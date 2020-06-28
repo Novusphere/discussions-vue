@@ -20,6 +20,7 @@
     "eosjs": "^20.0.3",
     "eosjs-ecc": "^4.0.7",
     "express": "^4.17.1",
+    "jsdom": "^16.2.2",
     "sanitize-html": "^1.27.0",
     "showdown": "^1.9.1",
     "tippy.js": "^6.2.3",

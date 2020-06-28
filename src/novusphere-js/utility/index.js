@@ -122,6 +122,19 @@ async function getFromCache(cache, name, createAsync) {
     return cache[name];
 }
 
+function createDOMParser() {
+    let domParser = undefined;
+    if (typeof DOMParser !== 'undefined') {
+        domParser = new DOMParser();
+    }
+    else {
+        const jsdom = require("jsdom");
+        const { JSDOM } = jsdom;
+        domParser = new (new JSDOM()).window.DOMParser();
+    }
+    return domParser;
+}
+
 export {
     htmlToMarkdown,
     markdownToHTML,
@@ -129,5 +142,6 @@ export {
     refreshOEmbed,
     waitFor,
     sleep,
-    getFromCache
+    getFromCache,
+    createDOMParser
 }

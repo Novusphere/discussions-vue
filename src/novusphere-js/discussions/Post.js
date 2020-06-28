@@ -2,9 +2,11 @@ import ecc from 'eosjs-ecc'
 import bigInt from 'big-integer';
 import { markdownToHTML, generateUuid } from "@/novusphere-js/utility";
 import { cors } from "@/novusphere-js/discussions/api";
+import { createDOMParser } from "@/novusphere-js/utility";
 
 // Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
 const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
+const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
 
 export class Post {
     isOpeningPost() {
@@ -107,7 +109,7 @@ export class Post {
         let timeOffset = n.and(bigInt('ffffffff', 16));
 
         let time = //Number(timeOffset)
-            timeOffset.valueOf() 
+            timeOffset.valueOf()
             * 1000 + TIME_ENCODE_GENESIS;
 
         return {
@@ -127,11 +129,38 @@ export class Post {
         return id.toString(36);
     }
 
-    async getContentHTML() {
+    async getContentDocument() {
         const html = markdownToHTML(this.content);
-
-        let domParser = new DOMParser();
+        let domParser = createDOMParser();
         let doc = domParser.parseFromString(html, 'text/html');
+        return doc;
+    }
+
+    async getContentImage() {
+        let doc = await this.getContentDocument();
+
+        for (const { href } of Array.from(doc.links)) {
+            if (IMAGE_REGEX.test(href)) {
+                return href;
+            }
+        }
+
+        return undefined;
+    }
+
+    async getContentText({ removeImages }) {
+        let doc = await this.getContentDocument();
+        let text = doc.body.innerText || doc.body.textContent;
+
+        if (removeImages) {
+            text = text.replace(IMAGE_REGEX, '');
+        }
+
+        return text;
+    }
+
+    async getContentHTML() {
+        let doc = await this.getContentDocument();
 
         for (const node of Array.from(doc.links)) {
 
@@ -139,8 +168,8 @@ export class Post {
             let insertHTML = undefined;
             let oembed = undefined;
 
-            if ((/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/).test(href) ||
-                (/https?:\/\/(www.)?tradingview.com\/x\//).test(href)) {
+            if (IMAGE_REGEX.test(href) ||
+                (/https?:\/\/(www.)?tradingview.com\/x\//gi).test(href)) {
                 // Images auto embed
                 // Trading view chart image
                 insertHTML = `<img src="${href}" alt="${href}" />`;
