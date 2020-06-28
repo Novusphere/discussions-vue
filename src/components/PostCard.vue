@@ -42,12 +42,12 @@
         <v-expansion-panel>
           <v-expansion-panel-content>
             <v-card flat @click.native="cardClicked()">
-              <v-card-text
+              <div
                 :class="{ 'content-fade': isPreviewDisplay && !isCompactContent }"
                 v-if="!isCompactDisplay || isCompactContent"
               >
                 <div class="post-html" v-html="postHTML"></div>
-              </v-card-text>
+              </div>
             </v-card>
           </v-expansion-panel-content>
         </v-expansion-panel>
