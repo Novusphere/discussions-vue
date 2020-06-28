@@ -163,7 +163,7 @@ export default {
 <style>
 .post-html img,
 .post-html iframe {
-  max-width: 512px;
+  max-width: min(100%, 512px);
 }
 
 .post-html a {
