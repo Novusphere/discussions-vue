@@ -2,7 +2,9 @@
   <v-card :class="`post-card-${post.transaction}`" outlined>
     <v-row no-gutters class="overline">
       <div class="d-inline pl-3">
-        <v-btn icon @click="expanded = !expanded"><v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon></v-btn>
+        <v-btn icon @click="expanded = !expanded">
+          <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
+        </v-btn>
       </div>
       <div class="d-inline pl-3" v-if="!isCommentDisplay">
         <TagLink :tag="post.sub" />
@@ -161,7 +163,7 @@ export default {
 <style>
 .post-html img,
 .post-html iframe {
-  width: 100%;
+  max-width: 512px;
 }
 
 .post-html a {

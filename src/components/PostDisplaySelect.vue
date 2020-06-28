@@ -39,7 +39,7 @@ export default {
   data: () => ({
     views: [
       { name: "compact", text: "Compact View", icon: "view_headline" },
-      { name: "preview", text: "Preview View", icon: "view_day" },
+      { name: "preview", text: "Preview", icon: "view_day" },
       { name: "full", text: "Full View", icon: "view_agenda" }
     ],
     view: null

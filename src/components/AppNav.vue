@@ -61,7 +61,7 @@
           <span>{{ $vuetify.theme.dark ? `Light` : `Dark` }} Mode</span>
         </v-btn>
       </v-list-item>
-      <v-list-item>
+      <v-list-item v-if="isLoggedIn">
         <v-btn text @click="$router.push(`/logout`)">
           <v-icon>power_settings_new</v-icon> 
           <span>Log out</span>
