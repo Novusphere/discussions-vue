@@ -9,6 +9,7 @@
       <div v-if="!isThread">
         <div v-if="showSubmitter" class="ml-1 mr-1 mb-3">
           <PostSubmitter
+            ref="submitter"
             :parent-post="reply.post"
             cancelable
             @cancel="showSubmitter = false"
@@ -16,6 +17,7 @@
           />
         </div>
         <PostReplyCard
+          ref="replies"
           v-for="(r) in reply.replies"
           :key="r.post.transaction"
           :reply="r"
@@ -29,6 +31,7 @@
       <v-card class="mt-3">
         <v-card-text>
           <PostSubmitter
+            ref="submitter"
             :parent-post="reply.post"
             @cancel="showSubmitter = false"
             @reply="onReply"
@@ -36,6 +39,7 @@
         </v-card-text>
       </v-card>
       <PostReplyCard
+        ref="replies"
         class="mt-3"
         v-for="(r) in reply.replies"
         :key="r.post.transaction"
@@ -69,7 +73,7 @@ export default {
     isThread() {
       return this.display == "thread";
     },
-    ...mapGetters(['isLoggedIn']),
+    ...mapGetters(["isLoggedIn"])
   },
   data() {
     return {
@@ -77,6 +81,12 @@ export default {
     };
   },
   methods: {
+    hasInput() {
+      return (
+        (this.$refs.submitter && this.$refs.submitter.hasInput()) ||
+        (this.$refs.replies && this.$refs.replies.some(r => r.hasInput()))
+      );
+    },
     onEdit(editPost) {
       this.$emit("edit", editPost);
     },

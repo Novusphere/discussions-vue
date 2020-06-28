@@ -312,6 +312,9 @@ export default {
       }
       return mentions;
     },
+    clear() {
+      this.editor.setContent("");
+    },
     setFromMarkdown(markdown) {
       const html = markdownToHTML(markdown);
       this.editor.setContent(html);

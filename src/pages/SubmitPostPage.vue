@@ -57,6 +57,21 @@ export default {
   async destroyed() {
     this.stopSyncEditor = true;
   },
+  beforeRouteLeave(to, from, next) {
+    if (this.$refs.submitter.hasInput()) {
+      const answer = window.confirm(
+        "Do you really want to leave? you have unsaved changes!"
+      );
+      if (answer) {
+        next();
+      } else {
+        next(false);
+      }
+    }
+    else {
+      next();
+    }
+  },
   methods: {
     async submitPost({ transaction }) {
       this.waitSubmit = true;

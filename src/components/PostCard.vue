@@ -1,6 +1,9 @@
 <template>
   <v-card :class="`post-card-${post.transaction}`" outlined>
     <v-row no-gutters class="overline">
+      <div class="d-inline pl-3">
+        <v-btn icon @click="expanded = !expanded"><v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon></v-btn>
+      </div>
       <div class="d-inline pl-3" v-if="!isCommentDisplay">
         <TagLink :tag="post.sub" />
       </div>
@@ -33,14 +36,20 @@
         </v-col>
       </v-row>
 
-      <v-card flat @click.native="cardClicked()">
-        <v-card-text
-          :class="{ 'content-fade': isPreviewDisplay && !isCompactContent }"
-          v-if="!isCompactDisplay || isCompactContent"
-        >
-          <div class="post-html" v-html="postHTML"></div>
-        </v-card-text>
-      </v-card>
+      <v-expansion-panels flat tile :value="expanded ? 0 : -1">
+        <v-expansion-panel>
+          <v-expansion-panel-content>
+            <v-card flat @click.native="cardClicked()">
+              <v-card-text
+                :class="{ 'content-fade': isPreviewDisplay && !isCompactContent }"
+                v-if="!isCompactDisplay || isCompactContent"
+              >
+                <div class="post-html" v-html="postHTML"></div>
+              </v-card-text>
+            </v-card>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </div>
     <div v-show="editing">
       <v-card-text>
@@ -120,6 +129,7 @@ export default {
     }
   },
   data: () => ({
+    expanded: true,
     postHTML: "",
     editing: false
   }),

@@ -2,7 +2,14 @@
   <div>
     <v-progress-linear v-if="!opening" indeterminate></v-progress-linear>
     <div v-else>
-      <PostReplyCard class="mt-3" :reply="opening" :display="'thread'" @reply="reply" @edit="edit" />
+      <PostReplyCard
+        ref="reply"
+        class="mt-3"
+        :reply="opening"
+        :display="'thread'"
+        @reply="reply"
+        @edit="edit"
+      />
     </div>
   </div>
 </template>
@@ -59,6 +66,9 @@ export default {
     await this.goToSubPost();
   },
   methods: {
+    hasInput() {
+      return this.$refs.reply.hasInput();
+    },
     async mergeNewComments() {
       if (!this.checkForPosts) return;
 

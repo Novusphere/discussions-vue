@@ -4,6 +4,7 @@ import { sleep } from "@/novusphere-js/utility";
 import { getSinglePost } from "@/novusphere-js/discussions/api";
 
 const DEFAULT_TILE = `Discussions`;
+const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
 
 const app = express();
 const port = 8008;
@@ -15,7 +16,6 @@ app.get(`/tag/:tags/:referenceId/:referenceId2?`, async (req, res, next) => {
     const post = await getSinglePost(req.params.referenceId);
     if (post) {
         res.inject = {
-            body: JSON.stringify(post),
             head: {
                 title: post.title ? `Discussions - ${post.title}` : DEFAULT_TILE,
                 description: await post.getContentText({ removeImages: true }),
@@ -27,7 +27,6 @@ app.get(`/tag/:tags/:referenceId/:referenceId2?`, async (req, res, next) => {
 });
 
 app.get('*', (req, res) => {
-    let index = fs.readFileSync(`./dist/index.html`, `utf8`);
 
     let title = ``;
     let body = ``;
@@ -51,10 +50,9 @@ app.get('*', (req, res) => {
         <meta name="twitter:card" content="summary_large_image">
     `;
 
-    console.log(head);
-
+    let index = INDEX_FILE;
     index = index.replace(/<title>[A-Za-z0-9_-\s]+?<\/title>/, ``); // strip title
-    index = index.replace(/<\/head>/, `${head}</head>`);
+    index = index.replace(/<\/head>/, `${header}</head>`);
     index = index.replace(/<\/div>/, `${body}</div>`); // should be the app div
 
     res.setHeader('content-type', 'text/html');

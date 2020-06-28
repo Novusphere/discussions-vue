@@ -43,8 +43,9 @@
         <v-icon>power_settings_new</v-icon>
       </v-btn>
     </div>
-    <div v-else-if="isLoggedIn && $vuetify.breakpoint.mobile">
-      <v-btn text @click="createPost()">
+
+    <div v-if="$vuetify.breakpoint.mobile">
+      <v-btn v-if="isLoggedIn" text @click="createPost()">
         <v-icon>create</v-icon>
       </v-btn>
       <v-menu

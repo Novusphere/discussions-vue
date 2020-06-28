@@ -15,7 +15,7 @@
           <v-progress-circular class="mr-2" indeterminate v-if="disablePost"></v-progress-circular>
           <span>{{ edit ? 'Edit' : 'Post' }}</span>
         </v-btn>
-        <v-btn color="primary" class="ml-1" @click="$emit('cancel')" v-if="cancelable">Cancel</v-btn>
+        <v-btn color="primary" class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
       </div>
     </div>
     <div v-else>
@@ -77,9 +77,22 @@ export default {
     submitError: ""
   }),
   async created() {},
+  mounted() {},
+  beforeDestroy() {},
   methods: {
+    hasInput() {
+      const editor = this.getEditor();
+      if (!editor) return false;
+      
+      const html = editor.getHTML();
+      return html.length >= 8;
+    },
     getEditor() {
       return this.$refs.editor;
+    },
+    cancel() {
+      this.getEditor().clear();
+      this.$emit('cancel');
     },
     mentionSuggester(query) {
       // include people who the user is following
@@ -87,7 +100,7 @@ export default {
         pub: u.pub,
         displayName: u.displayName
       }));
-      
+
       // include people who have participated in current thread
       if (this.parentPost.threadTree) {
         for (const { post } of Object.values(this.parentPost.threadTree)) {
@@ -106,7 +119,7 @@ export default {
       if (this.titleField) {
         this.title = title;
       }
-      this.$refs.editor.setFromMarkdown(value);
+      this.getEditor().setFromMarkdown(value);
     },
     async submitPost() {
       if (!this.isLoggedIn) return;
@@ -272,53 +285,33 @@ export default {
       }
 
       if (trxid && getSinglePost && submitPost) {
+        let artificalReplyPost = new Post();
+        artificalReplyPost.transaction = trxid;
+        artificalReplyPost.title = post.title;
+        artificalReplyPost.chain = "eos";
+        artificalReplyPost.parentUuid = post.parentUuid;
+        artificalReplyPost.threadUuid = post.threadUuid;
+        artificalReplyPost.uuid = post.uuid;
+        artificalReplyPost.displayName = post.displayName;
+        artificalReplyPost.content = post.content;
+        artificalReplyPost.createdAt = new Date();
+        artificalReplyPost.sub = post.sub;
+        artificalReplyPost.tags = post.tags;
+        artificalReplyPost.pub = this.keys.arbitrary.pub;
+        // sig?
+        artificalReplyPost.uidw = post.uidw;
+        artificalReplyPost.upvotes = 1;
+        artificalReplyPost.myVote = 1;
+
+        this.disablePost = false;
+        this.getEditor().clear();
+
         if (this.edit) {
           console.log(`edit trxid: ${trxid}`);
-
-          this.disablePost = false;
-          this.$emit("edit", post);
+          this.$emit("edit", artificalReplyPost);
         } else {
           console.log(`post trxid: ${trxid}`);
-
-          let replyPost = undefined;
-
-          /*await waitFor(
-            async () => {
-              replyPost = await getSinglePost(trxid);
-              return replyPost != undefined;
-            },
-            500,
-            5000
-          );*/
-
-          let artificalReplyPost = new Post();
-          artificalReplyPost.transaction = trxid;
-          artificalReplyPost.title = post.title;
-          artificalReplyPost.chain = "eos";
-          artificalReplyPost.parentUuid = post.parentUuid;
-          artificalReplyPost.threadUuid = post.threadUuid;
-          artificalReplyPost.uuid = post.uuid;
-          artificalReplyPost.displayName = post.displayName;
-          artificalReplyPost.content = post.content;
-          artificalReplyPost.createdAt = new Date();
-          artificalReplyPost.sub = post.sub;
-          artificalReplyPost.tags = post.tags;
-          artificalReplyPost.pub = this.keys.arbitrary.pub;
-          // sig?
-          artificalReplyPost.uidw = post.uidw;
-          artificalReplyPost.upvotes = 1;
-          artificalReplyPost.myVote = 1;
-
-          // set reply to the artifical post
-          replyPost = artificalReplyPost;
-
-          this.disablePost = false;
-
-          if (replyPost) {
-            this.$emit("reply", replyPost);
-          } else {
-            console.log(`replyPost is undefined/null`);
-          }
+          this.$emit("reply", artificalReplyPost);
         }
       }
     }

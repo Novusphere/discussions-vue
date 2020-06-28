@@ -71,7 +71,7 @@
     <v-spacer></v-spacer>
     <slot></slot>
     <v-spacer></v-spacer>
-    <v-list-item>
+    <v-list-item v-show="false">
       <v-text-field
         append-icon="add"
         class="mt-3"
