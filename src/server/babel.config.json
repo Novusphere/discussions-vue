@@ -1,0 +1,14 @@
+{
+    "plugins": [
+        [
+            "babel-plugin-root-import",
+            {
+                "root": "./src/",
+                "rootPathPrefix": "@/"
+            }
+        ]
+    ],
+    "presets": [
+        "@babel/preset-env"
+    ]
+}
