@@ -23,7 +23,7 @@ async function cors(url) {
 // Retrieve the tags currently trending on Discussions
 //
 async function getTrendingTags() {
-    const { data } = await axios.get('http://atmosdb.novusphere.io/discussions/search/trendingtags');
+    const { data } = await axios.get('https://atmosdb.novusphere.io/discussions/search/trendingtags');
     return data.payload; // { tag, members }
 }
 
@@ -31,7 +31,7 @@ async function getTrendingTags() {
 // Retrieves information about a users profile
 //
 async function getUserProfile(key) {
-    const { data } = await axios.get(`http://atmosdb.novusphere.io/discussions/site/profile/${key}`);
+    const { data } = await axios.get(`https://atmosdb.novusphere.io/discussions/site/profile/${key}`);
     return data;
 }
 
@@ -40,7 +40,7 @@ async function getUserProfile(key) {
 //
 async function getTokens() {
     return getFromCache(cache, 'tokens', async () => {
-        const { data } = await axios.get('http://atmosdb.novusphere.io/discussions/site/tokens');
+        const { data } = await axios.get('https://atmosdb.novusphere.io/discussions/site/tokens');
         return data;
     });
 }

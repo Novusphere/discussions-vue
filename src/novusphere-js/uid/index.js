@@ -133,7 +133,7 @@ async function getAmountFeeAssetsForTotal(totalAsset) {
 //
 async function getTokensInfo() {
     const eosTokensInfo = await getFromCache(cache, 'eosTokensInfo', async () => {
-        const { data } = await axios.get(`http://atmosdb.novusphere.io/unifiedid/p2k`);
+        const { data } = await axios.get(`https://atmosdb.novusphere.io/unifiedid/p2k`);
         return data;
     });
 
