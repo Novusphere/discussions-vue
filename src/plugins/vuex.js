@@ -24,11 +24,19 @@ export default new Vuex.Store({
         isLoggedIn: state => {
             if (!state.displayName) return false;
             if (!state.encryptedBrainKey) return false;
-            if (!state.keys || !state.keys.arbitrary.key) return false;
+            if (!state.keys) return false;
+            if (!state.keys.arbitrary.key) return false;
+            if (!state.keys.wallet.pub) return false;
+            if (!state.keys.identity.key) return false;
             return true;
         },
         hasLoginSession: state => {
-            return (state.keys && state.keys.arbitrary.pub);
+            if (!state.encryptedBrainKey) return false;
+            if (!state.encryptedTest) return false;
+            if (!state.displayName) return false;
+            if (!state.keys) return false;
+            if (!state.keys.arbitrary.pub) return false;
+            return true;
         },
         isFollowing: state => {
             return key => {
@@ -43,6 +51,13 @@ export default new Vuex.Store({
         }
     },
     mutations: {
+        importOld(state, { encryptedBrainKey, encryptedTest, displayName, keys }) {
+            // this method is for legacy transaction only
+            state.encryptedBrainKey = encryptedBrainKey;
+            state.encryptedTest = encryptedTest;
+            state.displayName = displayName;
+            state.keys = keys;
+        },
         followUser(state, { displayName, pub, uidw }) {
             if (pub == state.keys.arbitrary.pub) return; // self follow disallowed
             if (state.followingUsers.find(u => u.pub == pub)) return;

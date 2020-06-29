@@ -14,14 +14,12 @@
 
     <PostThreadLink btn class="ml-2" :post="post" v-if="!isCommentDisplay">
       <v-icon>comment</v-icon>
-      <span>{{ post.totalReplies }} Comments</span>
+      <span>{{ post.totalReplies + ((!$vuetify.breakpoint.mobile) ? ' Comments' : '')}}</span>
     </PostThreadLink>
     <v-btn text v-else @click="$emit('reply')">
       <v-icon>comment</v-icon>
       <span>Reply</span>
     </v-btn>
-
-    <PostTips class="d-inline pl-3" :post="post" v-if="$vuetify.breakpoint.mobile" />
 
     <v-spacer></v-spacer>
 
@@ -62,7 +60,6 @@ import { sleep } from "@/novusphere-js/utility";
 
 import PostThreadLink from "@/components/PostThreadLink";
 import TransactionLink from "@/components/TransactionLink";
-import PostTips from "@/components/PostTips";
 
 export default {
   name: "PostCardActions",
@@ -70,7 +67,7 @@ export default {
     //PublicKeyIcon
     PostThreadLink,
     TransactionLink,
-    PostTips
+    //PostTips
   },
   props: {
     post: Object,
@@ -108,13 +105,13 @@ export default {
       await modPolicySetTags(this.keys.arbitrary.key, this.post.uuid, pol);
     },
     async markAsSpam() {
-      await this.adjustModPolicy('spam');
+      await this.adjustModPolicy("spam");
     },
     async markAsNSFW() {
-      await this.adjustModPolicy('nsfw');
+      await this.adjustModPolicy("nsfw");
     },
     async markAsPinned() {
-      await this.adjustModPolicy('pinned');
+      await this.adjustModPolicy("pinned");
     },
     async sendTip() {
       if (!this.isLoggedIn) {

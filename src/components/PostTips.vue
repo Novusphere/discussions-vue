@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-for="(tip, i) in tips" :key="i" class="d-inline" :class="{ 'pl-1': (i > 0) }">
-      <TokenIcon :symbol="tip.symbol" />
+    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block" :class="{ 'pl-1': (i > 0) }">
+      <TokenIcon :size="16" :symbol="tip.symbol" />
       <span>x{{ formatTip(tip) }}</span>
     </div>
   </div>

@@ -6,7 +6,7 @@
         ref="reply"
         class="mt-3"
         :reply="opening"
-        :display="'thread'"
+        :display="'comment'"
         @reply="reply"
         @edit="edit"
       />

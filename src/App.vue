@@ -43,11 +43,7 @@
             <v-card>
               <AppNav>
                 <v-list-item>
-                  <v-btn
-                    block
-                    color="primary"
-                    @click="createPost()"
-                  >New Post</v-btn>
+                  <v-btn block color="primary" @click="createPost()">New Post</v-btn>
                 </v-list-item>
               </AppNav>
             </v-card>
@@ -91,7 +87,7 @@ export default {
     theme() {
       return this.$vuetify.theme.dark ? "dark" : "light";
     },
-    ...mapGetters(["isLoggedIn"]),
+    ...mapGetters(["isLoggedIn, hasLoginSession"]),
     ...mapState({
       isLoginDialogOpen: state => state.isLoginDialogOpen,
       isTransferDialogOpen: state => state.isTransferDialogOpen,
@@ -103,7 +99,44 @@ export default {
   data: () => ({
     //
   }),
-  created() {},
+  created() {
+    function importOld() {
+      let authStore = window.localStorage["authStore"];
+      if (authStore) {
+        authStore = JSON.parse(authStore);
+
+        let bk = JSON.parse(authStore.bk);
+        let encryptedBrainKey = bk.bk;
+        let encryptedTest = bk.bkc;
+        let displayName = authStore.displayName || bk.displayName;
+
+        let keys = {
+          arbitrary: { key: authStore.postPriv, pub: bk.post },
+          wallet: { pub: bk.uidwallet },
+          identity: { key: authStore.accountPrivKey, pub: bk.account }
+        };
+
+        // convert to new format
+        return {
+          encryptedBrainKey,
+          encryptedTest,
+          displayName,
+          keys
+        };
+      }
+    }
+
+    try {
+      if (!this.hasLoginSession) {
+        const old = importOld();
+        console.log(`Retrieved legacy session!`);
+        console.log(old);
+        if (old) this.$store.commit("importOld", old);
+      }
+    } catch (ex) {
+      return console.error(ex);
+    }
+  },
   methods: {
     async createPost() {
       if (!this.isLoggedIn) {

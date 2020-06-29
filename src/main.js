@@ -9,9 +9,6 @@ import App from './App.vue';
 import VueClipboard from 'vue-clipboard2'
 Vue.use(VueClipboard);
 
-import VueMoment from 'vue-moment';
-Vue.use(VueMoment);
-
 import InfiniteLoading from 'vue-infinite-loading';
 Vue.use(InfiniteLoading, { /* options */ });
 

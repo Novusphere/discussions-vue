@@ -1,34 +1,35 @@
 <template>
   <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${post.transaction}`" outlined>
     <v-row no-gutters class="overline">
-      <div class="d-inline pl-3">
-        <v-btn icon @click="expanded = expanded ? 0 : -1">
-          <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
-        </v-btn>
-      </div>
-      <div class="d-inline pl-3" v-if="!isCommentDisplay">
-        <TagLink :tag="post.sub" />
-      </div>
-      <div class="d-inline pl-3">
-        <UserProfileLink :displayName="post.displayName" :publicKey="post.pub" />
-      </div>
-      <div class="d-inline pl-3">
-        <PostThreadLink :post="post">
-          <span v-show="!post.edit">{{ post.createdAt | moment("from") }}</span>
-          <span v-show="post.edit">
-            <v-icon dense small>edit</v-icon>
-            {{ post.editedAt | moment("from")}}
-          </span>
-        </PostThreadLink>
-      </div>
-      <div class="d-inline pl-3">
-        <v-icon v-if="post.isPinned" color="success">push_pin</v-icon>
-        <v-icon v-if="post.isSpam" color="error">error</v-icon>
-        <v-chip v-if="post.isNSFW" small color="orange" text-color="white">18+</v-chip>
-      </div>
-      <v-spacer></v-spacer>
-      <div class="d-inline pr-3" v-if="!$vuetify.breakpoint.mobile">
-        <PostTips :post="post" />
+      <div class="pl-3">
+        <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile">
+          <v-btn icon @click="expanded = expanded ? 0 : -1">
+            <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
+          </v-btn>
+        </div>
+        <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)">
+          <TagLink :tag="post.sub" />
+        </div>
+        <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || (isCommentDisplay || !isMultiTag)">
+          <UserProfileLink :displayName="post.displayName" :publicKey="post.pub" />
+        </div>
+        <div class="d-inline-block pr-3">
+          <PostThreadLink :post="post">
+            <span v-show="!post.edit">{{ shortTime(post.createdAt) }}</span>
+            <span v-show="post.edit">
+              <v-icon dense small>edit</v-icon>
+              {{ shortTime(post.editedAt) }}
+            </span>
+          </PostThreadLink>
+        </div>
+        <div class="d-inline-block pr-3" v-if="post.isPinned || post.isSpam || post.isNSFW">
+          <v-icon v-if="post.isPinned" color="success">push_pin</v-icon>
+          <v-icon v-if="post.isSpam" color="error">error</v-icon>
+          <v-chip v-if="post.isNSFW" small color="orange" text-color="white">18+</v-chip>
+        </div>
+        <div class="d-inline-block pr-3">
+          <PostTips class="d-inline" :post="post" />
+        </div>
       </div>
     </v-row>
 
@@ -43,7 +44,7 @@
       <div v-else>
         <v-row class="headline" v-if="!isCommentDisplay && post.title">
           <v-col cols="12">
-            <div class="pl-3">
+            <div class="pl-3 pr-3">
               <PostThreadLink :post="post">{{ post.title }}</PostThreadLink>
             </div>
           </v-col>
@@ -95,6 +96,8 @@
 
 <script>
 import { mapState } from "vuex";
+import { formatDistance } from "date-fns";
+
 import UserProfileLink from "@/components/UserProfileLink";
 import TagLink from "@/components/TagLink";
 import PostCardActions from "@/components/PostCardActions";
@@ -124,7 +127,7 @@ export default {
       return true;
     },
     isThread() {
-      return this.uuid == this.threadUuid;
+      return this.post.uuid == this.post.threadUuid;
     },
     isCompactContent() {
       return this.post.content.length <= 300;
@@ -140,6 +143,18 @@ export default {
     },
     isFullDisplay() {
       return this.display == "full";
+    },
+    isMultiTag() {
+      if (!this.isBrowsing) return false;
+      if (!this.$route.params.tags) return true; // assume we're on a multi tag
+      const tags = this.$route.params.tags.split(",");
+      return (tags.length > 1) || (tags.length == 1 && tags[0] == 'all');
+    },
+    isBrowsing() {
+      // one of the browsing display modes
+      return (
+        this.isCompactDisplay || this.isPreviewDisplay || this.isFullDisplay
+      );
     },
     ...mapState({
       hideSpam: state => !state // TO-DO: implement state setting....
@@ -168,6 +183,27 @@ export default {
     refreshOEmbed();
   },
   methods: {
+    shortTime(t) {
+      if (!this.$vuetify.breakpoint.mobile)
+        return formatDistance(t, new Date(), { addSuffix: true });
+      else {
+        const delta = Date.now() - t;
+        const second = 1000;
+        const minute = second * 60;
+        const hour = minute * 60;
+        const day = hour * 24;
+
+        let unit = (u, s) => {
+          const n = Math.max(1, Math.ceil(delta / u));
+          return `${n}${s}`;
+        };
+
+        if (delta < minute) return unit(second, `s`);
+        else if (delta < hour) return unit(minute, `m`);
+        else if (delta < day) return unit(hour, `h`);
+        else return unit(day, `d`);
+      }
+    },
     startEdit() {
       this.$refs.editor.setEditorContent(this.post.title, this.post.content);
       this.editing = true;
@@ -195,7 +231,8 @@ export default {
 <style>
 .post-html img,
 .post-html iframe {
-  max-width: min(100%, 512px);
+  min-width: 0px !important; /* instagram override */
+  max-width: min(100%, 512px) !important;
 }
 
 .post-html a {

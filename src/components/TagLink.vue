@@ -1,5 +1,5 @@
 <template>
-  <div class="d-inline">
+  <div class="d-inline-block">
     <v-btn :to="link" v-if="btn">
       <slot></slot>
     </v-btn>
