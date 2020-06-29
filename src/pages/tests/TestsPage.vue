@@ -1,6 +1,16 @@
 <template>
   <div>
     <v-row>
+      <v-col :cols="12">
+        <v-card>
+          <v-card-text>
+            <strong>Build:</strong>
+            {{ build }}
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="auto">
         <v-card>
           <v-toolbar color="primary" dark>
@@ -40,7 +50,15 @@ export default {
   components: {},
   props: {},
   data: () => ({
-    posts: [...testPosts]
-  })
+    posts: [...testPosts],
+    build: ""
+  }),
+  created() {
+    if (window.__BUILD__) {
+      this.build = `Server - ${new Date(window.__BUILD__)}`;
+    } else {
+      this.build = `Client - ${new Date()}`;
+    }
+  }
 };
 </script>

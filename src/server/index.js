@@ -5,6 +5,7 @@ import { getSinglePost, getCommunities } from "@/novusphere-js/discussions/api";
 
 const DEFAULT_TILE = `Discussions`;
 const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
+const BUILD_TIME = Date.now();
 
 const app = express();
 const port = 8008;
@@ -66,6 +67,7 @@ app.get('*', (req, res) => {
         <meta name="twitter:description" content="${head.description}">
         <meta name="twitter:image" content="${head.image}">
         <meta name="twitter:card" content="summary_large_image">
+        <script>window.__BUILD__ = ${BUILD_TIME}</script>
     `;
 
     let index = INDEX_FILE;

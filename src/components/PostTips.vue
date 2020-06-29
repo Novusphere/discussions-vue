@@ -1,8 +1,12 @@
 <template>
   <div>
-    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block" :class="{ 'pl-1': (i > 0) }">
-      <TokenIcon :size="16" :symbol="tip.symbol" />
-      <span>x{{ formatTip(tip) }}</span>
+    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block mt-1" :style="{ width: `${36 + formatTip(tip).length*6}px` }">
+      <v-badge overlap>
+        <template v-slot:badge>
+          <span>{{ formatTip(tip) }}</span>
+        </template>
+        <TokenIcon :symbol="tip.symbol" />
+      </v-badge>
     </div>
   </div>
 </template>
@@ -11,7 +15,7 @@
 import TokenIcon from "@/components/TokenIcon";
 
 export default {
-  name: "PostTips",
+  name: "PostTips", 
   components: {
     TokenIcon
   },
@@ -20,7 +24,7 @@ export default {
   },
   computed: {
     tips() {
-      //let summary = { 'a': 1.234, 'b': 2.234, 'c': 3.111, 'd': 4.222, 'e': 555, 'f': 123.456 };
+      //let summary = { 'EOS': 1.234, 'MPT': 2.234, 'VIG': 3.111, 'BOID': 4.222, 'KROWN': 555, 'PUML': 123.456 };
       let summary = {};
       for (const tip of this.post.tips) {
         const [amount, symbol] = tip.data.amount.split(" ");

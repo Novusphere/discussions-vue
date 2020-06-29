@@ -106,7 +106,7 @@ export default {
   data() {
     return {
       search: this.$route.query.q || "",
-      subscribeTag: ""
+      subscribeTag: "",
     };
   },
   watch: {
@@ -119,6 +119,8 @@ export default {
     ...mapState({
       subscribedTags: state => state.subscribedTags
     })
+  },
+  created() {
   },
   methods: {
     async goSearch() {
