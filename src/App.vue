@@ -100,6 +100,7 @@ export default {
     //
   }),
   created() {
+    // TO-DO: deprecate this code on 8/1/2020
     function importOld() {
       let authStore = window.localStorage["authStore"];
       if (authStore) {
@@ -124,14 +125,17 @@ export default {
           keys
         };
       }
+      return undefined;
     }
 
     try {
       if (!this.hasLoginSession) {
         const old = importOld();
-        console.log(`Retrieved legacy session!`);
-        console.log(old);
-        if (old) this.$store.commit("importOld", old);
+        if (old) {
+          console.log(`Retrieved legacy session!`);
+          console.log(old);
+          this.$store.commit("importOld", old);
+        }
       }
     } catch (ex) {
       return console.error(ex);

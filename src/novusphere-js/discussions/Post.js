@@ -162,7 +162,7 @@ export class Post {
         let doc = await this.getContentDocument();
 
         for (const { href } of Array.from(doc.links)) {
-            if (IMAGE_REGEX.test(href)) {
+            if (new RegExp(IMAGE_REGEX).test(href)) {
                 return href;
             }
         }
@@ -190,7 +190,9 @@ export class Post {
             let insertHTML = undefined;
             let oembed = undefined;
 
-            if (IMAGE_REGEX.test(href) ||
+            console.log(href);
+
+            if (new RegExp(IMAGE_REGEX).test(href) ||
                 (/https?:\/\/(www.)?tradingview.com\/x\//gi).test(href)) {
                 // Images auto embed
                 // Trading view chart image

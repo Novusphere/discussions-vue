@@ -1,7 +1,7 @@
 <template>
   <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${post.transaction}`" outlined>
     <v-row no-gutters class="overline">
-      <div class="pl-3">
+      <div class="pl-3 mt-1">
         <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile">
           <v-btn icon @click="expanded = expanded ? 0 : -1">
             <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
