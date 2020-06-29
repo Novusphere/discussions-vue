@@ -7,7 +7,7 @@
             <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
           </v-btn>
         </div>
-        <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)">
+        <div class="d-inline-block pr-3" v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)">
           <TagLink :tag="post.sub" />
         </div>
         <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || (isCommentDisplay || !isMultiTag)">

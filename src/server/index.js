@@ -38,8 +38,6 @@ app.get(`/tag/:tags`, async (req, res, next) => {
                     image: community.icon
                 }
             }
-
-            console.log(res.inject.head);
         }
     }
     next();
@@ -47,9 +45,10 @@ app.get(`/tag/:tags`, async (req, res, next) => {
 
 app.get('*', (req, res) => {
 
+    // TO-DO: build default head from site.json
     let title = ``;
     let body = ``;
-    let head = { title: DEFAULT_TILE, description: ``, image: `` };
+    let head = { title: DEFAULT_TILE, description: `An open forum for discussions built on blockchain. Supporting and nurturing token communities of all kind`, image: `https://i.imgur.com/WO5pb52.png` };
 
     if (res.inject) {
         title = res.inject.title || title;
