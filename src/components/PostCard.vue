@@ -221,7 +221,12 @@ export default {
 
       // other...
       if (!this.clickable) return;
-      const link = `/tag/${this.post.sub}/${this.post.getEncodedId()}`;
+
+      let link = `/tag/${this.post.sub}`;
+      if (this.post.op && this.post.transaction != this.post.op.transaction) {
+        link += `/${this.post.op.getEncodedId()}`;
+      }
+      link += `/${this.post.getEncodedId()}`;
       this.$router.push(link);
     }
   }

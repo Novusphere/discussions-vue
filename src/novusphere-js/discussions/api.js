@@ -388,6 +388,31 @@ function searchPostsByTextSearch(text) {
     });
 }
 
+
+//
+// Search posts by notifications
+//
+function searchPostsByNotifications(key, lastSeenTime) {
+    return searchPosts({
+        key,
+        includeOpeningPost: true,
+        sort: 'recent',
+        pipeline: [
+            {
+                // TO-DO: add watched param
+                $match: {
+                    pub: { $ne: key }, // ignore self posts
+                    mentions: { $in: [key] },
+                    $or: [
+                        { createdAt: { $gt: lastSeenTime } },
+                        { editedAt: { $gt: lastSeenTime } }
+                    ]
+                }
+            }
+        ]
+    });
+}
+
 //
 // Submit a vote
 //
@@ -540,6 +565,7 @@ export {
     searchPostsByKeys,
     searchPostsByTransactions,
     searchPostsByTextSearch,
+    searchPostsByNotifications,
     getSinglePost,
     getThread,
     createThreadTree,

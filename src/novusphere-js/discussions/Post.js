@@ -190,8 +190,6 @@ export class Post {
             let insertHTML = undefined;
             let oembed = undefined;
 
-            console.log(href);
-
             if (new RegExp(IMAGE_REGEX).test(href) ||
                 (/https?:\/\/(www.)?tradingview.com\/x\//gi).test(href)) {
                 // Images auto embed

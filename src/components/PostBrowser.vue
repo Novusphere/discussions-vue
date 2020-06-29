@@ -52,6 +52,10 @@ export default {
     }
   },
   async created() {
+    if (this.noSort) {
+      // sort should already be set in the cursor if no-sort is being specified
+      this.sort = this.cursor.sort;
+    }
     this.cursor.votePublicKey = this.votePublicKey;
     this.cursor.sort = this.sort;
   },
@@ -61,7 +65,7 @@ export default {
       cursor.votePublicKey = this.votePublicKey;
       cursor.sort = this.sort;
       cursor.reset();
-      
+
       this.posts = [];
       if (this.pinned) this.posts.push(...this.pinned);
 

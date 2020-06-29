@@ -33,7 +33,7 @@
       <v-btn text @click="createPost()">
         <v-icon>create</v-icon>
       </v-btn>
-      <v-btn text>
+      <v-btn text :to="`/notifications`">
         <v-icon>notifications</v-icon>
       </v-btn>
       <v-btn text>

@@ -16,6 +16,7 @@ import BrowseFeedPage from "@/pages/BrowseFeedPage";
 import BrowseThreadPage from "@/pages/BrowseThreadPage";
 import BrowseTrendingPostsPage from "@/pages/BrowseTrendingPostsPage";
 import BrowseTagPostsPage from "@/pages/BrowseTagPostsPage";
+import BrowseNotifications from "@/pages/BrowseNotifications";
 
 import WalletPage from "@/pages/wallet/WalletPage";
 import WalletAssetsPage from "@/pages/wallet/WalletAssetsPage";
@@ -35,6 +36,7 @@ const routes = [
             { path: 'logout', component: LogOutPage },
             { path: 'feed', component: BrowseFeedPage },
             { path: 'search', component: BrowseSearchPage },
+            { path: 'notifications', component: BrowseNotifications },
             { path: 'tag/all', component: BrowseTrendingPostsPage },
             { path: 'tag/:tags/submit', component: SubmitPostPage },
             { path: 'tag/:tags/:referenceId/:referenceId2?', component: BrowseThreadPage },
