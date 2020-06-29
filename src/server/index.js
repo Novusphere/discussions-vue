@@ -64,7 +64,7 @@ app.get('*', (req, res) => {
         <meta property="og:description" content="${head.description}"/>
         <meta property="og:image" content="${head.image}"/>
         <meta name="twitter:title" content="${head.title}">
-        <meta name="twitter:description" content="$${head.description}">
+        <meta name="twitter:description" content="${head.description}">
         <meta name="twitter:image" content="${head.image}">
         <meta name="twitter:card" content="summary_large_image">
     `;

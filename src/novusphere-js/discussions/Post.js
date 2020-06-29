@@ -99,7 +99,8 @@ export class Post {
         }
 
         if (o.modPolicy) {
-            p.modPolicy = o.modPolicy;
+            const domain = window.location.host;
+            p.modPolicy = o.modPolicy.filter(mp => mp.domain == domain);
         }
 
         return p;
