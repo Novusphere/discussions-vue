@@ -44,6 +44,7 @@ export default new Vuex.Store({
     },
     mutations: {
         followUser(state, { displayName, pub, uidw }) {
+            if (pub == state.keys.arbitrary.pub) return; // self follow disallowed
             if (state.followingUsers.find(u => u.pub == pub)) return;
             state.followingUsers.push({ displayName, pub, uidw });
         },

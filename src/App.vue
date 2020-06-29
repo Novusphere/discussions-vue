@@ -46,7 +46,7 @@
                   <v-btn
                     block
                     color="primary"
-                    @click="isLoggedIn ? console.log('logged in') : $store.commit('setLoginDialogOpen', true)"
+                    @click="createPost()"
                   >New Post</v-btn>
                 </v-list-item>
               </AppNav>
@@ -91,7 +91,7 @@ export default {
     theme() {
       return this.$vuetify.theme.dark ? "dark" : "light";
     },
-    ...mapGetters(['isLoggedIn']),
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       isLoginDialogOpen: state => state.isLoginDialogOpen,
       isTransferDialogOpen: state => state.isTransferDialogOpen,
@@ -105,6 +105,24 @@ export default {
   }),
   created() {},
   methods: {
+    async createPost() {
+      if (!this.isLoggedIn) {
+        this.$store.commit("setLoginDialogOpen", true);
+        return;
+      }
+
+      try {
+        if (this.$route.params.tags) {
+          // only take a single tag
+          const tag = this.$route.params.tags.split(",")[0];
+          await this.$router.push(`/tag/${tag}/submit`);
+        } else {
+          await this.$router.push(`/submit`);
+        }
+      } catch (ex) {
+        return; // Avoided redundant navigation
+      }
+    },
     async closeTip() {
       this.$store.commit("setSendTipDialogOpen", { value: false });
     },

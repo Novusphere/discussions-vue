@@ -11,7 +11,7 @@
         <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6"></v-col>
         <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 1">
           <v-btn
-            v-if="!isFollowing(publicKey)"
+            v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"
             @click="isLoggedIn ? $store.commit('followUser', { displayName, pub: publicKey, uidw }) : $store.commit('setLoginDialogOpen', true)"
           >
@@ -19,14 +19,15 @@
             <span>Follow</span>
           </v-btn>
           <v-btn
-            v-else
+            v-else-if="(publicKey != myPublicKey)"
             color="primary"
             @click="isLoggedIn ? $store.commit('unfollowUser', publicKey) : $store.commit('setLoginDialogOpen', true)"
           >
             <v-icon>person_remove</v-icon>
             <span>Unfollow</span>
-          </v-btn>
+          </v-btn>  
           <v-btn
+            v-if="(publicKey != myPublicKey)"
             color="primary"
             :class="{ 'mt-1': !$vuetify.breakpoint.mobile, 'ml-1': $vuetify.breakpoint.mobile }"
             @click="sendTip()"
@@ -41,7 +42,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 import UserProfileLink from "@/components/UserProfileLink";
 
 export default {
@@ -57,7 +58,10 @@ export default {
     noView: Boolean
   },
   computed: {
-    ...mapGetters(["isLoggedIn", "isFollowing"])
+    ...mapGetters(["isLoggedIn", "isFollowing"]),
+    ...mapState({
+      myPublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
+    })
   },
   data: () => ({}),
   methods: {

@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs';
-import { sleep } from "@/novusphere-js/utility";
-import { getSinglePost } from "@/novusphere-js/discussions/api";
+import { sleep, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
+import { getSinglePost, getCommunities } from "@/novusphere-js/discussions/api";
 
 const DEFAULT_TILE = `Discussions`;
 const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
@@ -21,6 +21,25 @@ app.get(`/tag/:tags/:referenceId/:referenceId2?`, async (req, res, next) => {
                 description: await post.getContentText({ removeImages: true }),
                 image: await post.getContentImage()
             }
+        }
+    }
+    next();
+});
+
+app.get(`/tag/:tags`, async (req, res, next) => {
+    const tags = (req.params.tags || 'all').split(',');
+    if (tags.length == 1) {
+        const community = (await getCommunities()).find(c => c.tag == tags[0]);
+        if (community) {
+            res.inject = {
+                head: {
+                    title: `Discussions - #${tags[0]}`,
+                    description: htmlToText(markdownToHTML(community.desc)),
+                    image: community.icon
+                }
+            }
+
+            console.log(res.inject.head);
         }
     }
     next();

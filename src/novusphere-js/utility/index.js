@@ -61,6 +61,12 @@ function markdownToHTML(md) {
     return html;
 }
 
+function htmlToText(html) {
+    const domParser = createDOMParser();
+    let doc = domParser.parseFromString(html, 'text/html');
+    return doc.body.innerText || doc.body.textContent;
+}
+
 function generateUuid() {
     return uuid();
 }
@@ -137,6 +143,7 @@ function createDOMParser() {
 
 export {
     htmlToMarkdown,
+    htmlToText,
     markdownToHTML,
     generateUuid,
     refreshOEmbed,

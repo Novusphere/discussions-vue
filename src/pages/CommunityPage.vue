@@ -22,8 +22,9 @@ export default {
     communities: []
   }),
   async created() {
-    this.communities = (await getCommunities())
-      .filter(comm => comm.tag != "test" && comm.desc);
+    this.communities = (await getCommunities()).filter(
+      comm => comm.tag != "test" && comm.desc
+    );
   },
   methods: {}
 };

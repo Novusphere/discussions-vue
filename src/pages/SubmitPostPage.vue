@@ -57,8 +57,14 @@ export default {
   async destroyed() {
     this.stopSyncEditor = true;
   },
+  mounted() {
+    window.addEventListener("beforeunload", this.leaveGuard);
+  },
+  beforeDestroy() {
+    window.removeEventListener("beforeunload", this.leaveGuard);
+  },
   beforeRouteLeave(to, from, next) {
-    if (this.$refs.submitter.hasInput()) {
+    if (this.$refs.submitter && this.$refs.submitter.hasInput()) {
       const answer = window.confirm(
         "Do you really want to leave? you have unsaved changes!"
       );
@@ -67,12 +73,19 @@ export default {
       } else {
         next(false);
       }
-    }
-    else {
+    } else {
       next();
     }
   },
   methods: {
+    leaveGuard(e) {
+      if (this.$refs.submitter && this.$refs.submitter.hasInput()) {
+        // Cancel the event
+        e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+        // Chrome requires returnValue to be set
+        e.returnValue = "";
+      }
+    },
     async submitPost({ transaction }) {
       this.waitSubmit = true;
 

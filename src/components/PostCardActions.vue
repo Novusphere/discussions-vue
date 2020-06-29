@@ -8,7 +8,7 @@
       <v-icon>thumb_down</v-icon>
     </v-btn>
 
-    <v-btn text @click="sendTip()">
+    <v-btn v-if="!isLoggedIn || (myPublicKey != post.pub)" text @click="sendTip()">
       <v-icon>attach_money</v-icon>Tip
     </v-btn>
 
@@ -32,7 +32,7 @@
         </v-btn>
       </template>
       <v-list>
-        <v-list-item v-show="isLoggedIn && keys && (keys.arbitrary.pub == post.pub)">
+        <v-list-item v-show="isLoggedIn && (myPublicKey == post.pub)">
           <v-btn text @click="$emit('edit')">Edit</v-btn>
         </v-list-item>
         <v-list-item v-show="isCommentDisplay">
@@ -77,9 +77,10 @@ export default {
     isCommentDisplay: Boolean
   },
   computed: {
-    ...mapGetters(['isLoggedIn']),
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      keys: state => state.keys
+      keys: state => state.keys,
+      myPublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
     })
   },
   data: () => ({
