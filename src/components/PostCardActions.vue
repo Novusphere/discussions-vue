@@ -39,13 +39,13 @@
           <PostThreadLink btn :post="post">Permalink</PostThreadLink>
         </v-list-item>
         <v-list-item>
-          <v-btn text>Pin</v-btn>
+          <v-btn text @click="markAsPinned()">{{ isMyPolicy('pinned') ? 'unpin' : 'pin'}}</v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn text>Spam</v-btn>
+          <v-btn text @click="markAsSpam()">{{ isMyPolicy('spam') ? 'not spam' : 'spam' }}</v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn text>NSFW</v-btn>
+          <v-btn text @click="markAsNSFW()">{{ isMyPolicy('nsfw') ? 'sfw' : 'nsfw' }}</v-btn>
         </v-list-item>
         <v-list-item>
           <TransactionLink btn :chain="post.chain" :transaction="post.transaction">On Chain</TransactionLink>
@@ -57,7 +57,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import { submitVote } from "@/novusphere-js/discussions/api";
+import { submitVote, modPolicySetTags } from "@/novusphere-js/discussions/api";
 import { sleep } from "@/novusphere-js/utility";
 
 import PostThreadLink from "@/components/PostThreadLink";
@@ -87,6 +87,35 @@ export default {
     //
   }),
   methods: {
+    isMyPolicy(tag) {
+      let pol = this.post.getMyModPolicy(this.myPublicKey);
+      return pol.find(t => t == tag);
+    },
+    async adjustModPolicy(tag) {
+      if (!this.isLoggedIn) {
+        this.$store.commit("setLoginDialogOpen", true);
+        return;
+      }
+
+      let pol = this.post.getMyModPolicy(this.myPublicKey);
+
+      if (pol.find(t => t == tag)) pol = pol.filter(t => t != tag);
+      else pol.push(tag);
+
+      this.post.setMyModPolicy(this.myPublicKey, pol);
+
+      await sleep(100);
+      await modPolicySetTags(this.keys.arbitrary.key, this.post.uuid, pol);
+    },
+    async markAsSpam() {
+      await this.adjustModPolicy('spam');
+    },
+    async markAsNSFW() {
+      await this.adjustModPolicy('nsfw');
+    },
+    async markAsPinned() {
+      await this.adjustModPolicy('pinned');
+    },
     async sendTip() {
       if (!this.isLoggedIn) {
         this.$store.commit("setLoginDialogOpen", true);

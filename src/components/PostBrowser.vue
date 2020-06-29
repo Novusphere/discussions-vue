@@ -26,7 +26,8 @@ export default {
   },
   props: {
     noSort: Boolean,
-    cursor: Object
+    cursor: Object,
+    pinned: Array
   },
   data: () => ({
     posts: [],
@@ -62,6 +63,8 @@ export default {
       cursor.reset();
       
       this.posts = [];
+      if (this.pinned) this.posts.push(...this.pinned);
+
       if (this.$refs.scroller) {
         this.$refs.scroller.reset();
       }

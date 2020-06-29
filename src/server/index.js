@@ -49,7 +49,7 @@ app.get('*', (req, res) => {
 
     let title = ``;
     let body = ``;
-    let head = { title: DEFAULT_TILE };
+    let head = { title: DEFAULT_TILE, description: ``, image: `` };
 
     if (res.inject) {
         title = res.inject.title || title;

@@ -6,7 +6,8 @@ const testPosts = [
     { name: 'Instagram Embed', transaction: "59c14291ea28fa91f5112a441e9acaffa0032b716a491e8e8de9bc7f7bb0db6f" },
     { name: 'Soundcloud Embed', transaction: "ddc5607f78c1c8857bef10c72da1dd2106e8e25059f6593248dd92ca238e2672" },
     { name: 'Long', transaction: "9c7b051405f1ccc6d19639c3240ed27ca4ac8fe9bb0007806b852c16f823b2f5" },
-    { name: 'Tipped', transaction: "d8b54c5a74da9d0027eb1a6dacd61a0e6cead3bc99c80bb54344ab9b1063d4e0" }
+    { name: 'Tipped', transaction: "d8b54c5a74da9d0027eb1a6dacd61a0e6cead3bc99c80bb54344ab9b1063d4e0" },
+    { name: 'NSFW', transaction: "1e15faaa03f625ea2aefb0f918df49ccd113b55fd0e8edd5f9df0223637f06ce" },
 ];
 
 export {

@@ -44,6 +44,7 @@ export class Post {
         this.downvotes = 0;
         this.myVote = 0; // not voted (neutral)
         this.tips = [];
+        this.modPolicy = []; // [{mod, tags}]
 
         // if api specified [includeOpeningPost] this field will be populated with another Post object
         this.op = undefined;
@@ -97,7 +98,27 @@ export class Post {
             p.op = Post.fromDbObject(op);
         }
 
+        if (o.modPolicy) {
+            p.modPolicy = o.modPolicy;
+        }
+
         return p;
+    }
+
+    get isSpam() {
+        // a post is only spam if it's been marked as spam via mod pol
+        return this.modPolicy.some(mp => mp.tags.some(t => t == 'spam'));
+    }
+
+    get isPinned() {
+        // a post is only pinned if it's been marked as pinned via mod pol
+        return this.modPolicy.some(mp => mp.tags.some(t => t == 'pinned'));
+    }
+
+    get isNSFW() {
+        // a post can be self-marked NSFW or via mod pol
+        return (this.sub == 'nsfw' || this.tags.some(t => t == 'nsfw')) ||
+            (this.modPolicy.some(mp => mp.tags.some(t => t == 'nsfw')));
     }
 
     static decodeId(id) {
@@ -234,6 +255,17 @@ export class Post {
 
     getEncodedId() {
         return Post.encodeId(this.transaction, this.createdAt)
+    }
+
+    setMyModPolicy(myKey, tags) {
+        const pol = this.modPolicy.find(mp => mp.mod == myKey);
+        if (pol) pol.tags = tags;
+        else this.modPolicy.push({ mod: myKey, tags });
+    }
+
+    getMyModPolicy(myKey) {
+        const pol = this.modPolicy.find(mp => mp.mod == myKey);
+        return pol ? pol.tags : [];
     }
 
     getSignHash(uuid) {

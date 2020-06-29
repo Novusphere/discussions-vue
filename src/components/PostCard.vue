@@ -1,8 +1,8 @@
 <template>
-  <v-card :class="`post-card-${post.transaction}`" outlined>
+  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${post.transaction}`" outlined>
     <v-row no-gutters class="overline">
       <div class="d-inline pl-3">
-        <v-btn icon @click="expanded = !expanded">
+        <v-btn icon @click="expanded = expanded ? 0 : -1">
           <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
         </v-btn>
       </div>
@@ -21,37 +21,50 @@
           </span>
         </PostThreadLink>
       </div>
-
+      <div class="d-inline pl-3">
+        <v-icon v-if="post.isPinned" color="success">push_pin</v-icon>
+        <v-icon v-if="post.isSpam" color="error">error</v-icon>
+        <v-chip v-if="post.isNSFW" small color="orange" text-color="white">18+</v-chip>
+      </div>
       <v-spacer></v-spacer>
-
       <div class="d-inline pr-3" v-if="!$vuetify.breakpoint.mobile">
         <PostTips :post="post" />
       </div>
     </v-row>
 
     <div v-show="!editing">
-      <v-row class="headline" v-if="!isCommentDisplay && post.title">
-        <v-col cols="12">
-          <div class="pl-3">
-            <PostThreadLink :post="post">{{ post.title }}</PostThreadLink>
-          </div>
-        </v-col>
-      </v-row>
+      <div v-if="post.isSpam && !forceReveal">
+        <v-row>
+          <v-col :cols="12" align="center" justify="center">
+            <v-btn color="error" @click="forceReveal = true, expanded = 0">Reveal Spam?</v-btn>
+          </v-col>
+        </v-row>
+      </div>
+      <div v-else>
+        <v-row class="headline" v-if="!isCommentDisplay && post.title">
+          <v-col cols="12">
+            <div class="pl-3">
+              <PostThreadLink :post="post">{{ post.title }}</PostThreadLink>
+            </div>
+          </v-col>
+        </v-row>
 
-      <v-expansion-panels flat tile :value="expanded ? 0 : -1">
-        <v-expansion-panel>
-          <v-expansion-panel-content>
-            <v-card flat @click.native="cardClicked()">
-              <div
-                :class="{ 'content-fade': isPreviewDisplay && !isCompactContent }"
-                v-if="!isCompactDisplay || isCompactContent"
-              >
-                <div class="post-html" v-html="postHTML"></div>
-              </div>
-            </v-card>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
+        <v-expansion-panels flat tile :value="expanded">
+          <v-expansion-panel>
+            <v-expansion-panel-content>
+              <v-card flat @click.native="cardClicked()">
+                <div
+                  :class="{ 
+                    'content-fade': isPreviewDisplay && !isCompactContent, 
+                    'nsfw-blur': post.isNSFW && !removeNSFWOverlay }"
+                >
+                  <div class="post-html" v-html="postHTML"></div>
+                </div>
+              </v-card>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </div>
     </div>
     <div v-show="editing">
       <v-card-text>
@@ -81,6 +94,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import UserProfileLink from "@/components/UserProfileLink";
 import TagLink from "@/components/TagLink";
 import PostCardActions from "@/components/PostCardActions";
@@ -106,6 +120,9 @@ export default {
     display: String
   },
   computed: {
+    shouldShowPostHTML() {
+      return true;
+    },
     isThread() {
       return this.uuid == this.threadUuid;
     },
@@ -123,17 +140,26 @@ export default {
     },
     isFullDisplay() {
       return this.display == "full";
-    }
+    },
+    ...mapState({
+      hideSpam: state => !state // TO-DO: implement state setting....
+    })
   },
   watch: {
     "post.content": async function() {
       this.postHTML = await this.post.getContentHTML();
+    },
+    isCompactDisplay() {
+      if (this.isCompactDisplay) this.expanded = -1;
+      else this.expanded = 0;
     }
   },
   data: () => ({
-    expanded: true,
+    expanded: 0, // 0 is show, -1 is don't show
     postHTML: "",
-    editing: false
+    editing: false,
+    forceReveal: false,
+    removeNSFWOverlay: false
   }),
   async mounted() {
     this.postHTML = await this.post.getContentHTML();
@@ -151,8 +177,14 @@ export default {
       this.$emit("edit", editedPost);
     },
     cardClicked() {
-      if (!this.clickable) return;
+      // reveal the blur if clicked on
+      if (this.post.isNSFW && !this.removeNSFWOverlay) {
+        this.removeNSFWOverlay = true;
+        return;
+      }
 
+      // other...
+      if (!this.clickable) return;
       const link = `/tag/${this.post.sub}/${this.post.getEncodedId()}`;
       this.$router.push(link);
     }
@@ -175,7 +207,9 @@ export default {
 .post-replies {
   border-left: 2px solid lightgray;
 }
-
+.nsfw-blur {
+  filter: blur(20px);
+}
 .content-fade {
   position: relative;
   max-height: 320px;

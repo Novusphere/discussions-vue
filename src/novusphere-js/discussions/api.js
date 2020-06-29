@@ -481,6 +481,52 @@ async function submitPost(signKey, post, transferActions) {
     return data.transaction;
 }
 
+//
+//  Sets a users tags for their mod policiy
+//
+async function modPolicySetTags(postKey, uuid, tags, domain) {
+    const time = Date.now();
+    const pub = ecc.privateToPublic(postKey);
+    domain = domain || window.location.host;
+    const hash = ecc.sha256(`${domain}-${time}`);
+    const sig = ecc.signHash(hash, postKey);
+
+    const { data } = await axios.post(
+        `https://atmosdb.novusphere.io/discussions/moderation/settags`,
+        `time=${time}&pub=${pub}&sig=${sig}&tags=${tags.join(',')}&uuid=${uuid}&domain=${domain}`
+    )
+
+    //console.log(data);
+
+    return data;
+}
+
+//
+// Get pinned posts (top level only)
+//
+async function getPinnedPosts(key, mods, tags, domain) {
+    domain = domain || window.location.host;
+    mods = Array.from(new Set([key, ...mods]));
+
+    const { data } = await axios.post(
+        `https://atmosdb.novusphere.io/discussions/moderation/pinned`,
+        `domain=${domain}&mods=${mods.join(',')}&tags=${tags.join(',')}`
+    );
+
+    let posts = [];
+    if (data && data.length > 0) {
+        const trxids = data.map(p => p.transaction);
+
+        const cursor = searchPostsByTransactions(trxids);
+        cursor.votePublicKey = key;
+
+        do { posts.push(...await cursor.next()) }
+        while (cursor.hasMore());
+    }
+
+    return posts;
+}
+
 export {
     Post,
     PostSearchQuery,
@@ -501,5 +547,7 @@ export {
     getUserProfile,
     getTrendingTags,
     getCommunities,
-    getTokens
+    getTokens,
+    modPolicySetTags,
+    getPinnedPosts
 }
