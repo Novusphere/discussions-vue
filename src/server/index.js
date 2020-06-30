@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import { sleep, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
-import { getSinglePost, getCommunities } from "@/novusphere-js/discussions/api";
+import { getSinglePost, getCommunities, getUserProfile } from "@/novusphere-js/discussions/api";
 
 const DEFAULT_TILE = `Discussions`;
 const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
@@ -12,6 +12,24 @@ const port = 8008;
 
 app.use(`/js`, express.static(`./dist/js`));
 app.use(`/css`, express.static(`./dist/css`));
+app.use(`/static`, express.static(`./dist/static`));
+
+app.get(`/u/:who/:tab?`, async (req, res, next) => {
+    const [, key] = req.params.who.split('-');
+    if (key) {
+        const info = await getUserProfile(key);
+        if (info) {
+            res.inject = {
+                head: {
+                    title: `Discussions - ${info.displayName}`,
+                    description: `${key} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
+                    image: `https://atmosdb.novusphere.io/discussions/keyicon/${key}`
+                }
+            }
+        }
+    }
+    next();
+});
 
 app.get(`/tag/:tags/:referenceId/:referenceId2?`, async (req, res, next) => {
     const post = await getSinglePost(req.params.referenceId);
@@ -47,12 +65,10 @@ app.get(`/tag/:tags`, async (req, res, next) => {
 app.get('*', (req, res) => {
 
     // TO-DO: build default head from site.json
-    let title = ``;
     let body = ``;
     let head = { title: DEFAULT_TILE, description: `An open forum for discussions built on blockchain. Supporting and nurturing token communities of all kind`, image: `https://i.imgur.com/WO5pb52.png` };
 
     if (res.inject) {
-        title = res.inject.title || title;
         body = res.inject.body || body;
         Object.assign(head, res.inject.head || {});
     }
