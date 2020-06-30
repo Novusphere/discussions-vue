@@ -122,6 +122,7 @@ export default {
     async reply(replyPost) {
       if (this.tree[replyPost.uuid]) return;
 
+      replyPost.threadTree = replyPost;
       const reply = { post: replyPost, replies: [] };
       this.tree[replyPost.uuid] = reply;
       this.tree[replyPost.parentUuid].replies.unshift(reply);
