@@ -41,6 +41,11 @@ export default {
     PublicKeyIcon
   },
   props: {},
+  watch: {
+    isLoggedIn() {
+      if (!this.isLoggedIn) this.$router.push(`/`);
+    }
+  },
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({

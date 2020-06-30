@@ -19,11 +19,16 @@ export default {
     PostBrowser
   },
   props: {},
+  watch: {
+    isLoggedIn() {
+      if (!this.isLoggedIn) this.$router.push(`/`);
+    }
+  },
   data: () => ({
     cursor: null
   }),
   computed: {
-    ...mapGetters(['isLoggedIn']),
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       subscribedTags: state => state.subscribedTags,
       followingUsers: state => state.followingUsers
@@ -31,7 +36,10 @@ export default {
   },
   async created() {
     if (!this.isLoggedIn) this.$router.push(`/`);
-    this.cursor = searchPostsByFeed(this.subscribedTags, this.followingUsers.map(u => u.pub));
+    this.cursor = searchPostsByFeed(
+      this.subscribedTags,
+      this.followingUsers.map(u => u.pub)
+    );
   },
   methods: {}
 };

@@ -34,6 +34,9 @@ export default {
   watch: {
     async editorTags() {
       await this.setTag();
+    },
+    isLoggedIn() {
+      if (!this.isLoggedIn) this.$router.push(`/`);
     }
   },
   computed: {
