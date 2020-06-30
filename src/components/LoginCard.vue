@@ -5,7 +5,7 @@
     </v-card-title>
     <v-card-text>
       <v-container>
-        <v-form ref="form">
+        <v-form ref="form" v-model="validForm">
           <div v-if="!hasLoginSession">
             <v-row>
               <v-col cols="12">
@@ -58,8 +58,11 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn text @click="$store.commit('setLoginDialogOpen', false)">Close</v-btn>
-      <v-btn text @click="login()">Log in</v-btn>
+      <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)">Close</v-btn>
+      <v-btn :disabled="waiting || !validForm" color="primary" @click="login()">
+        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>
+        Log in
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -73,6 +76,8 @@ import {
   isValidBrainKey,
   brainKeyToKeys
 } from "@/novusphere-js/uid";
+import { getUserAccountObject } from "@/novusphere-js/discussions/api";
+import { sleep } from "@/novusphere-js/utility";
 
 export default {
   name: "LoginCard",
@@ -83,10 +88,11 @@ export default {
   data: () => ({
     brainKey: "",
     displayName: "",
-    password: ""
+    password: "",
+    waiting: false,
+    validForm: false
   }),
   computed: {
-    // TO-DO: rules for display name, password
     brainKeyRules() {
       const rules = [];
       if (!isValidBrainKey(this.brainKey)) {
@@ -99,9 +105,16 @@ export default {
       if (this.displayName.length < 3) {
         rules.push(`Display name must be at least 3 characters`);
       }
+      
       if (this.displayName.length > 16) {
         rules.push(`Display names can be at most 16 characters`);
       }
+
+      const validNameRegex = /[a-zA-Z0-9_]/;
+      if (!validNameRegex.test(this.displayName)) {
+        rules.push(`Display names may only contain letters, numbers, underscores`);
+      }
+
       return rules;
     },
     passwordRules() {
@@ -130,6 +143,7 @@ export default {
       this.displayName = "";
       this.password = "";
       this.brainKey = "";
+      this.waiting = false;
     },
     async login() {
       this.$refs.form.validate();
@@ -163,8 +177,44 @@ export default {
       }
 
       if (login) {
+        this.waiting = true;
+        await sleep(150); // let ui update
+
+        let account = await getUserAccountObject(login.keys.identity.key);
+
+        if (!account) {
+          // TO-REMOVE: migration code
+          // note: "https://" is no longer in new acccount domains
+          /*const oldAccount = await getUserAccountObject(
+            login.keys.identity.key,
+            `https://discussions.app`
+          );
+
+          if (oldAccount) {
+            console.log(
+              `Found old Discussions account... trying to migrate...`
+            );
+            console.log(oldAccount);
+            // upgrade to new object format
+            const migrated = {
+              postPublicKey: login.keys.arbitrary.pub,
+              uidw: login.keys.wallet.pub,
+              lastSeenNotificationsTime: oldAccount.data.lastCheckedNotifications,
+              displayName: login.displayName,
+              // TO-DO: watching
+              subscribedTags: oldAccount.data.tags,
+              delegatedMods: oldAccount.data.moderation.delegated.map(m => {
+                const [displayName, pub] = m[0].split(":");
+                return { displayName, pub, tag: m[1] };
+              })
+            };
+            console.log(JSON.stringify(migrated));
+          }*/
+        }
+
         this.$store.commit("login", login);
         await this.reset();
+        this.waiting = false;
       }
     }
   }

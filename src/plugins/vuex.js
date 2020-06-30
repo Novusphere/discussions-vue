@@ -16,8 +16,9 @@ const getDefaultState = () => ({
     encryptedBrainKey: '',
     encryptedTest: '', // the value "test" encrypted with the same password as [encryptedBrainKey]
     keys: null,
-    subscribedTags: ['eos', 'atmos', 'vigor'],
-    followingUsers: [] // { displayName, pub, uidw }
+    subscribedTags: [],
+    followingUsers: [], // { displayName, pub, uidw }
+    watchedThreads: [], // { uuid, transaction, watchedAt }
 });
 
 export default new Vuex.Store({
@@ -50,6 +51,11 @@ export default new Vuex.Store({
                 tag = tag.toLowerCase();
                 return state.subscribedTags.find(t => t == tag);
             }
+        },
+        isThreadWatched: state => {
+            return uuid => {
+                return state.watchedThreads.find(wt => wt.uuid == uuid);
+            }
         }
     },
     mutations: {
@@ -59,6 +65,12 @@ export default new Vuex.Store({
             state.encryptedTest = encryptedTest;
             state.displayName = displayName;
             state.keys = keys;
+        },
+        watchThread(state, { uuid, transaction }) {
+            state.watchedThreads.push({ uuid, transaction, watchedAt: Date.now() });
+        },
+        unwatchThread(state, uuid) {
+            state.watchedThreads = state.watchedThreads.filter(wt => wt.uuid != uuid);
         },
         seenNotifications(state) {
             state.lastSeenNotificationsTime = Date.now();

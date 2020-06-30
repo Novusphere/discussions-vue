@@ -31,22 +31,45 @@
       </template>
       <v-list>
         <v-list-item v-show="isLoggedIn && (myPublicKey == post.pub)">
-          <v-btn text @click="$emit('edit')">Edit</v-btn>
+          <v-btn text @click="$emit('edit')">
+            <v-icon>edit</v-icon>
+            <span>Edit</span>
+          </v-btn>
         </v-list-item>
         <v-list-item v-show="isCommentDisplay">
-          <PostThreadLink btn :post="post">Permalink</PostThreadLink>
+          <PostThreadLink btn :post="post">
+            <v-icon>link</v-icon>
+            <span>link</span>
+          </PostThreadLink>
+        </v-list-item>
+        <v-list-item v-show="(myPublicKey != post.pub) && (post.uuid == post.threadUuid)">
+          <v-btn text @click="watchThread()">
+            <v-icon>watch_later</v-icon>
+            <span>{{ isThreadWatched(post.uuid) ? 'unwatch' : 'watch' }}</span>
+          </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn text @click="markAsPinned()">{{ isMyPolicy('pinned') ? 'unpin' : 'pin'}}</v-btn>
+          <v-btn text @click="markAsPinned()">
+            <v-icon color="green">push_pin</v-icon>
+            <span>{{ isMyPolicy('pinned') ? 'unpin' : 'pin'}}</span>
+          </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn text @click="markAsSpam()">{{ isMyPolicy('spam') ? 'not spam' : 'spam' }}</v-btn>
+          <v-btn text @click="markAsSpam()">
+            <v-icon color="error">error</v-icon>
+            <span>{{ isMyPolicy('spam') ? 'not spam' : 'spam' }}</span>
+          </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn text @click="markAsNSFW()">{{ isMyPolicy('nsfw') ? 'sfw' : 'nsfw' }}</v-btn>
+          <v-btn text @click="markAsNSFW()">
+            <v-chip class="mr-1" small color="orange" text-color="white">18+</v-chip>
+            <span>{{ isMyPolicy('nsfw') ? 'sfw' : 'nsfw' }}</span>
+          </v-btn>
         </v-list-item>
         <v-list-item>
-          <TransactionLink btn :chain="post.chain" :transaction="post.transaction">On Chain</TransactionLink>
+          <TransactionLink btn :chain="post.chain" :transaction="post.transaction">
+            <v-icon>zoom_in</v-icon>On Chain
+          </TransactionLink>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -66,7 +89,7 @@ export default {
   components: {
     //PublicKeyIcon
     PostThreadLink,
-    TransactionLink,
+    TransactionLink
     //PostTips
   },
   props: {
@@ -74,7 +97,7 @@ export default {
     isCommentDisplay: Boolean
   },
   computed: {
-    ...mapGetters(["isLoggedIn"]),
+    ...mapGetters(["isLoggedIn", "isThreadWatched"]),
     ...mapState({
       keys: state => state.keys,
       myPublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
@@ -103,6 +126,17 @@ export default {
 
       await sleep(100);
       await modPolicySetTags(this.keys.arbitrary.key, this.post.uuid, pol);
+    },
+    async watchThread() {
+      if (!this.isLoggedIn) return;
+      if (this.isThreadWatched(this.post.uuid)) {
+        this.$store.commit("unwatchThread", this.post.uuid);
+      } else {
+        this.$store.commit("watchThread", {
+          uuid: this.post.uuid,
+          transaction: this.post.transaction
+        });
+      }
     },
     async markAsSpam() {
       await this.adjustModPolicy("spam");

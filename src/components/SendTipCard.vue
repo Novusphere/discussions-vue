@@ -22,7 +22,7 @@
         <v-spacer></v-spacer>
         <v-btn color="primary" @click="close()" v-show="closable">Close</v-btn>
         <v-btn color="primary" @click="showSummary()" :disabled="!valid || disableSubmit">
-          <v-progress-circular class="mr-2" indeterminate v-if="disableSubmit"></v-progress-circular>
+          <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
           <span>Next</span>
         </v-btn>
       </v-card-actions>

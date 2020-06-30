@@ -31,13 +31,13 @@ export default {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
       keys: state => state.keys,
-      watchedPosts: state => [] || state // TO-DO
+      watchedThreads: state => state.watchedThreads
     })
   },
   async created() {
     if (!this.isLoggedIn) this.$router.push(`/`);
-    this.cursor = searchPostsByNotifications(this.keys.arbitrary.pub, 0);
-    this.$store.commit('seenNotifications');
+    this.cursor = searchPostsByNotifications(this.keys.arbitrary.pub, 0, this.watchedThreads);
+    this.$store.commit("seenNotifications");
   },
   methods: {}
 };

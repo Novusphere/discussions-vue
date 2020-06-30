@@ -38,7 +38,7 @@ export default {
       notificationCount: state => state.notificationCount,
       lastSeenNotificationsTime: state => state.lastSeenNotificationsTime,
       keys: state => state.keys,
-      watchedPosts: state => [] || state // TO-DO
+      watchedThreads: state => state.watchedThreads
     })
   },
   data: () => ({
@@ -54,13 +54,14 @@ export default {
     async checkNotifications() {
       if (this.stopChecking) return;
       if (this.isLoggedIn) {
-        if (Notification && Notification.permission !== 'denied') {
+        if (Notification && Notification.permission !== 'granted') {
             await Notification.requestPermission();
         }
 
         const cursor = searchPostsByNotifications(
           this.keys.arbitrary.pub,
-          this.lastSeenNotificationsTime
+          this.lastSeenNotificationsTime,
+          this.watchedThreads
         );
         cursor.includeOpeningPost = false; // dont need this
         cursor.pipeline.push({ $count: "n" });

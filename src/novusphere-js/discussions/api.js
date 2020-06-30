@@ -392,20 +392,32 @@ function searchPostsByTextSearch(text) {
 //
 // Search posts by notifications
 //
-function searchPostsByNotifications(key, lastSeenTime) {
+function searchPostsByNotifications(key, lastSeenTime, watchedThreads) {
     return searchPosts({
         key,
         includeOpeningPost: true,
         sort: 'recent',
         pipeline: [
             {
-                // TO-DO: add watched param
                 $match: {
-                    pub: { $ne: key }, // ignore self posts
-                    mentions: { $in: [key] },
                     $or: [
-                        { createdAt: { $gt: lastSeenTime } },
-                        { editedAt: { $gt: lastSeenTime } }
+                        {
+                            pub: { $ne: key }, // ignore self posts
+                            mentions: { $in: [key] },
+                            $or: [
+                                { createdAt: { $gt: lastSeenTime } },
+                                { editedAt: { $gt: lastSeenTime } }
+                            ]
+                        },
+                        ...(watchedThreads || []).map(wt => ({
+                            pub: { $ne: key }, // ignore self posts
+                            threadUuid: wt.uuid,
+                            $or: [
+                                // only include posts from when we started watching, or that we haven't seen yet
+                                { createdAt: { $gt: lastSeenTime ? lastSeenTime : wt.watchedAt } },
+                                { editedAt: { $gt: lastSeenTime ? lastSeenTime : wt.watchedAt } }
+                            ]
+                        }))
                     ]
                 }
             }
@@ -507,14 +519,23 @@ async function submitPost(signKey, post, transferActions) {
 }
 
 //
-//  Sets a users tags for their mod policiy
+// Creates a standard signed request
+// 
+function createStandardSignedRequest(key, domain, signHash = true) {
+    const time = Date.now();
+    const pub = ecc.privateToPublic(key);
+    const hash = ecc.sha256(`${domain}-${time}`);
+    const sig = (signHash ? ecc.signHash : ecc.sign)(hash, key); // TO-DO: fix requests that use sign()
+
+    return { time, pub, sig };
+}
+
+//
+// Sets a users tags for their mod policiy
 //
 async function modPolicySetTags(postKey, uuid, tags, domain) {
-    const time = Date.now();
-    const pub = ecc.privateToPublic(postKey);
     domain = domain || window.location.host;
-    const hash = ecc.sha256(`${domain}-${time}`);
-    const sig = ecc.signHash(hash, postKey);
+    const { time, pub, sig } = createStandardSignedRequest(postKey, domain);
 
     const { data } = await axios.post(
         `https://atmosdb.novusphere.io/discussions/moderation/settags`,
@@ -524,6 +545,21 @@ async function modPolicySetTags(postKey, uuid, tags, domain) {
     //console.log(data);
 
     return data;
+}
+
+//
+// Get user account object
+//
+async function getUserAccountObject(identityKey, domain) {
+    domain = domain || window.location.host;
+    const { time, pub, sig } = createStandardSignedRequest(identityKey, domain, false); // TO-DO: fix this request to use sign
+
+    const { data } = await axios.post(
+        `https://atmosdb.novusphere.io/account/data`,
+        `time=${time}&pub=${pub}&sig=${sig}&domain=${domain}`
+    )
+
+    return data.payload; // TO-DO: standardize this request...
 }
 
 //
@@ -575,5 +611,6 @@ export {
     getCommunities,
     getTokens,
     modPolicySetTags,
-    getPinnedPosts
+    getPinnedPosts,
+    getUserAccountObject
 }

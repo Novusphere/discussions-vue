@@ -100,7 +100,7 @@ export default {
     //
   }),
   created() {
-    // TO-DO: deprecate this code on 8/1/2020
+    // TO-REMOVE: deprecate this code on 8/1/2020
     function importOld() {
       let authStore = window.localStorage["authStore"];
       if (authStore) {
