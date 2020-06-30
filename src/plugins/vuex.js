@@ -4,6 +4,8 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 
 const getDefaultState = () => ({
+    notificationCount: 0,
+    lastSeenNotificationsTime: 0,
     isLoginDialogOpen: false,
     isTransferDialogOpen: false,
     isSendTipDialogOpen: false,
@@ -52,11 +54,17 @@ export default new Vuex.Store({
     },
     mutations: {
         importOld(state, { encryptedBrainKey, encryptedTest, displayName, keys }) {
-            // this method is for legacy transaction only
+            // TO-REMOVE: this method is for legacy transaction only
             state.encryptedBrainKey = encryptedBrainKey;
             state.encryptedTest = encryptedTest;
             state.displayName = displayName;
             state.keys = keys;
+        },
+        seenNotifications(state) {
+            state.lastSeenNotificationsTime = Date.now();
+        },
+        setNotificationCount(state, count) {
+            state.notificationCount = count;
         },
         followUser(state, { displayName, pub, uidw }) {
             if (pub == state.keys.arbitrary.pub) return; // self follow disallowed

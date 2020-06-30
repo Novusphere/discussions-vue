@@ -22,6 +22,11 @@ export default {
   data: () => ({
     cursor: null
   }),
+  watch: {
+    isLoggedIn() {
+      if (!this.isLoggedIn) this.$router.push(`/`);
+    }
+  },
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
@@ -32,6 +37,7 @@ export default {
   async created() {
     if (!this.isLoggedIn) this.$router.push(`/`);
     this.cursor = searchPostsByNotifications(this.keys.arbitrary.pub, 0);
+    this.$store.commit('seenNotifications');
   },
   methods: {}
 };

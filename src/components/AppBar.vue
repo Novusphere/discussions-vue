@@ -27,15 +27,12 @@
 
     <div v-if="!isLoggedIn">
       <v-btn text color="primary" @click="$store.commit('setLoginDialogOpen', true)">Log in</v-btn>
-      <v-btn text color="primary">Sign up</v-btn>
     </div>
     <div v-else-if="isLoggedIn && !$vuetify.breakpoint.mobile">
       <v-btn text @click="createPost()">
         <v-icon>create</v-icon>
       </v-btn>
-      <v-btn text :to="`/notifications`">
-        <v-icon>notifications</v-icon>
-      </v-btn>
+      <NotificationsButton />
       <v-btn text>
         <UserProfileLink :displayName="displayName" :publicKey="keys.arbitrary.pub" />
       </v-btn>
@@ -48,6 +45,7 @@
       <v-btn v-if="isLoggedIn" text @click="createPost()">
         <v-icon>create</v-icon>
       </v-btn>
+      <NotificationsButton />
       <v-menu
         offset-y
         v-model="menu"
@@ -68,13 +66,15 @@
 <script>
 import AppNav from "@/components/AppNav";
 import UserProfileLink from "@/components/UserProfileLink";
+import NotificationsButton from "@/components/NotificationsButton";
 import { mapState, mapGetters } from "vuex";
 
 export default {
   name: "AppBar",
   components: {
     AppNav,
-    UserProfileLink
+    UserProfileLink,
+    NotificationsButton
   },
   watch: {
     $route() {

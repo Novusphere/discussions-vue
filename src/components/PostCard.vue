@@ -50,7 +50,7 @@
           </v-col>
         </v-row>
 
-        <v-expansion-panels flat tile :value="expanded">
+        <v-expansion-panels class="mt-2" flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content>
               <v-card flat @click.native="cardClicked()">

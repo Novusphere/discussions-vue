@@ -59,9 +59,20 @@ export class PostSearchQuery {
     }
 
     //
-    // Returns a Post[] of next posts for the query asynchronously
+    //  Directly returns the payload from a search
     //
     async next() {
+        const payload = await this.nextRaw();
+        const result = payload.map(dbo => Post.fromDbObject(dbo));
+        //console.log(result[0].transaction + ' - ' + result[0].title);
+        //console.log(JSON.stringify(queryObject));
+        return result;
+    }
+
+    //
+    // Returns a Post[] of next posts for the query asynchronously
+    //
+    async nextRaw() {
         const url = `https://atmosdb.novusphere.io/discussions/search`;
         
         const queryObject = {
@@ -86,10 +97,7 @@ export class PostSearchQuery {
             this.count = data.count;
             this.limit = data.limimt;
 
-            const result = data.payload.map(dbo => Post.fromDbObject(dbo));
-            //console.log(result[0].transaction + ' - ' + result[0].title);
-            //console.log(JSON.stringify(queryObject));
-            return result;
+            return data.payload;
         }
         catch (ex) {
             console.error(`Search query error`, this, ex);

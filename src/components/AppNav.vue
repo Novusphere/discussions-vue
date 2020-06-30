@@ -12,12 +12,6 @@
         @click:append="goSearch()"
       ></v-text-field>
     </v-list-item>
-    <v-list-item v-show="isLoggedIn">
-     <v-btn text :to="`/notifications`">
-        <v-icon>notifications</v-icon>
-        <span>Notifications</span>
-      </v-btn>
-    </v-list-item>
     <v-list-item>
       <v-btn
         class="justify-start"
@@ -107,7 +101,7 @@ import TagLink from "@/components/TagLink";
 export default {
   name: "AppNav",
   components: {
-    TagLink
+    TagLink,
   },
   data() {
     return {

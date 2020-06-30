@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block mt-1" :style="{ width: `${36 + formatTip(tip).length*6}px` }">
-      <v-badge overlap>
+    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block" :style="{ width: `${36 + formatTip(tip).length*6}px` }">
+      <v-badge bottom overlap>
         <template v-slot:badge>
           <span>{{ formatTip(tip) }}</span>
         </template>
