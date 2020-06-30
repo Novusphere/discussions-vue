@@ -55,9 +55,9 @@ export default {
   }),
   created() {
     if (window.__BUILD__) {
-      this.build = `Server - ${new Date(window.__BUILD__)}`;
+      this.build = `Server - ${new Date(window.__BUILD__).getTime()}`;
     } else {
-      this.build = `Client - ${new Date()}`;
+      this.build = `Client - ${new Date().getTime()}`;
     }
   }
 };
