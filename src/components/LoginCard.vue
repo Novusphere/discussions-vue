@@ -185,7 +185,7 @@ export default {
         if (!account) {
           // TO-REMOVE: migration code
           // note: "https://" is no longer in new acccount domains
-          /*const oldAccount = await getUserAccountObject(
+          const oldAccount = await getUserAccountObject(
             login.keys.identity.key,
             `https://discussions.app`
           );
@@ -209,7 +209,7 @@ export default {
               })
             };
             console.log(JSON.stringify(migrated));
-          }*/
+          }
         }
 
         this.$store.commit("login", login);
