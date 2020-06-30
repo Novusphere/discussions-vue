@@ -7,11 +7,16 @@
             <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
           </v-btn>
         </div>
-        <div class="d-inline-block pr-3" v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)">
-          <TagLink :tag="post.sub" />
-        </div>
-        <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || (isCommentDisplay || !isMultiTag)">
-          <UserProfileLink :displayName="post.displayName" :publicKey="post.pub" />
+        <div class="d-inline">
+          <div
+            class="d-inline-block pr-3"
+            v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)"
+          >
+            <TagLink :tag="post.sub" />
+          </div>
+          <div class="d-inline-block pr-3">
+            <UserProfileLink :displayName="post.displayName" :publicKey="post.pub" />
+          </div>
         </div>
         <div class="d-inline-block pr-3">
           <PostThreadLink :post="post">
@@ -97,20 +102,24 @@
 <script>
 import { mapState } from "vuex";
 import { formatDistance } from "date-fns";
+import { refreshOEmbed } from "@/novusphere-js/utility";
 
 import UserProfileLink from "@/components/UserProfileLink";
 import TagLink from "@/components/TagLink";
+//import TagIcon from "@/components/TagIcon";
+//import PublicKeyIcon from "@/components/PublicKeyIcon";
 import PostCardActions from "@/components/PostCardActions";
 import PostTips from "@/components/PostTips";
 import PostThreadLink from "@/components/PostThreadLink";
 import PostSubmitter from "@/components/PostSubmitter";
-import { refreshOEmbed } from "@/novusphere-js/utility";
 
 export default {
   name: "BrowsePostCard",
   components: {
     UserProfileLink,
     TagLink,
+    //TagIcon,
+    //PublicKeyIcon,
     PostCardActions,
     PostTips,
     PostThreadLink,
@@ -148,7 +157,7 @@ export default {
       if (!this.isBrowsing) return false;
       if (!this.$route.params.tags) return true; // assume we're on a multi tag
       const tags = this.$route.params.tags.split(",");
-      return (tags.length > 1) || (tags.length == 1 && tags[0] == 'all');
+      return tags.length > 1 || (tags.length == 1 && tags[0] == "all");
     },
     isBrowsing() {
       // one of the browsing display modes

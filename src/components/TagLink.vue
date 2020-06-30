@@ -8,14 +8,14 @@
         <slot></slot>
       </div>
       <div class="d-inline" v-else-if="big">
-        <TagIcon :size="80" :tag="tag" />
+        <TagIcon v-show="!noIcon" :size="80" :tag="tag" />
         <div class="d-inline-block ml-2">
           <h1>#{{ tag }}</h1>
           <slot></slot>
         </div>
       </div>
       <div class="d-inline" v-else>
-        <TagIcon :tag="tag" />
+        <TagIcon v-show="!noIcon" :tag="tag" />
         <span class="ml-1">#{{ tag }}</span>
       </div>
     </router-link>
@@ -31,6 +31,7 @@ export default {
     TagIcon
   },
   props: {
+    noIcon: Boolean,
     useSlot: Boolean,
     btn: Boolean,
     tag: String,

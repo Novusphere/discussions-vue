@@ -1,9 +1,12 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+const LOCAL_STORAGE_KEY = 'vuexStore';
+
 Vue.use(Vuex);
 
 const getDefaultState = () => ({
+    needSyncAccount: false,
     notificationCount: 0,
     lastSeenNotificationsTime: 0,
     isLoginDialogOpen: false,
@@ -21,10 +24,39 @@ const getDefaultState = () => ({
     watchedThreads: [], // { uuid, transaction, watchedAt }
 });
 
+function saveAccount(state, external = true) {
+    const account = {
+        lastSeenNotificationsTime: state.lastSeenNotificationsTime,
+        displayName: state.displayName,
+        publicKeys: {
+            arbitrary: state.keys.arbitrary.pub,
+            identity: state.keys.arbitrary.pub,
+            wallet: state.keys.wallet.pub // uidw 
+        },
+        subscribedTags: state.subscribedTags,
+        followingUsers: state.followingUsers,
+        watchedThreads: state.watchThreads
+    };
+
+    const local = {
+        encryptedTest: state.encryptedTest,
+        encryptedBrainKey: state.encryptedBrainKey,
+        displayName: state.displayName,
+        keys: state.keys
+    }
+
+    window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
+
+    if (external && account) { // just put here to temporarily stop linter from complaining
+        // TO-DO: save account to nsdb
+    }
+}
+
 export default new Vuex.Store({
     state: getDefaultState(),
     getters: {
         isLoggedIn: state => {
+            if (state.needSyncAccount) return false;
             if (!state.displayName) return false;
             if (!state.encryptedBrainKey) return false;
             if (!state.keys) return false;
@@ -59,21 +91,66 @@ export default new Vuex.Store({
         }
     },
     mutations: {
-        importOld(state, { encryptedBrainKey, encryptedTest, displayName, keys }) {
-            // TO-REMOVE: this method is for legacy transaction only
-            state.encryptedBrainKey = encryptedBrainKey;
-            state.encryptedTest = encryptedTest;
-            state.displayName = displayName;
-            state.keys = keys;
+        init(state) {
+            let local = window.localStorage[LOCAL_STORAGE_KEY];
+            try {
+                local = JSON.parse(local);
+                if (local.encryptedBrainKey && local.encryptedTest && local.displayName && local.keys) {
+                    state.encryptedBrainKey = local.encryptedBrainKey;
+                    state.encryptedTest = local.encryptedTest;
+                    state.displayName = local.displayName;
+                    state.keys = local.keys;
+
+                    // if false, they have a session -- but are not logged in.
+                    if (state.keys.arbitrary.key)
+                        state.needSyncAccount = true;
+                }
+            }
+            catch (ex) {
+                // TO-REMOVE: deprecate this code on 8/1/2020
+                try {
+                    console.log(`Trying to restore account from old authStore object...`);
+                    let authStore = JSON.parse(window.localStorage["authStore"]);
+                    let bk = JSON.parse(authStore.bk);
+                    let encryptedBrainKey = bk.bk;
+                    let encryptedTest = bk.bkc;
+                    let displayName = authStore.displayName || bk.displayName;
+
+                    let keys = {
+                        arbitrary: { key: authStore.postPriv, pub: bk.post },
+                        wallet: { pub: bk.uidwallet },
+                        identity: { key: authStore.accountPrivKey, pub: bk.account }
+                    };
+
+                    // import old
+                    state.encryptedBrainKey = encryptedBrainKey;
+                    state.encryptedTest = encryptedTest;
+                    state.displayName = displayName;
+                    state.keys = keys;
+                    state.needSyncAccount = true;
+
+                    console.log(state);
+                    console.log(`Restore was OK`);
+                }
+                catch (ex2) {
+                    console.error(ex2);
+                    return;
+                }
+                // ---
+                return;
+            }
         },
         watchThread(state, { uuid, transaction }) {
             state.watchedThreads.push({ uuid, transaction, watchedAt: Date.now() });
+            saveAccount(state);
         },
         unwatchThread(state, uuid) {
             state.watchedThreads = state.watchedThreads.filter(wt => wt.uuid != uuid);
+            saveAccount(state);
         },
         seenNotifications(state) {
             state.lastSeenNotificationsTime = Date.now();
+            saveAccount(state);
         },
         setNotificationCount(state, count) {
             state.notificationCount = count;
@@ -82,6 +159,7 @@ export default new Vuex.Store({
             if (pub == state.keys.arbitrary.pub) return; // self follow disallowed
             if (state.followingUsers.find(u => u.pub == pub)) return;
             state.followingUsers.push({ displayName, pub, uidw });
+            saveAccount(state);
         },
         unfollowUser(state, pub) {
             state.followingUsers = state.followingUsers.filter(u => u.pub != pub);
@@ -90,10 +168,12 @@ export default new Vuex.Store({
             tag = tag.toLowerCase();
             if (state.subscribedTags.find(t => t == tag)) return;
             state.subscribedTags.push(tag);
+            saveAccount(state);
         },
         unsubscribeTag(state, tag) {
             tag = tag.toLowerCase();
             state.subscribedTags = state.subscribedTags.filter(t => t != tag);
+            saveAccount(state);
         },
         setSendTipDialogOpen(state, { value, recipient }) {
             if (value) {
@@ -122,7 +202,6 @@ export default new Vuex.Store({
             state.isLoginDialogOpen = value;
         },
         login(state, { encryptedBrainKey, encryptedTest, displayName, keys }) {
-            state.isLoginDialogOpen = false;
             state.displayName = displayName;
             state.encryptedBrainKey = encryptedBrainKey;
             state.encryptedTest = encryptedTest;
@@ -131,6 +210,14 @@ export default new Vuex.Store({
                 identity: keys.identity,
                 wallet: { key: '', pub: keys.wallet.pub } // redact the wallet private key
             }
+            state.needSyncAccount = true;
+            saveAccount(state, false);
+        },
+        syncAccount(state, account) {
+            state.needSyncAccount = false;
+            if (!account) return;
+            state.lastSeenNotificationsTime = account.lastSeenNotificationsTime;
+            state.subscribedTags.push(...account.subscribedTags);
         },
         forgetLoginSession(state) {
             const defaultState = getDefaultState();
@@ -141,6 +228,8 @@ export default new Vuex.Store({
                 displayName: defaultState.displayName,
                 keys: defaultState.keys
             });
+
+            saveAccount(state, false);
         },
         logout(state) {
 
@@ -152,10 +241,14 @@ export default new Vuex.Store({
             update.encryptedBrainKey = state.encryptedBrainKey;
             update.displayName = state.displayName;
             update.keys = {
-                arbitrary: { pub: state.keys.arbitrary.pub }
+                arbitrary: { pub: state.keys.arbitrary.pub },
+                identity: { pub: state.keys.identity.pub },
+                wallet: { pub: state.keys.wallet.pub }
             }
 
             Object.assign(state, update);
+
+            saveAccount(state, false);
         }
     }
 });

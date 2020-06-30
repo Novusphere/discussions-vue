@@ -23,7 +23,7 @@
             <v-icon :class="{ 'is-active': isActive.blockquote() }">format_quote</v-icon>
           </v-btn>
 
-          <v-btn icon>
+          <v-btn icon @click="commands.link">
             <v-icon>insert_link</v-icon>
           </v-btn>
 
@@ -66,12 +66,12 @@ import {
   Bold,
   Code,
   Italic,
-  Link,
   Strike,
   Underline,
   History
 } from "tiptap-extensions";
 
+import Link2 from "./nodes/Link2";
 import Mention from "./nodes/Mention";
 import Hashtag from "./nodes/Hashtag";
 
@@ -206,7 +206,7 @@ export default {
           new Bold(),
           new Code(),
           new Italic(),
-          new Link(),
+          new Link2(),
           new Strike(),
           new Underline(),
           new History()

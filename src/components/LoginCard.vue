@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title>
-      <span class="headline">Sign in</span>
+      <span class="headline">Sign in {{ hasLoginSession }}</span>
     </v-card-title>
     <v-card-text>
       <v-container>
@@ -60,8 +60,7 @@
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)">Close</v-btn>
       <v-btn :disabled="waiting || !validForm" color="primary" @click="login()">
-        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>
-        Log in
+        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>Log in
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -76,8 +75,7 @@ import {
   isValidBrainKey,
   brainKeyToKeys
 } from "@/novusphere-js/uid";
-import { getUserAccountObject } from "@/novusphere-js/discussions/api";
-import { sleep } from "@/novusphere-js/utility";
+import { sleep, waitFor } from "@/novusphere-js/utility";
 
 export default {
   name: "LoginCard",
@@ -105,14 +103,16 @@ export default {
       if (this.displayName.length < 3) {
         rules.push(`Display name must be at least 3 characters`);
       }
-      
+
       if (this.displayName.length > 16) {
         rules.push(`Display names can be at most 16 characters`);
       }
 
       const validNameRegex = /[a-zA-Z0-9_]/;
       if (!validNameRegex.test(this.displayName)) {
-        rules.push(`Display names may only contain letters, numbers, underscores`);
+        rules.push(
+          `Display names may only contain letters, numbers, underscores`
+        );
       }
 
       return rules;
@@ -135,7 +135,8 @@ export default {
       oldEncryptedTest: state => state.encryptedTest,
       oldDisplayName: state => state.displayName,
       oldPublicKey: state => state.keys.arbitrary.pub,
-      oldEncryptedBrainKey: state => state.encryptedBrainKey
+      oldEncryptedBrainKey: state => state.encryptedBrainKey,
+      needSyncAccount: state => state.needSyncAccount
     })
   },
   methods: {
@@ -178,41 +179,10 @@ export default {
 
       if (login) {
         this.waiting = true;
-        await sleep(150); // let ui update
-
-        let account = await getUserAccountObject(login.keys.identity.key);
-
-        if (!account) {
-          // TO-REMOVE: migration code
-          // note: "https://" is no longer in new acccount domains
-          const oldAccount = await getUserAccountObject(
-            login.keys.identity.key,
-            `https://discussions.app`
-          );
-
-          if (oldAccount) {
-            console.log(
-              `Found old Discussions account... trying to migrate...`
-            );
-            console.log(oldAccount);
-            // upgrade to new object format
-            const migrated = {
-              postPublicKey: login.keys.arbitrary.pub,
-              uidw: login.keys.wallet.pub,
-              lastSeenNotificationsTime: oldAccount.data.lastCheckedNotifications,
-              displayName: login.displayName,
-              // TO-DO: watching
-              subscribedTags: oldAccount.data.tags,
-              delegatedMods: oldAccount.data.moderation.delegated.map(m => {
-                const [displayName, pub] = m[0].split(":");
-                return { displayName, pub, tag: m[1] };
-              })
-            };
-            console.log(JSON.stringify(migrated));
-          }
-        }
-
         this.$store.commit("login", login);
+        await sleep(500);
+        await waitFor(async () => !this.needSyncAccount);
+        this.$store.commit("setLoginDialogOpen", false);
         await this.reset();
         this.waiting = false;
       }

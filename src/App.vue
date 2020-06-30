@@ -66,6 +66,9 @@ import LoginCard from "@/components/LoginCard";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
 import SendTipCard from "@/components/SendTipCard";
 
+import { getUserAccountObject } from "@/novusphere-js/discussions/api";
+import { sleep } from "@/novusphere-js/utility";
+
 export default {
   name: "App",
   components: {
@@ -81,6 +84,50 @@ export default {
       if (sendTip && this.isSendTipDialogOpen) {
         await sendTip.refresh();
       }
+    },
+    async needSyncAccount() {
+      if (!this.needSyncAccount) return;
+
+      console.log(`Synchronizing account...`);
+      await sleep(100);
+
+      let account = await getUserAccountObject(this.keys.identity.key);
+      if (!account) {
+        console.log(`Did not find account... checking for legacy account...`);
+        const oldAccount = await getUserAccountObject(
+          this.keys.identity.key,
+          `https://discussions.app`
+        );
+
+        // TO-REMOVE: migration code
+        // note: "https://" is no longer in new acccount domains
+
+        if (oldAccount) {
+          console.log(`Found old Discussions account... trying to migrate...`);
+
+          console.log(oldAccount);
+
+          // upgrade to new object format
+          const migrated = {
+            // NOTE: we didn't bother migrating watched posts
+            lastSeenNotificationsTime: oldAccount.data.lastCheckedNotifications,
+            subscribedTags: oldAccount.data.tags,
+            delegatedMods: oldAccount.data.moderation.delegated.map(m => {
+              const [displayName, pub] = m[0].split(":");
+              return { displayName, pub, tag: m[1] };
+            })
+          };
+
+          console.log(migrated);
+          account = migrated;
+        } else {
+          console.log(`Did not find legacy account`);
+        }
+      } else {
+        console.log(`Retrieved account successfully`);
+      }
+
+      if (account) this.$store.commit("syncAccount", account);
     }
   },
   computed: {
@@ -89,57 +136,20 @@ export default {
     },
     ...mapGetters(["isLoggedIn, hasLoginSession"]),
     ...mapState({
+      needSyncAccount: state => state.needSyncAccount,
       isLoginDialogOpen: state => state.isLoginDialogOpen,
       isTransferDialogOpen: state => state.isTransferDialogOpen,
       isSendTipDialogOpen: state => state.isSendTipDialogOpen,
       pendingTransfers: state => state.pendingTransfers,
-      sendTipRecipient: state => state.sendTipRecipient
+      sendTipRecipient: state => state.sendTipRecipient,
+      keys: state => state.keys
     })
   },
   data: () => ({
     //
   }),
   created() {
-    // TO-REMOVE: deprecate this code on 8/1/2020
-    function importOld() {
-      let authStore = window.localStorage["authStore"];
-      if (authStore) {
-        authStore = JSON.parse(authStore);
-
-        let bk = JSON.parse(authStore.bk);
-        let encryptedBrainKey = bk.bk;
-        let encryptedTest = bk.bkc;
-        let displayName = authStore.displayName || bk.displayName;
-
-        let keys = {
-          arbitrary: { key: authStore.postPriv, pub: bk.post },
-          wallet: { pub: bk.uidwallet },
-          identity: { key: authStore.accountPrivKey, pub: bk.account }
-        };
-
-        // convert to new format
-        return {
-          encryptedBrainKey,
-          encryptedTest,
-          displayName,
-          keys
-        };
-      }
-      return undefined;
-    }
-
-    try {
-      if (!this.hasLoginSession) {
-        const old = importOld();
-        if (old) {
-          console.log(`Retrieved legacy session!`);
-          console.log(old);
-          this.$store.commit("importOld", old);
-        }
-      }
-    } catch (ex) {
-      return console.error(ex);
-    }
+    this.$store.commit("init");
   },
   methods: {
     async createPost() {

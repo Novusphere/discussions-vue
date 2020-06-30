@@ -7,6 +7,7 @@ import { createDOMParser } from "@/novusphere-js/utility";
 // Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
 const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
 const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
+const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi);
 
 export class Post {
     isOpeningPost() {
@@ -184,6 +185,29 @@ export class Post {
     async getContentHTML() {
         let doc = await this.getContentDocument();
 
+        // transform text that is a link into an actual anchor link
+        (function recursiveLinkify(node) {
+            for (const child of node.childNodes)
+                recursiveLinkify(child);
+
+            if (node.nodeType == Node.TEXT_NODE) {
+                if (node.parentNode.tagName == 'A') return;
+
+                let replacements = 0;
+                const fixed = node.textContent.replace(new RegExp(LINK_REGEX), (s) => {
+                    replacements++;
+                    return `<a href="${s}">${s}</a>`
+                });
+                
+                if (replacements > 0) {
+                    const span = doc.createElement('span');
+                    span.innerHTML = fixed;
+                    node.parentNode.insertBefore(span, node);
+                    node.remove();
+                }
+            }
+        })(doc.body);
+
         for (const node of Array.from(doc.links)) {
 
             const { href, innerText } = node;
@@ -238,7 +262,7 @@ export class Post {
 
             if (!insertHTML) continue;
 
-            const div = document.createElement('div');
+            const div = doc.createElement('div');
             div.innerHTML = insertHTML;
 
             node.parentNode.insertBefore(div, node);

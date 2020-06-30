@@ -1,21 +1,33 @@
 <template>
   <div>
-    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block" :style="{ width: `${36 + formatTip(tip).length*6}px` }">
-      <v-badge bottom overlap>
-        <template v-slot:badge>
-          <span>{{ formatTip(tip) }}</span>
-        </template>
-        <TokenIcon :symbol="tip.symbol" />
-      </v-badge>
+    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block mr-1">
+      <v-chip small outlined color="primary">
+        <TokenIcon class="mr-1" :symbol="tip.symbol" />
+        <span
+          :class="{ 'tip-text': true, 'mobile-tip-text': $vuetify.breakpoint.mobile }"
+        >{{ formatTip(tip) }}</span>
+      </v-chip>
     </div>
   </div>
 </template>
 
+
 <script>
+/*
+    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block" :style="{ width: `${36 + formatTip(tip).length* (!$vuetify.breakpoint.mobile ? 6 : 3)}px` }">
+      <v-badge bottom overlap :offset-x="-1">
+        <template v-slot:badge>
+          <span :class="{ 'mobile-tip-text': $vuetify.breakpoint.mobile }">{{ formatTip(tip) }}</span>
+        </template>
+        <TokenIcon :size="!$vuetify.breakpoint.mobile ? 32 : 16" :symbol="tip.symbol" />
+      </v-badge>
+    </div>
+*/
+
 import TokenIcon from "@/components/TokenIcon";
 
 export default {
-  name: "PostTips", 
+  name: "PostTips",
   components: {
     TokenIcon
   },
@@ -24,7 +36,14 @@ export default {
   },
   computed: {
     tips() {
-      //let summary = { 'EOS': 1.234, 'MPT': 2.234, 'VIG': 3.111, 'BOID': 4.222, 'KROWN': 555, 'PUML': 123.456 };
+      /*let summary = {
+        EOS: 1.234,
+        MPT: 2.234,
+        VIG: 3.111,
+        BOID: 4.222,
+        KROWN: 555,
+        PUML: 123.456
+      };*/
       let summary = {};
       for (const tip of this.post.tips) {
         const [amount, symbol] = tip.data.amount.split(" ");
@@ -46,3 +65,13 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.tip-text {
+  letter-spacing: 0px;
+}
+
+.mobile-tip-text {
+  font-size: 8px;
+}
+</style>
