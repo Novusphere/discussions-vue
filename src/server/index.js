@@ -9,7 +9,6 @@ import { getSinglePost, getCommunities, getUserProfile } from "@/novusphere-js/d
     let CONFIG = undefined;
     try {
         CONFIG = JSON.parse(fs.readFileSync(argv.config));
-        console.log(CONFIG);
     }
     catch (ex) {
         console.error(ex);
@@ -106,6 +105,6 @@ import { getSinglePost, getCommunities, getUserProfile } from "@/novusphere-js/d
         res.send(index);
     });
 
-    app.listen(port, () => console.log(`Server is listening at port ${CONFIG.port}`));
+    app.listen(CONFIG.port, () => console.log(`Server is listening at port ${CONFIG.port}`));
 
 })();
