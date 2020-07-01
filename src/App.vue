@@ -197,4 +197,9 @@ body {
 body {
   position: relative;
 }
+
+.v-dialog--fullscreen {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
 </style>
