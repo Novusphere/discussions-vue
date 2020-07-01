@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app color="secondary" fixed :style="{ 'z-index': 1 }">
+  <v-app-bar app color="secondary">
     <div class="d-flex align-center">
       <v-btn text color="primary" :to="'/'">
         <v-img
