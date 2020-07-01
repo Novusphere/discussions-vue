@@ -40,7 +40,7 @@
       <v-container v-else>
         <v-row>
           <v-col cols="2">
-            <v-card>
+            <v-card style="position:fixed">
               <AppNav />
             </v-card>
           </v-col>
@@ -104,7 +104,7 @@ export default {
         if (oldAccount) {
           console.log(`Found old Discussions account... trying to migrate...`);
 
-          console.log(oldAccount);
+          //console.log(oldAccount);
 
           // upgrade to new object format
           const migrated = {
@@ -117,7 +117,8 @@ export default {
             })
           };
 
-          console.log(migrated);
+          //console.log(migrated);
+          console.log(`Migration OK`);
           account = migrated;
         } else {
           console.log(`Did not find legacy account`);

@@ -106,9 +106,9 @@ function waitFor(predicate, sleep = 5, timeOut) {
 }
 
 function sleep(time) {
-   return new Promise((resolve) => {
+    return new Promise((resolve) => {
         setTimeout(resolve, time);
-   });
+    });
 }
 
 async function getFromCache(cache, name, createAsync) {
@@ -140,6 +140,32 @@ function createDOMParser() {
     }
     return domParser;
 }
+
+(function () {
+
+    // hijack the log function for logging to a string variable
+    let log = console.log;
+    console.enableProxyLog = function (value) {
+        window._consoleProxyEnabled = value;
+        window.localStorage['proxyLog'] = value ? 'enabled' : '';
+    }
+
+    console.proxyLog = function () {
+        if (window._consoleProxyEnabled) {
+            const args = Array.from(arguments).map(a => JSON.stringify(a));
+            window._consoleProxy = (window._consoleProxy || '') + [`[${new Date().toLocaleTimeString()}]`, ...args].join(' ') + '\r\n';
+        }
+    }
+    console.log = function () {
+        console.proxyLog.apply(this, arguments);
+        log.apply(this, arguments);
+    }
+
+    if (window.localStorage['proxyLog']) {
+        console.enableProxyLog(true);
+    }
+
+})();
 
 export {
     htmlToMarkdown,

@@ -1,25 +1,25 @@
 <template>
   <div>
     <v-row>
-      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 3">
         <v-card>
           <v-card-title>General Settings</v-card-title>
           <v-card-text>
             <v-row>
-              <v-col cols="auto">
+              <v-col cols="12">
                 <v-switch v-model="hideSpamProxy" :label="`Hide spam content`"></v-switch>
               </v-col>
-              <v-col cols="auto">
+              <v-col cols="12">
                 <v-switch v-model="blurNSFWProxy" :label="`Blur NSFW content`"></v-switch>
               </v-col>
-               <v-col cols="auto">
+              <v-col cols="12">
                 <v-switch v-model="darkModeProxy" :label="`Dark mode`"></v-switch>
               </v-col>
             </v-row>
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col :cols="$vuetify.breakpoint.mobile ? 12 :6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 9">
         <v-card>
           <v-card-title>Moderation Settings</v-card-title>
           <v-card-text>
@@ -58,7 +58,11 @@
               </v-row>
             </v-form>
             <v-row>
-              <v-col v-for="(dm, i) in delegatedMods" :key="i" :cols="$vuetify.breakpoint.mobile ? 12 : 6">
+              <v-col
+                v-for="(dm, i) in delegatedMods"
+                :key="i"
+                :cols="$vuetify.breakpoint.mobile ? 12 : 4"
+              >
                 <TagLink class="mr-2" :tag="dm.tag" />
                 <UserProfileLink :publicKey="dm.pub" :displayName="dm.displayName" />
                 <v-btn @click="removeModerator(dm)" color="error" icon>
@@ -93,7 +97,7 @@ export default {
         return this.darkMode;
       },
       set(value) {
-        this.$store.commit('setDarkMode', value);
+        this.$store.commit("setDarkMode", value);
       }
     },
     hideSpamProxy: {

@@ -60,10 +60,12 @@ export default {
       // sort should already be set in the cursor if no-sort is being specified
       this.sort = this.cursor.sort;
     }
-    this.cursor.votePublicKey = this.isLoggedIn
-      ? this.keys.arbitrary.pub
-      : undefined;
-    this.cursor.sort = this.sort;
+    if (this.cursor) {
+      this.cursor.votePublicKey = this.isLoggedIn
+        ? this.keys.arbitrary.pub
+        : undefined;
+      this.cursor.sort = this.sort;
+    }
   },
   methods: {
     reset(cursor) {
@@ -81,6 +83,7 @@ export default {
       }
     },
     async infinite($state) {
+      console.proxyLog(`PostBrowser infinite scroller called`);
       let posts = await this.cursor.next();
       if (posts.length > 0) {
         if (this.pinned) {

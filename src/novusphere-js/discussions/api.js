@@ -31,7 +31,10 @@ async function getTrendingTags() {
 // Retrieves information about a users profile
 //
 async function getUserProfile(key) {
+    const startTime = Date.now();
     const { data } = await axios.get(`https://atmosdb.novusphere.io/discussions/site/profile/${key}`);
+    let displayName = (data ? data.displayName : '') || '[unknown]';
+    console.proxyLog(`Took ${Date.now() - startTime}ms to retrieve profile object for ${displayName}@${key}`);
     return data;
 }
 
@@ -558,10 +561,12 @@ async function getUserAccountObject(identityKey, domain) {
     domain = domain || window.location.host;
     const { time, pub, sig } = createStandardSignedRequest(identityKey, domain, false); // TO-DO: fix this request to use sign
 
+    const startTime = Date.now();
     const { data } = await axios.post(
         `https://atmosdb.novusphere.io/account/data`,
         `time=${time}&pub=${pub}&sig=${sig}&domain=${domain}`
     )
+    console.proxyLog(`Took ${Date.now() - startTime}ms to retrieve account object for ${identityKey} @ ${domain}`);
 
     return data.payload; // TO-DO: standardize this request...
 }

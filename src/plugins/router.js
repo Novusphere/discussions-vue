@@ -91,7 +91,14 @@ const routes = [
     }
 ]
 
-export default new VueRouter({
+const router = new VueRouter({
     mode: 'history',
     routes
-})  
+})
+
+router.beforeEach((to, from, next) => {
+    console.proxyLog(`Route change from ${from.path} to ${to.path}`);
+    next();
+});
+
+export default router;

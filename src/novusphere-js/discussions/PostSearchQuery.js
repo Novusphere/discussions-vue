@@ -93,6 +93,7 @@ export class PostSearchQuery {
         //console.log(JSON.stringify(queryObject));
 
         try {
+            const startTime = Date.now();
             const { data } = await axios.post(url, query);
             if (data.error) {
                 throw new Error(data.message);
@@ -101,6 +102,10 @@ export class PostSearchQuery {
             this.id = data.cursorId;
             this.count = data.count;
             this.limit = data.limimt;
+
+            const deltaTime = Date.now() - startTime;
+            if (deltaTime > 1000)
+                console.proxyLog(`PostSearchQuery took ${deltaTime}ms to return results`, this.pipeline);
 
             return data.payload;
         }
