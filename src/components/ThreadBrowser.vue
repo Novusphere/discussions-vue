@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 //import PostSubmitter from "@/components/PostSubmitter";
 //import PostCard from "@/components/PostCard";
 import PostReplyCard from "@/components/PostReplyCard";
@@ -43,20 +43,19 @@ export default {
     checkForPosts: true
   }),
   computed: {
+    ...mapGetters(["getModeratorKeys", "isLoggedIn"]),
     ...mapState({
-      votePublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
+      keys: state => state.keys
     })
   },
   watch: {
-    async votePublicKey() {
-      // reload thread from votePublicKey perspective
-      if (this.votePublicKey) {
-        await this.loadThread();
-      }
+    async isLoggedIn() {
+      // reload perspective
+      await this.load();
     }
   },
   async created() {
-    await this.loadThread();
+    await this.load();
     await this.mergeNewComments();
   },
   async destroyed() {
@@ -79,7 +78,8 @@ export default {
 
       const thread = await getThread(
         this.referenceId,
-        this.votePublicKey,
+        this.isLoggedIn ? this.keys.arbitrary.pub : undefined,
+        this.getModeratorKeys,
         sinceTime
       );
 
@@ -87,8 +87,12 @@ export default {
 
       setTimeout(() => this.mergeNewComments(), 3000);
     },
-    async loadThread() {
-      const thread = await getThread(this.referenceId, this.votePublicKey);
+    async load() {
+      const thread = await getThread(
+        this.referenceId,
+        this.isLoggedIn ? this.keys.arbitrary.pub : undefined,
+        this.getModeratorKeys
+      );
       const tree = createThreadTree(thread);
 
       this.opening = tree[thread.opening.uuid];

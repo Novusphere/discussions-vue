@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import PostScroller from "@/components/PostScroller";
 import PostSortSelect from "@/components/PostSortSelect";
 import PostDisplaySelect from "@/components/PostDisplaySelect";
@@ -41,16 +41,14 @@ export default {
     sort: ""
   }),
   computed: {
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      votePublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
+      keys: state => state.keys
     })
   },
   watch: {
-    async votePublicKey() {
-      // reload thread from votePublicKey perspective
-      if (this.votePublicKey) {
-        await this.reset();
-      }
+    async isLoggedIn() {
+      await this.reset();
     },
     async sort() {
       this.cursor.sort = this.sort;
@@ -62,13 +60,17 @@ export default {
       // sort should already be set in the cursor if no-sort is being specified
       this.sort = this.cursor.sort;
     }
-    this.cursor.votePublicKey = this.votePublicKey;
+    this.cursor.votePublicKey = this.isLoggedIn
+      ? this.keys.arbitrary.pub
+      : undefined;
     this.cursor.sort = this.sort;
   },
   methods: {
     reset(cursor) {
       cursor = cursor || this.cursor;
-      cursor.votePublicKey = this.votePublicKey;
+      cursor.votePublicKey = this.isLoggedIn
+        ? this.keys.arbitrary.pub
+        : undefined;
       cursor.sort = this.sort;
       cursor.reset();
 
@@ -85,7 +87,7 @@ export default {
           // prevent duplicates
           posts = posts.filter(
             p => !this.pinned.some(p2 => p.transaction == p2.transaction)
-          ); 
+          );
         }
         this.posts.push(...posts);
         $state.loaded();

@@ -122,12 +122,16 @@ async function getSinglePost(referenceId, votePublicKey) {
 //
 // Get a thread using a reference id
 // A reference id can be any transaction id, post uuid or encoded post id that occurs within the thread 
+// getModeratorKeys(tag) => [pub1, pub2, ...]
 //
-async function getThread(referenceId, votePublicKey, sinceTime = 0) {
+async function getThread(referenceId, votePublicKey, getModeratorKeys, sinceTime = 0) {
     const opening = await getSinglePost(referenceId, votePublicKey);
     if (!opening) return undefined;
 
+    const mods = moderators(votePublicKey, getModeratorKeys ? getModeratorKeys(opening.sub) : []);
+
     const cursor = searchPosts({
+        moderatorKeys: mods,
         votePublicKey,
         pipeline: [
             {
@@ -567,7 +571,7 @@ async function getUserAccountObject(identityKey, domain) {
 //
 async function getPinnedPosts(key, mods, tags, domain) {
     domain = domain || window.location.host;
-    mods = Array.from(new Set(key ? [key, ...mods] : mods));
+    mods = moderators(key, mods);
 
     const qs = `domain=${domain}&mods=${mods.join(',')}&tags=${tags.join(',')}`;
     const { data } = await axios.post(`https://atmosdb.novusphere.io/discussions/moderation/pinned`, qs);
@@ -585,6 +589,13 @@ async function getPinnedPosts(key, mods, tags, domain) {
     }
 
     return posts;
+}
+
+//
+// Combines a key and a set of moderator keys into a single array and removes duplicates
+//
+function moderators(key, mods) {
+    return Array.from(new Set(key ? [key, ...mods] : mods));
 }
 
 export {

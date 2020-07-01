@@ -31,8 +31,7 @@ export default {
   computed: {
     ...mapGetters(["isLoggedIn", "getModeratorKeys"]),
     ...mapState({
-      keys: state => state.keys,
-      delegatedMods: state => state.delegatedMods
+      keys: state => state.keys
     })
   },
   watch: {
