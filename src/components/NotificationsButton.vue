@@ -70,7 +70,7 @@ export default {
           const raw = await cursor.nextRaw();
           //console.log(this.lastSeenNotificationsTime);
           //console.log(raw);
-          n = raw[0].n;
+          n = raw.length > 0 ? raw[0].n : 0;
           
           if (n > 0 && n != this.notificationCount) {
             if (Notification && Notification.permission == "granted") {
