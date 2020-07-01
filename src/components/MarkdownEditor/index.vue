@@ -36,15 +36,17 @@
       <editor-content class="editor-content" :editor="editor" />
     </div>
     <div v-show="showSuggestions" ref="suggestions">
-      <template v-if="hasResults">
-        <v-list dense outlined>
+      <v-card>
+        <template v-if="hasResults">
           <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
             <PublicKeyIcon :publicKey="user.pub" />
             {{ user.displayName }}
           </v-list-item>
-        </v-list>
-      </template>
-      <div v-else>No users found</div>
+        </template>
+        <div v-else>
+          <v-card-text>No users found</v-card-text>
+        </div>
+      </v-card>
     </div>
   </div>
 </template>

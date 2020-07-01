@@ -29,16 +29,18 @@ export default {
   },
   props: {},
   computed: {
-    ...mapGetters(["isLoggedIn"]),
+    ...mapGetters(["isLoggedIn", "getModeratorKeys"]),
     ...mapState({
       keys: state => state.keys,
-      mods: state => [] || state // TO-DO: moderation...
+      delegatedMods: state => state.delegatedMods
     })
   },
   watch: {
     "$route.params.tags": function() {
-      this.setTags();
-      this.$forceUpdate();
+      this.load();
+    },
+    isLoggedIn() {
+      if (this.isLoggedIn) this.load();
     }
   },
   data: () => ({
@@ -48,16 +50,26 @@ export default {
     community: null
   }),
   async created() {
-    await this.setTags();
+    await this.load();
   },
   methods: {
-    async setTags() {
+    async load() {
+      this.cursor = null;
+      this.pinned = [];
+
       const tags = this.$route.params.tags.split(",");
+      const mods = this.getModeratorKeys(tags);
       const cursor = searchPostsByTags(tags);
+      cursor.moderatorKeys = mods;
+
       let pinned = [];
 
-      if (this.isLoggedIn) {
-        pinned = await getPinnedPosts(this.keys.arbitrary.pub, this.mods, tags);
+      if (mods.length > 0) {
+        pinned = await getPinnedPosts(
+          this.isLoggedIn ? this.keys.arbitrary.pub : undefined,
+          mods,
+          tags
+        );
       }
 
       this.tags = tags;

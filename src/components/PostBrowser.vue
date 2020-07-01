@@ -6,7 +6,13 @@
         <PostSortSelect v-if="!noSort" v-model="sort" />
         <PostDisplaySelect v-model="display" />
       </v-row>
-      <PostScroller ref="scroller" :posts="posts" :display="display" :infinite="infinite" />
+      <PostScroller
+        ref="scroller"
+        :pinned="pinned"
+        :posts="posts"
+        :display="display"
+        :infinite="infinite"
+      />
     </div>
   </div>
 </template>
@@ -67,15 +73,20 @@ export default {
       cursor.reset();
 
       this.posts = [];
-      if (this.pinned) this.posts.push(...this.pinned);
 
       if (this.$refs.scroller) {
         this.$refs.scroller.reset();
       }
     },
     async infinite($state) {
-      const posts = await this.cursor.next();
+      let posts = await this.cursor.next();
       if (posts.length > 0) {
+        if (this.pinned) {
+          // prevent duplicates
+          posts = posts.filter(
+            p => !this.pinned.some(p2 => p.transaction == p2.transaction)
+          ); 
+        }
         this.posts.push(...posts);
         $state.loaded();
       } else {

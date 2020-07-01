@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+//import { waitFor } from "@/novusphere-js/utility";
 
 const LOCAL_STORAGE_KEY = 'vuexStore';
 
@@ -22,6 +23,11 @@ const getDefaultState = () => ({
     subscribedTags: [],
     followingUsers: [], // { displayName, pub, uidw }
     watchedThreads: [], // { uuid, transaction, watchedAt }
+    delegatedMods: [ // { displayName, pub, tag }
+        // hard coded list of preset moderators
+        { displayName: 'xiaxiaxia', pub: 'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', tag: 'all' },
+        { displayName: 'JacquesWhales', pub: 'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', tag: 'all' }
+    ]
 });
 
 function saveAccount(state, external = true) {
@@ -35,7 +41,8 @@ function saveAccount(state, external = true) {
         },
         subscribedTags: state.subscribedTags,
         followingUsers: state.followingUsers,
-        watchedThreads: state.watchThreads
+        watchedThreads: state.watchThreads,
+        delegatedMods: state.delegatedMods
     };
 
     const local = {
@@ -88,6 +95,14 @@ export default new Vuex.Store({
             return uuid => {
                 return state.watchedThreads.find(wt => wt.uuid == uuid);
             }
+        },
+        getModeratorKeys: state => {
+            return tags => {
+                const mods = state.delegatedMods
+                    .filter(dm => dm.tag == "all" || tags.some(t => t == dm.tag))
+                    .map(dm => dm.pub);
+                return mods;
+            }
         }
     },
     mutations: {
@@ -139,6 +154,14 @@ export default new Vuex.Store({
                 // ---
                 return;
             }
+        },
+        addModerator(state, { displayName, pub, tag }) {
+            state.delegatedMods.push({ displayName, pub, tag });
+            saveAccount(state);
+        },
+        removeModerator(state, { pub, tag }) {
+            state.delegatedMods = state.delegatedMods.filter(dm => !(dm.pub == pub && dm.tag == tag));
+            saveAccount(state);
         },
         watchThread(state, { uuid, transaction }) {
             state.watchedThreads.push({ uuid, transaction, watchedAt: Date.now() });
@@ -217,7 +240,8 @@ export default new Vuex.Store({
             state.needSyncAccount = false;
             if (!account) return;
             state.lastSeenNotificationsTime = account.lastSeenNotificationsTime;
-            state.subscribedTags.push(...account.subscribedTags);
+            state.subscribedTags.push(...account.subscribedTags.filter(st => !state.subscribedTags.some(st2 => st == st2)));
+            state.delegatedMods.push(...account.delegatedMods.filter(dm => !state.delegatedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag)));
         },
         forgetLoginSession(state) {
             const defaultState = getDefaultState();

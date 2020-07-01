@@ -567,18 +567,17 @@ async function getUserAccountObject(identityKey, domain) {
 //
 async function getPinnedPosts(key, mods, tags, domain) {
     domain = domain || window.location.host;
-    mods = Array.from(new Set([key, ...mods]));
+    mods = Array.from(new Set(key ? [key, ...mods] : mods));
 
-    const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/discussions/moderation/pinned`,
-        `domain=${domain}&mods=${mods.join(',')}&tags=${tags.join(',')}`
-    );
+    const qs = `domain=${domain}&mods=${mods.join(',')}&tags=${tags.join(',')}`;
+    const { data } = await axios.post(`https://atmosdb.novusphere.io/discussions/moderation/pinned`, qs);
 
     let posts = [];
     if (data && data.length > 0) {
         const trxids = data.map(p => p.transaction);
 
         const cursor = searchPostsByTransactions(trxids);
+        cursor.moderatorKeys = mods;
         cursor.votePublicKey = key;
 
         do { posts.push(...await cursor.next()) }

@@ -40,8 +40,8 @@ export default {
     markdown: ""
   }),
   methods: {
-    testSuggester() {
-      return [
+    testSuggester(query) {
+      const items = [
         {
           displayName: "Jacques Whales",
           pub: "EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH"
@@ -59,6 +59,10 @@ export default {
           pub: "EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe"
         }
       ];
+
+      const regex = new RegExp(`^${query}`, "i");
+      const filtered = items.filter(i => regex.test(i.displayName));
+      return filtered;
     },
     htmlConvert() {
       this.markdown = this.$refs.editor.getMarkdown();
@@ -71,7 +75,7 @@ export default {
       console.log(this.$refs.editor.getTags());
       console.log(this.$refs.editor.getMentions());
       console.log(this.$refs.editor.getTips());
-    },
+    }
   }
 };
 </script>

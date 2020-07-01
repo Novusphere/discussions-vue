@@ -17,7 +17,8 @@
     </v-row>
     <v-row v-else>
       <v-col :cols="noRight ? 12 : 9">
-        <slot name="content"></slot>
+        <v-progress-linear v-if="needSyncAccount" indeterminate></v-progress-linear>
+        <slot v-else name="content"></slot>
       </v-col>
       <v-col cols="3" v-if="!noRight">
         <slot name="right"></slot>
@@ -28,6 +29,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import TrendingCard from "./TrendingCard";
 
 export default {
@@ -37,6 +39,11 @@ export default {
   },
   props: {
     noRight: Boolean
+  },
+  computed: {
+    ...mapState({
+      needSyncAccount: state => state.needSyncAccount
+    })
   },
   data: () => ({
     //

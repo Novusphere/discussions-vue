@@ -9,7 +9,8 @@ const schema = Joi.object({
     limit: Joi.number().default(20),
     sort: Joi.string(),
     votePublicKey: Joi.string(),
-    includeOpeningPost: Joi.boolean().default(false)
+    includeOpeningPost: Joi.boolean().default(false),
+    moderatorKeys: Joi.array().items(Joi.string())
 });
 
 export class PostSearchQuery {
@@ -33,6 +34,7 @@ export class PostSearchQuery {
         this.sort = searchQuery.sort;
         this.includeOpeningPost = searchQuery.includeOpeningPost;
         this.votePublicKey = searchQuery.votePublicKey;
+        this.moderatorKeys = searchQuery.moderatorKeys;
     }
 
     //
@@ -44,7 +46,8 @@ export class PostSearchQuery {
             limit: this.limit,
             sort: this.sort,
             includeOpeningPost: this.includeOpeningPost,
-            votePublicKey: this.votePublicKey
+            votePublicKey: this.votePublicKey,
+            moderatorKeys: this.moderatorKeys
         };
 
         this.setFrom(searchQuery);
@@ -74,7 +77,7 @@ export class PostSearchQuery {
     //
     async nextRaw() {
         const url = `https://atmosdb.novusphere.io/discussions/search`;
-        
+
         const queryObject = {
             cursorId: this.id,
             pipeline: this.pipeline,
@@ -82,10 +85,12 @@ export class PostSearchQuery {
             limit: this.limit,
             sort: this.sort,
             key: this.votePublicKey,
-            op: this.includeOpeningPost
+            op: this.includeOpeningPost,
+            mods: this.moderatorKeys
         };
 
         const query = `data=${encodeURIComponent(JSON.stringify(queryObject))}`;
+        //console.log(JSON.stringify(queryObject));
 
         try {
             const { data } = await axios.post(url, query);

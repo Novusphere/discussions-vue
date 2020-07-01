@@ -54,8 +54,8 @@ export default {
     async checkNotifications() {
       if (this.stopChecking) return;
       if (this.isLoggedIn) {
-        if (Notification && Notification.permission !== 'granted') {
-            await Notification.requestPermission();
+        if (Notification && Notification.permission !== "granted") {
+          await Notification.requestPermission();
         }
 
         const cursor = searchPostsByNotifications(
@@ -71,17 +71,21 @@ export default {
           //console.log(this.lastSeenNotificationsTime);
           //console.log(raw);
           n = raw[0].n;
+          
+          if (n > 0 && n != this.notificationCount) {
+            if (Notification && Notification.permission == "granted") {
+              new Notification(
+                `You have ${n} new notification${
+                  n > 1 ? "s" : ""
+                } on Discussions`
+              );
+            }
+          }
+
+          this.$store.commit("setNotificationCount", n);
         } catch (ex) {
           n = 0;
         }
-
-        if (n > 0 && n != this.notificationCount) {
-            if (Notification && Notification.permission == 'granted') {
-                new Notification(`You have ${n} new notification${n > 1 ? 's' : ''} on Discussions`);
-            }
-        }
-
-        this.$store.commit("setNotificationCount", n);
       }
       setTimeout(() => this.checkNotifications(), 5000);
     }
