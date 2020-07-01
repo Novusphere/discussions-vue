@@ -146,12 +146,14 @@ function createDOMParser() {
     // hijack the log function for logging to a string variable
     let log = console.log;
     console.enableProxyLog = function (value) {
-        window._consoleProxyEnabled = value;
-        window.localStorage['proxyLog'] = value ? 'enabled' : '';
+        if (window) {
+            window._consoleProxyEnabled = value;
+            window.localStorage['proxyLog'] = value ? 'enabled' : '';
+        }
     }
 
     console.proxyLog = function () {
-        if (window._consoleProxyEnabled) {
+        if (window && window._consoleProxyEnabled) {
             const args = Array.from(arguments).map(a => JSON.stringify(a));
             window._consoleProxy = (window._consoleProxy || '') + [`[${new Date().toLocaleTimeString()}]`, ...args].join(' ') + '\r\n';
         }
@@ -161,7 +163,7 @@ function createDOMParser() {
         log.apply(this, arguments);
     }
 
-    if (window.localStorage['proxyLog']) {
+    if (window && window.localStorage['proxyLog']) {
         console.enableProxyLog(true);
     }
 
