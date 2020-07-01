@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title>
-      <span class="headline">Sign in {{ hasLoginSession }}</span>
+      <span class="headline">Log in</span>
     </v-card-title>
     <v-card-text>
       <v-container>

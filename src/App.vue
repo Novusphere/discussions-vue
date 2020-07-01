@@ -41,11 +41,7 @@
         <v-row>
           <v-col cols="2">
             <v-card>
-              <AppNav>
-                <v-list-item>
-                  <v-btn block color="primary" @click="createPost()">New Post</v-btn>
-                </v-list-item>
-              </AppNav>
+              <AppNav />
             </v-card>
           </v-col>
           <v-col cols="10">
@@ -152,24 +148,6 @@ export default {
     this.$store.commit("init");
   },
   methods: {
-    async createPost() {
-      if (!this.isLoggedIn) {
-        this.$store.commit("setLoginDialogOpen", true);
-        return;
-      }
-
-      try {
-        if (this.$route.params.tags) {
-          // only take a single tag
-          const tag = this.$route.params.tags.split(",")[0];
-          await this.$router.push(`/tag/${tag}/submit`);
-        } else {
-          await this.$router.push(`/submit`);
-        }
-      } catch (ex) {
-        return; // Avoided redundant navigation
-      }
-    },
     async closeTip() {
       this.$store.commit("setSendTipDialogOpen", { value: false });
     },

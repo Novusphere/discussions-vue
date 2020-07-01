@@ -55,7 +55,13 @@
       </v-btn>
     </v-list-item>
     <v-list-item>
-      <v-btn class="justify-start" block text left @click="isLoggedIn ? $router.push(`/settings`) : $store.commit('setLoginDialogOpen', true)">
+      <v-btn
+        class="justify-start"
+        block
+        text
+        left
+        @click="isLoggedIn ? $router.push(`/settings`) : $store.commit('setLoginDialogOpen', true)"
+      >
         <v-icon>settings</v-icon>
         <span>Settings</span>
       </v-btn>
@@ -74,9 +80,11 @@
         </v-btn>
       </v-list-item>
     </div>
-    <v-spacer></v-spacer>
-    <slot></slot>
-    <v-spacer></v-spacer>
+    <v-list-item v-if="!$vuetify.breakpoint.mobile">
+      <v-btn block color="primary" @click="createPost()">New Post</v-btn>
+    </v-list-item>
+    <v-divider />
+    <v-subheader>My Communities</v-subheader>
     <v-list-item v-show="false">
       <v-text-field
         append-icon="add"
@@ -128,6 +136,24 @@ export default {
   },
   created() {},
   methods: {
+    async createPost() {
+      if (!this.isLoggedIn) {
+        this.$store.commit("setLoginDialogOpen", true);
+        return;
+      }
+
+      try {
+        if (this.$route.params.tags) {
+          // only take a single tag
+          const tag = this.$route.params.tags.split(",")[0];
+          await this.$router.push(`/tag/${tag}/submit`);
+        } else {
+          await this.$router.push(`/submit`);
+        }
+      } catch (ex) {
+        return; // Avoided redundant navigation
+      }
+    },
     async goSearch() {
       this.$router.push(`/search?q=${this.search}`);
     },
