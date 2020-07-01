@@ -57,7 +57,8 @@
       <v-container v-else>
         <v-row>
           <v-col cols="2">
-            <v-card style="position:fixed">
+            <v-card>
+              <!-- TO-REFINE: fix the nav bar so that it scrolls with the user -->
               <AppNav />
             </v-card>
           </v-col>

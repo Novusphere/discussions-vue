@@ -131,7 +131,7 @@ async function getThread(referenceId, votePublicKey, getModeratorKeys, sinceTime
     const opening = await getSinglePost(referenceId, votePublicKey);
     if (!opening) return undefined;
 
-    const mods = moderators(votePublicKey, getModeratorKeys ? getModeratorKeys(opening.sub) : []);
+    const mods = moderators(votePublicKey, getModeratorKeys ? getModeratorKeys([opening.sub]) : []);
 
     const cursor = searchPosts({
         moderatorKeys: mods,
