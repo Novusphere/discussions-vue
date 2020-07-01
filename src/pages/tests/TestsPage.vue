@@ -42,6 +42,9 @@
             <v-list-item>
               <v-btn text :to="'/tests/editor'">Editor</v-btn>
             </v-list-item>
+            <v-list-item>
+              <v-btn text @click="openDialogThread()">Dialog Thread</v-btn>
+            </v-list-item>
           </v-list>
         </v-card>
       </v-col>
@@ -93,6 +96,15 @@ export default {
   },
   beforeDestroy() {
     if (this.updateConsole) clearInterval(this.updateConsole);
+  },
+  methods: {
+    async openDialogThread() {
+      this.$store.commit("setThreadDialogOpen", {
+        value: true,
+        sub: "test",
+        referenceId: "ggy5io6wgwm9"
+      });
+    }
   }
 };
 </script>

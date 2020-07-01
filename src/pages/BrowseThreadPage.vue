@@ -1,5 +1,5 @@
 <template>
-  <ThreadBrowser ref="browser" :referenceId="$route.params.referenceId" />
+  <ThreadBrowser ref="browser" :referenceId="referenceId || $route.params.referenceId" :referenceId2="referenceId2 || $route.params.referenceId2" />
 </template>
 
 <script>
@@ -10,7 +10,10 @@ export default {
   components: {
     ThreadBrowser
   },
-  props: {},
+  props: {
+    referenceId: String,
+    referenceId2: String
+  },
   data: () => ({}),
   mounted() {
     window.addEventListener("beforeunload", this.leaveGuard);

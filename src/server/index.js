@@ -41,7 +41,7 @@ import { getSinglePost, getCommunities, getUserProfile } from "@/novusphere-js/d
         next();
     });
 
-    app.get(`/tag/:tags/:referenceId/:referenceId2?`, async (req, res, next) => {
+    app.get(`/tag/:tags/:referenceId/:title/:referenceId2?`, async (req, res, next) => {
         const post = await getSinglePost(req.params.referenceId);
         if (post) {
             res.inject = {

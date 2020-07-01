@@ -35,7 +35,8 @@ export default {
     //PostSubmitter
   },
   props: {
-    referenceId: String
+    referenceId: String,
+    referenceId2: String
   },
   data: () => ({
     opening: null,
@@ -99,11 +100,12 @@ export default {
       this.tree = tree;
     },
     async goToSubPost() {
-      const subPostId = this.$route.params.referenceId2;
+      const subPostId = this.referenceId2;
       if (subPostId) {
         const subPost = await getSinglePost(subPostId);
         if (
           subPost &&
+          this.tree &&
           Object.values(this.tree).find(
             c => c.post.transaction == subPost.transaction
           )

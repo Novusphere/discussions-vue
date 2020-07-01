@@ -42,7 +42,7 @@ const routes = [
             { path: 'notifications', component: BrowseNotifications },
             { path: 'tag/all', component: BrowseTrendingPostsPage },
             { path: 'tag/:tags/submit', component: SubmitPostPage },
-            { path: 'tag/:tags/:referenceId/:referenceId2?', component: BrowseThreadPage },
+            { path: 'tag/:tags/:referenceId/:title?/:referenceId2?', component: BrowseThreadPage },
             { path: 'tag/:tags', component: BrowseTagPostsPage },
             { path: 'community', component: CommunityPage },
             { path: 'u/:who/:tab?', component: UserProfilePage },

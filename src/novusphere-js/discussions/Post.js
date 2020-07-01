@@ -152,6 +152,17 @@ export class Post {
         return id.toString(36);
     }
 
+    getSnakeCaseTitle() {
+        if (!this.title) return '_';
+        const title = this.title
+            .replace(/[^0-9a-z]/gi, ' ')
+            .split(' ')
+            .filter(s => s)
+            .map(s => s.toLowerCase())
+            .join('_');
+        return title || '_';
+    }
+
     async getContentDocument() {
         const html = markdownToHTML(this.content);
         let domParser = createDOMParser();
@@ -198,7 +209,7 @@ export class Post {
                     replacements++;
                     return `<a href="${s}">${s}</a>`
                 });
-                
+
                 if (replacements > 0) {
                     const span = doc.createElement('span');
                     span.innerHTML = fixed;

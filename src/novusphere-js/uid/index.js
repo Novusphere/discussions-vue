@@ -13,7 +13,7 @@ let cache = {};
 
 const GREYMASS_EOS_RPC = 'https://eos.greymass.com';
 const EOSCAFE_EOS_RPC = 'https://eos.eoscafeblock.com';
-const DEFAULT_EOS_RPC = EOSCAFE_EOS_RPC;
+const DEFAULT_EOS_RPC = GREYMASS_EOS_RPC;
 
 function encrypt(data, password) {
     const key = aesjs.utils.hex.toBytes(ecc.sha256(password));

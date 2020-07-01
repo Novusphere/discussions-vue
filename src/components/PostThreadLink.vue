@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline">
-    <v-btn text v-if="btn" :to="link">
+    <v-btn text v-if="btn" @click="goToLink()">
       <slot></slot>
     </v-btn>
     <router-link class="thread-link" :to="link" v-else>
@@ -10,6 +10,8 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "PostThreadLink",
   components: {},
@@ -21,14 +23,26 @@ export default {
     link() {
       let link = `/tag/${this.post.sub}`;
       if (this.post.op && this.post.transaction != this.post.op.transaction) {
-        link += `/${this.post.op.getEncodedId()}`;
+        link += `/${this.post.op.getEncodedId()}/${this.post.op.getSnakeCaseTitle()}/${this.post.getEncodedId()}`;
+      } else {
+        link += `/${this.post.getEncodedId()}/${this.post.getSnakeCaseTitle()}`;
       }
-      link += `/${this.post.getEncodedId()}`;
       return link;
-    }
+    },
+    ...mapState({
+      isThreadDialogOpen: state => state.isThreadDialogOpen
+    })
   },
   data: () => ({}),
-  methods: {}
+  methods: {
+    async goToLink() {
+      if (this.isThreadDialogOpen) {
+        window.history.pushState({}, null, this.link);
+      } else {
+        this.$router.push(this.link);
+      }
+    }
+  }
 };
 </script>
 

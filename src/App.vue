@@ -30,6 +30,23 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
+      <v-dialog v-model="isThreadDialogOpen" fullscreen>
+        <v-card v-if="isThreadDialogOpen">
+          <v-row>
+            <v-col :cols="12" class="text-right">
+              <v-btn
+                class="mr-4"
+                icon
+                @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
+              >
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <BrowseThreadPage :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
+        </v-card>
+      </v-dialog>
+
       <v-container v-if="$vuetify.breakpoint.mobile">
         <v-row no-gutters>
           <v-col cols="12">
@@ -55,15 +72,15 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import { getUserAccountObject } from "@/novusphere-js/discussions/api";
+import { sleep } from "@/novusphere-js/utility";
 
 import AppBar from "@/components/AppBar";
 import AppNav from "@/components/AppNav";
 import LoginCard from "@/components/LoginCard";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
 import SendTipCard from "@/components/SendTipCard";
-
-import { getUserAccountObject } from "@/novusphere-js/discussions/api";
-import { sleep } from "@/novusphere-js/utility";
+import BrowseThreadPage from "@/pages/BrowseThreadPage";
 
 export default {
   name: "App",
@@ -72,7 +89,8 @@ export default {
     AppNav,
     LoginCard,
     ApproveTransfersCard,
-    SendTipCard
+    SendTipCard,
+    BrowseThreadPage
   },
   watch: {
     darkMode() {
@@ -141,6 +159,9 @@ export default {
       isLoginDialogOpen: state => state.isLoginDialogOpen,
       isTransferDialogOpen: state => state.isTransferDialogOpen,
       isSendTipDialogOpen: state => state.isSendTipDialogOpen,
+      isThreadDialogOpen: state => state.isThreadDialogOpen,
+      threadDialogRef1: state => state.threadDialogRef1,
+      threadDialogRef2: state => state.threadDialogRef2,
       pendingTransfers: state => state.pendingTransfers,
       sendTipRecipient: state => state.sendTipRecipient,
       keys: state => state.keys

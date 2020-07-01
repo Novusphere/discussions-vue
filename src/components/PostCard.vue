@@ -47,7 +47,7 @@
         </v-row>
       </div>
       <div v-else>
-        <v-row class="headline" v-if="!isCommentDisplay && post.title">
+        <v-row class="headline" v-if="isThread && post.title">
           <v-col cols="12">
             <div class="pl-3 pr-3">
               <PostThreadLink :post="post">{{ post.title }}</PostThreadLink>
@@ -232,12 +232,35 @@ export default {
       // other...
       if (!this.clickable) return;
 
-      let link = `/tag/${this.post.sub}`;
+      let referenceId = undefined;
+      let referenceId2 = undefined;
+      let sub = undefined;
+      let title = undefined;
+      if (this.post.op) {
+        sub = this.post.op.sub;
+        title = this.post.op.getSnakeCaseTitle();
+        referenceId = this.post.op.getEncodedId();
+        referenceId2 = this.post.getEncodedId();
+      } else {
+        sub = this.post.sub;
+        title = this.post.getSnakeCaseTitle();
+        referenceId = this.post.getEncodedId();
+      }
+
+      this.$store.commit("setThreadDialogOpen", {
+        value: true,
+        sub,
+        referenceId,
+        title,
+        referenceId2
+      });
+
+      /*let link = `/tag/${this.post.sub}`;
       if (this.post.op && this.post.transaction != this.post.op.transaction) {
         link += `/${this.post.op.getEncodedId()}`;
       }
       link += `/${this.post.getEncodedId()}`;
-      this.$router.push(link);
+      this.$router.push(link);*/
     }
   }
 };

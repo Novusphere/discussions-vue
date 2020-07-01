@@ -16,6 +16,9 @@ const getDefaultState = () => ({
     isLoginDialogOpen: false,
     isTransferDialogOpen: false,
     isSendTipDialogOpen: false,
+    isThreadDialogOpen: false,
+    threadDialogRef1: '',
+    threadDialogRef2: '',
     pendingTransfers: [],
     sendTipRecipient: null,
     tempPassword: '', // used to temporarily store the result of a user inputting their password, setTempPassword() should IMMEDIATELY be called after consumption to clear
@@ -228,6 +231,22 @@ export default new Vuex.Store({
         },
         setTempPassword(state, password) {
             state.tempPassword = password || '';
+        },
+        setThreadDialogOpen(state, { value, sub, referenceId, title, referenceId2, path }) {
+            if (value) {
+                state.isThreadDialogOpen = true;
+                state.threadDialogRef1 = referenceId;
+                state.threadDialogRef2 = referenceId2;
+
+                window.history.pushState({}, null, `/tag/${sub}/${referenceId}/${title}/${referenceId2 || ''}`);
+            }
+            else {
+                state.isThreadDialogOpen = false;
+                state.threadDialogRef2 = '';
+                state.threadDialogRef2 = '';
+
+                window.history.pushState({}, null, path);
+            }
         },
         setTransferDialogOpen(state, { value, transfers }) {
             if (value) {
