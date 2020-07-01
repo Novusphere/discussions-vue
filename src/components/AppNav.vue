@@ -68,9 +68,9 @@
     </v-list-item>
     <div v-show="$vuetify.breakpoint.mobile">
       <v-list-item>
-        <v-btn text @click="$vuetify.theme.dark = !$vuetify.theme.dark">
+        <v-btn text @click="$store.commit('setDarkMode', !darkMode)">
           <v-icon>brightness_high</v-icon>
-          <span>{{ $vuetify.theme.dark ? `Light` : `Dark` }} Mode</span>
+          <span>{{ darkMode ? `Light` : `Dark` }} Mode</span>
         </v-btn>
       </v-list-item>
       <v-list-item v-if="isLoggedIn">
@@ -131,6 +131,7 @@ export default {
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
+      darkMode: state => state.darkMode,
       subscribedTags: state => state.subscribedTags
     })
   },

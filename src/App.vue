@@ -75,6 +75,9 @@ export default {
     SendTipCard
   },
   watch: {
+    darkMode() {
+      this.$vuetify.theme.dark = this.darkMode;
+    },
     async isSendTipDialogOpen() {
       const sendTip = this.$refs.sendTip;
       if (sendTip && this.isSendTipDialogOpen) {
@@ -128,10 +131,11 @@ export default {
   },
   computed: {
     theme() {
-      return this.$vuetify.theme.dark ? "dark" : "light";
+      return this.darkMode ? "dark" : "light";
     },
     ...mapGetters(["isLoggedIn, hasLoginSession"]),
     ...mapState({
+      darkMode: state => state.darkMode,
       needSyncAccount: state => state.needSyncAccount,
       isLoginDialogOpen: state => state.isLoginDialogOpen,
       isTransferDialogOpen: state => state.isTransferDialogOpen,

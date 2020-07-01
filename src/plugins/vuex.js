@@ -7,6 +7,7 @@ const LOCAL_STORAGE_KEY = 'vuexStore';
 Vue.use(Vuex);
 
 const getDefaultState = () => ({
+    darkMode: false,
     hideSpam: true,
     blurNSFW: true,
     needSyncAccount: false,
@@ -44,14 +45,18 @@ function saveAccount(state, external = true) {
         subscribedTags: state.subscribedTags,
         followingUsers: state.followingUsers,
         watchedThreads: state.watchThreads,
-        delegatedMods: state.delegatedMods
+        delegatedMods: state.delegatedMods,
+        hideSpam: state.hideSpam,
+        blurNSFW: state.blurNSFW,
+        darkMode: state.darkMode
     };
 
     const local = {
         encryptedTest: state.encryptedTest,
         encryptedBrainKey: state.encryptedBrainKey,
         displayName: state.displayName,
-        keys: state.keys
+        keys: state.keys,
+        darkMode: state.darkMode
     }
 
     window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
@@ -121,6 +126,7 @@ export default new Vuex.Store({
                     state.encryptedTest = local.encryptedTest;
                     state.displayName = local.displayName;
                     state.keys = local.keys;
+                    state.darkMode = local.darkMode;
 
                     // if false, they have a session -- but are not logged in.
                     if (state.keys.arbitrary.key)
@@ -160,6 +166,10 @@ export default new Vuex.Store({
                 // ---
                 return;
             }
+        },
+        setDarkMode(state, value) {
+            state.darkMode = value;
+            saveAccount(state);
         },
         addModerator(state, { displayName, pub, tag }) {
             tag = tag.toLowerCase();

@@ -13,7 +13,7 @@
                 <v-switch v-model="blurNSFWProxy" :label="`Blur NSFW content`"></v-switch>
               </v-col>
                <v-col cols="auto">
-                <v-switch v-model="$vuetify.theme.dark" :label="`Dark mode`"></v-switch>
+                <v-switch v-model="darkModeProxy" :label="`Dark mode`"></v-switch>
               </v-col>
             </v-row>
           </v-card-text>
@@ -88,6 +88,14 @@ export default {
   },
   props: {},
   computed: {
+    darkModeProxy: {
+      get() {
+        return this.darkMode;
+      },
+      set(value) {
+        this.$store.commit('setDarkMode', value);
+      }
+    },
     hideSpamProxy: {
       get() {
         return this.hideSpam;
@@ -108,7 +116,8 @@ export default {
       followingUsers: state => state.followingUsers,
       delegatedMods: state => state.delegatedMods,
       hideSpam: state => state.hideSpam,
-      blurNSFW: state => state.blurNSFW
+      blurNSFW: state => state.blurNSFW,
+      darkMode: state => state.darkMode
     })
   },
   data: () => ({

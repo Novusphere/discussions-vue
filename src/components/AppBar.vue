@@ -17,11 +17,7 @@
 
     <v-spacer></v-spacer>
 
-    <v-btn
-      v-if="!$vuetify.breakpoint.mobile"
-      text
-      @click="$vuetify.theme.dark = !$vuetify.theme.dark"
-    >
+    <v-btn v-if="!$vuetify.breakpoint.mobile" text @click="$store.commit('setDarkMode', !darkMode)">
       <v-icon>brightness_high</v-icon>
     </v-btn>
 
@@ -84,6 +80,7 @@ export default {
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
+      darkMode: state => state.darkMode,
       displayName: state => state.displayName,
       keys: state => state.keys
     })
