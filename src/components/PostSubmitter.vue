@@ -133,6 +133,11 @@ export default {
       const mentions = this.$refs.editor.getMentions().map(m => m.pub);
       const tips = this.$refs.editor.getTips();
 
+      if (this.parentPost) { 
+        // include the person we're replying to as a silent mention
+        mentions.push(this.parentPost.pub);
+      }
+
       const uuid = generateUuid();
       const post = {
         title: this.title,

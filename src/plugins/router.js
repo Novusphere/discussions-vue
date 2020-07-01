@@ -18,6 +18,9 @@ import BrowseTrendingPostsPage from "@/pages/BrowseTrendingPostsPage";
 import BrowseTagPostsPage from "@/pages/BrowseTagPostsPage";
 import BrowseNotifications from "@/pages/BrowseNotifications";
 
+import SettingsPage from "@/pages/settings/SettingsPage";
+import ContentSettingsPage from "@/pages/settings/ContentSettingsPage";
+
 import WalletPage from "@/pages/wallet/WalletPage";
 import WalletAssetsPage from "@/pages/wallet/WalletAssetsPage";
 import WalletWithdrawPage from "@/pages/wallet/WalletWithdrawPage";
@@ -52,6 +55,14 @@ const routes = [
                     { path: 'withdraw', component: WalletWithdrawPage }
                 ]
             },
+            {
+                path: 'settings',
+                component: SettingsPage,
+                children: [
+                    { path: '', component: ContentSettingsPage },
+                    { path: 'content', component: ContentSettingsPage }
+                ]
+            }
         ]
     },
     {

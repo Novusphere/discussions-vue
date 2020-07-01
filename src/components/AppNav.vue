@@ -54,6 +54,12 @@
         <span>Testing</span>
       </v-btn>
     </v-list-item>
+    <v-list-item>
+      <v-btn class="justify-start" block text left @click="isLoggedIn ? $router.push(`/settings`) : $store.commit('setLoginDialogOpen', true)">
+        <v-icon>settings</v-icon>
+        <span>Settings</span>
+      </v-btn>
+    </v-list-item>
     <div v-show="$vuetify.breakpoint.mobile">
       <v-list-item>
         <v-btn text @click="$vuetify.theme.dark = !$vuetify.theme.dark">
@@ -63,7 +69,7 @@
       </v-list-item>
       <v-list-item v-if="isLoggedIn">
         <v-btn text @click="$router.push(`/logout`)">
-          <v-icon>power_settings_new</v-icon> 
+          <v-icon>power_settings_new</v-icon>
           <span>Log out</span>
         </v-btn>
       </v-list-item>
@@ -87,7 +93,7 @@
     </v-list-item>
     <v-list-item v-for="(tag, i) in subscribedTags" :key="i">
       <TagLink :tag="tag" />
-      <v-btn absolute right icon color="primary" @click="removeTag(tag)">
+      <v-btn absolute right icon color="error" @click="removeTag(tag)">
         <v-icon>clear</v-icon>
       </v-btn>
     </v-list-item>
@@ -101,12 +107,12 @@ import TagLink from "@/components/TagLink";
 export default {
   name: "AppNav",
   components: {
-    TagLink,
+    TagLink
   },
   data() {
     return {
       search: this.$route.query.q || "",
-      subscribeTag: "",
+      subscribeTag: ""
     };
   },
   watch: {
@@ -115,13 +121,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['isLoggedIn']),
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       subscribedTags: state => state.subscribedTags
     })
   },
-  created() {
-  },
+  created() {},
   methods: {
     async goSearch() {
       this.$router.push(`/search?q=${this.search}`);

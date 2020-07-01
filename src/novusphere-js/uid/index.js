@@ -289,7 +289,7 @@ async function transfer(actions, notify) {
 }
 
 async function getTransactionLink(symbol, trxid) {
-    return `https://eosq.app/tx/${trxid}`;
+    return `https://bloks.io/transaction/${trxid}`;
 }
 
 async function createAsset(quantity, symbol) {

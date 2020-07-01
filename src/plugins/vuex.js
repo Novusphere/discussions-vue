@@ -7,6 +7,8 @@ const LOCAL_STORAGE_KEY = 'vuexStore';
 Vue.use(Vuex);
 
 const getDefaultState = () => ({
+    hideSpam: true,
+    blurNSFW: true,
     needSyncAccount: false,
     notificationCount: 0,
     lastSeenNotificationsTime: 0,
@@ -106,6 +108,10 @@ export default new Vuex.Store({
         }
     },
     mutations: {
+        set(state, [name, value]) {
+            // performs a very basic mutation, should not be abused!!
+            state[name] = value;
+        },
         init(state) {
             let local = window.localStorage[LOCAL_STORAGE_KEY];
             try {
@@ -156,6 +162,8 @@ export default new Vuex.Store({
             }
         },
         addModerator(state, { displayName, pub, tag }) {
+            tag = tag.toLowerCase();
+            if (state.delegatedMods.some(dm => dm.pub == pub && dm.tag == tag)) return;
             state.delegatedMods.push({ displayName, pub, tag });
             saveAccount(state);
         },

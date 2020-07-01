@@ -30,33 +30,25 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
+import { requireLoggedIn } from "@/utility";
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 
-export default {
+export default requireLoggedIn({
   name: "WalletPage",
   components: {
     BrowsePageLayout,
     PublicKeyIcon
   },
   props: {},
-  watch: {
-    isLoggedIn() {
-      if (!this.isLoggedIn) this.$router.push(`/`);
-    }
-  },
   computed: {
-    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       keys: state => state.keys
     })
   },
-  data: () => ({}),
-  created() {
-    if (!this.isLoggedIn) this.$router.push(`/`);
-  }
-};
+  data: () => ({})
+});
 </script>
 
 <style scoped>

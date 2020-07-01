@@ -62,7 +62,7 @@
                 <div
                   :class="{ 
                     'content-fade': isPreviewDisplay && !isCompactContent, 
-                    'nsfw-blur': post.isNSFW && !removeNSFWOverlay }"
+                    'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
                 >
                   <div class="post-html" v-html="postHTML"></div>
                 </div>
@@ -166,7 +166,8 @@ export default {
       );
     },
     ...mapState({
-      hideSpam: state => !state // TO-DO: implement state setting....
+      hideSpam: state => state.hideSpam,
+      blurNSFW: state => state.blurNSFW
     })
   },
   watch: {
