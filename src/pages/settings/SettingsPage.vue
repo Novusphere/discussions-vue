@@ -10,6 +10,8 @@
           </v-row>
         </v-card-text>
       </v-card>
+      <v-btn small dense text :to="`/settings/content`">Content</v-btn>
+      <v-btn small dense text :to="`/settings/watched`">Watched Threads</v-btn>
     </template>
     <template v-slot:content>
       <router-view></router-view>

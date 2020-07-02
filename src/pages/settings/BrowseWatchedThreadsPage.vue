@@ -1,9 +1,11 @@
 <template>
-  <BrowsePageLayout>
-    <template v-slot:content>
-      <PostBrowser no-sort :cursor="cursor" />
-    </template>
-  </BrowsePageLayout>
+  <div>
+    <v-row>
+      <v-col :cols="12">
+        <PostBrowser no-sort :cursor="cursor" />
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
 <script>
@@ -11,10 +13,10 @@ import { mapState } from "vuex";
 import { requireLoggedIn } from "@/utility";
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import PostBrowser from "@/components/PostBrowser";
-import { searchPostsByNotifications } from "@/novusphere-js/discussions/api";
+import { searchPostsByTransactions } from "@/novusphere-js/discussions/api";
 
 export default requireLoggedIn({
-  name: "BrowseFeedPage",
+  name: "BrowseWatchedThreadsPage",
   components: {
     BrowsePageLayout,
     PostBrowser
@@ -30,12 +32,8 @@ export default requireLoggedIn({
     })
   },
   async created() {
-    this.cursor = searchPostsByNotifications(
-      this.keys.arbitrary.pub,
-      0,
-      this.watchedThreads
-    );
-    this.$store.commit("seenNotifications");
+    const trxids = this.watchedThreads.map(wt => wt.transaction);
+    this.cursor = searchPostsByTransactions(trxids);
   },
   methods: {}
 });

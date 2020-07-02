@@ -23,7 +23,11 @@
             href="https://docs.google.com/document/d/e/2PACX-1vRSHTH1e3eR1IPumj9H63XAP3_QT0kQOd5v2f_9um_3hPHi1PBJaH-XQhoguSBrXv_YdHd4s1BryVhc/pub"
             class="mr-2 d-inline-block"
           >Privacy Policy</a>
-          <a target="_blank" href="#" class="mr-2 d-inline-block">User Agreement</a>
+          <a
+            target="_blank"
+            href="https://docs.google.com/document/d/e/2PACX-1vR8X4A-pa3HmsAYm9NCjZQsKLt1Q5kZooZkvHhtusUPU2fr4mi4AL9uIZKrrBNZp-lnBEJMP9Guj4t0/pub"
+            class="mr-2 d-inline-block"
+          >User Agreement</a>
           <span class="mr-2 d-inline-block">Build {{ version }}</span>
         </v-col>
       </v-row>

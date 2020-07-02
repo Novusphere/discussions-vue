@@ -20,6 +20,7 @@ import BrowseNotifications from "@/pages/BrowseNotifications";
 
 import SettingsPage from "@/pages/settings/SettingsPage";
 import ContentSettingsPage from "@/pages/settings/ContentSettingsPage";
+import BrowseWatchedThreadsPage from "@/pages/settings/BrowseWatchedThreadsPage";
 
 import WalletPage from "@/pages/wallet/WalletPage";
 import WalletAssetsPage from "@/pages/wallet/WalletAssetsPage";
@@ -50,8 +51,9 @@ const routes = [
             {
                 path: 'wallet',
                 component: WalletPage,
+                redirect: `/wallet/assets`,
                 children: [
-                    { path: '', component: WalletAssetsPage },
+                    //{ path: '', component: WalletAssetsPage },
                     { path: 'assets', component: WalletAssetsPage },
                     { path: 'withdraw', component: WalletWithdrawPage },
                     { path: 'deposit', component: WalletDepositPage }
@@ -59,10 +61,12 @@ const routes = [
             },
             {
                 path: 'settings',
+                redirect: `/settings/content`,
                 component: SettingsPage,
                 children: [
-                    { path: '', component: ContentSettingsPage },
-                    { path: 'content', component: ContentSettingsPage }
+                    //{ path: '', component: ContentSettingsPage },
+                    { path: 'content', component: ContentSettingsPage },
+                    { path: 'watched', component: BrowseWatchedThreadsPage }
                 ]
             }
         ]

@@ -64,7 +64,7 @@
                 :cols="$vuetify.breakpoint.mobile ? 12 : 4"
               >
                 <TagLink inline class="mr-2" :tag="dm.tag" />
-                <UserProfileLink :publicKey="dm.pub" :displayName="dm.displayName" />
+                <UserProfileLink class="d-inline-block" :publicKey="dm.pub" :displayName="dm.displayName" />
                 <v-btn @click="removeModerator(dm)" color="error" icon>
                   <v-icon>clear</v-icon>
                 </v-btn>
