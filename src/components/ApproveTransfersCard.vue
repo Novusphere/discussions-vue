@@ -4,7 +4,7 @@
       <span class="headline">Transfer</span>
     </v-card-title>
     <v-card-text>
-      <v-container>
+      <v-container :class="{ 'approve-transfers-mobile': $vuetify.breakpoint.mobile }">
         <v-row v-for="(t, i) in pendingTransfers" :key="i">
           <v-col cols="auto" v-if="!$vuetify.breakpoint.mobile">
             <UserProfileLink :publicKey="keys.arbitrary.pub" :displayName="displayName" />
@@ -85,7 +85,7 @@ export default {
       if (this.disableSubmit) return;
 
       this.$refs.form.validate();
-      if (this.passwordRules.length) return;
+      if (this.passwordTesterRules.length) return;
 
       const password = this.password;
       this.password = "";
@@ -95,3 +95,9 @@ export default {
   }
 };
 </script>
+
+<style>
+.approve-transfers-mobile {
+  font-size: 10px;
+}
+</style>
