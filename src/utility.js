@@ -49,8 +49,9 @@ function displayNameRules(displayName) {
                 rules.push(`Display names can be at most 16 characters`);
             }
 
-            const validNameRegex = /[a-zA-Z0-9_]/;
-            if (!validNameRegex.test(this[displayName])) {
+            const validNameRegex = /[a-zA-Z0-9_]+/g;
+            const match = this[displayName].match(validNameRegex);
+            if (!match || match[0] != this[displayName]) {
                 rules.push(
                     `Display names may only contain letters, numbers, underscores`
                 );
