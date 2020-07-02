@@ -105,7 +105,7 @@ export default {
       );
 
       if (post) {
-        this.$router.push(`/tag/${post.sub}/${post.getSnakeCaseTitle()}/${post.getEncodedId()}`);
+        this.$router.push(`/tag/${post.sub}/${post.getEncodedId()}/${post.getSnakeCaseTitle()}`);
       } else {
         console.log(`Thread couldnt be found... ${transaction}`);
       }

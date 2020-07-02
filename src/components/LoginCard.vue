@@ -2,7 +2,7 @@
   <v-card flat tile>
     <v-card-text>
       <v-container>
-        <v-form ref="form" v-model="validForm">
+        <v-form ref="form" v-model="validForm" @submit.prevent="login()">
           <div v-if="!hasLoginSession">
             <v-row>
               <v-col cols="12">
@@ -47,6 +47,7 @@
                 label="Password"
                 type="password"
                 required
+                @keydown.enter="login()"
               ></v-text-field>
             </v-col>
           </v-row>

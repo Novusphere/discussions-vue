@@ -108,11 +108,22 @@ async function createLoginObject({ displayName, brainKey, password }) {
     };
 }
 
+function getBuildVersion() {
+    let build = '';
+    if (window.__BUILD__) {
+        build = `S-${new Date(window.__BUILD__).getTime().toString(16)}`;
+    } else {
+        build = `C-${new Date().getTime().toString(16)}`;
+    }
+    return build;
+}
+
 export {
     requireLoggedIn,
     displayNameRules,
     passwordRules,
     passwordTesterRules,
     brainKeyRules,
-    createLoginObject
+    createLoginObject,
+    getBuildVersion
 }

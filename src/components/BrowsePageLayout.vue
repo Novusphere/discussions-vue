@@ -23,6 +23,7 @@
       <v-col :cols="3" v-if="!noRight">
         <slot name="right"></slot>
         <TrendingCard />
+        <AboutUsCard class="mt-2" />
       </v-col>
     </v-row>
   </div>
@@ -30,12 +31,14 @@
 
 <script>
 import { mapState } from "vuex";
-import TrendingCard from "./TrendingCard";
+import TrendingCard from "@/components/TrendingCard";
+import AboutUsCard from "@/components/AboutUsCard";
 
 export default {
   name: "BrowsePageLayout",
   components: {
-    TrendingCard
+    TrendingCard,
+    AboutUsCard
   },
   props: {
     noRight: Boolean

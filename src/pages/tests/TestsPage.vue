@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { getBuildVersion } from "@/utility";
 import { testPosts } from "./posts/posts";
 import { eos } from "@/novusphere-js/uid";
 
@@ -87,12 +88,7 @@ export default {
     consoleText: ""
   }),
   created() {
-    if (window.__BUILD__) {
-      this.build = `Server - ${new Date(window.__BUILD__).getTime()}`;
-    } else {
-      this.build = `Client - ${new Date().getTime()}`;
-    }
-
+    this.build = getBuildVersion();
     this.consoleText = window._consoleProxy || "";
     this.updateConsole = setInterval(() => {
       this.consoleText = window._consoleProxy || "";

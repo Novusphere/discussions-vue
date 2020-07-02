@@ -54,6 +54,7 @@
           </v-btn>
         </template>
         <AppNav />
+        <AboutUsCard><v-divider /></AboutUsCard>
       </v-menu>
     </div>
   </v-app-bar>
@@ -61,6 +62,7 @@
 
 <script>
 import AppNav from "@/components/AppNav";
+import AboutUsCard from "@/components/AboutUsCard";
 import UserProfileLink from "@/components/UserProfileLink";
 import NotificationsButton from "@/components/NotificationsButton";
 import { mapState, mapGetters } from "vuex";
@@ -69,6 +71,7 @@ export default {
   name: "AppBar",
   components: {
     AppNav,
+    AboutUsCard,
     UserProfileLink,
     NotificationsButton
   },

@@ -33,6 +33,7 @@
                 label="Confirm Password"
                 type="password"
                 required
+                @keydown.enter="nextStep()"
               ></v-text-field>
             </v-col>
           </v-row>

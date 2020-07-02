@@ -276,6 +276,11 @@ export default {
 .post-html a {
   text-decoration: none;
 }
+
+/*.post-embed-content {
+  margin-right: 10px;
+  float: left;
+}*/
 </style>
 
 <style scoped>
