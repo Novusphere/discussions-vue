@@ -274,6 +274,7 @@ export class Post {
             if (!insertHTML) continue;
 
             const div = doc.createElement('div');
+            div.classList.add('post-embed-content');
             div.innerHTML = insertHTML;
 
             node.parentNode.insertBefore(div, node);

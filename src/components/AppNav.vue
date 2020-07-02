@@ -2,6 +2,7 @@
   <v-list>
     <v-list-item>
       <v-text-field
+        hide-details
         append-icon="search"
         class="mt-3"
         v-model="search"
@@ -100,7 +101,9 @@
       ></v-text-field>
     </v-list-item>
     <v-list-item v-for="(tag, i) in subscribedTags" :key="i">
-      <span class="nav-tag"><TagLink :tag="tag" /></span>
+      <span class="nav-tag">
+        <TagLink :tag="tag" />
+      </span>
       <v-btn absolute right icon color="error" @click="removeTag(tag)">
         <v-icon>clear</v-icon>
       </v-btn>

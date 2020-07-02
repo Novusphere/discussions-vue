@@ -1,10 +1,11 @@
 <template>
   <v-card>
-    <v-card-title>
-      <v-icon>trending_up</v-icon>Trending
-    </v-card-title>
-
     <v-list>
+      <v-list-item>
+        <span class="text-h6">
+          <v-icon>trending_up</v-icon>Trending
+        </span>
+      </v-list-item>
       <v-list-item v-for="(tag, i) in tags" :key="i">
         <span class="trending-tag">
           <TagLink :tag="tag" />

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row>
+    <v-row no-gutters>
       <v-col cols="12">
         <v-card flat>
           <img class="md-banner" src="https://i.imgur.com/WO5pb52.png" />

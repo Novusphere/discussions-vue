@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row>
+    <v-row no-gutters>
       <v-col :cols="12">
         <v-card>
           <v-card-text>

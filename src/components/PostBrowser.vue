@@ -84,7 +84,16 @@ export default {
     },
     async infinite($state) {
       console.proxyLog(`PostBrowser infinite scroller called`);
-      let posts = await this.cursor.next();
+      let posts = undefined;
+      try {
+        posts = await this.cursor.next();
+      } catch (ex) {
+        // error stop loading...
+        console.proxyLog(ex);
+        $state.complete();
+        return;
+      }
+
       if (posts.length > 0) {
         if (this.pinned) {
           // prevent duplicates
