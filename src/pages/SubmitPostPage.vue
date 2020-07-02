@@ -16,7 +16,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { getCommunities, getSinglePost } from "@/novusphere-js/discussions/api";
+import { getCommunityByTag, getSinglePost } from "@/novusphere-js/discussions/api";
 import { waitFor, sleep } from "@/novusphere-js/utility";
 
 import BrowsePageLayout from "@/components/BrowsePageLayout";
@@ -132,7 +132,7 @@ export default {
         tag = this.editorTags[0]; // maybe use the most frequently used tag instead?
       }
 
-      const community = (await getCommunities()).find(t => t.tag == tag);
+      const community = await getCommunityByTag(tag);
 
       this.tag = tag;
       this.community = community ? community : null;

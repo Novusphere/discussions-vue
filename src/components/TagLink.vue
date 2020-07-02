@@ -1,20 +1,25 @@
 <template>
-  <div class="d-inline-block">
+  <div class="d-inline-block tag-link">
     <v-btn :to="link" v-if="btn">
       <slot></slot>
     </v-btn>
-    <router-link class="tag-link" :to="link" v-else>
+    <router-link :to="link" v-else>
       <div class="d-inline" v-if="useSlot">
         <slot></slot>
       </div>
-      <div class="d-inline" v-else-if="big">
+      <div v-else-if="big" class="tag-link-content">
         <TagIcon v-show="!noIcon" :size="80" :tag="tag" />
         <div class="d-inline-block ml-2">
           <h1>#{{ tag }}</h1>
           <slot></slot>
         </div>
       </div>
-      <div class="d-inline" v-else>
+      <div
+        v-else
+        class="tag-link-content"
+        :class="{ 'd-inline': inline }"
+        :style="{'max-width': tagWidth }"
+      >
         <TagIcon v-show="!noIcon" :tag="tag" />
         <span class="ml-1">#{{ tag }}</span>
       </div>
@@ -35,11 +40,13 @@ export default {
     useSlot: Boolean,
     btn: Boolean,
     tag: String,
-    big: Boolean
+    big: Boolean,
+    inline: Boolean
   },
   computed: {
-    hasSlot() {
-      return !!this.$slots.default && !!this.$slots.default[0];
+    tagWidth() {
+      if (this.$vuetify.breakpoint.lg) return '13ch';
+      return '30ch';
     },
     link() {
       return `/tag/${this.tag.toLowerCase()}`;
@@ -52,7 +59,15 @@ export default {
 </script>
 
 <style>
-.tag-link {
+.tag-link a {
   text-decoration: none;
+}
+
+.tag-link-content {
+  text-overflow: ellipsis;
+
+  /* Required for text-overflow to do anything */
+  white-space: nowrap;
+  overflow: hidden;
 }
 </style>

@@ -6,7 +6,7 @@
 
     <v-list>
       <v-list-item v-for="(tag, i) in tags" :key="i">
-        <span class="v-list-item-text trending-tag">
+        <span class="trending-tag">
           <TagLink :tag="tag" />
         </span>
       </v-list-item>

@@ -100,7 +100,7 @@
       ></v-text-field>
     </v-list-item>
     <v-list-item v-for="(tag, i) in subscribedTags" :key="i">
-      <TagLink :tag="tag" />
+      <span class="nav-tag"><TagLink :tag="tag" /></span>
       <v-btn absolute right icon color="error" @click="removeTag(tag)">
         <v-icon>clear</v-icon>
       </v-btn>
@@ -169,3 +169,13 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.nav-tag {
+  text-overflow: ellipsis;
+
+  /* Required for text-overflow to do anything */
+  white-space: nowrap;
+  overflow: hidden;
+}
+</style>

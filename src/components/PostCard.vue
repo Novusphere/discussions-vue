@@ -12,7 +12,7 @@
             class="d-inline-block pr-3"
             v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)"
           >
-            <TagLink :tag="post.sub" />
+            <TagLink inline :tag="post.sub" />
           </div>
           <div class="d-inline-block pr-3">
             <UserProfileLink :displayName="post.displayName" :publicKey="post.pub" />

@@ -54,7 +54,7 @@
           </v-col>
         </v-row>
       </v-container>
-      <v-container v-else>
+      <v-container fluid v-else>
         <v-row>
           <v-col cols="2">
             <v-card>

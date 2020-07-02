@@ -74,6 +74,22 @@ async function getCommunities() {
 }
 
 //
+// Get Community by tag
+// if [artifical] is enabled, if the community doesn't exist it'll borrow from the artifical community
+//
+async function getCommunityByTag(tag, artifical = 'atmos') {
+    const communities = await getCommunities();
+    let community = communities.find(c => c.tag == tag);
+    if (!community && artifical) {
+        let borrow = communities.find(c => c.tag == artifical);
+        if (borrow) {
+            community = { ...borrow, members: 0, desc: '', html: '', tag: tag };
+        }
+    }
+    return community;
+}
+
+//
 // General Search Query
 // See [SearchQuery] object for documentation
 //
@@ -624,6 +640,7 @@ export {
     getUserProfile,
     getTrendingTags,
     getCommunities,
+    getCommunityByTag,
     getTokens,
     modPolicySetTags,
     getPinnedPosts,

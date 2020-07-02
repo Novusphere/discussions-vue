@@ -57,3 +57,10 @@ export default {
   }
 };
 </script>
+
+<style>
+.community-html img {
+  background-color: white;
+  border-radius: 50%;
+}
+</style>

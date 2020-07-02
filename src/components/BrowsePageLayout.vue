@@ -20,7 +20,7 @@
         <v-progress-linear v-if="needSyncAccount" indeterminate></v-progress-linear>
         <slot v-else name="content"></slot>
       </v-col>
-      <v-col cols="3" v-if="!noRight">
+      <v-col :cols="3" v-if="!noRight">
         <slot name="right"></slot>
         <TrendingCard />
       </v-col>

@@ -17,7 +17,7 @@ import PostBrowser from "@/components/PostBrowser";
 import {
   getPinnedPosts,
   searchPostsByTags,
-  getCommunities
+  getCommunityByTag
 } from "@/novusphere-js/discussions/api";
 
 export default {
@@ -84,9 +84,8 @@ export default {
         return;
       }
 
-      const community = (await getCommunities()).find(
-        t => t.tag == this.tags[0]
-      );
+      const community = await getCommunityByTag(this.tags[0]);
+      console.log({...community});
 
       this.community = community ? community : null;
     }
