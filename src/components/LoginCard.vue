@@ -60,7 +60,8 @@
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)">Close</v-btn>
       <v-btn :disabled="waiting || !validForm" color="primary" @click="login()">
-        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>Log in
+        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular> 
+        <span>Log in</span>
       </v-btn>
     </v-card-actions>
   </v-card>

@@ -45,6 +45,9 @@
             <v-list-item>
               <v-btn text @click="openDialogThread()">Dialog Thread</v-btn>
             </v-list-item>
+            <v-list-item>
+              <v-btn text @click="eosTests()">EOS</v-btn>
+            </v-list-item>
           </v-list>
         </v-card>
       </v-col>
@@ -54,6 +57,7 @@
 
 <script>
 import { testPosts } from "./posts/posts";
+import { eos } from "@/novusphere-js/uid";
 
 export default {
   name: "TestsPage",
@@ -98,6 +102,9 @@ export default {
     if (this.updateConsole) clearInterval(this.updateConsole);
   },
   methods: {
+    async eosTests() {
+      await eos.connectWallet();
+    },
     async openDialogThread() {
       this.$store.commit("setThreadDialogOpen", {
         value: true,

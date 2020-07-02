@@ -20,7 +20,7 @@
       </v-card>
 
       <v-btn text :to="`/wallet/assets`">Assets</v-btn>
-      <v-btn text :to="`/wallet/deposit`" disabled>Deposit</v-btn>
+      <v-btn text :to="`/wallet/deposit`">Deposit</v-btn>
       <v-btn text :to="`/wallet/withdraw`">Withdraw</v-btn>
     </template>
     <template v-slot:content>

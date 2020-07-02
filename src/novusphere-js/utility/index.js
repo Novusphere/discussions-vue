@@ -71,23 +71,38 @@ function generateUuid() {
     return uuid();
 }
 
+// kind of hacky, but... such is life
+const _oembedMaxAttempt = 10;
+let _oembedAttempts = _oembedMaxAttempt;
+let _oembedNextAttempt = 0;
+(async function _refreshOEmbed() {
+    for (;;) {
+        const now = Date.now();
+        if (_oembedAttempts < _oembedMaxAttempt && now >= _oembedNextAttempt) {
+            _oembedNextAttempt = now + 1000;
+            _oembedAttempts++;
+
+            if (window.FB) {
+                window.FB.XFBML.parse()
+            }
+    
+            if (window.twttr) {
+                window.twttr.widgets.load()
+            }
+    
+            if (window.instgrm) {
+                window.instgrm.Embeds.process()
+            }
+
+            loadTelegram(window);
+        } 
+        await sleep(100);
+    }
+})();
+
 function refreshOEmbed() {
-    setTimeout(() => {
-        if (window.FB) {
-            window.FB.XFBML.parse()
-        }
-
-        if (window.twttr) {
-            window.twttr.widgets.load()
-        }
-
-        if (window.instgrm) {
-            window.instgrm.Embeds.process()
-        }
-
-        loadTelegram(window);
-
-    }, 100);
+    _oembedAttempts = 0; // reset
+    _oembedNextAttempt = 0; // schedule immediately
 }
 
 function waitFor(predicate, sleep = 5, timeOut) {

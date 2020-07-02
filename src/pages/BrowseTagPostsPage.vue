@@ -85,8 +85,6 @@ export default {
       }
 
       const community = await getCommunityByTag(this.tags[0]);
-      console.log({...community});
-
       this.community = community ? community : null;
     }
   }

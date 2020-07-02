@@ -1,19 +1,14 @@
 import Joi from "@hapi/joi";
-import { Api, JsonRpc } from 'eosjs'
-import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig'
 import * as ecc from 'eosjs-ecc';
 import * as aesjs from 'aes-js';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
 import * as axios from 'axios';
 import BufferWriter from './bufferwriter';
+import eos from "./eos";
 import { getFromCache } from "@/novusphere-js/utility";
 
 let cache = {};
-
-const GREYMASS_EOS_RPC = 'https://eos.greymass.com';
-const EOSCAFE_EOS_RPC = 'https://eos.eoscafeblock.com';
-const DEFAULT_EOS_RPC = GREYMASS_EOS_RPC;
 
 function encrypt(data, password) {
     const key = aesjs.utils.hex.toBytes(ecc.sha256(password));
@@ -74,18 +69,6 @@ function getTokenAddress(token, publicKey) {
     //else if (token.chain.name == 'BCH') return publicKeyToCashAddress(publicKey);
 
     return publicKey;
-}
-
-function getEOSAPI(rpcEndpoint = DEFAULT_EOS_RPC) {
-    const signatureProvider = new JsSignatureProvider([]);
-    const jsonRpc = new JsonRpc(rpcEndpoint);
-    const api = new Api({
-        rpc: jsonRpc,
-        signatureProvider,
-        textDecoder: new TextDecoder(),
-        textEncoder: new TextEncoder(),
-    });
-    return api;
 }
 
 //
@@ -151,7 +134,7 @@ async function getSymbols() {
 // Gets an asset for an address (or public key depending on the asset type)
 // Returns a string with the balance followed by the symbol
 //
-async function getAsset(symbol, address, rpc = DEFAULT_EOS_RPC) {
+async function getAsset(symbol, address, rpc) {
     let balance = `0 ${symbol}`;
 
     const eosTokensInfo = await getTokensInfo();
@@ -159,9 +142,9 @@ async function getAsset(symbol, address, rpc = DEFAULT_EOS_RPC) {
     const eosToken = eosTokensInfo.find(t => t.symbol == symbol);
     if (eosToken) {
 
-        const eos = await getEOSAPI(rpc);
+        const api = await eos.getAPI(rpc);
         const bound = `0x${ecc.sha256(ecc.PublicKey.fromString(address).toBuffer(), 'hex')}`;
-        const balances = await eos.rpc.get_table_rows({
+        const balances = await api.rpc.get_table_rows({
             json: true,
             code: eosToken.p2k.contract,
             scope: eosToken.p2k.chain,
@@ -314,10 +297,7 @@ async function sumAsset(asset1, asset2) {
 }
 
 export {
-    DEFAULT_EOS_RPC,
-    GREYMASS_EOS_RPC,
-    EOSCAFE_EOS_RPC,
-
+    eos,
     encrypt,
     decrypt,
     isValidBrainKey,
@@ -329,6 +309,7 @@ export {
     getFeeForAmount,
     getAmountFeeAssetsForTotal,
     getTokensInfo,
+    getToken,
     getTransactionLink,
     createAsset,
     sumAsset,

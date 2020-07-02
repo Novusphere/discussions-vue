@@ -3,7 +3,7 @@
     v-model="valueProxy"
     :items="assets"
     :rules="rules"
-    item-text="asset"
+    :item-text="itemText"
     item-value="symbol"
     label="Asset"
     :required="required"
@@ -29,7 +29,9 @@ export default {
   },
   props: {
     value: String,
-    required: Boolean
+    required: Boolean,
+    allowZero: Boolean,
+    itemText: { type: String, default: "asset" }
   },
   computed: {
     rules() {
@@ -66,7 +68,7 @@ export default {
           const asset = await getAsset(symbol, this.keys.wallet.pub);
           const [quantity] = asset.split(" ");
 
-          if (Number(quantity) <= 0) continue; // ignore assets with no balance
+          if (!this.allowZero && Number(quantity) <= 0) continue; // ignore assets with no balance
 
           this.assets.push({ symbol, quantity, asset });
         } catch (ex) {

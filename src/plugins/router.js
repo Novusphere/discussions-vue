@@ -24,6 +24,7 @@ import ContentSettingsPage from "@/pages/settings/ContentSettingsPage";
 import WalletPage from "@/pages/wallet/WalletPage";
 import WalletAssetsPage from "@/pages/wallet/WalletAssetsPage";
 import WalletWithdrawPage from "@/pages/wallet/WalletWithdrawPage";
+import WalletDepositPage from "@/pages/wallet/WalletDepositPage";
 
 import TestsPage from "@/pages/tests/TestsPage";
 import TestEditorPage from '@/pages/tests/TestEditorPage';
@@ -52,7 +53,8 @@ const routes = [
                 children: [
                     { path: '', component: WalletAssetsPage },
                     { path: 'assets', component: WalletAssetsPage },
-                    { path: 'withdraw', component: WalletWithdrawPage }
+                    { path: 'withdraw', component: WalletWithdrawPage },
+                    { path: 'deposit', component: WalletDepositPage }
                 ]
             },
             {

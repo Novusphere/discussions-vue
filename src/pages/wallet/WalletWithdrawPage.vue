@@ -4,13 +4,17 @@
       <v-form ref="form" v-model="valid">
         <UserAssetSelect v-model="symbol" required></UserAssetSelect>
 
-        <v-text-field v-model="amount" label="Amount" required></v-text-field>
+        <v-text-field v-model="amount" label="Amount" required @change="amountChange()"></v-text-field>
 
-        <v-text-field v-model="fee" label="Fee" required></v-text-field>
+        <v-text-field readonly v-model="fee" label="Fee" required></v-text-field>
+
+        <v-text-field v-model="total" label="Total" required @change="totalChange()"></v-text-field>
 
         <v-text-field v-model="account" label="EOS Account" required></v-text-field>
 
         <v-text-field v-model="memo" label="Memo"></v-text-field>
+
+        <v-text-field type="password" v-model="password" :rules="passwordRules" label="Password"></v-text-field>
 
         <div class="success--text text-center" v-show="transactionLink">
           Your withdrawal has been successfully submitted to the network.
@@ -21,19 +25,25 @@
         </div>
         <div class="error--text text-center" v-show="transactionError">{{ transactionError }}</div>
 
-        <v-btn color="primary" @click="submitWithdraw()" :disabled="!valid">Submit</v-btn>
+        <v-btn color="primary" @click="submitWithdraw()" :disabled="!valid || disableSubmit">
+          <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
+          <span>Withdraw</span>
+        </v-btn>
       </v-form>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import UserAssetSelect from "@/components/UserAssetSelect";
-
+import { sleep } from "@/novusphere-js/utility";
 import {
-  getTokensInfo,
+  getToken,
   getTransactionLink,
+  getAmountFeeAssetsForTotal,
+  getFeeForAmount,
+  sumAsset,
   createAsset,
   decrypt,
   transfer,
@@ -48,35 +58,77 @@ export default {
   },
   props: {},
   computed: {
+    passwordRules() {
+      const rules = [];
+      if (this.isLoggedIn) {
+        if (decrypt(this.encryptedTest, this.password) != "test") {
+          rules.push(`Password is incorrect`);
+        }
+      }
+      return rules;
+    },
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       encryptedBrainKey: state => state.encryptedBrainKey,
+      encryptedTest: state => state.encryptedTest,
       keys: state => state.keys
     })
   },
   data: () => ({
+    disableSubmit: false,
+    password: "",
     valid: false,
-    assets: [],
     symbol: "",
-    amount: 1,
-    fee: 1,
-    account: "asphyxiating",
-    memo: "test",
+    amount: 0,
+    fee: 0,
+    total: 0,
+    account: "",
+    memo: "",
     transactionLink: "",
     transactionError: ""
   }),
-  async created() {
+  watch: {
+    async symbol() {
+      await this.totalChange();
+    }
   },
+  async created() {},
   methods: {
+    async totalChange() {
+      if (!this.symbol) return;
+      const {
+        amountAsset,
+        feeAsset,
+        totalAsset
+      } = await getAmountFeeAssetsForTotal(
+        await createAsset(this.total, this.symbol)
+      );
+
+      this.total = totalAsset.split(" ")[0];
+      this.amount = amountAsset.split(" ")[0];
+      this.fee = feeAsset.split(" ")[0];
+    },
+    async amountChange() {
+      if (!this.symbol) return;
+      const amountAsset = await createAsset(this.amount, this.symbol);
+      const feeAsset = await getFeeForAmount(amountAsset);
+      const totalAsset = await sumAsset(amountAsset, feeAsset);
+
+      this.total = totalAsset.split(" ")[0];
+      this.amount = amountAsset.split(" ")[0];
+      this.fee = feeAsset.split(" ")[0];
+    },
     async submitWithdraw() {
       this.transactionLink = "";
       this.transactionError = "";
 
-      const brainKey = decrypt(this.encryptedBrainKey, "hello");
+      if (decrypt(this.encryptedTest, this.password) != "test") return;
+
+      const brainKey = decrypt(this.encryptedBrainKey, this.password);
       const keys = await brainKeyToKeys(brainKey);
       const walletPrivateKey = keys.wallet.key;
 
-      const tokens = await getTokensInfo();
-      const token = tokens.find(t => t.symbol == this.symbol);
+      const token = getToken(this.symbol);
 
       const request = withdrawAction({
         chain: token.p2k.chain,
@@ -88,11 +140,10 @@ export default {
         memo: this.memo
       });
 
-      if (request) {
-        console.log(this.symbol);
-        console.log(request);
-        return;
-      }
+      console.log(request);
+
+      this.disableSubmit = true;
+      await sleep(200);
 
       const receipt = await transfer([request]);
       if (receipt.transaction_id) {
@@ -106,6 +157,9 @@ export default {
         }
         console.log(receipt);
       }
+
+      this.disableSubmit = false;
+      this.password = "";
     }
   }
 };
