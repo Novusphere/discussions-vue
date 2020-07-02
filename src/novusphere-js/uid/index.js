@@ -28,6 +28,10 @@ function decrypt(data, password) {
     return decryptedText;
 }
 
+function generateBrainKey() {
+    return bip39.generateMnemonic()
+}
+
 function isValidBrainKey(brainKey) {
     return bip39.validateMnemonic(brainKey);
 }
@@ -266,7 +270,7 @@ async function transfer(actions, notify) {
             transfers: transfers,
             notify: notify ? JSON.stringify(notify) : undefined
         }))}`);
-        
+
     return data;
     //return { transaction_id: "dee67ccdf1aae10cb1f59c5f4ab87bc4b02b5be5ad1710600a352b4d8ebed2a0" };
 }
@@ -300,6 +304,7 @@ export {
     eos,
     encrypt,
     decrypt,
+    generateBrainKey,
     isValidBrainKey,
     brainKeyToKeys,
     getTokenAddress,

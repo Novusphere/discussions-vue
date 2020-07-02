@@ -37,22 +37,29 @@ const getDefaultState = () => ({
 });
 
 function saveAccount(state, external = true) {
-    const account = {
-        lastSeenNotificationsTime: state.lastSeenNotificationsTime,
-        displayName: state.displayName,
-        publicKeys: {
-            arbitrary: state.keys.arbitrary.pub,
-            identity: state.keys.arbitrary.pub,
-            wallet: state.keys.wallet.pub // uidw 
-        },
-        subscribedTags: state.subscribedTags,
-        followingUsers: state.followingUsers,
-        watchedThreads: state.watchThreads,
-        delegatedMods: state.delegatedMods,
-        hideSpam: state.hideSpam,
-        blurNSFW: state.blurNSFW,
-        darkMode: state.darkMode
-    };
+
+    if (state.keys && state.keys.identity.key) {
+        const account = {
+            lastSeenNotificationsTime: state.lastSeenNotificationsTime,
+            displayName: state.displayName,
+            publicKeys: {
+                arbitrary: state.keys.arbitrary.pub,
+                identity: state.keys.arbitrary.pub,
+                wallet: state.keys.wallet.pub // uidw 
+            },
+            subscribedTags: state.subscribedTags,
+            followingUsers: state.followingUsers,
+            watchedThreads: state.watchThreads,
+            delegatedMods: state.delegatedMods,
+            hideSpam: state.hideSpam,
+            blurNSFW: state.blurNSFW,
+            darkMode: state.darkMode
+        };
+
+        if (external && account) { // just put here to temporarily stop linter from complaining
+            // TO-DO: save account to nsdb
+        }
+    }
 
     const local = {
         encryptedTest: state.encryptedTest,
@@ -63,10 +70,6 @@ function saveAccount(state, external = true) {
     }
 
     window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
-
-    if (external && account) { // just put here to temporarily stop linter from complaining
-        // TO-DO: save account to nsdb
-    }
 }
 
 export default new Vuex.Store({
@@ -294,18 +297,18 @@ export default new Vuex.Store({
         },
         logout(state) {
 
-            const update = getDefaultState();
-
-            // preserve encryptedBrainKey and displayName for easy re-login
-            // preserve arbitrary pub for icon
-            update.encryptedTest = state.encryptedTest;
-            update.encryptedBrainKey = state.encryptedBrainKey;
-            update.displayName = state.displayName;
-            update.keys = {
-                arbitrary: { pub: state.keys.arbitrary.pub },
-                identity: { pub: state.keys.identity.pub },
-                wallet: { pub: state.keys.wallet.pub }
-            }
+            const update = {
+                ...getDefaultState(),
+                darkMode: state.darkMode,
+                encryptedTest: state.encryptedTest,
+                encryptedBrainKey: state.encryptedBrainKey,
+                displayName: state.displayName,
+                keys: {
+                    arbitrary: { pub: state.keys.arbitrary.pub },
+                    identity: { pub: state.keys.identity.pub },
+                    wallet: { pub: state.keys.wallet.pub }
+                }
+            };
 
             Object.assign(state, update);
 

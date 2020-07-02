@@ -19,9 +19,9 @@
         </v-card-text>
       </v-card>
 
-      <v-btn text :to="`/wallet/assets`">Assets</v-btn>
-      <v-btn text :to="`/wallet/deposit`">Deposit</v-btn>
-      <v-btn text :to="`/wallet/withdraw`">Withdraw</v-btn>
+      <v-btn small dense text :to="`/wallet/assets`">Assets</v-btn>
+      <v-btn small dense text :to="`/wallet/deposit`">Deposit</v-btn>
+      <v-btn small dense text :to="`/wallet/withdraw`">Withdraw</v-btn>
     </template>
     <template v-slot:content>
       <router-view></router-view>
@@ -53,7 +53,7 @@ export default requireLoggedIn({
 
 <style scoped>
 .wallet-pub-mobile {
-  max-width: 175px;
+  max-width: 130px;
   text-overflow: ellipsis;
   /* Required for text-overflow to do anything */
   white-space: nowrap;

@@ -1,8 +1,5 @@
 <template>
-  <v-card>
-    <v-card-title>
-      <span class="headline">Log in</span>
-    </v-card-title>
+  <v-card flat tile>
     <v-card-text>
       <v-container>
         <v-form ref="form" v-model="validForm">
@@ -46,7 +43,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="password"
-                :rules="passwordRules"
+                :rules="passwordRules2"
                 label="Password"
                 type="password"
                 required
@@ -60,7 +57,7 @@
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)">Close</v-btn>
       <v-btn :disabled="waiting || !validForm" color="primary" @click="login()">
-        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular> 
+        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>
         <span>Log in</span>
       </v-btn>
     </v-card-actions>
@@ -69,13 +66,16 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import PublicKeyIcon from "@/components/PublicKeyIcon";
 import {
-  decrypt,
-  encrypt,
-  isValidBrainKey,
-  brainKeyToKeys
-} from "@/novusphere-js/uid";
+  createLoginObject,
+  displayNameRules,
+  passwordRules,
+  passwordTesterRules,
+  brainKeyRules
+} from "@/utility";
+
+import PublicKeyIcon from "@/components/PublicKeyIcon";
+import { decrypt } from "@/novusphere-js/uid";
 import { sleep, waitFor } from "@/novusphere-js/utility";
 
 export default {
@@ -92,42 +92,16 @@ export default {
     validForm: false
   }),
   computed: {
-    brainKeyRules() {
-      const rules = [];
-      if (!isValidBrainKey(this.brainKey)) {
-        rules.push(`Invalid brain key mnemonic`);
-      }
-      return rules;
-    },
-    displayNameRules() {
-      const rules = [];
-      if (this.displayName.length < 3) {
-        rules.push(`Display name must be at least 3 characters`);
-      }
-
-      if (this.displayName.length > 16) {
-        rules.push(`Display names can be at most 16 characters`);
-      }
-
-      const validNameRegex = /[a-zA-Z0-9_]/;
-      if (!validNameRegex.test(this.displayName)) {
-        rules.push(
-          `Display names may only contain letters, numbers, underscores`
-        );
-      }
-
-      return rules;
-    },
-    passwordRules() {
+    ...brainKeyRules("brainKey"),
+    ...displayNameRules("displayName"),
+    ...passwordRules("password"),
+    ...passwordTesterRules("password", "oldEncryptedTest"),
+    passwordRules2() {
       const rules = [];
       if (this.hasLoginSession) {
-        if (decrypt(this.oldEncryptedTest, this.password) != "test") {
-          rules.push(`Password is incorrect`);
-        }
+        rules.push(...this.passwordTesterRules);
       } else {
-        if (this.password.length < 5) {
-          rules.push(`Password must be at least 5 characters`);
-        }
+        rules.push(...this.passwordRules);
       }
       return rules;
     },
@@ -158,35 +132,27 @@ export default {
         if (this.brainKeyRules.length) return;
         if (this.displayNameRules.length) return;
 
-        const keys = await brainKeyToKeys(this.brainKey);
-
-        login = {
-          encryptedBrainKey: encrypt(this.brainKey, this.password),
-          encryptedTest: encrypt("test", this.password),
-          displayName: this.displayName,
-          keys: keys
-        };
+        login = await createLoginObject({
+          brainKey: this.brainKey,
+          password: this.password,
+          displayName: this.displayName
+        });
       } else {
-        const keys = await brainKeyToKeys(
-          decrypt(this.oldEncryptedBrainKey, this.password)
-        );
-        login = {
-          encryptedBrainKey: this.oldEncryptedBrainKey,
-          encryptedTest: this.oldEncryptedTest,
-          displayName: this.oldDisplayName,
-          keys: keys
-        };
+        if (this.passwordTesterRules.length) return;
+
+        login = await createLoginObject({
+          brainKey: decrypt(this.oldEncryptedBrainKey, this.password),
+          password: this.password,
+          displayName: this.oldDisplayName
+        });
       }
 
-      if (login) {
-        this.waiting = true;
-        this.$store.commit("login", login);
-        await sleep(500);
-        await waitFor(async () => !this.needSyncAccount);
-        this.$store.commit("setLoginDialogOpen", false);
-        await this.reset();
-        this.waiting = false;
-      }
+      this.waiting = true;
+      this.$store.commit("login", login);
+      await sleep(500);
+      await waitFor(async () => !this.needSyncAccount);
+      this.$store.commit("setLoginDialogOpen", false);
+      await this.reset();
     }
   }
 };

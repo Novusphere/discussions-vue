@@ -17,11 +17,17 @@
             </div>
             <div class="error--text text-center" v-show="transactionError">{{ transactionError }}</div>
 
-            <v-btn color="primary" @click="submitDeposit()" :disabled="!valid || disableSubmit">
+            <v-btn :block="$vuetify.breakpoint.mobile" color="primary" @click="submitDeposit()" :disabled="!valid || disableSubmit">
               <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
               <span>Wallet Deposit</span>
             </v-btn>
-            <v-btn class="ml-2" color="primary" :disabled="!valid || disableSubmit" @click="manualDeposit = !manualDeposit">
+            <v-btn
+              :block="$vuetify.breakpoint.mobile"
+              :class="{ 'ml-2': !$vuetify.breakpoint.mobile, 'mt-2': $vuetify.breakpoint.mobile }"
+              color="primary"
+              :disabled="!valid || disableSubmit"
+              @click="manualDeposit = !manualDeposit"
+            >
               <span>Manuaul Deposit</span>
             </v-btn>
           </v-form>

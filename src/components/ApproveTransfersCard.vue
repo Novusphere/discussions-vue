@@ -25,7 +25,7 @@
             <v-col cols="12">
               <v-text-field
                 v-model="password"
-                :rules="passwordRules"
+                :rules="passwordTesterRules"
                 label="Password"
                 type="password"
                 required
@@ -40,18 +40,17 @@
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="close()" v-show="closable">{{ closeText }}</v-btn>
       <v-btn color="primary" @click="submit()" :disabled="disableSubmit">
-        <v-progress-circular class="mr-2" indeterminate v-if="disableSubmit"></v-progress-circular>
-        Submit
+        <v-progress-circular class="mr-2" indeterminate v-if="disableSubmit"></v-progress-circular>Submit
       </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
+import { passwordTesterRules } from "@/utility";
 import TokenIcon from "@/components/TokenIcon";
 import UserProfileLink from "@/components/UserProfileLink";
 import { mapState } from "vuex";
-import { decrypt } from "@/novusphere-js/uid";
 
 export default {
   name: "ApproveTransfersCard",
@@ -70,13 +69,7 @@ export default {
     password: ""
   }),
   computed: {
-    passwordRules() {
-      const rules = [];
-      if (decrypt(this.encryptedTest, this.password) != "test") {
-        rules.push("Incorrect password");
-      }
-      return rules;
-    },
+    ...passwordTesterRules("password", "encryptedTest"),
     ...mapState({
       keys: state => state.keys,
       displayName: state => state.displayName,
@@ -90,7 +83,7 @@ export default {
     },
     async submit() {
       if (this.disableSubmit) return;
-      
+
       this.$refs.form.validate();
       if (this.passwordRules.length) return;
 

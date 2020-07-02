@@ -14,7 +14,7 @@
 
         <v-text-field v-model="memo" label="Memo"></v-text-field>
 
-        <v-text-field type="password" v-model="password" :rules="passwordRules" label="Password"></v-text-field>
+        <v-text-field type="password" v-model="password" :rules="passwordTesterRules" label="Password"></v-text-field>
 
         <div class="success--text text-center" v-show="transactionLink">
           Your withdrawal has been successfully submitted to the network.
@@ -25,7 +25,7 @@
         </div>
         <div class="error--text text-center" v-show="transactionError">{{ transactionError }}</div>
 
-        <v-btn color="primary" @click="submitWithdraw()" :disabled="!valid || disableSubmit">
+        <v-btn :block="$vuetify.breakpoint.mobile" color="primary" @click="submitWithdraw()" :disabled="!valid || disableSubmit">
           <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
           <span>Withdraw</span>
         </v-btn>
@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import { passwordTesterRules } from "@/utility";
 import { mapState, mapGetters } from "vuex";
 import UserAssetSelect from "@/components/UserAssetSelect";
 import { sleep } from "@/novusphere-js/utility";
@@ -58,15 +59,7 @@ export default {
   },
   props: {},
   computed: {
-    passwordRules() {
-      const rules = [];
-      if (this.isLoggedIn) {
-        if (decrypt(this.encryptedTest, this.password) != "test") {
-          rules.push(`Password is incorrect`);
-        }
-      }
-      return rules;
-    },
+    ...passwordTesterRules("password", "encryptedTest"),
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
       encryptedBrainKey: state => state.encryptedBrainKey,
@@ -122,14 +115,13 @@ export default {
       this.transactionLink = "";
       this.transactionError = "";
 
-      if (decrypt(this.encryptedTest, this.password) != "test") return;
+      if (this.passwordTesterRules.length) return;
 
       const brainKey = decrypt(this.encryptedBrainKey, this.password);
       const keys = await brainKeyToKeys(brainKey);
       const walletPrivateKey = keys.wallet.key;
 
-      const token = getToken(this.symbol);
-
+      const token = await getToken(this.symbol);
       const request = withdrawAction({
         chain: token.p2k.chain,
         senderPrivateKey: walletPrivateKey,
@@ -139,8 +131,6 @@ export default {
         nonce: Date.now(),
         memo: this.memo
       });
-
-      console.log(request);
 
       this.disableSubmit = true;
       await sleep(200);

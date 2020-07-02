@@ -6,7 +6,21 @@
         v-model="isLoginDialogOpen"
         @click:outside="$store.commit('setLoginDialogOpen', false)"
       >
-        <LoginCard />
+        <v-card>
+          <v-tabs v-model="loginTab">
+            <v-tab>Log in</v-tab>
+            <v-tab>Sign up</v-tab>
+          </v-tabs>
+
+          <v-tabs-items v-model="loginTab">
+            <v-tab-item>
+              <LoginCard />
+            </v-tab-item>
+            <v-tab-item>
+              <SignupCard />
+            </v-tab-item>
+          </v-tabs-items>
+        </v-card>
       </v-dialog>
 
       <v-dialog
@@ -79,6 +93,7 @@ import { sleep } from "@/novusphere-js/utility";
 import AppBar from "@/components/AppBar";
 import AppNav from "@/components/AppNav";
 import LoginCard from "@/components/LoginCard";
+import SignupCard from "@/components/SignupCard";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
 import SendTipCard from "@/components/SendTipCard";
 import BrowseThreadPage from "@/pages/BrowseThreadPage";
@@ -89,6 +104,7 @@ export default {
     AppBar,
     AppNav,
     LoginCard,
+    SignupCard,
     ApproveTransfersCard,
     SendTipCard,
     BrowseThreadPage
@@ -146,7 +162,7 @@ export default {
         console.log(`Retrieved account successfully`);
       }
 
-      if (account) this.$store.commit("syncAccount", account);
+      this.$store.commit("syncAccount", account);
     }
   },
   computed: {
@@ -169,7 +185,7 @@ export default {
     })
   },
   data: () => ({
-    //
+    loginTab: null
   }),
   created() {
     this.$store.commit("init");
