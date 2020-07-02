@@ -1,5 +1,8 @@
 <template>
   <v-list>
+    <v-list-item v-if="$vuetify.breakpoint.mobile && isLoggedIn">
+      <UserProfileLink btn :displayName="displayName" :publicKey="keys.arbitrary.pub" />
+    </v-list-item>
     <v-list-item>
       <v-text-field
         hide-details
@@ -114,11 +117,13 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import TagLink from "@/components/TagLink";
+import UserProfileLink from "@/components/UserProfileLink";
 
 export default {
   name: "AppNav",
   components: {
-    TagLink
+    TagLink,
+    UserProfileLink
   },
   data() {
     return {
@@ -135,7 +140,9 @@ export default {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
       darkMode: state => state.darkMode,
-      subscribedTags: state => state.subscribedTags
+      subscribedTags: state => state.subscribedTags,
+      keys: state => state.keys,
+      displayName: state => state.displayName
     })
   },
   created() {},
