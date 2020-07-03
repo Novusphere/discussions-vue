@@ -4,9 +4,12 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
 
 (async function () {
 
-    let lastSentDiscordMsgTime = 0;
-    const DISCORD_SEND_FREQUENCY = 5 * 60 * 1000; // only send a discord message every 5 min
     const BOT_NAME = `discord`;
+    const RESET_DURATION = 2 * 60 * 60 * 1000; // 2 hours -- how long until we reset the bot
+    const SLEEP_DURATION = 10 * 1000; // 10 seconds -- how often we do our process loop
+    const DELAY_DURATION = 5 * 60 * 1000; // 5 minutes -- how often we send a discord message
+
+    let lastSentDiscordMsgTime = 0;
 
     function login(bot) {
         return new Promise(async (resolve, reject) => {
@@ -47,10 +50,6 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
         console.log('Trying to log in...');
         const bot = await login(new Discord.Client());
         console.log('Logged in!');
-
-        const RESET_DURATION = 2 * 60 * 60 * 1000; // 2 hours -- how long until we reset the bot
-        const SLEEP_DURATION = 10 * 1000; // 10 seconds -- how often we do our process loop
-        const DELAY_DURATION = 5 * 60 * 1000; // 5 minutes -- how often we send a discord message
 
         for (let q = 0; q < (RESET_DURATION / SLEEP_DURATION); q++) {
             try {

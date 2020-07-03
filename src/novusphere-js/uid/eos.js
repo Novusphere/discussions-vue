@@ -7,38 +7,51 @@ import anchor from 'eos-transit-anchorlink-provider';
 const GREYMASS_EOS_RPC = 'https://eos.greymass.com';
 const EOSCAFE_EOS_RPC = 'https://eos.eoscafeblock.com';
 const DEFAULT_EOS_RPC = GREYMASS_EOS_RPC;
+const ACCESS_CONTEXT_OPTIONS = {
+    appName: 'Discussions',
+    network: {
+        protocol: '',
+        host: '',
+        port: 443,
+        chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
+    },
+    walletProviders: [
+        anchor(`discussions`),
+        scatter()
+    ]
+}
 
-async function connectWallet() {
-    const accessContext = initAccessContext({
-        appName: 'Discussions',
+function getWalletNames() {
+    // NOTE: this should match [ACCESS_CONTEXT_OPTIONS.walletProviders] indexes
+    return [`anchor`, `scatter`]
+}
+
+async function connectWallet(name) {
+    const accessContextOptions = {
+        ...ACCESS_CONTEXT_OPTIONS,
         network: {
+            ...ACCESS_CONTEXT_OPTIONS.network,
             protocol: DEFAULT_EOS_RPC.substring(0, DEFAULT_EOS_RPC.indexOf(':')),
-            host: DEFAULT_EOS_RPC.substring(DEFAULT_EOS_RPC.indexOf(':') + 3),
-            port: 443,
-            chainId: 'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
-        },
-        walletProviders: [
-            anchor(`discussions`),
-            scatter()
-        ]
-    });
-
-    const walletProviders = accessContext.getWalletProviders();
-
-    for (let i = 0; i < walletProviders.length; i++) {
-        const selectedProvider = walletProviders[i];
-        try {
-            const wallet = accessContext.initWallet(selectedProvider);
-            await wallet.connect();
-            await wallet.login();
-            return wallet;
-        }
-        catch (ex) {
-            console.log(selectedProvider.meta.name, ex);
+            host: DEFAULT_EOS_RPC.substring(DEFAULT_EOS_RPC.indexOf(':') + 3)
         }
     }
 
-    throw new Error(`Unable to connect to any EOS wallet`);
+    const accessContext = initAccessContext(accessContextOptions);
+
+    const walletProviders = accessContext.getWalletProviders();
+    const selectedProvider = walletProviders[getWalletNames().findIndex(wn => wn == name)];
+
+    //try {
+    const wallet = accessContext.initWallet(selectedProvider);
+    await wallet.connect();
+    await wallet.login();
+    return wallet;
+    //}
+    //catch (ex) {
+    //    console.log(selectedProvider.meta.name, ex);
+    //}
+
+    //throw new Error(`Unable to connect to any EOS wallet`);
 }
 
 function getAPI(rpcEndpoint) {
@@ -58,6 +71,7 @@ export default {
     DEFAULT_EOS_RPC,
     GREYMASS_EOS_RPC,
     EOSCAFE_EOS_RPC,
+    getWalletNames,
     getAPI,
     connectWallet
 }

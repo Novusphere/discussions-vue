@@ -146,7 +146,10 @@ export default {
             // NOTE: we didn't bother migrating watched posts
             lastSeenNotificationsTime: oldAccount.data.lastCheckedNotifications,
             subscribedTags: oldAccount.data.tags,
-            // NOTE: followers
+            followingUsers: oldAccount.data.following.map(fu => ({
+              pub: fu.pub,
+              displayName: fu.name
+            })),
             delegatedMods: oldAccount.data.moderation.delegated.map(m => {
               const [displayName, pub] = m[0].split(":");
               return { displayName, pub, tag: m[1] };

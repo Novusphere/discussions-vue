@@ -17,10 +17,28 @@
             </div>
             <div class="error--text text-center" v-show="transactionError">{{ transactionError }}</div>
 
-            <v-btn :block="$vuetify.breakpoint.mobile" color="primary" @click="submitDeposit()" :disabled="!valid || disableSubmit">
-              <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
-              <span>Wallet Deposit</span>
-            </v-btn>
+            <ConnectWalletBtn ref="connector" :block="$vuetify.breakpoint.mobile" color="primary" @error="(ex) => transactionError = ex.toString()">
+              <template v-slot:action>
+                <v-btn
+                  :block="$vuetify.breakpoint.mobile"
+                  color="primary"
+                  @click="submitDeposit()"
+                  :disabled="!valid || disableSubmit"
+                >
+                  <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
+                  <span>Deposit</span>
+                </v-btn>
+              </template>
+              <template v-slot:disconnect="{ logout }">
+                <v-btn
+                  :block="$vuetify.breakpoint.mobile"
+                  :class="{ 'ml-2': !$vuetify.breakpoint.mobile, 'mt-2': $vuetify.breakpoint.mobile }"
+                  color="primary"
+                  @click="logout"
+                >Disconnect Wallet</v-btn>
+              </template>
+            </ConnectWalletBtn>
+
             <v-btn
               :block="$vuetify.breakpoint.mobile"
               :class="{ 'ml-2': !$vuetify.breakpoint.mobile, 'mt-2': $vuetify.breakpoint.mobile }"
@@ -66,17 +84,15 @@
 import { mapState } from "vuex";
 import UserAssetSelect from "@/components/UserAssetSelect";
 import { sleep } from "@/novusphere-js/utility";
-import {
-  getToken,
-  getTransactionLink,
-  createAsset,
-  eos
-} from "@/novusphere-js/uid";
+import { getToken, getTransactionLink, createAsset } from "@/novusphere-js/uid";
+
+import ConnectWalletBtn from "@/components/ConnectWalletBtn";
 
 export default {
   name: "WalletAssetsPage",
   components: {
-    UserAssetSelect
+    UserAssetSelect,
+    ConnectWalletBtn
   },
   props: {},
   computed: {
@@ -117,7 +133,7 @@ export default {
         this.disableSubmit = true;
         await sleep(150);
 
-        const wallet = await eos.connectWallet();
+        const wallet = this.$refs.connector.wallet;
         const token = await getToken(this.symbol);
         const actions = [
           {

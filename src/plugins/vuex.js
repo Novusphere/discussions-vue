@@ -281,6 +281,7 @@ export default new Vuex.Store({
             if (!account) return;
             state.lastSeenNotificationsTime = account.lastSeenNotificationsTime;
             state.subscribedTags.push(...account.subscribedTags.filter(st => !state.subscribedTags.some(st2 => st == st2)));
+            state.followingUsers.push(...account.followingUsers.filter(fu => !state.followingUsers.some(fu2 => fu.pub == fu2.pub)));
             state.delegatedMods.push(...account.delegatedMods.filter(dm => !state.delegatedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag)));
         },
         forgetLoginSession(state) {

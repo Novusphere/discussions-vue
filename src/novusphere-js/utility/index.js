@@ -158,7 +158,7 @@ function createDOMParser() {
 }
 
 function getBotsConfig(name) {
-    const bots = JSON.parse(fs.readFileSync('./bots.json', 'utf8'));
+    const bots = JSON.parse(fs.readFileSync('./bots/bots.json', 'utf8'));
     const section = bots[name] || {};
     const fn = `./bots/${name}.json`;
     if (fs.existsSync(fn)) {
@@ -169,14 +169,14 @@ function getBotsConfig(name) {
 }
 
 function saveBotsConfig(name, config) {
-    const bots = JSON.parse(fs.readFileSync('./bots.json', 'utf8'));
+    const bots = JSON.parse(fs.readFileSync('./bots/bots.json', 'utf8'));
     const section = bots[name] || {};
     for (const key of Object.keys(config)) {
         if (key.indexOf('_') == 0) continue;
         section[key] = config[key];
     }
     bots[name] = section;
-    fs.writeFileSync('./bots.json', JSON.stringify(bots));
+    fs.writeFileSync('./bots/bots.json', JSON.stringify(bots));
 }
 
 (function () {

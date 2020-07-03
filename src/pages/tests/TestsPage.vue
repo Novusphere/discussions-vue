@@ -46,7 +46,11 @@
               <v-btn text @click="openDialogThread()">Dialog Thread</v-btn>
             </v-list-item>
             <v-list-item>
-              <v-btn text @click="eosTests()">EOS</v-btn>
+              <ConnectWalletBtn ref="connector" text>
+                <template v-slot:action>
+                  <v-btn text @click="eosTrxTest()">Test EOS Trx</v-btn>
+                </template>
+              </ConnectWalletBtn>
             </v-list-item>
           </v-list>
         </v-card>
@@ -58,11 +62,14 @@
 <script>
 import { getBuildVersion } from "@/utility";
 import { testPosts } from "./posts/posts";
-import { eos } from "@/novusphere-js/uid";
+
+import ConnectWalletBtn from "@/components/ConnectWalletBtn";
 
 export default {
   name: "TestsPage",
-  components: {},
+  components: {
+    ConnectWalletBtn
+  },
   props: {},
   computed: {
     consoleProxy: {
@@ -98,8 +105,40 @@ export default {
     if (this.updateConsole) clearInterval(this.updateConsole);
   },
   methods: {
-    async eosTests() {
-      await eos.connectWallet();
+    async eosTrxTest() {
+      const wallet = this.$refs.connector.wallet;
+      const actions = [
+        {
+          account: `novusphereio`,
+          name: "transfer",
+          authorization: [
+            {
+              actor: wallet.auth.accountName,
+              permission: wallet.auth.permission
+            }
+          ],
+          data: {
+            from: wallet.auth.accountName,
+            to: `nsfoundation`,
+            quantity: `1.000 ATMOS`,
+            memo: `test trx`
+          }
+        }
+      ];
+
+      try {
+        const receipt = await wallet.eosApi.transact(
+          { actions },
+          {
+            broadcast: true,
+            blocksBehind: 3,
+            expireSeconds: 60
+          }
+        );
+        console.log(receipt);
+      } catch (ex) {
+        console.log(ex);
+      }
     },
     async openDialogThread() {
       this.$store.commit("setThreadDialogOpen", {
