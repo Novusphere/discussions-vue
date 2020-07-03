@@ -3,6 +3,7 @@ import Turndown from "turndown";
 import sanitizeHTML from "sanitize-html";
 import { uuid } from "uuidv4";
 import loadTelegram from "./telegram";
+import fs from 'fs';
 
 const turndownService = new Turndown();
 const showdownService = new Showdown.Converter({
@@ -156,6 +157,28 @@ function createDOMParser() {
     return domParser;
 }
 
+function getBotsConfig(name) {
+    const bots = JSON.parse(fs.readFileSync('./bots.json', 'utf8'));
+    const section = bots[name] || {};
+    const fn = `./bots/${name}.json`;
+    if (fs.existsSync(fn)) {
+        const config = JSON.parse(fs.readFileSync(fn));
+        Object.assign(section, config);
+    }
+    return section;
+}
+
+function saveBotsConfig(name, config) {
+    const bots = JSON.parse(fs.readFileSync('./bots.json', 'utf8'));
+    const section = bots[name] || {};
+    for (const key of Object.keys(config)) {
+        if (key.indexOf('_') == 0) continue;
+        section[key] = config[key];
+    }
+    bots[name] = section;
+    fs.writeFileSync('./bots.json', JSON.stringify(bots));
+}
+
 (function () {
 
     // hijack the log function for logging to a string variable
@@ -185,6 +208,8 @@ function createDOMParser() {
 })();
 
 export {
+    getBotsConfig,
+    saveBotsConfig,
     htmlToMarkdown,
     htmlToText,
     markdownToHTML,

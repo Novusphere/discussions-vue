@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "server": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=./server.json"
+    "server": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=./server.json",
+    "discord-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/discord.js"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
@@ -18,6 +19,7 @@
     "bs58": "^4.0.1",
     "core-js": "^3.6.5",
     "date-fns": "^2.14.0",
+    "discord.js": "^12.2.0",
     "eos-transit": "^4.0.7",
     "eos-transit-anchorlink-provider": "^4.0.7",
     "eos-transit-scatter-provider": "^4.0.7",

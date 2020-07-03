@@ -28,7 +28,7 @@
               :disabled="!valid || disableSubmit"
               @click="manualDeposit = !manualDeposit"
             >
-              <span>Manuaul Deposit</span>
+              <span>Manual Deposit</span>
             </v-btn>
           </v-form>
         </v-col>
