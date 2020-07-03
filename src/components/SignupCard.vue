@@ -45,6 +45,9 @@
           <v-row>
             <v-col cols="12">
               <v-textarea v-model="generatedBrainKey" label="Brain Key Mnemonic" required></v-textarea>
+              <div class="red--text text-center">
+                <span>It's <strong>VERY</strong> important you save your brain key. It cannot be recovered after sign up!</span>
+              </div>
               <v-btn color="primary" @click="generateBrainKey()">Generate</v-btn>
             </v-col>
           </v-row>

@@ -39,7 +39,13 @@ export default {
   methods: {
     async logout() {
       if (this.wallet) {
-        await this.wallet.logout();
+
+        try {
+          await this.wallet.logout(this.wallet.auth.accountName, this.wallet.auth.permission);
+        } catch (ex) {
+          console.log(ex);
+        }
+
         this.wallet = undefined;
         this.hasWallet = false;
       }

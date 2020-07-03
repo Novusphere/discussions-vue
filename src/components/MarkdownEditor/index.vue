@@ -121,29 +121,19 @@ export default {
             },
             // is called when a suggestion is cancelled
             onExit: () => {
-              // reset all saved values
-              this.tag = null;
-              this.tagRange = null;
-              this.insertTag = () => {};
-            },
-            // is called on every keyDown event while a suggestion is active
-            onKeyDown: ({ event }) => {
-              if (
-                event.key === "Enter" ||
-                event.key == " " ||
-                event.key == "Tab"
-              ) {
+              if (this.tag) {
                 this.insertTag({
-                  range: this.tagRange,
+                  range: { from: this.tagRange.from, to: this.tagRange.to + 1},
                   attrs: {
                     tag: this.tag,
                     href: `/tag/${this.tag}`
                   }
                 });
                 this.editor.focus();
-                return true;
               }
-              return false;
+              this.tag = null;
+              this.tagRange = null;
+              this.insertTag = () => {};
             }
           }),
 
@@ -191,7 +181,6 @@ export default {
             },
             // is called when a suggestion has changed
             onFilter: (_, query) => {
-              //console.log(this);
               return this.getMentionSuggestions(query);
             }
           }),
