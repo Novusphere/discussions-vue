@@ -23,10 +23,6 @@
             <v-icon :class="{ 'is-active': isActive.blockquote() }">format_quote</v-icon>
           </v-btn>
 
-          <v-btn icon @click="commands.link">
-            <v-icon>insert_link</v-icon>
-          </v-btn>
-
           <v-btn icon>
             <v-icon>insert_photo</v-icon>
           </v-btn>
@@ -122,18 +118,44 @@ export default {
             // is called when a suggestion is cancelled
             onExit: () => {
               if (this.tag) {
+                // this is pretty much a hack
+                const android = /Android \d/.test(navigator.userAgent);
+                if (android) {
+                  this.insertTag({
+                    range: {
+                      from: this.tagRange.from,
+                      to: this.tagRange.to + 1
+                    },
+                    attrs: {
+                      tag: this.tag,
+                      href: `/tag/${this.tag}`
+                    }
+                  });
+                  this.editor.focus();
+                }
+              }
+              this.tag = null;
+              this.tagRange = null;
+              this.insertTag = () => {};
+            },
+            // is called on every keyDown event while a suggestion is active
+            onKeyDown: ({ event }) => {
+              if (
+                event.key === "Enter" ||
+                event.key == " " ||
+                event.key == "Tab"
+              ) {
                 this.insertTag({
-                  range: { from: this.tagRange.from, to: this.tagRange.to + 1},
+                  range: this.tagRange,
                   attrs: {
                     tag: this.tag,
                     href: `/tag/${this.tag}`
                   }
                 });
                 this.editor.focus();
+                return true;
               }
-              this.tag = null;
-              this.tagRange = null;
-              this.insertTag = () => {};
+              return false;
             }
           }),
 
