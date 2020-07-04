@@ -61,6 +61,14 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog
+        v-model="isImageUploadDialogOpen"
+        max-width="600"
+        @click:outside="$store.commit('setImageUploadDialogOpen', { value: false })"
+      >
+        <ImageUploadCard />
+      </v-dialog>
+
       <v-container v-if="$vuetify.breakpoint.mobile">
         <v-row no-gutters>
           <v-col cols="12">
@@ -94,6 +102,7 @@ import AppBar from "@/components/AppBar";
 import AppNav from "@/components/AppNav";
 import LoginCard from "@/components/LoginCard";
 import SignupCard from "@/components/SignupCard";
+import ImageUploadCard from "@/components/MarkdownEditor/ImageUploadCard";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
 import SendTipCard from "@/components/SendTipCard";
 import BrowseThreadPage from "@/pages/BrowseThreadPage";
@@ -105,6 +114,7 @@ export default {
     AppNav,
     LoginCard,
     SignupCard,
+    ImageUploadCard,
     ApproveTransfersCard,
     SendTipCard,
     BrowseThreadPage
@@ -181,6 +191,7 @@ export default {
       isTransferDialogOpen: state => state.isTransferDialogOpen,
       isSendTipDialogOpen: state => state.isSendTipDialogOpen,
       isThreadDialogOpen: state => state.isThreadDialogOpen,
+      isImageUploadDialogOpen: state => state.isImageUploadDialogOpen,
       threadDialogRef1: state => state.threadDialogRef1,
       threadDialogRef2: state => state.threadDialogRef2,
       pendingTransfers: state => state.pendingTransfers,

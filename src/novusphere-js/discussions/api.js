@@ -2,7 +2,7 @@ import * as axios from 'axios';
 import ecc from 'eosjs-ecc';
 import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
-import { getFromCache, markdownToHTML } from "@/novusphere-js/utility";
+import { getFromCache, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
 import { Post } from './Post';
 import { createTransferActions } from "@/novusphere-js/uid";
 
@@ -17,6 +17,32 @@ let cache = {
 async function cors(url) {
     const { data } = await axios.get(`https://atmosdb.novusphere.io/cors?${url}`);
     return data;
+}
+
+//
+// Upload an image to the Discussions servers
+//
+async function uploadImage(file) {
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const { data } = await axios.post(
+        `https://atmosdb.novusphere.io/discussions/upload`,
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
+        }
+    );
+
+    if (data.error) {
+        //.console.log(data.message);
+        throw new Error(data.message);
+    }
+
+    return `https://atmosdb.novusphere.io/discussions/upload/image/${data.filename}`;
 }
 
 //
@@ -61,13 +87,19 @@ async function getCommunities() {
             tags[tag].members = count;
         }
 
-        let communities = Object.keys(tags).map(t => ({
-            tag: t,
-            desc: tags[t].desc,
-            icon: tags[t].icon,
-            members: tags[t].members,
-            html: markdownToHTML(tags[t].desc)
-        }));
+        let communities = Object
+            .keys(tags)
+            .map(t => ({
+                tag: t,
+                desc: tags[t].desc,
+                icon: tags[t].icon,
+                members: tags[t].members,
+                html: markdownToHTML(tags[t].desc)
+            }))
+            .map(t => ({
+                ...t,
+                description: htmlToText(t.html)
+            }));
 
         return communities;
     });
@@ -623,6 +655,7 @@ export {
     Post,
     PostSearchQuery,
     cors,
+    uploadImage,
     submitPost,
     submitVote,
     searchPosts,

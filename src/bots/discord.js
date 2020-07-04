@@ -11,6 +11,11 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
 
     let lastSentDiscordMsgTime = 0;
 
+    console.log(`===== Discussions.app Discord Bot =====`);
+    console.log(`Loading config...`);
+
+    const config = getBotsConfig(BOT_NAME);
+
     function login(bot) {
         return new Promise(async (resolve, reject) => {
             bot.on('ready', () => {
@@ -20,7 +25,8 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
                 console.log(e)
             });*/
             bot.on("error", (e) => {
-                console.error(e)
+                console.error(e);
+                reject(e);
             });
             await bot.login(config._token);
         });
@@ -39,11 +45,6 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
         const posts = await cursor.next();
         return posts;
     }
-
-    console.log(`===== Discussions.app Discord Bot =====`);
-    console.log(`Loading config...`);
-
-    const config = getBotsConfig(BOT_NAME);
 
     while (true) {
 

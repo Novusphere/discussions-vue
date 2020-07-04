@@ -23,7 +23,7 @@
             <v-icon :class="{ 'is-active': isActive.blockquote() }">format_quote</v-icon>
           </v-btn>
 
-          <v-btn icon>
+          <v-btn icon @click="uploadImage(commands.image)">
             <v-icon>insert_photo</v-icon>
           </v-btn>
         </div>
@@ -66,6 +66,7 @@ import {
   Italic,
   Strike,
   Underline,
+  Image,
   History
 } from "tiptap-extensions";
 
@@ -218,6 +219,7 @@ export default {
           new TodoList(),
           new Bold(),
           new Code(),
+          new Image(),
           new Italic(),
           new Link2(),
           new Strike(),
@@ -239,6 +241,14 @@ export default {
   },
 
   methods: {
+    async uploadImage(command) {
+      this.$store.commit("setImageUploadDialogOpen", {
+        value: true,
+        onImageUpload: src => {
+          command(src);
+        }
+      });
+    },
     getMentionSuggestions(query) {
       if (this.mentionSuggester) {
         return this.mentionSuggester(query);

@@ -37,6 +37,7 @@
     "uuidv4": "^6.1.0",
     "vue": "^2.6.11",
     "vue-clipboard2": "^0.3.1",
+    "vue-headful": "^2.1.0",
     "vue-infinite-loading": "^2.4.5",
     "vue-router": "^3.3.4",
     "vuetify": "^2.2.11",

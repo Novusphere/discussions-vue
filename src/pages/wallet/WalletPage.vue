@@ -22,6 +22,7 @@
       <v-btn small dense text :to="`/wallet/assets`">Assets</v-btn>
       <v-btn small dense text :to="`/wallet/deposit`">Deposit</v-btn>
       <v-btn small dense text :to="`/wallet/withdraw`">Withdraw</v-btn>
+      <v-btn small dense text :to="`/wallet/eos-account`">EOS Account</v-btn>
     </template>
     <template v-slot:content>
       <router-view></router-view>

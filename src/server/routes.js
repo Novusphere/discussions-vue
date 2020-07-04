@@ -1,0 +1,132 @@
+import { getSinglePost, getCommunityByTag, getUserProfile } from "@/novusphere-js/discussions/api";
+
+const routes = [
+    {
+        path: '/',
+        redirect: '/tag/all',
+        component: `BlankPage`,
+        children: [
+            { path: 'submit', component: `SubmitPostPage` },
+            { path: 'logout', component: `LogOutPage` },
+            { path: 'feed', component: `BrowseFeedPage`, meta: { head: async () => ({ title: `Discussions - Feed` }) } },
+            { path: 'search', component: `BrowseSearchPage` },
+            { path: 'notifications', component: `BrowseNotifications` },
+            { path: 'tag/all', component: `BrowseTrendingPostsPage`, meta: { head: async () => ({ title: `Discussions - Trending`, description: `View trending posts on Discussions.app` }) } },
+            { path: 'tag/:tags/submit', component: `SubmitPostPage` },
+            {
+                path: 'tag/:tags/:referenceId/:title?/:referenceId2?',
+                component: `BrowseThreadPage`,
+                meta: {
+                    head: async (p) => {
+                        const post = await getSinglePost(p.referenceId);
+                        return ({
+                            title: `Discussions - ${post.title ? post.title : 'Viewing Thread'}`,
+                            description: await post.getContentText({ removeImages: true }),
+                            image: await post.getContentImage()
+                        });
+                    }
+                }
+            },
+            {
+                path: 'tag/:tags',
+                component: `BrowseTagPostsPage`,
+                meta: {
+                    head: async (p) => {
+                        const tags = (p.tags || 'all').split(',');
+                        if (tags.length == 1) {
+                            const community = await getCommunityByTag(tags[0]);
+                            if (community) {
+                                return ({
+                                    title: `Discussions - #${community.tag}`,
+                                    description: community.description,
+                                    image: community.icon
+                                })
+                            }
+                        }
+                    }
+                }
+            },
+            { path: 'community', component: `CommunityPage`, meta: { head: async () => ({ title: `Discussions - Discover Communities`, description: `Discover communities on Discussions.app` }) } },
+            {
+                path: 'u/:who/:tab?',
+                component: `UserProfilePage`,
+                meta: {
+                    head: async (p) => {
+                        const [, key] = p.who.split('-');
+                        if (key) {
+                            const info = await getUserProfile(key);
+                            if (info) {
+                                return ({
+                                    title: `Discussions - ${info.displayName}`,
+                                    description: `${key} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
+                                    image: `https://atmosdb.novusphere.io/discussions/keyicon/${key}`
+                                })
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                path: 'wallet',
+                component: `WalletPage`,
+                redirect: `/wallet/assets`,
+                children: [
+                    { path: 'assets', component: `WalletAssetsPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Assets` }) } },
+                    { path: 'withdraw', component: `WalletWithdrawPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Deposit` }) } },
+                    { path: 'deposit', component: `WalletDepositPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Withdraw` }) } },
+                    { path: 'eos-account', component: `EOSAccountCreatePage` }
+                ]
+            },
+            {
+                path: 'settings',
+                redirect: `/settings/content`,
+                component: `SettingsPage`,
+                children: [
+                    { path: 'content', component: `ContentSettingsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Content` }) } },
+                    { path: 'watched', component: `BrowseWatchedThreadsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Watched Threads` }) } }
+                ]
+            }
+        ]
+    },
+    {
+        path: '/tests',
+        component: `BlankPage`,
+        children: [
+            {
+                path: '',
+                component: `TestsPage`,
+            },
+            {
+                path: 'editor',
+                component: `TestEditorPage`
+            },
+            {
+                path: 'posts',
+                component: `BlankPage`,
+                children: [
+                    {
+                        path: 'browse/:transactionIds',
+                        component: `TestBrowsePostsPage`
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+function createRoute(route, components) {
+    let result = { ...route };
+    if (result.component && components) {
+        const component = components[result.component];
+        if (!components) throw new Error(`Component ${result.component} was not found in specified components`);
+        result.component = component;
+    }
+    if (result.children) {
+        result.children = result.children.map(chr => createRoute(chr, components));
+    }
+    return result;
+}
+
+export default function (components) {
+    return routes.map(r => createRoute(r, components));
+}

@@ -8,14 +8,7 @@
 
             <v-text-field v-model="amount" label="Amount" required @change="amountChange()"></v-text-field>
 
-            <div class="success--text text-center" v-show="transactionLink">
-              Your deposit has been successfully submitted to the network.
-              <a
-                :href="transactionLink"
-                target="_blank"
-              >View Transaction</a>
-            </div>
-            <div class="error--text text-center" v-show="transactionError">{{ transactionError }}</div>
+            <TransactionSubmitText :link="transactionLink" :error="transactionError">Your deposit has been successfully submitted to the network.</TransactionSubmitText>
 
             <ConnectWalletBtn ref="connector" :block="$vuetify.breakpoint.mobile" color="primary" @error="(ex) => transactionError = ex.toString()">
               <template v-slot:action>
@@ -82,17 +75,19 @@
 
 <script>
 import { mapState } from "vuex";
-import UserAssetSelect from "@/components/UserAssetSelect";
 import { sleep } from "@/novusphere-js/utility";
 import { getToken, getTransactionLink, createAsset } from "@/novusphere-js/uid";
 
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
+import TransactionSubmitText from "@/components/TransactionSubmitText";
+import UserAssetSelect from "@/components/UserAssetSelect";
 
 export default {
   name: "WalletAssetsPage",
   components: {
     UserAssetSelect,
-    ConnectWalletBtn
+    ConnectWalletBtn,
+    TransactionSubmitText
   },
   props: {},
   computed: {

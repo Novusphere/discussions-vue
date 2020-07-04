@@ -17,6 +17,8 @@ const getDefaultState = () => ({
     isTransferDialogOpen: false,
     isSendTipDialogOpen: false,
     isThreadDialogOpen: false,
+    isImageUploadDialogOpen: false,
+    onImageUpload: undefined,
     threadDialogRef1: '',
     threadDialogRef2: '',
     pendingTransfers: [],
@@ -234,6 +236,16 @@ export default new Vuex.Store({
         },
         setTempPassword(state, password) {
             state.tempPassword = password || '';
+        },
+        setImageUploadDialogOpen(state, { value, onImageUpload }) {
+            if (value) {
+                state.isImageUploadDialogOpen = true;
+                state.onImageUpload = onImageUpload;
+            }
+            else {
+                state.isImageUploadDialogOpen = false;
+                state.onImageUpload = undefined;
+            }
         },
         setThreadDialogOpen(state, { value, sub, referenceId, title, referenceId2, path }) {
             if (value) {

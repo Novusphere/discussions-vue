@@ -16,14 +16,7 @@
 
         <v-text-field type="password" v-model="password" :rules="passwordTesterRules" label="Password"></v-text-field>
 
-        <div class="success--text text-center" v-show="transactionLink">
-          Your withdrawal has been successfully submitted to the network.
-          <a
-            :href="transactionLink"
-            target="_blank"
-          >View Transaction</a>
-        </div>
-        <div class="error--text text-center" v-show="transactionError">{{ transactionError }}</div>
+        <TransactionSubmitText :link="transactionLink" :error="transactionError">Your withdrawal has been successfully submitted to the network.</TransactionSubmitText>
 
         <v-btn :block="$vuetify.breakpoint.mobile" color="primary" @click="submitWithdraw()" :disabled="!valid || disableSubmit">
           <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
@@ -37,7 +30,6 @@
 <script>
 import { passwordTesterRules } from "@/utility";
 import { mapState, mapGetters } from "vuex";
-import UserAssetSelect from "@/components/UserAssetSelect";
 import { sleep } from "@/novusphere-js/utility";
 import {
   getToken,
@@ -52,10 +44,15 @@ import {
   brainKeyToKeys
 } from "@/novusphere-js/uid";
 
+
+import UserAssetSelect from "@/components/UserAssetSelect";
+import TransactionSubmitText from "@/components/TransactionSubmitText";
+
 export default {
   name: "WalletAssetsPage",
   components: {
-    UserAssetSelect
+    UserAssetSelect,
+    TransactionSubmitText
   },
   props: {},
   computed: {

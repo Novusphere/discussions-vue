@@ -1,8 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import { argv } from 'yargs';
-import { sleep, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
-import { getSinglePost, getCommunities, getUserProfile } from "@/novusphere-js/discussions/api";
+import createRoutes from "./routes";
 
 (function () {
 
@@ -24,53 +23,35 @@ import { getSinglePost, getCommunities, getUserProfile } from "@/novusphere-js/d
     app.use(`/css`, express.static(`./dist/css`));
     app.use(`/static`, express.static(`./dist/static`));
 
-    app.get(`/u/:who/:tab?`, async (req, res, next) => {
-        const [, key] = req.params.who.split('-');
-        if (key) {
-            const info = await getUserProfile(key);
-            if (info) {
-                res.inject = {
-                    head: {
-                        title: `${CONFIG.title} - ${info.displayName}`,
-                        description: `${key} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
-                        image: `https://atmosdb.novusphere.io/discussions/keyicon/${key}`
+    function addRoute(route, path = '') {
+        if (!route.children) {
+            const fullPath = path + route.path;
+            console.log(`Added route for ${fullPath}`);
+            app.get(fullPath, async (req, res, next) => {
+                const meta = route.meta;
+                if (meta) {
+                    let inject = {};
+                    if (meta.head) {
+                        inject.head = await meta.head(req.params);
                     }
+                    res.inject = inject;
                 }
+                next();
+            });
+        }
+        else {
+            for (const child of route.children) {
+                let fullPath = path + route.path;
+                if (fullPath[fullPath.length - 1] != '/') {
+                    fullPath += '/';
+                }
+                addRoute(child, fullPath);
             }
         }
-        next();
-    });
+    }
 
-    app.get(`/tag/:tags/:referenceId/:title/:referenceId2?`, async (req, res, next) => {
-        const post = await getSinglePost(req.params.referenceId);
-        if (post) {
-            res.inject = {
-                head: {
-                    title: post.title ? `${CONFIG.title} - ${post.title}` : CONFIG.title,
-                    description: await post.getContentText({ removeImages: true }),
-                    image: await post.getContentImage()
-                }
-            }
-        }
-        next();
-    });
-
-    app.get(`/tag/:tags`, async (req, res, next) => {
-        const tags = (req.params.tags || 'all').split(',');
-        if (tags.length == 1) {
-            const community = (await getCommunities()).find(c => c.tag == tags[0]);
-            if (community) {
-                res.inject = {
-                    head: {
-                        title: `${CONFIG.title} - #${tags[0]}`,
-                        description: htmlToText(markdownToHTML(community.desc)),
-                        image: community.icon
-                    }
-                }
-            }
-        }
-        next();
-    });
+    // hook up all our routes
+    createRoutes().forEach(r => addRoute(r));
 
     app.get('*', (req, res) => {
 

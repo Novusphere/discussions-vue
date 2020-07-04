@@ -5,8 +5,9 @@
     :rules="rules"
     :item-text="itemText"
     item-value="symbol"
-    label="Asset"
+    :label="label"
     :required="required"
+    :disabled="disabled"
   >
     <template v-slot:item="{ item }">
       <TokenIcon :symbol="item.symbol" />
@@ -28,6 +29,8 @@ export default {
     TokenIcon
   },
   props: {
+    label: { type: String, default: "Asset" },
+    disabled: Boolean,
     value: String,
     required: Boolean,
     allowZero: Boolean,

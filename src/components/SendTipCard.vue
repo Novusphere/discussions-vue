@@ -10,13 +10,9 @@
 
           <v-text-field v-model="amount" label="Amount" required></v-text-field>
         </v-form>
-        <div class="success--text text-center" v-show="transactionLink">
-          Your tip has been successfully submitted to the network.
-          <a
-            :href="transactionLink"
-            target="_blank"
-          >View Transaction</a>
-        </div>
+        <TransactionSubmitText
+          :link="transactionLink"
+        >Your tip has been successfully submitted to the network.</TransactionSubmitText>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -36,7 +32,7 @@
       @submit="submitTransfer"
       v-else
     >
-      <div class="error--text text-center" v-show="transactionError">{{ transactionError }}</div>
+      <TransactionSubmitText :error="transactionError" />
     </ApproveTransfersCard>
   </div>
 </template>
@@ -57,12 +53,14 @@ import { sleep } from "@/novusphere-js/utility";
 
 import UserAssetSelect from "@/components/UserAssetSelect";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
+import TransactionSubmitText from "@/components/TransactionSubmitText";
 
 export default {
   name: "SendTipCard",
   components: {
     UserAssetSelect,
-    ApproveTransfersCard
+    ApproveTransfersCard,
+    TransactionSubmitText
   },
   props: {
     closable: Boolean,

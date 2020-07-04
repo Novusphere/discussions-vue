@@ -57,10 +57,10 @@ export default {
     threads: 0
   }),
   computed: {
-    isBlog: function() {
+    isBlog() {
       return this.$route.params.tab == "blog" || !this.$route.params.tab;
     },
-    isThreads: function() {
+    isThreads() {
       return this.$route.params.tab == "threads";
     },
     ...mapState({

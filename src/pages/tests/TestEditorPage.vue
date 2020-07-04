@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import * as axios from "axios";
 import MarkdownEditor from "@/components/MarkdownEditor";
 
 export default {
@@ -37,9 +38,27 @@ export default {
   },
   props: {},
   data: () => ({
-    markdown: ""
+    markdown: "",
+    file: null
   }),
   methods: {
+    async doTest() {
+      const file = this.file && this.file.length > 0 ? this.file[0] : undefined;
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const { data } = await axios.post(
+        `https://atmosdb.novusphere.io/discussions/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      console.log(data);
+    },
     testSuggester(query) {
       const items = [
         {

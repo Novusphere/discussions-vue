@@ -29,6 +29,7 @@ function sanitize(html) {
             "li",
             "b",
             "i",
+            "img",
             "strong",
             "em",
             "strike",
