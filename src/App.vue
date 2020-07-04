@@ -76,6 +76,21 @@
           </v-col>
         </v-row>
       </v-container>
+      <v-container fluid v-if="$vuetify.breakpoint.xl">
+        <v-row>
+          <v-col cols="2"></v-col>
+          <v-col cols="2">
+            <v-card>
+              <!-- TO-REFINE: fix the nav bar so that it scrolls with the user -->
+              <AppNav />
+            </v-card>
+          </v-col>
+          <v-col cols="6">
+            <router-view></router-view>
+          </v-col>
+          <v-col cols="2"></v-col>
+        </v-row>
+      </v-container>
       <v-container fluid v-else>
         <v-row>
           <v-col cols="2">

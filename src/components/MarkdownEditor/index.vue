@@ -26,10 +26,6 @@
           <v-btn icon @click="uploadImage(commands.image)">
             <v-icon>insert_photo</v-icon>
           </v-btn>
-
-          <v-btn icon @click="commands.image({ src: 'https://atmosdb.novusphere.io/discussions/upload/image/1593836881531.png'})">
-            <v-icon>insert_photo</v-icon>
-          </v-btn>
         </div>
       </editor-menu-bar>
 
