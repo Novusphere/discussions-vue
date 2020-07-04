@@ -26,6 +26,10 @@
           <v-btn icon @click="uploadImage(commands.image)">
             <v-icon>insert_photo</v-icon>
           </v-btn>
+
+          <v-btn icon @click="commands.image({ src: 'https://atmosdb.novusphere.io/discussions/upload/image/1593836881531.png'})">
+            <v-icon>insert_photo</v-icon>
+          </v-btn>
         </div>
       </editor-menu-bar>
 
@@ -244,8 +248,8 @@ export default {
     async uploadImage(command) {
       this.$store.commit("setImageUploadDialogOpen", {
         value: true,
-        onImageUpload: src => {
-          command(src);
+        onImageUpload: args => {
+          command(args);
         }
       });
     },
@@ -393,6 +397,12 @@ export default {
 <style >
 .ProseMirror:focus {
   outline: none;
+}
+
+.ProseMirror img,
+.ProseMirror iframe {
+  min-width: 0px !important; /* instagram override */
+  max-width: min(100%, 512px) !important;
 }
 </style>
 
