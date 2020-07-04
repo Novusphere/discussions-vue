@@ -31,15 +31,32 @@ import TestEditorPage from '@/pages/tests/TestEditorPage';
 import TestBrowsePostsPage from '@/pages/tests/posts/TestBrowsePostsPage';
 
 let components = {
-    BlankPage, LogOutPage, SubmitPostPage, UserProfilePage,
-    CommunityPage, BrowseSearchPage, BrowseFeedPage, BrowseThreadPage,
-    BrowseTrendingPostsPage, BrowseTagPostsPage, BrowseNotifications,
-    SettingsPage, ContentSettingsPage, BrowseWatchedThreadsPage,
-    WalletPage, WalletAssetsPage, WalletWithdrawPage, WalletDepositPage, EOSAccountCreatePage,
-    TestsPage, TestEditorPage, TestBrowsePostsPage
+    BlankPage, 
+    LogOutPage, 
+    SubmitPostPage, 
+    UserProfilePage,
+    CommunityPage, 
+    BrowseSearchPage, 
+    BrowseFeedPage, 
+    BrowseThreadPage,
+    BrowseTrendingPostsPage, 
+    BrowseTagPostsPage, 
+    BrowseNotifications,
+    SettingsPage, 
+    ContentSettingsPage, 
+    BrowseWatchedThreadsPage,
+    WalletPage, 
+    WalletAssetsPage, 
+    WalletWithdrawPage, 
+    WalletDepositPage, 
+    EOSAccountCreatePage,
+    TestsPage, 
+    TestEditorPage, 
+    TestBrowsePostsPage
 }
 
 import createRoutes from "@/server/routes";
+import site from "@/server/site";
 const routes = createRoutes(components);
 
 const router = new VueRouter({
@@ -65,6 +82,9 @@ router.afterEach(async (to) => {
             catch (ex) {
                 console.log(ex);
             }
+        }
+        else {
+            document.title = site.title;
         }
     }
 });

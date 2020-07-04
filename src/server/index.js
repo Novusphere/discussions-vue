@@ -2,17 +2,9 @@ import express from 'express';
 import fs from 'fs';
 import { argv } from 'yargs';
 import createRoutes from "./routes";
+import config from "./site";
 
 (function () {
-
-    let CONFIG = undefined;
-    try {
-        CONFIG = JSON.parse(fs.readFileSync(argv.config));
-    }
-    catch (ex) {
-        console.error(ex);
-        return;
-    }
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
     const BUILD_TIME = Date.now();
@@ -57,7 +49,7 @@ import createRoutes from "./routes";
 
         // TO-DO: build default head from site.json
         let body = ``;
-        let head = { title: CONFIG.title, description: CONFIG.description, image: CONFIG.image };
+        let head = { title: config.title, description: config.description, image: config.image };
 
         if (res.inject) {
             body = res.inject.body || body;
@@ -86,6 +78,6 @@ import createRoutes from "./routes";
         res.send(index);
     });
 
-    app.listen(CONFIG.port, () => console.log(`Server is listening at port ${CONFIG.port}`));
+    app.listen(config.port, () => console.log(`Server is listening at port ${config.port}`));
 
 })();

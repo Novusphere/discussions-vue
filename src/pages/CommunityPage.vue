@@ -1,6 +1,5 @@
 <template>
   <div>      
-    <vue-headful :title="pageTitle" />
     <v-row no-gutters v-for="(comm, i) in communities" :key="i" class="mb-2">
       <v-col cols="12">
         <CommunityCard :community="comm" />
@@ -22,11 +21,6 @@ export default {
   data: () => ({
     communities: []
   }),
-  computed: {
-    pageTitle() {
-      return `Discussions - Discover Communities`
-    }
-  },
   async created() {
     this.communities = (await getCommunities())
       .map(comm => ({ ...comm }))

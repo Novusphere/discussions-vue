@@ -12,9 +12,6 @@ Vue.use(VueClipboard);
 import InfiniteLoading from 'vue-infinite-loading';
 Vue.use(InfiniteLoading, { /* options */ });
 
-import VueHeadful from 'vue-headful';
-Vue.component('vue-headful', VueHeadful);
-
 Vue.config.productionTip = false;
 
 new Vue({
