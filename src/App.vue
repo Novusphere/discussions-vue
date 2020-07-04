@@ -76,7 +76,7 @@
           </v-col>
         </v-row>
       </v-container>
-      <v-container fluid v-if="$vuetify.breakpoint.xl">
+      <v-container fluid v-else-if="$vuetify.breakpoint.xl">
         <v-row>
           <v-col cols="2"></v-col>
           <v-col cols="2">
