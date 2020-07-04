@@ -46,7 +46,7 @@ export default {
   computed: {
     tagWidth() {
       if (this.$vuetify.breakpoint.lg) return '13ch';
-      return '30ch';
+      return '20ch';
     },
     link() {
       return `/tag/${this.tag.toLowerCase()}`;

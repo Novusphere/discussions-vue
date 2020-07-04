@@ -29,6 +29,7 @@
                 label="Password"
                 type="password"
                 required
+                @keydown.enter="submit()"
               ></v-text-field>
             </v-col>
           </v-row>

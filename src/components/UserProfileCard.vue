@@ -8,8 +8,8 @@
           </UserProfileLink>
           <v-spacer />
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6"></v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 1">
+        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 5"></v-col>
+        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 2">
           <v-btn
             v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"
@@ -29,7 +29,7 @@
           <v-btn
             v-if="(publicKey != myPublicKey)"
             color="primary"
-            :class="{ 'mt-1': !$vuetify.breakpoint.mobile, 'ml-1': $vuetify.breakpoint.mobile }"
+            :class="{ 'mt-2': !$vuetify.breakpoint.mobile, 'ml-1': $vuetify.breakpoint.mobile }"
             @click="sendTip()"
           >
             <v-icon>attach_money</v-icon>
