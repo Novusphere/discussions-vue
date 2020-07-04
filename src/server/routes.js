@@ -17,8 +17,11 @@ const routes = [
                 path: 'tag/:tags/:referenceId/:title?/:referenceId2?',
                 component: `BrowseThreadPage`,
                 meta: {
-                    head: async (p) => {
+                    context: async (p) => {
                         const post = await getSinglePost(p.referenceId);
+                        return post;
+                    },
+                    head: async (post) => {
                         return ({
                             title: `Discussions - ${post.title ? post.title : 'Viewing Thread'}`,
                             description: await post.getContentText({ removeImages: true }),
@@ -31,18 +34,20 @@ const routes = [
                 path: 'tag/:tags',
                 component: `BrowseTagPostsPage`,
                 meta: {
-                    head: async (p) => {
+                    context: async (p) => {
                         const tags = (p.tags || 'all').split(',');
                         if (tags.length == 1) {
                             const community = await getCommunityByTag(tags[0]);
-                            if (community) {
-                                return ({
-                                    title: `Discussions - #${community.tag}`,
-                                    description: community.description,
-                                    image: community.icon
-                                })
-                            }
+                            return community;
                         }
+                        return undefined;
+                    },
+                    head: async (community) => {
+                        return ({
+                            title: `Discussions - #${community.tag}`,
+                            description: community.description,
+                            image: community.icon
+                        })
                     }
                 }
             },
@@ -51,18 +56,20 @@ const routes = [
                 path: 'u/:who/:tab?',
                 component: `UserProfilePage`,
                 meta: {
-                    head: async (p) => {
+                    context: async (p) => {
                         const [, key] = p.who.split('-');
                         if (key) {
                             const info = await getUserProfile(key);
-                            if (info) {
-                                return ({
-                                    title: `Discussions - ${info.displayName}`,
-                                    description: `${key} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
-                                    image: `https://atmosdb.novusphere.io/discussions/keyicon/${key}`
-                                })
-                            }
+                            return info;
                         }
+                        return undefined;
+                    },
+                    head: async (info) => {
+                        return ({
+                            title: `Discussions - ${info.displayName}`,
+                            description: `${info.pub} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
+                            image: `https://atmosdb.novusphere.io/discussions/keyicon/${info.pub}`
+                        });
                     }
                 }
             },
@@ -72,9 +79,9 @@ const routes = [
                 redirect: `/wallet/assets`,
                 children: [
                     { path: 'assets', component: `WalletAssetsPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Assets` }) } },
-                    { path: 'withdraw', component: `WalletWithdrawPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Deposit` }) } },
-                    { path: 'deposit', component: `WalletDepositPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Withdraw` }) } },
-                    { path: 'eos-account', component: `EOSAccountCreatePage` }
+                    { path: 'withdraw', component: `WalletWithdrawPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Withdraw` }) } },
+                    { path: 'deposit', component: `WalletDepositPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Deposits` }) } },
+                    { path: 'eos-account', component: `EOSAccountCreatePage`, meta: { head: async () => ({ title: `Discussions - Wallet - EOS Account Creation` }) } }
                 ]
             },
             {

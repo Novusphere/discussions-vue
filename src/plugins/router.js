@@ -31,27 +31,27 @@ import TestEditorPage from '@/pages/tests/TestEditorPage';
 import TestBrowsePostsPage from '@/pages/tests/posts/TestBrowsePostsPage';
 
 let components = {
-    BlankPage, 
-    LogOutPage, 
-    SubmitPostPage, 
+    BlankPage,
+    LogOutPage,
+    SubmitPostPage,
     UserProfilePage,
-    CommunityPage, 
-    BrowseSearchPage, 
-    BrowseFeedPage, 
+    CommunityPage,
+    BrowseSearchPage,
+    BrowseFeedPage,
     BrowseThreadPage,
-    BrowseTrendingPostsPage, 
-    BrowseTagPostsPage, 
+    BrowseTrendingPostsPage,
+    BrowseTagPostsPage,
     BrowseNotifications,
-    SettingsPage, 
-    ContentSettingsPage, 
+    SettingsPage,
+    ContentSettingsPage,
     BrowseWatchedThreadsPage,
-    WalletPage, 
-    WalletAssetsPage, 
-    WalletWithdrawPage, 
-    WalletDepositPage, 
+    WalletPage,
+    WalletAssetsPage,
+    WalletWithdrawPage,
+    WalletDepositPage,
     EOSAccountCreatePage,
-    TestsPage, 
-    TestEditorPage, 
+    TestsPage,
+    TestEditorPage,
     TestBrowsePostsPage
 }
 
@@ -72,19 +72,20 @@ router.beforeEach((to, from, next) => {
 router.afterEach(async (to) => {
     const meta = to.meta;
     if (meta) {
-        if (meta.head) {
-            try {
-                const result = await meta.head(to.params);
-                if (result.title) {
-                    document.title = result.title;
+        try {
+            const context = meta.context ? (await meta.context(to.params)) : undefined;
+            if (meta.head) {
+                const head = await meta.head(context);
+                if (head.title) {
+                    document.title = head.title;
                 }
             }
-            catch (ex) {
-                console.log(ex);
+            else {
+                document.title = site.title;
             }
         }
-        else {
-            document.title = site.title;
+        catch (ex) {
+            console.log(ex);
         }
     }
 });
