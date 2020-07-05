@@ -322,7 +322,7 @@ export default {
           console.log(`post trxid: ${trxid}`);
           this.$emit("reply", {
             post: artificalReplyPost,
-            tips: transferActions.map(ta => ({ ...ta, senderPrivateKey: "" }))
+            transferActions: transferActions.map(ta => ({ ...ta, senderPrivateKey: "" }))
           });
         }
       }

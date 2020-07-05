@@ -5,6 +5,7 @@
       :display="display"
       @reply="!isLoggedIn ? $store.commit('setLoginDialogOpen', true) : (showSubmitter = true)"
       @edit="onEdit"
+      @tip="({ uuid, transaction, transferActions }) => $emit('tip', { uuid, transaction, transferActions })"
     >
       <div v-if="!isThread">
         <div v-if="showSubmitter" class="ml-1 mr-1 mb-3">
@@ -23,6 +24,7 @@
           :reply="r"
           @reply="onReply"
           @edit="onEdit"
+          @tip="({ uuid, transaction, transferActions }) => $emit('tip', { uuid, transaction, transferActions })"
         />
       </div>
     </PostCard>
@@ -46,6 +48,7 @@
         :reply="r"
         @reply="onReply"
         @edit="onEdit"
+        @tip="({ uuid, transaction, transferActions }) => $emit('tip', { uuid, transaction, transferActions })"
       />
     </div>
   </div>
@@ -90,11 +93,11 @@ export default {
     onEdit({ post }) {
       this.$emit("edit", { post });
     },
-    onReply({ post, tips }) {
+    onReply({ post, transferActions }) {
       if (!this.isThread) {
         this.showSubmitter = false;
       }
-      this.$emit("reply", { post, tips });
+      this.$emit("reply", { post, transferActions });
     }
   }
 };

@@ -91,6 +91,7 @@
       :isCommentDisplay="isCommentDisplay"
       @reply="$emit('reply')"
       @edit="startEdit()"
+      @tip="({ uuid, transaction, transferActions }) => $emit('tip', { uuid, transaction, transferActions })"
     />
 
     <div class="post-replies ml-1">

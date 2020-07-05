@@ -9,6 +9,7 @@
         :display="'comment'"
         @reply="reply"
         @edit="edit"
+        @tip="tip"
       />
     </div>
   </div>
@@ -127,11 +128,9 @@ export default {
         p.title = post.title;
       }
     },
-    async reply({ post, tips }) {
-      if (this.tree[post.uuid]) return;
-
-      let artificalTips = tips.map(t => ({
-        transaction: post.transaction,
+    async tip({ uuid, transaction, transferActions }) {
+      let artificalTips = transferActions.map(t => ({
+        transaction: transaction,
         data: {
           amount: t.amount,
           chain_id: t.chain,
@@ -146,12 +145,21 @@ export default {
         }
       }));
 
+      const comment = this.tree[uuid];
+      comment.post.tips.push(...artificalTips);
+    },
+    async reply({ post, transferActions }) {
+      if (this.tree[post.uuid]) return;
+
       const reply = { post, replies: [] };
       this.tree[post.uuid] = reply;
+      this.tree[post.parentUuid].replies.unshift(reply);
 
-      const parent = this.tree[post.parentUuid];
-      parent.replies.unshift(reply);
-      parent.post.tips.push(...artificalTips);
+      await this.tip({
+        uuid: post.parentUuid,
+        transaction: post.transaction,
+        transferActions: transferActions
+      });
     }
   }
 };

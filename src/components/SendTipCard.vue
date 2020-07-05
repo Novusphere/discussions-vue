@@ -63,7 +63,7 @@ export default {
   },
   props: {
     closable: Boolean,
-    recipient: Object // { pub, uidw, displayName, uuid? }
+    recipient: Object // { pub, uidw, displayName, uuid?, callback? }
   },
   data: () => ({
     disableSubmit: false,
@@ -159,6 +159,16 @@ export default {
           );
           //console.log(transactionLink);
           this.transactionLink = transactionLink;
+
+          if (this.recipient.callback) {
+            this.recipient.callback({
+              transaction: receipt.transaction_id,
+              transferActions: transferActions.map(ta => ({
+                ...ta,
+                senderPrivateKey: ""
+              }))
+            });
+          }
         } else {
           if (receipt.error && receipt.message) {
             this.transactionError = receipt.message;

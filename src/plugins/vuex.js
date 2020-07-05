@@ -17,7 +17,7 @@ const getDefaultState = () => ({
     tempPassword: '', // used to temporarily store the result of a user inputting their password, setTempPassword() should IMMEDIATELY be called after consumption to clear
     //
     isSendTipDialogOpen: false,
-    sendTipRecipient: null,
+    sendTipRecipient: null, // { pub, uidw, displayName, uuid?, callback? }
     //
     isThreadDialogOpen: false,
     threadDialogRef1: '',

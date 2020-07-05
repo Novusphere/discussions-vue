@@ -157,7 +157,9 @@ export default {
           pub: this.post.pub,
           uidw: this.post.uidw,
           displayName: this.post.displayName,
-          uuid: this.post.uuid
+          uuid: this.post.uuid,
+          callback: ({ transaction, transferActions }) =>
+            this.$emit("tip", { uuid: this.post.uuid, transaction, transferActions })
         }
       });
     },
