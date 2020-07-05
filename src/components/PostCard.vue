@@ -271,6 +271,7 @@ export default {
 .post-html iframe {
   min-width: 0px !important; /* instagram override */
   max-width: min(100%, 512px) !important;
+  display: block;
 }
 
 .post-html a {

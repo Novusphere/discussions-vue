@@ -98,6 +98,8 @@ export default {
 
       this.opening = tree[thread.opening.uuid];
       this.tree = tree;
+
+      this.$emit('loaded', { opening: this.opening, tree: this.tree });
     },
     async goToSubPost() {
       const subPostId = this.referenceId2;

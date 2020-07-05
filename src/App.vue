@@ -57,7 +57,7 @@
               </v-btn>
             </v-col>
           </v-row>
-          <BrowseThreadPage :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
+          <ThreadBrowser :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
         </v-card>
       </v-dialog>
 
@@ -120,7 +120,7 @@ import SignupCard from "@/components/SignupCard";
 import ImageUploadCard from "@/components/MarkdownEditor/ImageUploadCard";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
 import SendTipCard from "@/components/SendTipCard";
-import BrowseThreadPage from "@/pages/BrowseThreadPage";
+import ThreadBrowser from "@/components/ThreadBrowser";
 
 export default {
   name: "App",
@@ -132,7 +132,7 @@ export default {
     ImageUploadCard,
     ApproveTransfersCard,
     SendTipCard,
-    BrowseThreadPage
+    ThreadBrowser
   },
   watch: {
     darkMode() {
