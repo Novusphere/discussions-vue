@@ -6,6 +6,7 @@ import anchor from 'eos-transit-anchorlink-provider';
 
 const GREYMASS_EOS_RPC = 'https://eos.greymass.com';
 const EOSCAFE_EOS_RPC = 'https://eos.eoscafeblock.com';
+const EOSNATION_EOS_RPC = 'https://api.eosn.io';
 const DEFAULT_EOS_RPC = GREYMASS_EOS_RPC;
 const ACCESS_CONTEXT_OPTIONS = {
     appName: 'Discussions',
@@ -70,6 +71,7 @@ function getAPI(rpcEndpoint) {
 export default {
     DEFAULT_EOS_RPC,
     GREYMASS_EOS_RPC,
+    EOSNATION_EOS_RPC,
     EOSCAFE_EOS_RPC,
     getWalletNames,
     getAPI,

@@ -99,6 +99,9 @@ export default {
       if (symbols.find(s => s == sym)) {
         this.symbol = sym;
       }
+      else {
+        this.symbol = null;
+      }
     }
   }
 };

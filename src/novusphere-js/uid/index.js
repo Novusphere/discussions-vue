@@ -145,8 +145,7 @@ async function getSymbols() {
 // Returns a string with the balance followed by the symbol
 //
 async function getAsset(symbol, address, rpc) {
-    let balance = `0 ${symbol}`;
-
+    let balance = await createAsset(0, symbol);
     const eosTokensInfo = await getTokensInfo();
 
     const eosToken = eosTokensInfo.find(t => t.symbol == symbol);

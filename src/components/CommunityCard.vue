@@ -11,7 +11,11 @@
           </TagLink>
         </v-col>
         <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 8">
-          <div class="community-html mr-3" v-html="community.html"></div>
+          <div
+            class="community-html mr-3"
+            v-html="community.html"
+            :class="{ 'invert': $vuetify.theme.dark }"
+          ></div>
         </v-col>
         <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 1">
           <v-btn v-if="!isSubscribed(community.tag)" color="primary" @click="subscribeTag()">
@@ -21,7 +25,12 @@
             <v-icon>person_remove</v-icon>
             <span>Leave</span>
           </v-btn>
-          <TagLink btn :class="$vuetify.breakpoint.mobile ? 'ml-2' : 'd-block mt-2'" :tag="community.tag" v-if="!noView">View</TagLink>
+          <TagLink
+            btn
+            :class="$vuetify.breakpoint.mobile ? 'ml-2' : 'd-block mt-2'"
+            :tag="community.tag"
+            v-if="!noView"
+          >View</TagLink>
         </v-col>
       </v-row>
     </v-card-text>
@@ -59,8 +68,7 @@ export default {
 </script>
 
 <style>
-.community-html img {
-  background-color: white;
-  border-radius: 50%;
+.community-html.invert img {
+  filter: grayscale(1) invert(1);
 }
 </style>

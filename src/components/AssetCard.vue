@@ -15,7 +15,7 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import { getAsset } from "@/novusphere-js/uid";
+import { createAsset, getAsset } from "@/novusphere-js/uid";
 import TagLink from "@/components/TagLink";
 import TokenIcon from "@/components/TokenIcon";
 
@@ -49,6 +49,9 @@ export default {
       this.zero = Number(quantity) <= 0;
 
       this.$emit("data", { quantity, symbol: this.symbol, zero: this.zero });
+    }
+    else {
+      this.quantity = await createAsset(0, this.symbol);
     }
   }
 };
