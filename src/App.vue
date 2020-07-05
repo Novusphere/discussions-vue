@@ -111,7 +111,6 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { getUserAccountObject } from "@/novusphere-js/discussions/api";
-import { sleep } from "@/novusphere-js/utility";
 
 import AppBar from "@/components/AppBar";
 import AppNav from "@/components/AppNav";
@@ -148,7 +147,6 @@ export default {
       if (!this.needSyncAccount) return;
 
       console.log(`Synchronizing account...`);
-      await sleep(100);
 
       let account = await getUserAccountObject(this.keys.identity.key);
       if (!account) {

@@ -49,7 +49,6 @@ import {
   getTransactionLink,
   transfer
 } from "@/novusphere-js/uid";
-import { sleep } from "@/novusphere-js/utility";
 
 import UserAssetSelect from "@/components/UserAssetSelect";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
@@ -148,7 +147,6 @@ export default {
 
       try {
         this.disableSubmit = true;
-        await sleep(250); // let UI update
 
         const receipt = await transfer(transferActions, notify);
         this.disableSubmit = false;
@@ -159,7 +157,7 @@ export default {
             this.symbol,
             receipt.transaction_id
           );
-          console.log(transactionLink);
+          //console.log(transactionLink);
           this.transactionLink = transactionLink;
         } else {
           if (receipt.error && receipt.message) {

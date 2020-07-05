@@ -1,4 +1,3 @@
-import ecc from 'eosjs-ecc'
 import bigInt from 'big-integer';
 import { markdownToHTML, generateUuid } from "@/novusphere-js/utility";
 import { cors } from "@/novusphere-js/discussions/api";
@@ -303,17 +302,5 @@ export class Post {
     getMyModPolicy(myKey) {
         const pol = this.modPolicy.find(mp => mp.mod == myKey);
         return pol ? pol.tags : [];
-    }
-
-    getSignHash(uuid) {
-        const hash0 = ecc.sha256(this.content)
-        const hash1 = ecc.sha256(uuid + hash0)
-        return hash1;
-    }
-
-    sign(privKey) {
-        this.pub = ecc.privateToPublic(privKey);
-        this.sig = ecc.sign(this.getSignHash(this.uuid), privKey);
-        return this.sig;
     }
 }

@@ -1,5 +1,11 @@
+const ThreadsPlugin = require('threads-plugin');
+
 module.exports = {
-  "configureWebpack": {},
+  "configureWebpack": {
+    plugins: [
+      new ThreadsPlugin()
+    ]
+  },
   "transpileDependencies": [
     "vuetify"
   ]

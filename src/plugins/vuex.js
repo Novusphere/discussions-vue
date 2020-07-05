@@ -1,33 +1,42 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-//import { waitFor } from "@/novusphere-js/utility";
+import { signText } from "@/novusphere-js/uid";
+import { Lock } from "@/novusphere-js/utility";
 
 const LOCAL_STORAGE_KEY = 'vuexStore';
+const saver = new Lock();
 
 Vue.use(Vuex);
 
 const getDefaultState = () => ({
+    //
+    isLoginDialogOpen: false,
+    //
+    isTransferDialogOpen: false,
+    pendingTransfers: [],
+    tempPassword: '', // used to temporarily store the result of a user inputting their password, setTempPassword() should IMMEDIATELY be called after consumption to clear
+    //
+    isSendTipDialogOpen: false,
+    sendTipRecipient: null,
+    //
+    isThreadDialogOpen: false,
+    threadDialogRef1: '',
+    threadDialogRef2: '',
+    //
+    isImageUploadDialogOpen: false,
+    onImageUpload: undefined,
+    //
+    displayName: '',
+    encryptedBrainKey: '',
+    encryptedTest: '', // the value "test" encrypted with the same password as [encryptedBrainKey]
+    keys: null,
+    //
     darkMode: false,
     hideSpam: true,
     blurNSFW: true,
     needSyncAccount: false,
     notificationCount: 0,
     lastSeenNotificationsTime: 0,
-    isLoginDialogOpen: false,
-    isTransferDialogOpen: false,
-    isSendTipDialogOpen: false,
-    isThreadDialogOpen: false,
-    isImageUploadDialogOpen: false,
-    onImageUpload: undefined,
-    threadDialogRef1: '',
-    threadDialogRef2: '',
-    pendingTransfers: [],
-    sendTipRecipient: null,
-    tempPassword: '', // used to temporarily store the result of a user inputting their password, setTempPassword() should IMMEDIATELY be called after consumption to clear
-    displayName: '',
-    encryptedBrainKey: '',
-    encryptedTest: '', // the value "test" encrypted with the same password as [encryptedBrainKey]
-    keys: null,
     subscribedTags: [],
     followingUsers: [], // { displayName, pub, uidw }
     watchedThreads: [], // { uuid, transaction, watchedAt }
@@ -38,40 +47,48 @@ const getDefaultState = () => ({
     ]
 });
 
-function saveAccount(state, external = true) {
-
-    if (state.keys && state.keys.identity.key) {
-        const account = {
-            lastSeenNotificationsTime: state.lastSeenNotificationsTime,
+async function saveAccount(state, external = true) {
+    await saver.lock(async () => {
+        const local = {
+            encryptedTest: state.encryptedTest,
+            encryptedBrainKey: state.encryptedBrainKey,
             displayName: state.displayName,
-            publicKeys: {
-                arbitrary: state.keys.arbitrary.pub,
-                identity: state.keys.arbitrary.pub,
-                wallet: state.keys.wallet.pub // uidw 
-            },
-            subscribedTags: state.subscribedTags,
-            followingUsers: state.followingUsers,
-            watchedThreads: state.watchThreads,
-            delegatedMods: state.delegatedMods,
-            hideSpam: state.hideSpam,
-            blurNSFW: state.blurNSFW,
+            keys: state.keys,
             darkMode: state.darkMode
-        };
-
-        if (external && account) { // just put here to temporarily stop linter from complaining
-            // TO-DO: save account to nsdb
         }
-    }
 
-    const local = {
-        encryptedTest: state.encryptedTest,
-        encryptedBrainKey: state.encryptedBrainKey,
-        displayName: state.displayName,
-        keys: state.keys,
-        darkMode: state.darkMode
-    }
+        window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
 
-    window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
+        if (state.keys && state.keys.identity.key) {
+            const account = {
+                lastSeenNotificationsTime: state.lastSeenNotificationsTime,
+                displayName: state.displayName,
+                publicKeys: {
+                    arbitrary: state.keys.arbitrary.pub,
+                    identity: state.keys.arbitrary.pub,
+                    wallet: state.keys.wallet.pub // uidw 
+                },
+                publicKeyProofs: {
+                    // xxxYYY means [YYY] was signed with [xxx]
+                    identityArbitrary: await signText(state.keys.arbitrary.pub, state.keys.identity.key),
+                    arbitraryWallet: await signText(state.keys.wallet.pub, state.keys.arbitrary.key)
+                },
+                subscribedTags: state.subscribedTags,
+                followingUsers: state.followingUsers,
+                watchedThreads: state.watchThreads,
+                delegatedMods: state.delegatedMods,
+                hideSpam: state.hideSpam,
+                blurNSFW: state.blurNSFW,
+                darkMode: state.darkMode
+            };
+
+            //console.log(account);
+
+            if (external && account) { // just put here to temporarily stop linter from complaining
+                // TO-DO: save account to nsdb
+            }
+        }
+    });
 }
 
 export default new Vuex.Store({

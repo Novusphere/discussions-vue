@@ -124,7 +124,6 @@ export default {
 
       this.post.setMyModPolicy(this.myPublicKey, pol);
 
-      await sleep(100);
       await modPolicySetTags(this.keys.arbitrary.key, this.post.uuid, pol);
     },
     async watchThread() {

@@ -1,9 +1,10 @@
 import Showdown from "showdown";
 import Turndown from "turndown";
 import sanitizeHTML from "sanitize-html";
+import fs from 'fs';
 import { uuid } from "uuidv4";
 import loadTelegram from "./telegram";
-import fs from 'fs';
+import Lock from "./lock";
 
 const turndownService = new Turndown();
 const showdownService = new Showdown.Converter({
@@ -209,6 +210,7 @@ function saveBotsConfig(name, config) {
 })();
 
 export {
+    Lock,
     getBotsConfig,
     saveBotsConfig,
     htmlToMarkdown,

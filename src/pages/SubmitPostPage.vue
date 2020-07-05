@@ -92,7 +92,7 @@ export default {
     async submitPost({ transaction }) {
       this.waitSubmit = true;
 
-      await sleep(1000);
+      await sleep(250);
 
       let post = undefined;
       await waitFor(

@@ -6,7 +6,11 @@ import * as bip32 from 'bip32';
 import * as axios from 'axios';
 import BufferWriter from './bufferwriter';
 import eos from "./eos";
-import { getFromCache } from "@/novusphere-js/utility";
+import { getFromCache, waitFor } from "@/novusphere-js/utility";
+import { spawn, Worker } from "threads";
+
+let eccWorker = undefined;
+spawn(new Worker("./workers/ecc")).then((ew) => eccWorker = ew);
 
 let cache = {};
 
@@ -186,7 +190,7 @@ function withdrawAction({ chain, senderPrivateKey, account, amount, fee, nonce, 
 //
 // Create transfer actions
 //
-function createTransferActions(actions) {
+async function createTransferActions(actions) {
     const schema = Joi.object(
         {
             actions: Joi.array().items(Joi.object({
@@ -239,7 +243,7 @@ function createTransferActions(actions) {
         trx.write(bodyBuffer);
 
         const trxBuffer = trx.toBuffer();
-        const signature = ecc.signHash(ecc.sha256(trxBuffer, 'hex'), senderPrivateKey);
+        const signature = await signHash(ecc.sha256(trxBuffer, 'hex'), senderPrivateKey);
 
         const transfer = {
             amount: amount,
@@ -263,7 +267,7 @@ function createTransferActions(actions) {
 //
 async function transfer(actions, notify) {
 
-    const transfers = createTransferActions(actions);
+    const transfers = await createTransferActions(actions);
     const { data } = await axios.post(
         `https://atmosdb.novusphere.io/unifiedid/relay`,
         `data=${encodeURIComponent(JSON.stringify({
@@ -275,10 +279,16 @@ async function transfer(actions, notify) {
     //return { transaction_id: "dee67ccdf1aae10cb1f59c5f4ab87bc4b02b5be5ad1710600a352b4d8ebed2a0" };
 }
 
+//
+// Gets a block explorer transaction link for a given symbol and a transaction id
+//
 async function getTransactionLink(symbol, trxid) {
     return `https://bloks.io/transaction/${trxid}`;
 }
 
+//
+// Creates an asset from a quantity and a symbol and corrects its precision
+//
 async function createAsset(quantity, symbol) {
     const eosTokensInfo = await getTokensInfo();
     const token = eosTokensInfo.find(t => t.symbol == symbol);
@@ -293,11 +303,32 @@ async function createAsset(quantity, symbol) {
     return `${parseFloat(quantity).toFixed(8)} ${symbol}`;
 }
 
+//
+// Add two assets together
+//
 async function sumAsset(asset1, asset2) {
     const [quantity1, symbol1] = asset1.split(' ');
     const [quantity2, symbol2] = asset2.split(' ');
     if (symbol1 != symbol2) throw new Error(`Symbol mismatch for assets "${asset1}", "${asset2}"`);
     return await createAsset(Number(quantity1) + Number(quantity2), symbol1);
+}
+
+//
+// Sign a text message
+//
+async function signText(text, key) {
+    await waitFor(async () => eccWorker);
+    const result = await eccWorker.sign(text, key);
+    return result;
+}
+
+//
+// Signs a hash
+//
+async function signHash(hash256, key) {
+    await waitFor(async () => eccWorker);
+    const result = eccWorker.signHash(hash256, key);
+    return result;
 }
 
 export {
@@ -320,6 +351,8 @@ export {
     sumAsset,
     withdrawAction,
     transfer,
-    createTransferActions
+    createTransferActions,
+    signText,
+    signHash
 }
 

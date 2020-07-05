@@ -270,8 +270,6 @@ export default {
             ...ta,
             senderPrivateKey: keys.wallet.key
           }));
-
-          await sleep(100); // let the transfer dialog close
         }
 
         //trxid =

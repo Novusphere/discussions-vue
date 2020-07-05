@@ -78,6 +78,7 @@ export default {
           console.log(`Could not load user asset ${symbol}`);
           console.error(ex);
         }
+
         await sleep(100);
       }
     }

@@ -4,7 +4,7 @@ import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
 import { getFromCache, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
 import { Post } from './Post';
-import { createTransferActions } from "@/novusphere-js/uid";
+import { createTransferActions, signText } from "@/novusphere-js/uid";
 
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
@@ -496,7 +496,7 @@ async function submitVote(signKey, vote) {
         metadata: JSON.stringify({
             nonce: nonce,
             pub: pub,
-            sig: ecc.sign(ecc.sha256(`${vote.value} ${vote.uuid} ${nonce}`), signKey)
+            sig: await signText(ecc.sha256(`${vote.value} ${vote.uuid} ${nonce}`), signKey)
         })
     };
 
@@ -528,7 +528,7 @@ async function submitPost(signKey, post, transferActions) {
         uidw: post.uidw || undefined,
         mentions: Array.from(new Set(post.mentions || [])),
         pub: pub,
-        sig: ecc.sign(ecc.sha256(post.uuid + ecc.sha256(post.content)), signKey)
+        sig: await signText(ecc.sha256(post.uuid + ecc.sha256(post.content)), signKey)
     };
 
     let vote = {
@@ -538,7 +538,7 @@ async function submitPost(signKey, post, transferActions) {
         metadata: JSON.stringify({
             nonce: nonce,
             pub: pub,
-            sig: ecc.sign(ecc.sha256(`${1} ${post.uuid} ${nonce}`), signKey)
+            sig: await signText(ecc.sha256(`${1} ${post.uuid} ${nonce}`), signKey)
         })
     };
 
@@ -555,7 +555,7 @@ async function submitPost(signKey, post, transferActions) {
     };
 
     if (transferActions && transferActions.length > 0) {
-        request.transfers = createTransferActions(transferActions);
+        request.transfers = await createTransferActions(transferActions);
         request.notify = JSON.stringify({ name: 'tip', data: { parentUuid: post.parentUuid } });
     }
 
@@ -576,11 +576,11 @@ async function submitPost(signKey, post, transferActions) {
 //
 // Creates a standard signed request
 // 
-function createStandardSignedRequest(key, domain, signHash = true) {
+async function createStandardSignedRequest(key, domain, signHash = true) {
     const time = Date.now();
     const pub = ecc.privateToPublic(key);
     const hash = ecc.sha256(`${domain}-${time}`);
-    const sig = (signHash ? ecc.signHash : ecc.sign)(hash, key); // TO-DO: fix requests that use sign()
+    const sig = await (signHash ? signHash : signText)(hash, key); // TO-DO: fix requests that use sign()
 
     return { time, pub, sig };
 }
@@ -590,7 +590,7 @@ function createStandardSignedRequest(key, domain, signHash = true) {
 //
 async function modPolicySetTags(postKey, uuid, tags, domain) {
     domain = domain || window.location.host;
-    const { time, pub, sig } = createStandardSignedRequest(postKey, domain);
+    const { time, pub, sig } = await createStandardSignedRequest(postKey, domain);
 
     const { data } = await axios.post(
         `https://atmosdb.novusphere.io/discussions/moderation/settags`,
@@ -607,7 +607,7 @@ async function modPolicySetTags(postKey, uuid, tags, domain) {
 //
 async function getUserAccountObject(identityKey, domain) {
     domain = domain || window.location.host;
-    const { time, pub, sig } = createStandardSignedRequest(identityKey, domain, false); // TO-DO: fix this request to use sign
+    const { time, pub, sig } = await createStandardSignedRequest(identityKey, domain, false); // TO-DO: fix this request to use sign
 
     const startTime = Date.now();
     const { data } = await axios.post(
@@ -677,5 +677,5 @@ export {
     getTokens,
     modPolicySetTags,
     getPinnedPosts,
-    getUserAccountObject
+    getUserAccountObject,
 }
