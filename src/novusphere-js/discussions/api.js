@@ -4,7 +4,7 @@ import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
 import { getFromCache, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
 import { Post } from './Post';
-import { createTransferActions, signText } from "@/novusphere-js/uid";
+import { createTransferActions, signText, signHash } from "@/novusphere-js/uid";
 
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
@@ -576,11 +576,11 @@ async function submitPost(signKey, post, transferActions) {
 //
 // Creates a standard signed request
 // 
-async function createStandardSignedRequest(key, domain, signHash = true) {
+async function createStandardSignedRequest(key, domain, useSignHash) {
     const time = Date.now();
     const pub = ecc.privateToPublic(key);
     const hash = ecc.sha256(`${domain}-${time}`);
-    const sig = await (signHash ? signHash : signText)(hash, key); // TO-DO: fix requests that use sign()
+    const sig = await (useSignHash ? signHash : signText)(hash, key); // TO-DO: fix requests that use sign()
 
     return { time, pub, sig };
 }

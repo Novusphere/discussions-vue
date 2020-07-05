@@ -14,7 +14,7 @@
 
         <v-text-field v-model="memo" label="Memo"></v-text-field>
 
-        <v-text-field type="password" v-model="password" :rules="passwordTesterRules" label="Password"></v-text-field>
+        <v-text-field type="password" v-model="password" :rules="passwordTesterRules" label="Password" @keydown.enter="submitWithdraw()"></v-text-field>
 
         <TransactionSubmitText :link="transactionLink" :error="transactionError">Your withdrawal has been successfully submitted to the network.</TransactionSubmitText>
 

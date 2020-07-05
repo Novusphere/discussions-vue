@@ -11,14 +11,14 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 8">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <div class="d-inline-block">
           <v-switch class="d-inline" v-model="enableConsoleProxy" :label="`Enable Console`"></v-switch>
           <v-btn class="d-inline" color="primary" @click="consoleProxy = ''">Clear</v-btn>
         </div>
         <v-textarea readonly v-model="consoleProxy" label="Console proxy"></v-textarea>
       </v-col>
-      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 2">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 3">
         <v-card>
           <v-toolbar color="primary" dark>
             <v-toolbar-title>Browse</v-toolbar-title>
@@ -33,7 +33,7 @@
           </v-list>
         </v-card>
       </v-col>
-      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 2">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 3">
         <v-card>
           <v-toolbar color="primary" dark>
             <v-toolbar-title>Misc</v-toolbar-title>

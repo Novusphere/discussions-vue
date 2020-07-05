@@ -8,9 +8,13 @@
       </v-row>
     </div>
     <div>
-      <v-row class="mb-2" v-for="(p, i) in posts" :key="i">
+      <v-row class="mb-2" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
         <v-col cols="12">
-          <PostCard :clickable="true" :display="display" :post="p" />
+          <PostCard
+            :clickable="true"
+            :display="display"
+            :post="p"
+          />
         </v-col>
       </v-row>
       <infinite-loading ref="infiniteLoading" @infinite="infinite">
@@ -25,6 +29,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import PostCard from "@/components/PostCard";
 
 export default {
@@ -38,9 +43,21 @@ export default {
     infinite: Function,
     display: String
   },
+  watch: {
+    //posts() {
+    //  this.show = this.posts.map(() => true);
+    //}
+  },
+  computed: {
+    ...mapState({
+      hideSpam: state => state.hideSpam,
+      blurNSFW: state => state.blurNSFW
+    })
+  },
   data: () => ({
-    //
+    //show: []
   }),
+  created() {},
   methods: {
     reset() {
       this.$refs.infiniteLoading.stateChanger.reset();
