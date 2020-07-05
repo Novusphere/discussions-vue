@@ -83,7 +83,7 @@ export default {
     hasInput() {
       const editor = this.getEditor();
       if (!editor) return false;
-      
+
       const html = editor.getHTML();
       return html.length >= 8;
     },
@@ -92,7 +92,7 @@ export default {
     },
     cancel() {
       this.getEditor().clear();
-      this.$emit('cancel');
+      this.$emit("cancel");
     },
     mentionSuggester(query) {
       // include people who the user is following
@@ -131,9 +131,9 @@ export default {
       const content = this.$refs.editor.getMarkdown();
       const tags = this.$refs.editor.getTags();
       const mentions = this.$refs.editor.getMentions().map(m => m.pub);
-      const tips = this.$refs.editor.getTips();
+      const tips = this.edit ? [] : this.$refs.editor.getTips(); // can't tip in an edit
 
-      if (this.parentPost) { 
+      if (this.parentPost) {
         // include the person we're replying to as a silent mention
         mentions.push(this.parentPost.pub);
       }
@@ -160,12 +160,13 @@ export default {
       };
 
       //await sleep(5000);
-      let trxid = undefined;
+      let trxid = undefined;        
+      let transferActions = [];
       try {
         if (!post.content || post.content.length < 5)
           throw new Error(`Content is too short`);
 
-        let transferActions = [];
+
         if (tips.length > 0) {
           for (const { symbol, quantity, pub } of tips) {
             let uidw = undefined;
@@ -306,15 +307,23 @@ export default {
         artificalReplyPost.upvotes = 1;
         artificalReplyPost.myVote = 1;
 
+        if (this.parentPost) {
+          artificalReplyPost.op = this.parentPost.op;
+          artificalReplyPost.threadTree = this.parentPost.threadTree;
+        }
+
         this.disablePost = false;
         this.getEditor().clear();
 
         if (this.edit) {
           console.log(`edit trxid: ${trxid}`);
-          this.$emit("edit", artificalReplyPost);
+          this.$emit("edit", { post: artificalReplyPost });
         } else {
           console.log(`post trxid: ${trxid}`);
-          this.$emit("reply", artificalReplyPost);
+          this.$emit("reply", {
+            post: artificalReplyPost,
+            tips: transferActions.map(ta => ({ ...ta, senderPrivateKey: "" }))
+          });
         }
       }
     }

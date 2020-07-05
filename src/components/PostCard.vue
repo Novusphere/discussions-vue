@@ -218,9 +218,9 @@ export default {
       this.$refs.editor.setEditorContent(this.post.title, this.post.content);
       this.editing = true;
     },
-    onEdit(editedPost) {
+    onEdit({ post }) {
       this.editing = false;
-      this.$emit("edit", editedPost);
+      this.$emit("edit", { post });
     },
     cardClicked() {
       // reveal the blur if clicked on

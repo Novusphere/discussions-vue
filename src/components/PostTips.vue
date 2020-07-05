@@ -13,17 +13,6 @@
 
 
 <script>
-/*
-    <div v-for="(tip, i) in tips" :key="i" class="d-inline-block" :style="{ width: `${36 + formatTip(tip).length* (!$vuetify.breakpoint.mobile ? 6 : 3)}px` }">
-      <v-badge bottom overlap :offset-x="-1">
-        <template v-slot:badge>
-          <span :class="{ 'mobile-tip-text': $vuetify.breakpoint.mobile }">{{ formatTip(tip) }}</span>
-        </template>
-        <TokenIcon :size="!$vuetify.breakpoint.mobile ? 32 : 16" :symbol="tip.symbol" />
-      </v-badge>
-    </div>
-*/
-
 import TokenIcon from "@/components/TokenIcon";
 
 export default {
@@ -44,6 +33,8 @@ export default {
         KROWN: 555,
         PUML: 123.456
       };*/
+      //console.log(JSON.parse(JSON.stringify(this.post.tips)));
+
       let summary = {};
       for (const tip of this.post.tips) {
         const [amount, symbol] = tip.data.amount.split(" ");

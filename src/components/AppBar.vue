@@ -41,7 +41,7 @@
       <v-btn v-if="isLoggedIn" text @click="createPost()">
         <v-icon>create</v-icon>
       </v-btn>
-      <NotificationsButton />
+      <NotificationsButton v-if="isLoggedIn" />
       <v-menu
         offset-y
         v-model="menu"

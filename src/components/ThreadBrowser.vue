@@ -99,7 +99,7 @@ export default {
       this.opening = tree[thread.opening.uuid];
       this.tree = tree;
 
-      this.$emit('loaded', { opening: this.opening, tree: this.tree });
+      this.$emit("loaded", { opening: this.opening, tree: this.tree });
     },
     async goToSubPost() {
       const subPostId = this.referenceId2;
@@ -120,20 +120,38 @@ export default {
         }
       }
     },
-    async edit(editPost) {
-      const { post } = this.tree[editPost.parentUuid];
-      if (post) {
-        post.content = editPost.content;
-        post.title = editPost.title;
+    async edit({ post }) {
+      const p = this.tree[post.parentUuid].post;
+      if (p) {
+        p.content = post.content;
+        p.title = post.title;
       }
     },
-    async reply(replyPost) {
-      if (this.tree[replyPost.uuid]) return;
+    async reply({ post, tips }) {
+      if (this.tree[post.uuid]) return;
 
-      replyPost.threadTree = replyPost;
-      const reply = { post: replyPost, replies: [] };
-      this.tree[replyPost.uuid] = reply;
-      this.tree[replyPost.parentUuid].replies.unshift(reply);
+      let artificalTips = tips.map(t => ({
+        transaction: post.transaction,
+        data: {
+          amount: t.amount,
+          chain_id: t.chain,
+          fee: t.fee,
+          from: this.keys.wallet.pub,
+          memo: t.memo,
+          nonce: t.nonce,
+          relayer: "",
+          relayer_account: "",
+          sig: "",
+          to: t.recipientPublicKey
+        }
+      }));
+
+      const reply = { post, replies: [] };
+      this.tree[post.uuid] = reply;
+
+      const parent = this.tree[post.parentUuid];
+      parent.replies.unshift(reply);
+      parent.post.tips.push(...artificalTips);
     }
   }
 };

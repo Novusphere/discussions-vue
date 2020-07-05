@@ -87,14 +87,14 @@ export default {
         (this.$refs.replies && this.$refs.replies.some(r => r.hasInput()))
       );
     },
-    onEdit(editPost) {
-      this.$emit("edit", editPost);
+    onEdit({ post }) {
+      this.$emit("edit", { post });
     },
-    onReply(replyPost) {
+    onReply({ post, tips }) {
       if (!this.isThread) {
         this.showSubmitter = false;
       }
-      this.$emit("reply", replyPost);
+      this.$emit("reply", { post, tips });
     }
   }
 };

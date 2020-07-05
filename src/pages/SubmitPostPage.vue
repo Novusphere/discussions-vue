@@ -16,7 +16,10 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { getCommunityByTag, getSinglePost } from "@/novusphere-js/discussions/api";
+import {
+  getCommunityByTag,
+  getSinglePost
+} from "@/novusphere-js/discussions/api";
 import { waitFor, sleep } from "@/novusphere-js/utility";
 
 import BrowsePageLayout from "@/components/BrowsePageLayout";
@@ -89,23 +92,26 @@ export default {
         e.returnValue = "";
       }
     },
-    async submitPost({ transaction }) {
+    async submitPost({ post }) {
       this.waitSubmit = true;
 
       await sleep(250);
 
-      let post = undefined;
+      const transaction = post.transaction;
+      let p = undefined;
       await waitFor(
         async () => {
-          post = await getSinglePost(transaction);
-          return post != undefined;
+          p = await getSinglePost(transaction);
+          return p != undefined;
         },
         500,
         5000
       );
 
-      if (post) {
-        this.$router.push(`/tag/${post.sub}/${post.getEncodedId()}/${post.getSnakeCaseTitle()}`);
+      if (p) {
+        this.$router.push(
+          `/tag/${p.sub}/${p.getEncodedId()}/${p.getSnakeCaseTitle()}`
+        );
       } else {
         console.log(`Thread couldnt be found... ${transaction}`);
       }
