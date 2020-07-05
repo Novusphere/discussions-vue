@@ -6,11 +6,13 @@ import * as bip32 from 'bip32';
 import * as axios from 'axios';
 import BufferWriter from './bufferwriter';
 import eos from "./eos";
-import { getFromCache, waitFor } from "@/novusphere-js/utility";
+import { getFromCache } from "@/novusphere-js/utility";
 import { spawn, Worker } from "threads";
 
 let eccWorker = undefined;
-spawn(new Worker("./workers/ecc")).then((ew) => eccWorker = ew);
+if (typeof window != "undefined") {
+    spawn(new Worker("./workers/ecc")).then((ew) => eccWorker = ew);
+}
 
 let cache = {};
 
@@ -317,18 +319,26 @@ async function sumAsset(asset1, asset2) {
 // Sign a text message
 //
 async function signText(text, key) {
-    await waitFor(async () => eccWorker);
-    const result = await eccWorker.sign(text, key);
-    return result;
+    if (eccWorker) {
+        const result = await eccWorker.sign(text, key);
+        return result;
+    }
+    else {
+        return ecc.sign(text, key);
+    }
 }
 
 //
 // Signs a hash
 //
 async function signHash(hash256, key) {
-    await waitFor(async () => eccWorker);
-    const result = eccWorker.signHash(hash256, key);
-    return result;
+    if (eccWorker) {
+        const result = eccWorker.signHash(hash256, key);
+        return result;
+    }
+    else {
+        return ecc.signHash(hash256, key);
+    }
 }
 
 export {
