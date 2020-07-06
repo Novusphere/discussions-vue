@@ -10,14 +10,14 @@
             >{{ community.members }} members</span>
           </TagLink>
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 8">
+        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 7">
           <div
             class="community-html mr-3"
             v-html="community.html"
             :class="{ 'invert': $vuetify.theme.dark }"
           ></div>
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 1">
+        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 2">
           <v-btn v-if="!isSubscribed(community.tag)" color="primary" @click="subscribeTag()">
             <v-icon>person_add</v-icon>Join
           </v-btn>
