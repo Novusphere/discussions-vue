@@ -103,7 +103,13 @@ import {
 } from "@/utility";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
-import { decrypt, brainKeyFromHash } from "@/novusphere-js/uid";
+import { getUserProfile } from "@/novusphere-js/discussions/api";
+import {
+  decrypt,
+  brainKeyFromHash,
+  isValidBrainKey,
+  brainKeyToKeys
+} from "@/novusphere-js/uid";
 import { sleep, waitFor } from "@/novusphere-js/utility";
 
 export default {
@@ -144,6 +150,17 @@ export default {
       oldEncryptedBrainKey: state => state.encryptedBrainKey,
       needSyncAccount: state => state.needSyncAccount
     })
+  },
+  watch: {
+    async brainKey() {
+      if (this.brainKey && isValidBrainKey(this.brainKey)) {
+        const keys = await brainKeyToKeys(this.brainKey);
+        const profile = await getUserProfile(keys.arbitrary.pub);
+        if (profile && profile.displayName) {
+          this.displayName = profile.displayName;
+        }
+      }
+    }
   },
   methods: {
     async reset() {
