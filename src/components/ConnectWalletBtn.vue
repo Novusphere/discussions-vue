@@ -12,7 +12,7 @@
           <v-btn
             text
             @click="connect(wn)"
-            :disabled="!supportedWallets || !supportedWallets.some(sw => sw == wn)"
+            :disabled="supportedWallets ? !supportedWallets.some(sw => sw == wn) : false"
           >{{ wn }}</v-btn>
         </v-list-item>
       </v-list>
