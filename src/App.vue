@@ -3,6 +3,8 @@
     <AppBar />
     <v-main :style="{background: $vuetify.theme.themes[theme].background}">
       <v-dialog
+        :retain-focus="false"
+        max-width="600"
         v-model="isLoginDialogOpen"
         @click:outside="$store.commit('setLoginDialogOpen', false)"
       >

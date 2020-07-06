@@ -44,9 +44,22 @@
         <v-expansion-panel-content>
           <v-row>
             <v-col cols="12">
-              <v-textarea v-model="generatedBrainKey" label="Brain Key Mnemonic" required></v-textarea>
+              <v-textarea
+                v-model="generatedBrainKey"
+                label="Brain Key Mnemonic"
+                required
+              >
+                <template v-slot:append>
+                  <v-btn icon @click="$copyText(generatedBrainKey)">
+                    <v-icon>content_copy</v-icon>
+                  </v-btn>
+                </template>
+              </v-textarea>
               <div class="red--text text-center">
-                <span>It's <strong>VERY</strong> important you save your brain key. It cannot be recovered after sign up!</span>
+                <span>
+                  It's
+                  <strong>VERY</strong> important you save your brain key. It cannot be recovered after sign up!
+                </span>
               </div>
               <v-btn color="primary" @click="generateBrainKey()">Generate</v-btn>
             </v-col>
@@ -56,7 +69,12 @@
       <v-expansion-panel>
         <v-expansion-panel-header>3. Verify your brain key mnemonic</v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-textarea v-model="brainKey" :rules="brainKeyRules2" label="Brain Key Mnemonic" required></v-textarea>
+          <v-textarea
+            v-model="brainKey"
+            :rules="brainKeyRules2"
+            label="Brain Key Mnemonic"
+            required
+          ></v-textarea>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -106,21 +124,19 @@ export default {
       return rules;
     },
     nextStepOK() {
-        if (this.panel == 0) {
-            if (this.displayNameRules.length) return false;
-            if (this.passwordRules.length) return false;
-            if (this.confirmPasswordRules.length) return false;
-            return true;
-        }
-        else if (this.panel == 1) {
-            if (!this.generatedBrainKey) return false;
-            return true;
-        }
-        else if (this.panel == 2) {
-            if (this.brainKeyRules2.length) return false;
-            return true;
-        }
-        return false;
+      if (this.panel == 0) {
+        if (this.displayNameRules.length) return false;
+        if (this.passwordRules.length) return false;
+        if (this.confirmPasswordRules.length) return false;
+        return true;
+      } else if (this.panel == 1) {
+        if (!this.generatedBrainKey) return false;
+        return true;
+      } else if (this.panel == 2) {
+        if (this.brainKeyRules2.length) return false;
+        return true;
+      }
+      return false;
     }
   },
   data: () => ({
@@ -145,17 +161,15 @@ export default {
       this.confirmPassword = "";
     },
     async nextStep() {
-        if (!this.nextStepOK) return;
-        if (this.panel < 2) {
-            this.panel = this.panel + 1;
-        }
-        else if (this.panel == 2) {
-            await this.completeSignup();
-        }
-        else {
-            // should never happen
-            this.panel = 0;
-        }
+      if (!this.nextStepOK) return;
+      if (this.panel < 2) {
+        this.panel = this.panel + 1;
+      } else if (this.panel == 2) {
+        await this.completeSignup();
+      } else {
+        // should never happen
+        this.panel = 0;
+      }
     },
     async completeSignup() {
       if (this.brainKeyRules.length) return;

@@ -40,7 +40,7 @@ function generateBrainKey() {
 }
 
 function isValidBrainKey(brainKey) {
-    return bip39.validateMnemonic(brainKey);
+    return bip39.validateMnemonic(brainKey.trim());
 }
 
 async function brainKeyFromHash(hash256) {
@@ -49,7 +49,7 @@ async function brainKeyFromHash(hash256) {
 }
 
 async function brainKeyToKeys(brainKey) {
-    const seed = await bip39.mnemonicToSeed(brainKey);
+    const seed = await bip39.mnemonicToSeed(brainKey.trim());
     const node = await bip32.fromSeed(seed);
 
     function getKeyAt(index) {

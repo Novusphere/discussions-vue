@@ -19,7 +19,8 @@
                       label="Brain Key Mnemonic"
                       hint="Enter your brain key mnemonic"
                       required
-                    ></v-textarea>
+                    >
+                    </v-textarea>
                   </v-tab-item>
                   <v-tab-item>
                     <div class="text-center" v-show="walletError">
