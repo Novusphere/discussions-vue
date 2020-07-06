@@ -6,13 +6,39 @@
           <div v-if="!hasLoginSession">
             <v-row>
               <v-col cols="12">
-                <v-textarea
-                  v-model="brainKey"
-                  :rules="brainKeyRules"
-                  label="Brain Key Mnemonic"
-                  hint="Enter your brain key mnemonic"
-                  required
-                ></v-textarea>
+                <v-tabs v-model="keyMethodTab">
+                  <v-tab>Brain Key</v-tab>
+                  <v-tab>Wallet</v-tab>
+                </v-tabs>
+
+                <v-tabs-items v-model="keyMethodTab">
+                  <v-tab-item>
+                    <v-textarea
+                      v-model="brainKey"
+                      :rules="brainKeyRules"
+                      label="Brain Key Mnemonic"
+                      hint="Enter your brain key mnemonic"
+                      required
+                    ></v-textarea>
+                  </v-tab-item>
+                  <v-tab-item>
+                    <div class="text-center" v-show="walletError">
+                      <span class="error--text">{{ walletError }}</span>
+                    </div>
+                    <ConnectWalletBtn
+                      :supportedWallets="['scatter']"
+                      ref="connector"
+                      color="primary"
+                      class="mt-2"
+                      @connected="walletConnected"
+                      @error="(e) => walletError = e"
+                    >
+                      <template v-slot:disconnect="{ logout }">
+                        <v-btn class="ml-2" color="primary" @click="logout">Disconnect Wallet</v-btn>
+                      </template>
+                    </ConnectWalletBtn>
+                  </v-tab-item>
+                </v-tabs-items>
               </v-col>
             </v-row>
             <v-row>
@@ -67,6 +93,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import ecc from "eosjs-ecc";
 import {
   createLoginObject,
   displayNameRules,
@@ -74,18 +101,21 @@ import {
   passwordTesterRules,
   brainKeyRules
 } from "@/utility";
-
 import PublicKeyIcon from "@/components/PublicKeyIcon";
-import { decrypt } from "@/novusphere-js/uid";
+import ConnectWalletBtn from "@/components/ConnectWalletBtn";
+import { decrypt, brainKeyFromHash } from "@/novusphere-js/uid";
 import { sleep, waitFor } from "@/novusphere-js/utility";
 
 export default {
   name: "LoginCard",
   components: {
-    PublicKeyIcon
+    PublicKeyIcon,
+    ConnectWalletBtn
   },
   props: {},
   data: () => ({
+    keyMethodTab: 0,
+    walletError: "",
     brainKey: "",
     displayName: "",
     password: "",
@@ -121,6 +151,18 @@ export default {
       this.password = "";
       this.brainKey = "";
       this.waiting = false;
+    },
+    async walletConnected(wallet) {
+      this.walletError = "";
+      try {
+        const sig = await wallet.signArbitrary("discussions app auth");
+        const hash = ecc.sha256(sig);
+        this.brainKey = await brainKeyFromHash(hash);
+        this.displayName = wallet.auth.accountName;
+      } catch (ex) {
+        this.walletError = ex.message;
+        this.$refs.connector.logout();
+      }
     },
     async login() {
       this.$refs.form.validate();

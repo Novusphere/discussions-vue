@@ -102,7 +102,7 @@ export default {
       }));
 
       // include people who have participated in current thread
-      if (this.parentPost.threadTree) {
+      if (this.parentPost && this.parentPost.threadTree) {
         for (const { post } of Object.values(this.parentPost.threadTree)) {
           if (items.find(i => i.pub == post.pub)) continue;
           items.push({ pub: post.pub, displayName: post.displayName });

@@ -9,7 +9,11 @@
       </template>
       <v-list>
         <v-list-item v-for="(wn, i) in walletNames" :key="i">
-          <v-btn text @click="connect(wn)">{{ wn }}</v-btn>
+          <v-btn
+            text
+            @click="connect(wn)"
+            :disabled="!supportedWallets || !supportedWallets.some(sw => sw == wn)"
+          >{{ wn }}</v-btn>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -26,7 +30,9 @@ import { eos } from "@/novusphere-js/uid";
 export default {
   name: "ConnectWalletBtn",
   components: {},
-  props: {},
+  props: {
+    supportedWallets: Array
+  },
   data: () => ({
     waiting: false,
     hasWallet: false,
@@ -39,9 +45,11 @@ export default {
   methods: {
     async logout() {
       if (this.wallet) {
-
         try {
-          await this.wallet.logout(this.wallet.auth.accountName, this.wallet.auth.permission);
+          await this.wallet.logout(
+            this.wallet.auth.accountName,
+            this.wallet.auth.permission
+          );
         } catch (ex) {
           console.log(ex);
         }
@@ -58,8 +66,11 @@ export default {
           this.hasWallet = true;
           this.wallet = wallet;
           this.waiting = false;
+          this.$emit("connected", this.wallet);
         }
       } catch (ex) {
+        this.hasWallet = false;
+        this.wallet = undefined;
         this.waiting = false;
         this.$emit("error", ex);
       }

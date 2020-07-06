@@ -42,6 +42,11 @@ function isValidBrainKey(brainKey) {
     return bip39.validateMnemonic(brainKey);
 }
 
+async function brainKeyFromHash(hash256) {
+    const mnemonic = bip39.entropyToMnemonic(hash256);
+    return mnemonic;
+}
+
 async function brainKeyToKeys(brainKey) {
     const seed = await bip39.mnemonicToSeed(brainKey);
     const node = await bip32.fromSeed(seed);
@@ -347,6 +352,7 @@ export {
     generateBrainKey,
     isValidBrainKey,
     brainKeyToKeys,
+    brainKeyFromHash,
     getTokenAddress,
     getSymbols,
     getAsset,
