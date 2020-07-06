@@ -433,6 +433,7 @@ function searchPostsByTransactions(transactions, sort) {
 //
 function searchPostsByTextSearch(text) {
     return searchPosts({
+        includeOpeningPost: true,
         pipeline: [
             {
                 $match: {

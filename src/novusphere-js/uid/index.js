@@ -6,6 +6,7 @@ import * as bip32 from 'bip32';
 import * as axios from 'axios';
 import BufferWriter from './bufferwriter';
 import eos from "./eos";
+import bch from "./bch";
 import { getFromCache } from "@/novusphere-js/utility";
 import { spawn, Worker } from "threads";
 
@@ -52,6 +53,7 @@ async function brainKeyToKeys(brainKey) {
     const node = await bip32.fromSeed(seed);
 
     function getKeyAt(index) {
+        // m/44'/0'/0' = read.cash
         let child = node.derivePath(`m/80'/0'/0'/${index}`);
         const wif = child.toWIF();
         return {
@@ -347,6 +349,7 @@ async function signHash(hash256, key) {
 
 export {
     eos,
+    bch,
     encrypt,
     decrypt,
     generateBrainKey,

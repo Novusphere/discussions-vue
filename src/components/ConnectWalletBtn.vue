@@ -40,7 +40,7 @@ export default {
   }),
   created() {
     this.wallet = undefined;
-    this.walletNames = eos.getWalletNames();
+    this.walletNames = [...eos.getWalletNames()];
   },
   methods: {
     async logout() {
