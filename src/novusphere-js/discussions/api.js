@@ -4,7 +4,7 @@ import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
 import { getFromCache, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
 import { Post } from './Post';
-import { createTransferActions, signText, signHash } from "@/novusphere-js/uid";
+import { createTransferActions, signText, signHash, getSymbols } from "@/novusphere-js/uid";
 
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
@@ -87,6 +87,8 @@ async function getCommunities() {
             tags[tag].members = count;
         }
 
+
+        const symbols = await getSymbols();
         let communities = Object
             .keys(tags)
             .map(t => ({
@@ -94,11 +96,13 @@ async function getCommunities() {
                 desc: tags[t].desc,
                 icon: tags[t].icon,
                 members: tags[t].members,
-                html: markdownToHTML(tags[t].desc)
+                html: markdownToHTML(tags[t].desc),
+                symbol: tags[t].symbol || t.toUpperCase()
             }))
             .map(t => ({
                 ...t,
-                description: htmlToText(t.html)
+                description: htmlToText(t.html),
+                symbol: symbols.some(s => s == t.symbol) ? t.symbol : undefined
             }));
 
         return communities;

@@ -40,18 +40,27 @@ export default {
     quantity: "",
     zero: true
   }),
-  async created() {
-    if (this.isLoggedIn) {
-      const asset = await getAsset(this.symbol, this.keys.wallet.pub);
-      const [quantity] = asset.split(" ");
-
-      this.quantity = quantity;
-      this.zero = Number(quantity) <= 0;
-
-      this.$emit("data", { quantity, symbol: this.symbol, zero: this.zero });
+  watch: {
+    async symbol() {
+      await this.load();
     }
-    else {
-      this.quantity = await createAsset(0, this.symbol);
+  },
+  async created() {
+    await this.load();
+  },
+  methods: {
+    async load() {
+      if (this.isLoggedIn) {
+        const asset = await getAsset(this.symbol, this.keys.wallet.pub);
+        const [quantity] = asset.split(" ");
+
+        this.quantity = quantity;
+        this.zero = Number(quantity) <= 0;
+
+        this.$emit("data", { quantity, symbol: this.symbol, zero: this.zero });
+      } else {
+        this.quantity = await createAsset(0, this.symbol);
+      }
     }
   }
 };

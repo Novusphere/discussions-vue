@@ -17,14 +17,24 @@ export default {
   data: () => ({
     icon: ""
   }),
+  watch: {
+    async symbol() {
+      await this.load();
+    }
+  },
   async created() {
-    const symbol = this.symbol.toUpperCase();
-    const tokens = await getTokens();
-    const token =
-      tokens.find(t => t.symbol == symbol) ||
-      tokens.find(t => t.symbol == "ATMOS");
-    if (token) {
-      this.icon = token.logo;
+    await this.load();
+  },
+  methods: {
+    async load() {
+      const symbol = this.symbol.toUpperCase();
+      const tokens = await getTokens();
+      const token =
+        tokens.find(t => t.symbol == symbol) ||
+        tokens.find(t => t.symbol == "ATMOS");
+      if (token) {
+        this.icon = token.logo;
+      }
     }
   }
 };

@@ -7,7 +7,7 @@
       <PostBrowser :pinned="pinned" ref="browser" :cursor="cursor" />
     </template>
     <template v-slot:right>
-      <AssetCard class="mb-2" v-if="symbol" :symbol="symbol" />
+      <AssetCard class="mb-2" :symbol="community.symbol" v-if="community && community.symbol"  />
     </template>
   </BrowsePageLayout>
 </template>
@@ -23,7 +23,6 @@ import {
   searchPostsByTags,
   getCommunityByTag
 } from "@/novusphere-js/discussions/api";
-import { getSymbols } from "@/novusphere-js/uid";
 
 export default {
   name: "BrowseHotPostsPage",
@@ -49,7 +48,6 @@ export default {
     }
   },
   data: () => ({
-    symbol: "",
     tags: [],
     pinned: [],
     cursor: null,
@@ -93,15 +91,6 @@ export default {
 
       const community = await getCommunityByTag(this.tags[0]);
       this.community = community ? community : null;
-
-      const symbols = await getSymbols();
-      const sym = this.tags[0].toUpperCase();
-      if (symbols.find(s => s == sym)) {
-        this.symbol = sym;
-      }
-      else {
-        this.symbol = null;
-      }
     }
   }
 };
