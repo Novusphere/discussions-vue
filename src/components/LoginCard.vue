@@ -48,7 +48,11 @@
                   :rules="displayNameRules"
                   label="Display Name"
                   required
-                ></v-text-field>
+                >
+                  <template v-slot:prepend>
+                    <PublicKeyIcon v-if="publicKey" :publicKey="publicKey" />
+                  </template>
+                </v-text-field>
               </v-col>
             </v-row>
           </div>
@@ -122,6 +126,7 @@ export default {
   data: () => ({
     keyMethodTab: 0,
     walletError: "",
+    publicKey: "",
     brainKey: "",
     displayName: "",
     password: "",
@@ -155,6 +160,7 @@ export default {
     async brainKey() {
       if (this.brainKey && isValidBrainKey(this.brainKey)) {
         const keys = await brainKeyToKeys(this.brainKey);
+        this.publicKey = keys.arbitrary.pub;
         const profile = await getUserProfile(keys.arbitrary.pub);
         if (profile && profile.displayName) {
           this.displayName = profile.displayName;

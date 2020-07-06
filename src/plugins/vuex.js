@@ -128,6 +128,12 @@ export default new Vuex.Store({
                 return state.watchedThreads.find(wt => wt.uuid == uuid);
             }
         },
+        isModerator: state => {
+            return (tag, publicKey) => {
+                return state.delegatedMods
+                    .some(dm => (dm.tag == "all" || dm.tag == tag) && dm.pub == publicKey);
+            }
+        },
         getModeratorKeys: state => {
             return tags => {
                 const mods = state.delegatedMods

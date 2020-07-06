@@ -15,7 +15,11 @@
             <TagLink inline :tag="post.sub" />
           </div>
           <div class="d-inline-block pr-3">
-            <UserProfileLink :displayName="post.displayName" :publicKey="post.pub" />
+            <UserProfileLink
+              :class="{'moderator': isModerator(post.sub, post.pub)}"
+              :displayName="post.displayName"
+              :publicKey="post.pub"
+            />
           </div>
         </div>
         <div class="d-inline-block pr-3">
@@ -101,7 +105,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import { formatDistance } from "date-fns";
 import { refreshOEmbed } from "@/novusphere-js/utility";
 
@@ -166,6 +170,7 @@ export default {
         this.isCompactDisplay || this.isPreviewDisplay || this.isFullDisplay
       );
     },
+    ...mapGetters(["isModerator"]),
     ...mapState({
       hideSpam: state => state.hideSpam,
       blurNSFW: state => state.blurNSFW
@@ -277,6 +282,10 @@ export default {
 
 .post-html a {
   text-decoration: none;
+}
+
+.moderator .user-link {
+  color: red;
 }
 
 /*.post-embed-content {
