@@ -27,6 +27,7 @@
     "eosjs-ecc": "^4.0.7",
     "express": "^4.17.1",
     "jsdom": "^16.2.2",
+    "mongodb": "^3.5.9",
     "sanitize-html": "^1.27.0",
     "showdown": "^1.9.1",
     "threads": "^1.6.3",

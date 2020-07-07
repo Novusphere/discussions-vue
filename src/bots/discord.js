@@ -1,6 +1,6 @@
 import Discord from 'discord.js';
 import { searchPostsByAll } from "@/novusphere-js/discussions/api";
-import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
+import { getConfig, saveConfig, sleep } from "@/novusphere-js/utility";
 
 (async function () {
 
@@ -14,7 +14,17 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
     console.log(`===== Discussions.app Discord Bot =====`);
     console.log(`Loading config...`);
 
-    const config = getBotsConfig(BOT_NAME);
+    const config = getConfig(BOT_NAME, {
+        "token": "",
+        "lastPostTime": 0,
+        "ignoreTags": ["test"],
+        "channel": "discussions"
+    });
+
+    if (!config.token) {
+        console.error(`Discord API token is unspecified`);
+        return;
+    }
 
     function login(bot) {
         return new Promise(async (resolve, reject) => {
@@ -28,7 +38,7 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
                 console.error(e);
                 reject(e);
             });
-            await bot.login(config._token);
+            await bot.login(config.token);
         });
     }
 
@@ -83,15 +93,19 @@ import { getBotsConfig, saveBotsConfig, sleep } from "@/novusphere-js/utility";
 
                         console.log(message);
 
-                        const general = bot.channels.cache.find(ch => ch.name == config.channel);
-                        await general.send(message);
+                        const channel = bot.channels.cache.find(ch => ch.name == config.channel);
+                        if (!channel) {
+                            console.error(`Discord channel "${config.channel}" was not found`);
+                            return;
+                        }
+                        await channel.send(message);
 
                         lastSentDiscordMsgTime = now;
                     }
 
                     if (posts.length > 0 && posts[0].createdAt.getTime() > config.lastPostTime) {
                         config.lastPostTime = posts[0].createdAt.getTime();
-                        saveBotsConfig(BOT_NAME, config);
+                        saveConfig(BOT_NAME, config);
                     }
                 }
             }

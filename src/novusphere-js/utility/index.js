@@ -159,26 +159,22 @@ function createDOMParser() {
     return domParser;
 }
 
-function getBotsConfig(name) {
-    const bots = JSON.parse(fs.readFileSync('./bots/bots.json', 'utf8'));
-    const section = bots[name] || {};
-    const fn = `./bots/${name}.json`;
+function getConfig(name, template) {
+    const section = {};
+    const fn = `./config/${name}.json`;
     if (fs.existsSync(fn)) {
         const config = JSON.parse(fs.readFileSync(fn));
         Object.assign(section, config);
     }
+    else if (template) {
+        Object.assign(section, template);
+    }
     return section;
 }
 
-function saveBotsConfig(name, config) {
-    const bots = JSON.parse(fs.readFileSync('./bots/bots.json', 'utf8'));
-    const section = bots[name] || {};
-    for (const key of Object.keys(config)) {
-        if (key.indexOf('_') == 0) continue;
-        section[key] = config[key];
-    }
-    bots[name] = section;
-    fs.writeFileSync('./bots/bots.json', JSON.stringify(bots));
+function saveConfig(name, config) {
+    const fn = `./config/${name}.json`;
+    fs.writeFileSync(fn, JSON.stringify(config));
 }
 
 (function () {
@@ -211,8 +207,8 @@ function saveBotsConfig(name, config) {
 
 export {
     Lock,
-    getBotsConfig,
-    saveBotsConfig,
+    getConfig,
+    saveConfig,
     htmlToMarkdown,
     htmlToText,
     markdownToHTML,

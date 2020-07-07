@@ -1,50 +1,29 @@
-let config = {
-    "connection": "mongodb://localhost:27017",
-    "database": "discussions2",
-    "contract": {
-        "discussions": "discussionsx",
-        "uid": "nsuidcntract"
-    },
-    "table": {
-        "state": "state",
-        "posts": "posts",
-        "votes": "votes",
-        "accounts": "accounts",
-        "moderation": "moderation"
-    },
-    "index": {
-        "accounts": {
-            "pub": 1,
-            "data.postPub": 1,
-            "data.uidw": 1,
-            "data.tags": 1,
-            "data.following.pub": 1
-        },
-        "state": {
-            "name": 1
-        },
-        "votes": {
-            "pub": 1,
-            "uuid": 1
-        },
-        "posts": {
-            "id": -1,
-            "block": -1,
-            "transaction": 1,
-            "chain": 1,
-            "createdAt": -1,
-            "poster": 1,
-            "pub": 1,
-            "sub": 1,
-            "tags": 1,
-            "threadUuid": 1,
-            "uuid": 1,
-            "mentions": 1,
-            "$text": ["searchMeta", "content"]
-        },
-        "moderation": {
-            "pub": 1,
-            "uuid": 1
+import { MongoClient } from 'mongodb';
+import config from './mongo.config';
+import { getFromCache } from "@/novusphere-js/utility";
+
+let cache = {};
+
+export default async function getDatabase() {
+    return getFromCache(cache, 'database', async () => {
+        const mongo = await MongoClient.connect(config.connection, { useNewUrlParser: true });
+        const database = await mongo.db(config.database);
+
+        for (let collection in config.index) {
+            let indexes = config.index[collection];
+            for (let name in indexes) {
+                let action = {};
+                if (name == "$text") {
+                    indexes[name].forEach(field => action[field] = "text");
+                }
+                else {
+                    action[name] = indexes[name];
+                }
+
+                console.log(`${collection} ${JSON.stringify(action)}`);
+                await database.collection(collection).createIndex(action);
+            }
         }
-    }
+        return database;
+    });
 }
