@@ -103,7 +103,7 @@
         @click:append="subscribe()"
       ></v-text-field>
     </v-list-item>
-    <v-list-item v-for="(tag, i) in subscribedTags" :key="i">
+    <v-list-item v-for="(tag) in subscribedTags" :key="tag">
       <span class="nav-tag">
         <TagLink :tag="tag" />
       </span>

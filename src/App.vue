@@ -26,6 +26,7 @@
       </v-dialog>
 
       <v-dialog
+        :retain-focus="false"
         max-width="600"
         v-model="isTransferDialogOpen"
         @click:outside="$store.commit('setTransferDialogOpen', { value: false })"
@@ -111,7 +112,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import { getUserAccountObject } from "@/novusphere-js/discussions/api";
 
 import AppBar from "@/components/AppBar";
@@ -151,7 +152,10 @@ export default {
       console.log(`Synchronizing account...`);
 
       let account = await getUserAccountObject(this.keys.identity.key);
-      if (!account) {
+      if (account && account.data) {
+        account = account.data;
+        console.log(`Retrieved account successfully`);
+      } else {
         console.log(`Did not find account... checking for legacy account...`);
         const oldAccount = await getUserAccountObject(
           this.keys.identity.key,
@@ -187,8 +191,6 @@ export default {
         } else {
           console.log(`Did not find legacy account`);
         }
-      } else {
-        console.log(`Retrieved account successfully`);
       }
 
       this.$store.commit("syncAccount", account);
@@ -198,7 +200,9 @@ export default {
     theme() {
       return this.darkMode ? "dark" : "light";
     },
-    ...mapGetters(["isLoggedIn, hasLoginSession"]),
+    isLoggedIn() {
+      return this.$store.getters.isLoggedIn;
+    },
     ...mapState({
       darkMode: state => state.darkMode,
       needSyncAccount: state => state.needSyncAccount,
@@ -219,8 +223,20 @@ export default {
   }),
   created() {
     this.$store.commit("init");
+    //this.keepSyncAccount();
   },
+  beforeDestroy() {},
   methods: {
+    /*async keepSyncAccount() {
+      if (this.isLoggedIn && !this.needSyncAccount) {
+        console.log(`keepaccountsync`);
+        let account = await getUserAccountObject(this.keys.identity.key);
+        if (account && account.data) {
+          this.$store.commit("syncAccount", account.data);
+        }
+      }
+      setTimeout(() => this.keepSyncAccount(), 2000);
+    },*/
     async closeTip() {
       this.$store.commit("setSendTipDialogOpen", { value: false });
     },

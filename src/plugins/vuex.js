@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import { saveUserAccountObject } from "@/novusphere-js/discussions/api";
 import { signText } from "@/novusphere-js/uid";
 import { Lock } from "@/novusphere-js/utility";
 
@@ -9,6 +10,7 @@ const saver = new Lock();
 Vue.use(Vuex);
 
 const getDefaultState = () => ({
+    syncTime: 0,
     //
     isLoginDialogOpen: false,
     //
@@ -36,6 +38,7 @@ const getDefaultState = () => ({
     blurNSFW: true,
     needSyncAccount: false,
     notificationCount: 0,
+    // --- saved ---
     lastSeenNotificationsTime: 0,
     subscribedTags: [],
     followingUsers: [], // { displayName, pub, uidw }
@@ -59,8 +62,11 @@ async function saveAccount(state, external = true) {
 
         window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
 
-        if (state.keys && state.keys.identity.key) {
+        if (state.keys && state.keys.identity.key && external) {
+            state.syncTime = Date.now();
+
             const account = {
+                syncTime: state.syncTime,
                 lastSeenNotificationsTime: state.lastSeenNotificationsTime,
                 displayName: state.displayName,
                 publicKeys: {
@@ -82,10 +88,8 @@ async function saveAccount(state, external = true) {
                 darkMode: state.darkMode
             };
 
-            //console.log(account);
-
-            if (external && account) { // just put here to temporarily stop linter from complaining
-                // TO-DO: save account to nsdb
+            if (account && saveUserAccountObject) {
+                //await saveUserAccountObject(state.keys.identity.key, account, window.location.host);
             }
         }
     });
@@ -314,10 +318,18 @@ export default new Vuex.Store({
         syncAccount(state, account) {
             state.needSyncAccount = false;
             if (!account) return;
+            if (state.syncTime && account.syncTime <= state.syncTime) {
+                console.log(`state sync=${state.syncTime}, account sync=${account.syncTime}`);
+            }
+            console.log(`syncAccount()`);
+
+            state.syncTime = account.syncTime || 0;
             state.lastSeenNotificationsTime = account.lastSeenNotificationsTime;
-            state.subscribedTags.push(...account.subscribedTags.filter(st => !state.subscribedTags.some(st2 => st == st2)));
-            state.followingUsers.push(...account.followingUsers.filter(fu => !state.followingUsers.some(fu2 => fu.pub == fu2.pub)));
-            state.delegatedMods.push(...account.delegatedMods.filter(dm => !state.delegatedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag)));
+            state.subscribedTags = [...account.subscribedTags];
+            state.followingUsers = [...account.followingUsers];
+
+            const fixedMods = getDefaultState().delegatedMods;
+            state.delegatedMods = [...fixedMods, ...account.delegatedMods.filter(dm => !fixedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag))];
         },
         forgetLoginSession(state) {
             const defaultState = getDefaultState();

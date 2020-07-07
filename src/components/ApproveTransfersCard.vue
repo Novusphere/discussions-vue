@@ -20,20 +20,20 @@
             <UserProfileLink :publicKey="t.recipient.pub" :displayName="t.recipient.displayName" />
           </v-col>
         </v-row>
-        <v-form ref="form" lazy-validation v-show="!disableSubmit">
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="password"
-                :rules="passwordTesterRules"
-                label="Password"
-                type="password"
-                required
-                @keydown.enter="submit()"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-form>
+
+        <v-row v-show="!disableSubmit">
+          <v-col cols="12">
+            <v-text-field
+              v-model="password"
+              :rules="passwordTesterRules"
+              label="Password"
+              type="password"
+              required
+              @keydown.enter="submit()"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+
         <slot></slot>
       </v-container>
     </v-card-text>
@@ -84,8 +84,6 @@ export default {
     },
     async submit() {
       if (this.disableSubmit) return;
-
-      this.$refs.form.validate();
       if (this.passwordTesterRules.length) return;
 
       const password = this.password;

@@ -3,7 +3,7 @@
     <v-row no-gutters>
       <v-col cols="12">
         <v-card flat>
-          <img class="md-banner" src="https://i.imgur.com/WO5pb52.png" />
+          <img class="md-banner" :src="banner" />
           <v-card-text v-if="this.$slots.header">
             <slot name="header"></slot>
           </v-card-text>
@@ -31,6 +31,7 @@
 
 <script>
 import { mapState } from "vuex";
+import site from "@/server/site";
 import TrendingCard from "@/components/TrendingCard";
 import AboutUsCard from "@/components/AboutUsCard";
 
@@ -49,7 +50,7 @@ export default {
     })
   },
   data: () => ({
-    //
+    banner: site.image
   })
 };
 </script>

@@ -581,10 +581,10 @@ async function submitPost(signKey, post, transferActions) {
 //
 // Creates a standard signed request
 // 
-async function createStandardSignedRequest(key, domain, useSignHash) {
+async function createStandardSignedRequest(key, domain, useSignHash, contents) {
     const time = Date.now();
     const pub = ecc.privateToPublic(key);
-    const hash = ecc.sha256(`${domain}-${time}`);
+    const hash = ecc.sha256(contents || `${domain}-${time}`);
     const sig = await (useSignHash ? signHash : signText)(hash, key); // TO-DO: fix requests that use sign()
 
     return { time, pub, sig };
@@ -622,6 +622,27 @@ async function getUserAccountObject(identityKey, domain) {
     console.proxyLog(`Took ${Date.now() - startTime}ms to retrieve account object for ${identityKey} @ ${domain}`);
 
     return data.payload; // TO-DO: standardize this request...
+}
+
+//
+// Saves a user account object
+//
+async function saveUserAccountObject(identityKey, accountObject, domain) {
+    const json = JSON.stringify(accountObject);
+    const { time, pub, sig } = await createStandardSignedRequest(identityKey, domain, false, json);
+
+    const startTime = Date.now();
+    const qs =
+        `time=${time}&pub=${pub}&sig=${sig}&domain=${domain}&data=${encodeURIComponent(json)}`;
+    //console.log(qs);
+    const { data } = await axios.post(
+        `https://atmosdb.novusphere.io/account/save`,
+        qs
+    );
+    if (!data.payload) {
+        console.log(data);
+    }
+    console.proxyLog(`Took ${Date.now() - startTime}ms to save account object for ${identityKey} @ ${domain}`);
 }
 
 //
@@ -683,4 +704,5 @@ export {
     modPolicySetTags,
     getPinnedPosts,
     getUserAccountObject,
+    saveUserAccountObject
 }

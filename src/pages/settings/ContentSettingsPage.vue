@@ -28,6 +28,8 @@
                 <v-col>
                   <v-select
                     no-data-text="Try following some users!"
+                    hint="Add a moderator from users you follow"
+                    persistent-hint
                     v-model="addModPublicKey"
                     :items="followingUsers"
                     item-text="displayName"
