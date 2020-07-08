@@ -3,8 +3,14 @@ import fs from 'fs';
 import { argv } from 'yargs';
 import createRoutes from "./routes";
 import config from "./site";
+//import { getDatabase } from "./mongo";
 
-(function () {
+(async function () {
+    /*try { await getDatabase(); }
+    catch (ex) {
+        console.error(ex);
+        return;
+    }*/
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
     const BUILD_TIME = Date.now();

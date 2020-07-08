@@ -1,6 +1,14 @@
+import { getConfig } from "@/novusphere-js/utility";
+
+//
+// NOTE:
+// create /config/mongo.json and put your "connection" field there
+//
+
 let config = {
     "connection": "mongodb://localhost:27017",
     "database": "discussions2",
+    "actionDatabase": "atmosdb2",
     "contract": {
         "discussions": "discussionsx",
         "uid": "nsuidcntract"
@@ -15,10 +23,10 @@ let config = {
     "index": {
         "accounts": {
             "pub": 1,
-            "data.postPub": 1,
+            "data.arbitraryPublicKey": 1,
             "data.uidw": 1,
-            "data.tags": 1,
-            "data.following.pub": 1
+            "data.subscribedTags": 1,
+            "data.followingUsers.pub": 1
         },
         "state": {
             "name": 1
@@ -48,5 +56,7 @@ let config = {
         }
     }
 }
+
+Object.assign(config, getConfig(`mongo`));
 
 export default config;

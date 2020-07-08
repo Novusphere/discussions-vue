@@ -4,11 +4,13 @@ import { getFromCache } from "@/novusphere-js/utility";
 
 let cache = {};
 
-export default async function getDatabase() {
-    return getFromCache(cache, 'database', async () => {
-        const mongo = await MongoClient.connect(config.connection, { useNewUrlParser: true });
-        const database = await mongo.db(config.database);
+async function getMongo() {
+    return getFromCache(cache, 'mongo', async () => {
+        console.log(`Trying to connect to ${config.connection}`);
+        const mongo = await MongoClient.connect(config.connection, { useNewUrlParser: true, useUnifiedTopology: true });
 
+        // set up the indexes
+        const database = await mongo.db(config.database);
         for (let collection in config.index) {
             let indexes = config.index[collection];
             for (let name in indexes) {
@@ -20,10 +22,39 @@ export default async function getDatabase() {
                     action[name] = indexes[name];
                 }
 
-                console.log(`${collection} ${JSON.stringify(action)}`);
+                console.log(`Index ${collection} ${JSON.stringify(action)}`);
                 await database.collection(collection).createIndex(action);
             }
         }
+
+        return mongo;
+    });
+}
+
+async function getDatabase(name) {
+    name = name || config.database;
+
+    return getFromCache(cache, `database_${name}`, async () => {
+        const mongo = await getMongo();
+        const database = await mongo.db(name);
         return database;
     });
+}
+
+async function getCollection(name) {
+    const nameData = name.split('::');
+    let collection = undefined;
+    if (nameData.length > 1) {
+        database = await getDatabase(nameData[0]);
+        return database.collection(nameData[1]);
+    }
+    else {
+        database = await getDatabase();
+        return database.collection(nameData[0]);
+    }
+}
+
+export default {
+    config,
+    getDatabase: getDatabase
 }

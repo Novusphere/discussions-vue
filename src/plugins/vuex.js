@@ -89,7 +89,7 @@ async function saveAccount(state, external = true) {
             };
 
             if (account && saveUserAccountObject) {
-                //await saveUserAccountObject(state.keys.identity.key, account, window.location.host);
+                await saveUserAccountObject(state.keys.identity.key, account, window.location.host);
             }
         }
     });
