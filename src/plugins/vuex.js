@@ -9,6 +9,14 @@ const saver = new Lock();
 
 Vue.use(Vuex);
 
+const testerPublicKeys = [
+    'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', // xia256
+    'EOS66mZsNtdEVeFfxrxkZ9sZ5snwTPYmtRnEtHWhpyFovfnvDnCM5', // xia512
+    'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', // jacques
+    'EOS6sYMyMHzHhGtfwjCcZkRaw3YK5ws8xoD6ke2DNUmnHT3j1cpjV', // brain
+    'EOS7RWM4YvxcUEhZfHozf8XVajgvfh8wvohoJS9vx8Hg1K12PDx5o', // paul
+];
+
 const getDefaultState = () => ({
     syncTime: 0,
     //
@@ -45,7 +53,7 @@ const getDefaultState = () => ({
     watchedThreads: [], // { uuid, transaction, watchedAt }
     delegatedMods: [ // { displayName, pub, tag }
         // hard coded list of preset moderators
-        { displayName: 'xiaxiaxia', pub: 'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', tag: 'all' },
+        { displayName: 'xia256', pub: 'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', tag: 'all' },
         { displayName: 'JacquesWhales', pub: 'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', tag: 'all' }
     ]
 });
@@ -131,6 +139,11 @@ export default new Vuex.Store({
             return uuid => {
                 return state.watchedThreads.find(wt => wt.uuid == uuid);
             }
+        },
+        isTester: state => {
+            if (!state.keys) return false;
+            if (!state.keys.arbitrary.key) return false;
+            return testerPublicKeys.some(p => state.keys.arbitrary.pub == p);
         },
         isModerator: state => {
             return (tag, publicKey) => {

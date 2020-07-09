@@ -52,7 +52,7 @@
         <span>Community</span>
       </v-btn>
     </v-list-item>
-    <v-list-item>
+    <v-list-item v-show="isTester">
       <v-btn class="justify-start" block text left :to="'/tests'">
         <v-icon>assessment</v-icon>
         <span>Testing</span>
@@ -137,7 +137,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["isLoggedIn"]),
+    ...mapGetters(["isLoggedIn", "isTester"]),
     ...mapState({
       darkMode: state => state.darkMode,
       subscribedTags: state => state.subscribedTags,

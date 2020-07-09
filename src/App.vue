@@ -47,7 +47,7 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <v-dialog v-model="isThreadDialogOpen" fullscreen>
+      <v-dialog v-model="isThreadDialogOpen" fullscreen scrollable eager>
         <v-card v-if="isThreadDialogOpen">
           <v-row>
             <v-col :cols="12" class="text-right">

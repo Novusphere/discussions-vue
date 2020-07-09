@@ -12,7 +12,7 @@
               </template>
             </v-text-field>
           </v-col>
-          <v-col :cols="6">
+          <v-col :cols="12">
             <v-text-field label="Brain Key" :value="brainKey" readonly>
               <template v-slot:append>
                 <v-btn icon @click="$copyText(brainKey)">

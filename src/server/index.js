@@ -22,7 +22,12 @@ import config from "./site";
     app.use(`/static`, express.static(`./dist/static`));
 
     function serve(res, head, body) {
-        let _head = { title: config.title, description: config.description, image: config.image };
+        let _head = {
+            title: config.title,
+            description: config.description,
+            image: config.url + config.image // need non-relative URL for twitter image preview
+        };
+
         if (head) {
             Object.assign(_head, head);
         }

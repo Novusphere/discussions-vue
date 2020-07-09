@@ -3,6 +3,7 @@ export default {
     "title": "Discussions",
     "description": "An open forum for discussions built on blockchain. Supporting and nurturing token communities of all kind",
     "image": "/static/banner.png",
+    "url": "https://beta.discussions.app",
     "cors": {
         "whitelist": [
             /https:\/\/www.youtube.com\/oembed/,
