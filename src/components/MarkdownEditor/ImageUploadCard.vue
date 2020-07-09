@@ -6,7 +6,9 @@
       <div class="text-center" v-show="error">
         <span class="error--text">{{ error }}</span>
       </div>
-      <v-btn color="primary" @click="upload()">Upload</v-btn>
+      <v-btn color="primary" @click="upload()" :disabled="disabled">
+        <v-progress-circular class="mr-2" indeterminate v-if="disabled"></v-progress-circular>Upload
+      </v-btn>
     </v-card-text>
   </v-card>
 </template>
@@ -14,6 +16,7 @@
 <script>
 import { mapState } from "vuex";
 import { uploadImage } from "@/novusphere-js/discussions/api";
+//import { sleep } from "@/novusphere-js/utility";
 
 export default {
   name: "ImageUploadCard",
@@ -21,7 +24,8 @@ export default {
   props: {},
   data: () => ({
     files: null,
-    error: ""
+    error: "",
+    disabled: false
   }),
   computed: {
     ...mapState({
@@ -37,12 +41,16 @@ export default {
       }
       if (this.onImageUpload) {
         try {
+          this.disabled = true;
+          //await sleep(5000);
           const image = this.files;
           const src = await uploadImage(image);
           this.onImageUpload({ src });
           this.$store.commit("setImageUploadDialogOpen", { value: false });
+          this.disabled = false;
         } catch (error) {
           this.error = error.toString();
+          this.disabled = false;
         }
       }
     }

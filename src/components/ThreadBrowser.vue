@@ -2,15 +2,7 @@
   <div>
     <v-progress-linear v-if="!opening" indeterminate></v-progress-linear>
     <div v-else>
-      <PostReplyCard
-        ref="reply"
-        class="mt-3"
-        :reply="opening"
-        :display="'comment'"
-        @reply="reply"
-        @edit="edit"
-        @tip="tip"
-      />
+      <PostReplyCard ref="reply" class="mt-3" :reply="opening" @submit-post="submitPost" />
     </div>
   </div>
 </template>
@@ -20,6 +12,7 @@ import { mapState, mapGetters } from "vuex";
 //import PostSubmitter from "@/components/PostSubmitter";
 //import PostCard from "@/components/PostCard";
 import PostReplyCard from "@/components/PostReplyCard";
+import { createArtificalTips } from "@/novusphere-js/uid";
 import {
   createThreadTree,
   mergeThreadToTree,
@@ -59,12 +52,11 @@ export default {
   async created() {
     await this.load();
     await this.mergeNewComments();
+    await this.scrollToPost();
   },
+  async mounted() {},
   async destroyed() {
     this.checkForPosts = false;
-  },
-  async updated() {
-    await this.goToSubPost();
   },
   methods: {
     hasInput() {
@@ -102,7 +94,7 @@ export default {
 
       this.$emit("loaded", { opening: this.opening, tree: this.tree });
     },
-    async goToSubPost() {
+    async scrollToPost() {
       const subPostId = this.referenceId2;
       if (subPostId) {
         const subPost = await getSinglePost(subPostId);
@@ -113,53 +105,38 @@ export default {
             c => c.post.transaction == subPost.transaction
           )
         ) {
-          // slight delay before we do the scroll since things might still be loading on page
-          setTimeout(
-            () => this.$vuetify.goTo(`.post-card-${subPost.transaction}`),
-            1000
-          );
+          this.$vuetify.goTo(`.post-card-${subPost.transaction}`);
         }
+      } else {
+        this.$vuetify.goTo(`.post-card-${this.opening.post.transaction}`);
       }
     },
-    async edit({ post }) {
-      const p = this.tree[post.parentUuid].post;
-      if (p) {
-        p.content = post.content;
-        p.title = post.title;
-      }
-    },
-    async tip({ uuid, transaction, transferActions }) {
-      let artificalTips = transferActions.map(t => ({
-        transaction: transaction,
-        data: {
-          amount: t.amount,
-          chain_id: t.chain,
-          fee: t.fee,
-          from: this.keys.wallet.pub,
-          memo: t.memo,
-          nonce: t.nonce,
-          relayer: "",
-          relayer_account: "",
-          sig: "",
-          to: t.recipientPublicKey
+    async submitPost({ post, transferActions }) {
+      if (post.edit) {
+        const p = this.tree[post.parentUuid].post;
+        if (p) {
+          p.content = post.content;
+          p.title = post.title;
         }
-      }));
+      } else {
+        if (this.tree[post.uuid]) return;
 
-      const comment = this.tree[uuid];
-      comment.post.tips.push(...artificalTips);
-    },
-    async reply({ post, transferActions }) {
-      if (this.tree[post.uuid]) return;
+        const reply = { post, replies: [] };
+        this.tree[post.uuid] = reply;
+        this.tree[post.parentUuid].replies.unshift(reply);
 
-      const reply = { post, replies: [] };
-      this.tree[post.uuid] = reply;
-      this.tree[post.parentUuid].replies.unshift(reply);
-
-      await this.tip({
-        uuid: post.parentUuid,
-        transaction: post.transaction,
-        transferActions: transferActions
-      });
+        if (transferActions && transferActions.length > 0) {
+          const parent = this.tree[post.parentUuid];
+          if (parent) {
+            let artificalTips = await createArtificalTips(
+              this.keys.wallet.pub,
+              post.transaction,
+              transferActions
+            );
+            parent.post.tips.push(...artificalTips);
+          }
+        }
+      }
     }
   }
 };

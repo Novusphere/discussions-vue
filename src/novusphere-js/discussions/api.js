@@ -221,6 +221,12 @@ function mergeThreadToTree(thread, tree) {
     if (thread.replies.length > 0 && tree) {
         for (const comment of thread.replies) {
 
+            const thrd = tree[comment.threadUuid];
+            if (!thrd) continue;
+
+            comment.threadTree = tree;
+            comment.op = thrd.post;
+
             const existing = tree[comment.uuid];
             if (existing) {
                 if (existing.post.pub == comment.pub) {
@@ -228,14 +234,8 @@ function mergeThreadToTree(thread, tree) {
                 }
             }
             else {
-
                 const parent = tree[comment.parentUuid];
-                const thrd = tree[comment.threadUuid];
-
-                if (parent && thrd) {
-                    comment.threadTree = tree;
-                    comment.op = thrd.post;
-
+                if (parent) {
                     const reply = { post: comment, replies: [] };
                     tree[comment.uuid] = reply;
                     parent.replies.push(reply);

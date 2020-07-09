@@ -90,7 +90,8 @@ const routes = [
                 component: `SettingsPage`,
                 children: [
                     { path: 'content', component: `ContentSettingsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Content` }) } },
-                    { path: 'watched', component: `BrowseWatchedThreadsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Watched Threads` }) } }
+                    { path: 'watched', component: `BrowseWatchedThreadsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Watched Threads` }) } },
+                    { path: 'keys', component: `KeysSettingsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Keys` }) } }
                 ]
             }
         ]

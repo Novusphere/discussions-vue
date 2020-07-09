@@ -8,15 +8,28 @@
         hint="Enter your post title (optional)"
         required
       ></v-text-field>
-      <MarkdownEditor :mention-suggester="mentionSuggester" ref="editor" />
-      <div class="mt-1 error--text text-center" v-show="submitError">{{ submitError }}</div>
-      <div class="mt-1">
-        <v-btn color="primary" @click="submitPost()" :disabled="disablePost">
-          <v-progress-circular class="mr-2" indeterminate v-if="disablePost"></v-progress-circular>
-          <span>{{ edit ? 'Edit' : 'Post' }}</span>
-        </v-btn>
-        <v-btn color="primary" class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
-      </div>
+      <v-tabs v-model="tab" hide-slider>
+        <v-tab>Editor</v-tab>
+        <v-tab>Preview</v-tab>
+      </v-tabs>
+      <v-tabs-items v-model="tab">
+        <v-tab-item :transition="false" :reverse-transition="false">
+          <MarkdownEditor class="mt-1" :mention-suggester="mentionSuggester" ref="editor" />
+          <div class="mt-2 error--text text-center" v-show="submitError">{{ submitError }}</div>
+          <div class="mt-2">
+            <v-btn color="primary" @click="submitPost()" :disabled="disablePost">
+              <v-progress-circular class="mr-2" indeterminate v-if="disablePost"></v-progress-circular>
+              <span>Submit</span>
+            </v-btn>
+            <v-btn color="primary" class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
+          </div>
+        </v-tab-item>
+        <v-tab-item :transition="false" :reverse-transition="false">
+          <div v-if="preview">
+            <PostCard v-if="preview" :post="preview" />
+          </div>
+        </v-tab-item>
+      </v-tabs-items>
     </div>
     <div v-else>
       <v-btn
@@ -31,6 +44,7 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import MarkdownEditor from "@/components/MarkdownEditor";
+import PostCard from "@/components/PostCard";
 import { waitFor, sleep, generateUuid } from "@/novusphere-js/utility";
 import {
   Post,
@@ -50,7 +64,8 @@ import {
 export default {
   name: "PostSubmitter",
   components: {
-    MarkdownEditor
+    MarkdownEditor,
+    PostCard
   },
   props: {
     sub: String,
@@ -72,10 +87,20 @@ export default {
     })
   },
   data: () => ({
+    preview: null,
+    tab: 0,
     disablePost: false,
     title: "",
     submitError: ""
   }),
+  watch: {
+    async tab() {
+      if (this.tab == 1) {
+        const { artificalSubmission } = await this.generateSubmission();
+        this.preview = artificalSubmission;
+      }
+    }
+  },
   async created() {},
   mounted() {},
   beforeDestroy() {},
@@ -91,6 +116,7 @@ export default {
       return this.$refs.editor;
     },
     cancel() {
+      this.preview = null;
       this.getEditor().clear();
       this.$emit("cancel");
     },
@@ -121,17 +147,10 @@ export default {
       }
       this.getEditor().setFromMarkdown(value);
     },
-    async submitPost() {
-      if (!this.isLoggedIn) return;
-
-      this.submitError = "";
-      this.disablePost = true;
-      await sleep(50); // allow disablePost to update
-
+    async generateSubmission() {
       const content = this.$refs.editor.getMarkdown();
       const tags = this.$refs.editor.getTags();
       const mentions = this.$refs.editor.getMentions().map(m => m.pub);
-      const tips = this.edit ? [] : this.$refs.editor.getTips(); // can't tip in an edit
 
       if (this.parentPost) {
         // include the person we're replying to as a silent mention
@@ -159,119 +178,161 @@ export default {
         edit: this.edit
       };
 
+      let artificalSubmission = new Post();
+      artificalSubmission.title = post.title;
+      artificalSubmission.chain = "eos";
+      artificalSubmission.parentUuid = post.parentUuid;
+      artificalSubmission.threadUuid = post.threadUuid;
+      artificalSubmission.uuid = post.uuid;
+      artificalSubmission.displayName = post.displayName;
+      artificalSubmission.content = post.content;
+      artificalSubmission.createdAt = new Date();
+      artificalSubmission.sub = post.sub;
+      artificalSubmission.tags = post.tags;
+      artificalSubmission.pub = this.keys.arbitrary.pub;
+      // sig?
+      artificalSubmission.uidw = post.uidw;
+      artificalSubmission.upvotes = 1;
+      artificalSubmission.myVote = 1;
+      artificalSubmission.edit = false;
+      if (this.edit) {
+        artificalSubmission.editedAt = Date.now();
+        artificalSubmission.edit = true;
+      }
+      if (this.parentPost) {
+        artificalSubmission.op = this.parentPost.op;
+        artificalSubmission.threadTree = this.parentPost.threadTree;
+      }
+
+      return { post, artificalSubmission };
+    },
+    async generateSubmissionTips() {
+      let transferActions = [];
+      const tips = this.edit ? [] : this.$refs.editor.getTips(); // can't tip in an edit
+      if (tips.length > 0) {
+        for (const { symbol, quantity, pub } of tips) {
+          let uidw = undefined;
+          let recipientName = undefined;
+
+          if (pub) {
+            // attempt to find [uidw] from the thread tree
+            if (this.parentPost && this.parentPost.threadTree) {
+              const attempt = Object.values(this.parentPost.threadTree)
+                .map(c => c.post)
+                .find(p => p.pub == pub);
+
+              if (attempt) {
+                uidw = attempt.uidw;
+                recipientName = attempt.displayName;
+                console.log(
+                  `Resolved user ${pub} to name=${recipientName}, uidw=${uidw} via thread tree`
+                );
+              }
+            }
+
+            // attempt to find [uidw] from a persons following
+            if (!uidw) {
+              const attempt = this.followingUsers.find(u => u.pub == pub);
+              if (attempt) {
+                uidw = attempt.uidw;
+                recipientName = attempt.displayName;
+                console.log(
+                  `Resolved user ${pub} to name=${recipientName}, uidw=${uidw} via following`
+                );
+              }
+            }
+
+            // as a last resort, resolve the uidw from the API
+            if (!uidw) {
+              const profile = await getUserProfile(pub);
+              if (profile && profile.uidw) {
+                uidw = profile.uidw;
+                recipientName = profile.displayName;
+                console.log(
+                  `Resolved user ${pub} to name=${recipientName}, uidw=${uidw} via user profile api`
+                );
+              }
+            }
+          } else {
+            uidw = this.parentPost.uidw;
+            recipientName = this.parentPost.displayName;
+          }
+
+          if (!uidw || !recipientName || !symbol || !quantity) {
+            throw new Error(
+              `There was an unexpected error with the tip: ${JSON.stringify({
+                pub,
+                uidw,
+                recipientName,
+                symbol,
+                quantity
+              })}`
+            );
+          }
+
+          const { amountAsset, feeAsset } = await getAmountFeeAssetsForTotal(
+            await createAsset(quantity, symbol)
+          );
+
+          transferActions.push({
+            chain: await getChainForSymbol(symbol),
+            senderPrivateKey: "",
+            recipientPublicKey: uidw,
+            amount: amountAsset,
+            fee: feeAsset,
+            nonce: Date.now(),
+            memo: `tip`,
+            // non-standard transfer action data (used in transfer dialog)
+            recipient: {
+              pub: pub || this.parentPost.pub, // their posting (arbitrary) key
+              displayName: recipientName
+            },
+            symbol: symbol,
+            total: await sumAsset(amountAsset, feeAsset)
+          });
+        }
+
+        this.$store.commit("setTransferDialogOpen", {
+          value: true,
+          transfers: transferActions.map(ta => ({ ...ta })) // so that [transferActions] isnt observed
+        });
+
+        await waitFor(async () => !this.isTransferDialogOpen);
+
+        // update transfer actions with the wallet key
+        if (decrypt(this.encryptedTest, this.tempPassword) != "test")
+          throw new Error(`Invalid password`);
+
+        const tempPassword = this.tempPassword;
+        this.$store.commit("setTempPassword", ""); // clear password
+
+        const keys = await brainKeyToKeys(
+          decrypt(this.encryptedBrainKey, tempPassword)
+        );
+        transferActions = transferActions.map(ta => ({
+          ...ta,
+          senderPrivateKey: keys.wallet.key
+        }));
+      }
+
+      return transferActions;
+    },
+    async submitPost() {
+      if (!this.isLoggedIn) return;
+
+      this.submitError = "";
+      this.disablePost = true;
+
+      const { post, artificalSubmission } = await this.generateSubmission();
+
       //await sleep(5000);
-      let trxid = undefined;        
+      let trxid = undefined;
       let transferActions = [];
       try {
         if (!post.content || post.content.length < 5)
           throw new Error(`Content is too short`);
 
-
-        if (tips.length > 0) {
-          for (const { symbol, quantity, pub } of tips) {
-            let uidw = undefined;
-            let recipientName = undefined;
-
-            if (pub) {
-              // attempt to find [uidw] from the thread tree
-              if (this.parentPost && this.parentPost.threadTree) {
-                const attempt = Object.values(this.parentPost.threadTree)
-                  .map(c => c.post)
-                  .find(p => p.pub == pub);
-
-                if (attempt) {
-                  uidw = attempt.uidw;
-                  recipientName = attempt.displayName;
-                  console.log(
-                    `Resolved user ${pub} to name=${recipientName}, uidw=${uidw} via thread tree`
-                  );
-                }
-              }
-
-              // attempt to find [uidw] from a persons following
-              if (!uidw) {
-                const attempt = this.followingUsers.find(u => u.pub == pub);
-                if (attempt) {
-                  uidw = attempt.uidw;
-                  recipientName = attempt.displayName;
-                  console.log(
-                    `Resolved user ${pub} to name=${recipientName}, uidw=${uidw} via following`
-                  );
-                }
-              }
-
-              // as a last resort, resolve the uidw from the API
-              if (!uidw) {
-                const profile = await getUserProfile(pub);
-                if (profile && profile.uidw) {
-                  uidw = profile.uidw;
-                  recipientName = profile.displayName;
-                  console.log(
-                    `Resolved user ${pub} to name=${recipientName}, uidw=${uidw} via user profile api`
-                  );
-                }
-              }
-            } else {
-              uidw = this.parentPost.uidw;
-              recipientName = this.parentPost.displayName;
-            }
-
-            if (!uidw || !recipientName || !symbol || !quantity) {
-              throw new Error(
-                `There was an unexpected error with the tip: ${JSON.stringify({
-                  pub,
-                  uidw,
-                  recipientName,
-                  symbol,
-                  quantity
-                })}`
-              );
-            }
-
-            const { amountAsset, feeAsset } = await getAmountFeeAssetsForTotal(
-              await createAsset(quantity, symbol)
-            );
-
-            transferActions.push({
-              chain: await getChainForSymbol(symbol),
-              senderPrivateKey: "",
-              recipientPublicKey: uidw,
-              amount: amountAsset,
-              fee: feeAsset,
-              nonce: Date.now(),
-              memo: `tip`,
-              // non-standard transfer action data (used in transfer dialog)
-              recipient: {
-                pub: pub || this.parentPost.pub, // their posting (arbitrary) key
-                displayName: recipientName
-              },
-              symbol: symbol,
-              total: await sumAsset(amountAsset, feeAsset)
-            });
-          }
-
-          this.$store.commit("setTransferDialogOpen", {
-            value: true,
-            transfers: transferActions.map(ta => ({ ...ta })) // so that [transferActions] isnt observed
-          });
-
-          await waitFor(async () => !this.isTransferDialogOpen);
-
-          // update transfer actions with the wallet key
-          if (decrypt(this.encryptedTest, this.tempPassword) != "test")
-            throw new Error(`Invalid password`);
-
-          const tempPassword = this.tempPassword;
-          this.$store.commit("setTempPassword", ""); // clear password
-
-          const keys = await brainKeyToKeys(
-            decrypt(this.encryptedBrainKey, tempPassword)
-          );
-          transferActions = transferActions.map(ta => ({
-            ...ta,
-            senderPrivateKey: keys.wallet.key
-          }));
-        }
+        transferActions = await this.generateSubmissionTips();
 
         //trxid =
         //  "30072ef2bf4c3b22bd417709fa4f14aabf2dfbabdd9a03a2a3a34e73bb038c31";
@@ -288,41 +349,24 @@ export default {
         return;
       }
 
-      if (trxid && getSinglePost && submitPost) {
-        let artificalReplyPost = new Post();
-        artificalReplyPost.transaction = trxid;
-        artificalReplyPost.title = post.title;
-        artificalReplyPost.chain = "eos";
-        artificalReplyPost.parentUuid = post.parentUuid;
-        artificalReplyPost.threadUuid = post.threadUuid;
-        artificalReplyPost.uuid = post.uuid;
-        artificalReplyPost.displayName = post.displayName;
-        artificalReplyPost.content = post.content;
-        artificalReplyPost.createdAt = new Date();
-        artificalReplyPost.sub = post.sub;
-        artificalReplyPost.tags = post.tags;
-        artificalReplyPost.pub = this.keys.arbitrary.pub;
-        // sig?
-        artificalReplyPost.uidw = post.uidw;
-        artificalReplyPost.upvotes = 1;
-        artificalReplyPost.myVote = 1;
-
-        if (this.parentPost) {
-          artificalReplyPost.op = this.parentPost.op;
-          artificalReplyPost.threadTree = this.parentPost.threadTree;
-        }
+      // only trxid needs to be checked, the rest is to prevent the linter from complaining about stuff we might need to toggle back on
+      if (trxid && getSinglePost && submitPost && sleep) {
+        artificalSubmission.transaction = trxid;
 
         this.disablePost = false;
         this.getEditor().clear();
 
         if (this.edit) {
           console.log(`edit trxid: ${trxid}`);
-          this.$emit("edit", { post: artificalReplyPost });
+          this.$emit("submit-post", { post: artificalSubmission });
         } else {
           console.log(`post trxid: ${trxid}`);
-          this.$emit("reply", {
-            post: artificalReplyPost,
-            transferActions: transferActions.map(ta => ({ ...ta, senderPrivateKey: "" }))
+          this.$emit("submit-post", {
+            post: artificalSubmission,
+            transferActions: transferActions.map(ta => ({
+              ...ta,
+              senderPrivateKey: ""
+            }))
           });
         }
       }

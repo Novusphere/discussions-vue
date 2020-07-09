@@ -19,6 +19,7 @@ import BrowseNotifications from "@/pages/BrowseNotifications";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import ContentSettingsPage from "@/pages/settings/ContentSettingsPage";
 import BrowseWatchedThreadsPage from "@/pages/settings/BrowseWatchedThreadsPage";
+import KeysSettingsPage from "@/pages/settings/KeysSettingsPage";
 
 import WalletPage from "@/pages/wallet/WalletPage";
 import WalletAssetsPage from "@/pages/wallet/WalletAssetsPage";
@@ -45,6 +46,7 @@ let components = {
     SettingsPage,
     ContentSettingsPage,
     BrowseWatchedThreadsPage,
+    KeysSettingsPage,
     WalletPage,
     WalletAssetsPage,
     WalletWithdrawPage,

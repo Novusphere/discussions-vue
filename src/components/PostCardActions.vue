@@ -30,7 +30,7 @@
         </v-btn>
       </template>
       <v-list>
-        <v-list-item v-show="isLoggedIn && (myPublicKey == post.pub)">
+        <v-list-item v-show="isLoggedIn && (myPublicKey == post.pub) && !noEdit">
           <v-btn text @click="$emit('edit')">
             <v-icon>edit</v-icon>
             <span>Edit</span>
@@ -94,6 +94,7 @@ export default {
   },
   props: {
     post: Object,
+    noEdit: Boolean,
     isCommentDisplay: Boolean
   },
   computed: {

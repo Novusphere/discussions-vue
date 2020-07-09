@@ -10,11 +10,15 @@
     <div>
       <v-row class="mb-2" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
         <v-col cols="12">
-          <PostCard
-            :clickable="true"
-            :display="display"
-            :post="p"
-          />
+          <PostCard :clickable="true" :display="display" :post="p">
+            <template v-slot:actions>
+              <PostCardActions
+                no-edit
+                :post="p"
+                :isCommentDisplay="false"
+              />
+            </template>
+          </PostCard>
         </v-col>
       </v-row>
       <infinite-loading ref="infiniteLoading" @infinite="infinite">
@@ -31,11 +35,13 @@
 <script>
 import { mapState } from "vuex";
 import PostCard from "@/components/PostCard";
+import PostCardActions from "@/components/PostCardActions";
 
 export default {
   name: "PostScroller",
   components: {
-    PostCard
+    PostCard,
+    PostCardActions
   },
   props: {
     pinned: Array,

@@ -48,10 +48,10 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import { passwordTesterRules } from "@/utility";
 import TokenIcon from "@/components/TokenIcon";
 import UserProfileLink from "@/components/UserProfileLink";
-import { mapState } from "vuex";
 
 export default {
   name: "ApproveTransfersCard",

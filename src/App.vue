@@ -252,9 +252,8 @@ export default {
 </script>
 
 <style>
-html,
-body {
-  overflow-y: scroll;
+html {
+  margin-right: calc(-1 * (100vw - 100%));
   overflow-x: hidden;
 }
 body {

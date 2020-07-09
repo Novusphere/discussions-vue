@@ -196,6 +196,29 @@ function withdrawAction({ chain, senderPrivateKey, account, amount, fee, nonce, 
 }
 
 //
+// Create artifical tip objects from transfer actions
+//
+async function createArtificalTips(from, transaction, transferActions) {
+    let artificalTips = (transferActions || []).map(t => ({
+        transaction: transaction,
+        data: {
+            amount: t.amount,
+            chain_id: t.chain,
+            fee: t.fee,
+            from: from,
+            memo: t.memo,
+            nonce: t.nonce,
+            relayer: "",
+            relayer_account: "",
+            sig: "",
+            to: t.recipientPublicKey
+        }
+    }));
+
+    return artificalTips;
+}
+
+//
 // Create transfer actions
 //
 async function createTransferActions(actions) {
@@ -369,6 +392,7 @@ export {
     sumAsset,
     withdrawAction,
     transfer,
+    createArtificalTips,
     createTransferActions,
     signText,
     signHash

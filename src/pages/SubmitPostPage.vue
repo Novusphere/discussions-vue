@@ -7,7 +7,7 @@
       <v-progress-linear v-if="waitSubmit" indeterminate></v-progress-linear>
       <v-card v-else>
         <v-card-text>
-          <PostSubmitter :sub="tag" ref="submitter" :title-field="true" @reply="submitPost" />
+          <PostSubmitter :sub="tag" ref="submitter" :title-field="true" @submit-post="submitPost" />
         </v-card-text>
       </v-card>
     </template>

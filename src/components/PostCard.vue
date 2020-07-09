@@ -76,30 +76,16 @@
         </v-expansion-panels>
       </div>
     </div>
-    <div v-show="editing">
+    <div v-show="editing" v-if="post.transaction">
       <v-card-text>
-        <PostSubmitter
-          edit
-          :title-field="isThread"
-          :parent-post="post"
-          cancelable
-          @cancel="editing = false"
-          ref="editor"
-          @edit="onEdit"
-        />
+        <slot name="editor"></slot>
       </v-card-text>
     </div>
 
-    <PostCardActions
-      :post="post"
-      :isCommentDisplay="isCommentDisplay"
-      @reply="$emit('reply')"
-      @edit="startEdit()"
-      @tip="({ uuid, transaction, transferActions }) => $emit('tip', { uuid, transaction, transferActions })"
-    />
+    <slot name="actions" :tip="tip"></slot>
 
     <div class="post-replies ml-1">
-      <slot></slot>
+      <slot name="replies"></slot>
     </div>
   </v-card>
 </template>
@@ -107,16 +93,17 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { formatDistance } from "date-fns";
+import { createArtificalTips } from "@/novusphere-js/uid";
 import { refreshOEmbed } from "@/novusphere-js/utility";
 
 import UserProfileLink from "@/components/UserProfileLink";
 import TagLink from "@/components/TagLink";
 //import TagIcon from "@/components/TagIcon";
 //import PublicKeyIcon from "@/components/PublicKeyIcon";
-import PostCardActions from "@/components/PostCardActions";
+//import PostCardActions from "@/components/PostCardActions";
 import PostTips from "@/components/PostTips";
 import PostThreadLink from "@/components/PostThreadLink";
-import PostSubmitter from "@/components/PostSubmitter";
+//import PostSubmitter from "@/components/PostSubmitter";
 
 export default {
   name: "BrowsePostCard",
@@ -125,16 +112,17 @@ export default {
     TagLink,
     //TagIcon,
     //PublicKeyIcon,
-    PostCardActions,
+    //PostCardActions,
     PostTips,
-    PostThreadLink,
-    PostSubmitter
+    PostThreadLink
+    //PostSubmitter
   },
   props: {
     clickable: Boolean,
     post: Object,
     comments: Array,
-    display: String
+    display: String,
+    editing: Boolean
   },
   computed: {
     shouldShowPostHTML() {
@@ -173,7 +161,8 @@ export default {
     ...mapGetters(["isModerator"]),
     ...mapState({
       hideSpam: state => state.hideSpam,
-      blurNSFW: state => state.blurNSFW
+      blurNSFW: state => state.blurNSFW,
+      keys: state => state.keys
     })
   },
   watch: {
@@ -188,7 +177,6 @@ export default {
   data: () => ({
     expanded: 0, // 0 is show, -1 is don't show
     postHTML: "",
-    editing: false,
     forceReveal: false,
     removeNSFWOverlay: false
   }),
@@ -199,6 +187,14 @@ export default {
     refreshOEmbed();
   },
   methods: {
+    async tip({ transaction, transferActions }) {
+      let artificalTips = await createArtificalTips(
+        this.keys.wallet.pub,
+        transaction,
+        transferActions
+      );
+      this.post.tips.push(...artificalTips);
+    },
     shortTime(t) {
       if (!this.$vuetify.breakpoint.mobile)
         return formatDistance(t, new Date(), { addSuffix: true });
@@ -220,13 +216,8 @@ export default {
         else return unit(day, `d`);
       }
     },
-    startEdit() {
-      this.$refs.editor.setEditorContent(this.post.title, this.post.content);
-      this.editing = true;
-    },
-    onEdit({ post }) {
-      this.editing = false;
-      this.$emit("edit", { post });
+    submitPost({ post, transferActions }) {
+      this.$emit("submit-post", { post, transferActions });
     },
     cardClicked() {
       // reveal the blur if clicked on
