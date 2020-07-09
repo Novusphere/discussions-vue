@@ -30,7 +30,7 @@ export default {
         {
           pub: "EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe",
           link:
-            "https://atmosdb.novusphere.io/discussions/upload/image/1594319191670.png"
+            "https://atmosdb.novusphere.io/discussions/upload/image/1594320203561.png"
         }
       ].find(sp => sp.pub == this.publicKey);
 
