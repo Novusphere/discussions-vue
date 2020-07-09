@@ -27,7 +27,6 @@
                       <span class="error--text">{{ walletError }}</span>
                     </div>
                     <ConnectWalletBtn
-                      :supportedWallets="['scatter']"
                       ref="connector"
                       color="primary"
                       class="mt-2"
@@ -176,13 +175,13 @@ export default {
       this.brainKey = "";
       this.waiting = false;
     },
-    async walletConnected(wallet) {
+    async walletConnected({ connector, auth }) {
       this.walletError = "";
       try {
-        const sig = await wallet.signArbitrary("discussions app auth");
+        const sig = await connector.getAuthorizeSignature();
         const hash = ecc.sha256(sig);
         this.brainKey = await brainKeyFromHash(hash);
-        this.displayName = wallet.auth.accountName;
+        this.displayName = auth.accountName;
       } catch (ex) {
         this.walletError = ex.message;
         this.$refs.connector.logout();

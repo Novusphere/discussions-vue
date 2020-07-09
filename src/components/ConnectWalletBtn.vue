@@ -26,6 +26,7 @@
 
 <script>
 import { eos } from "@/novusphere-js/uid";
+import { sleep } from "@/novusphere-js/utility";
 
 export default {
   name: "ConnectWalletBtn",
@@ -43,6 +44,25 @@ export default {
     this.walletNames = [...eos.getWalletNames()];
   },
   methods: {
+    async getAuthorizeSignature() {
+      const wallet = this.wallet;
+      if (wallet.provider.id == "anchor-link") {
+        await sleep(1500);
+
+        const { signatures } = await wallet.provider.link.identify(
+          {
+            actor: wallet.auth.accountName,
+            permission: wallet.auth.permission
+          },
+          { key: wallet.auth.publicKey }
+        );
+
+        if (signatures && signatures.length > 0) return signatures[0];
+        throw new Error(`No signature result`);
+      } else {
+        return await wallet.signArbitrary("discussions app auth");
+      }
+    },
     async logout() {
       if (this.wallet) {
         try {
@@ -66,7 +86,7 @@ export default {
           this.hasWallet = true;
           this.wallet = wallet;
           this.waiting = false;
-          this.$emit("connected", this.wallet);
+          this.$emit("connected", { connector: this, auth: this.wallet.auth });
         }
       } catch (ex) {
         this.hasWallet = false;

@@ -107,7 +107,19 @@ export default {
   methods: {
     async eosTrxTest() {
       const wallet = this.$refs.connector.wallet;
-      const actions = [
+      console.log(Object.keys(wallet));
+      console.log(Object.keys(wallet.provider));
+      console.log(
+        await wallet.provider.link.identify(
+          {
+            actor: wallet.auth.accountName,
+            permission: wallet.auth.permission
+          },
+          { key: wallet.auth.publicKey }
+        )
+      );
+
+      /*const actions = [
         {
           account: `novusphereio`,
           name: "transfer",
@@ -138,7 +150,7 @@ export default {
         console.log(receipt);
       } catch (ex) {
         console.log(ex);
-      }
+      }*/
     },
     async openDialogThread() {
       this.$store.commit("setThreadDialogOpen", {

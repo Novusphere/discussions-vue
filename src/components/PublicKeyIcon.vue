@@ -28,13 +28,23 @@ export default {
       // just for fun
       const special = [
         {
-          pub: "EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe",
+          pub: "EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe", // xia256
           link:
             "https://atmosdb.novusphere.io/discussions/upload/image/1594320203561.png"
         },
         {
-          pub: "EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH",
-          link: "https://atmosdb.novusphere.io/discussions/upload/image/1594331019213.png"
+          pub: "EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH", // jack
+          link:
+            "https://atmosdb.novusphere.io/discussions/upload/image/1594331019213.png"
+        },
+        {
+          pun: "EOS6sYMyMHzHhGtfwjCcZkRaw3YK5ws8xoD6ke2DNUmnHT3j1cpjV", // brain
+          link:
+            "https://atmosdb.novusphere.io/discussions/upload/image/1594331754924.png"
+        },
+        {
+          pub: "paul", // paul
+          link: ""
         }
       ].find(sp => sp.pub == this.publicKey);
 
