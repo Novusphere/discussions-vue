@@ -47,8 +47,14 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <v-dialog v-model="isThreadDialogOpen" fullscreen scrollable eager>
-        <v-card v-if="isThreadDialogOpen">
+      <v-dialog
+        v-model="isThreadDialogOpen"
+        fullscreen
+        scrollable
+        eager
+        @click:outside="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
+      >
+        <v-card v-if="isThreadDialogOpen" class="thread-dialog-card">
           <v-row>
             <v-col :cols="12" class="text-right">
               <v-btn
@@ -60,7 +66,11 @@
               </v-btn>
             </v-col>
           </v-row>
-          <ThreadBrowser :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
+          <v-row>
+            <v-col :cols="12">
+              <ThreadBrowser :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
+            </v-col>
+          </v-row>
         </v-card>
       </v-dialog>
 
@@ -267,6 +277,7 @@ html {
   margin-right: calc(-1 * (100vw - 100%));
   overflow-x: hidden;
 }
+
 body {
   position: relative;
 }

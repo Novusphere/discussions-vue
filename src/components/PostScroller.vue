@@ -3,7 +3,15 @@
     <div v-if="pinned">
       <v-row class="mb-2" v-for="(p, i) in pinned" :key="i">
         <v-col cols="12">
-          <PostCard :clickable="true" :display="display" :post="p" />
+          <PostCard :clickable="true" :display="display" :post="p">
+            <template v-slot:actions>
+              <PostCardActions
+                no-edit
+                :post="p"
+                :isCommentDisplay="false"
+              />
+            </template>
+          </PostCard>
         </v-col>
       </v-row>
     </div>
