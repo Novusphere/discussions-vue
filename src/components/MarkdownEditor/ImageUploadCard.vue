@@ -46,7 +46,6 @@ export default {
           const image = this.files;
           const src = await uploadImage(image);
           this.onImageUpload({ src });
-          this.$store.commit("setImageUploadDialogOpen", { value: false });
           this.disabled = false;
         } catch (error) {
           this.error = error.toString();

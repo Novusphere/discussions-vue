@@ -72,6 +72,14 @@
         <ImageUploadCard />
       </v-dialog>
 
+      <v-dialog
+        v-model="isInsertLinkDialogOpen"
+        max-width="600"
+        @click:outside="$store.commit('setInsertLinkDialogOpen', { value: false })"
+      >
+        <InsertLinkCard />
+      </v-dialog>
+
       <v-container v-if="$vuetify.breakpoint.mobile">
         <v-row no-gutters>
           <v-col cols="12">
@@ -120,6 +128,7 @@ import AppNav from "@/components/AppNav";
 import LoginCard from "@/components/LoginCard";
 import SignupCard from "@/components/SignupCard";
 import ImageUploadCard from "@/components/MarkdownEditor/ImageUploadCard";
+import InsertLinkCard from "@/components/MarkdownEditor/InsertLinkCard";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
 import SendTipCard from "@/components/SendTipCard";
 import ThreadBrowser from "@/components/ThreadBrowser";
@@ -132,6 +141,7 @@ export default {
     LoginCard,
     SignupCard,
     ImageUploadCard,
+    InsertLinkCard,
     ApproveTransfersCard,
     SendTipCard,
     ThreadBrowser
@@ -211,6 +221,7 @@ export default {
       isSendTipDialogOpen: state => state.isSendTipDialogOpen,
       isThreadDialogOpen: state => state.isThreadDialogOpen,
       isImageUploadDialogOpen: state => state.isImageUploadDialogOpen,
+      isInsertLinkDialogOpen: state => state.isInsertLinkDialogOpen,
       threadDialogRef1: state => state.threadDialogRef1,
       threadDialogRef2: state => state.threadDialogRef2,
       pendingTransfers: state => state.pendingTransfers,
@@ -263,5 +274,12 @@ body {
 .v-dialog--fullscreen {
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+blockquote {
+  border-left: 4px solid #ccc;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding-left: 16px;
 }
 </style>

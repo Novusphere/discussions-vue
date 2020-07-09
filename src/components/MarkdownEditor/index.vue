@@ -23,6 +23,10 @@
             <v-icon :class="{ 'is-active': isActive.blockquote() }">format_quote</v-icon>
           </v-btn>
 
+          <v-btn icon @click="insertLink(commands.link)">
+            <v-icon :class="{ 'is-active': isActive.link() }">insert_link</v-icon>
+          </v-btn>
+
           <v-btn icon @click="uploadImage(commands.image)">
             <v-icon>insert_photo</v-icon>
           </v-btn>
@@ -241,11 +245,37 @@ export default {
   },
 
   methods: {
+    async insertLink(command) {
+      const state = this.editor.state;
+
+      // get marks, if any from selected area
+      const { from, to } = state.selection;
+
+      if (from == to) return; // no selection
+
+      let marks = [];
+      state.doc.nodesBetween(from, to, node => {
+        marks = [...marks, ...node.marks];
+      });
+
+      const mark = marks.find(markItem => markItem.type.name === "link");
+      let presetUrl = mark && mark.attrs.href ? mark.attrs.href : "";
+
+      this.$store.commit("setInsertLinkDialogOpen", {
+        value: true,
+        initialInsertedLink: presetUrl,
+        onInsertLink: href => {
+          command({ href: href });
+          this.$store.commit("setInsertLinkDialogOpen", { value: false });
+        }
+      });
+    },
     async uploadImage(command) {
       this.$store.commit("setImageUploadDialogOpen", {
         value: true,
         onImageUpload: args => {
           command(args);
+          this.$store.commit("setImageUploadDialogOpen", { value: false });
         }
       });
     },

@@ -34,7 +34,11 @@ const getDefaultState = () => ({
     threadDialogRef2: '',
     //
     isImageUploadDialogOpen: false,
-    onImageUpload: undefined,
+    onImageUpload: null,
+    //
+    isInsertLinkDialogOpen: false,
+    initialInsertedLink: '',
+    onInsertLink: null,
     //
     displayName: '',
     encryptedBrainKey: '',
@@ -277,6 +281,18 @@ export default new Vuex.Store({
         setTempPassword(state, password) {
             state.tempPassword = password || '';
         },
+        setInsertLinkDialogOpen(state, { value, onInsertLink, initialInsertedLink }) {
+            if (value) {
+                state.isInsertLinkDialogOpen = true;
+                state.onInsertLink = onInsertLink;
+                state.initialInsertedLink = initialInsertedLink;
+            }
+            else {
+                state.isInsertLinkDialogOpen = false;
+                state.onInsertLink = null;
+                state.initialInsertedLink = '';
+            }
+        },
         setImageUploadDialogOpen(state, { value, onImageUpload }) {
             if (value) {
                 state.isImageUploadDialogOpen = true;
@@ -284,7 +300,7 @@ export default new Vuex.Store({
             }
             else {
                 state.isImageUploadDialogOpen = false;
-                state.onImageUpload = undefined;
+                state.onImageUpload = null;
             }
         },
         setThreadDialogOpen(state, { value, sub, referenceId, title, referenceId2, path }) {
