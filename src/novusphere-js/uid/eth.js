@@ -1,3 +1,5 @@
+import { waitFor } from "@/novusphere-js/utility";
+
 class MetamaskWallet {
     constructor() {
         this.provider = {
@@ -11,10 +13,15 @@ class MetamaskWallet {
 
         this.ethereum = window.ethereum;
         this.web3 = window.web3;
+
+        await this.ethereum.enable();
     }
     async login() {
-        await this.ethereum.enable();
+        await waitFor(async () => this.web3.eth.accounts.length > 0, 500, 5000);
         const account = this.web3.eth.accounts[0];
+        if (!account)
+            throw new Error(`Could not login to Metamask account`);
+
         this.auth = {
             accountName: '',
             permission: '',
