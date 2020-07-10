@@ -121,6 +121,7 @@ export default {
       this.$emit("cancel");
     },
     mentionSuggester(query) {
+      console.proxyLog(`mentionsSuggester: ${query}`);
       // include people who the user is following
       let items = this.followingUsers.map(u => ({
         pub: u.pub,
@@ -134,11 +135,17 @@ export default {
           items.push({ pub: post.pub, displayName: post.displayName });
         }
       }
+
+      console.proxyLog(`mentions pre-filter: ${JSON.stringify(items)}`);
+
       if (!query) {
         return items;
       }
       const regex = new RegExp(`^${query}`, "i");
       const filtered = items.filter(i => regex.test(i.displayName));
+
+      console.proxyLog(`mentions after filter: ${JSON.stringify(filtered)}`);
+
       return filtered;
     },
     setEditorContent(title, value) {
