@@ -46,9 +46,12 @@
               <v-btn text @click="openDialogThread()">Dialog Thread</v-btn>
             </v-list-item>
             <v-list-item>
+              <v-btn text @click="trxTest()">Test Trx</v-btn>
+            </v-list-item>
+            <v-list-item>
               <ConnectWalletBtn ref="connector" text>
                 <template v-slot:action>
-                  <v-btn text @click="eosTrxTest()">Test EOS Trx</v-btn>
+                  <v-btn text @click="trxTest()">Test Trx</v-btn>
                 </template>
               </ConnectWalletBtn>
             </v-list-item>
@@ -64,6 +67,8 @@ import { getBuildVersion } from "@/utility";
 import { testPosts } from "./posts/posts";
 
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
+
+import eth from "@/novusphere-js/uid/eth";
 
 export default {
   name: "TestsPage",
@@ -105,19 +110,9 @@ export default {
     if (this.updateConsole) clearInterval(this.updateConsole);
   },
   methods: {
-    async eosTrxTest() {
-      const wallet = this.$refs.connector.wallet;
-      console.log(Object.keys(wallet));
-      console.log(Object.keys(wallet.provider));
-      console.log(
-        await wallet.provider.link.identify(
-          {
-            actor: wallet.auth.accountName,
-            permission: wallet.auth.permission
-          },
-          { key: wallet.auth.publicKey }
-        )
-      );
+    async trxTest() {
+      const wallet = new eth.MetamaskWallet();
+      await wallet.login();
 
       /*const actions = [
         {

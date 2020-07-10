@@ -9,11 +9,7 @@
       </template>
       <v-list>
         <v-list-item v-for="(wn, i) in walletNames" :key="i">
-          <v-btn
-            text
-            @click="connect(wn)"
-            :disabled="supportedWallets ? !supportedWallets.some(sw => sw == wn) : false"
-          >{{ wn }}</v-btn>
+          <v-btn text @click="connect(wn)">{{ wn }}</v-btn>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -25,14 +21,15 @@
 </template>
 
 <script>
-import { eos } from "@/novusphere-js/uid";
+import { eos, eth, connectWallet } from "@/novusphere-js/uid";
 import { sleep } from "@/novusphere-js/utility";
 
 export default {
   name: "ConnectWalletBtn",
   components: {},
   props: {
-    supportedWallets: Array
+    noEos: Boolean,
+    noEth: Boolean
   },
   data: () => ({
     waiting: false,
@@ -40,8 +37,12 @@ export default {
     walletNames: []
   }),
   created() {
+    const walletNames = [];
+    if (!this.noEos) walletNames.push(...eos.getWalletNames());
+    if (!this.noEth) walletNames.push(...eth.getWalletNames());
+
     this.wallet = undefined;
-    this.walletNames = [...eos.getWalletNames()];
+    this.walletNames = walletNames;
   },
   methods: {
     async getAuthorizeSignature() {
@@ -81,7 +82,7 @@ export default {
     async connect(wn) {
       this.waiting = true;
       try {
-        const wallet = await eos.connectWallet(wn);
+        const wallet = await connectWallet(wn);
         if (wallet) {
           this.hasWallet = true;
           this.wallet = wallet;

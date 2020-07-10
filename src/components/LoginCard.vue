@@ -170,6 +170,7 @@ export default {
   },
   methods: {
     async reset() {
+      this.publicKey = "";
       this.displayName = "";
       this.password = "";
       this.brainKey = "";

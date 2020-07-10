@@ -10,7 +10,7 @@
 
             <TransactionSubmitText :link="transactionLink" :error="transactionError">Your deposit has been successfully submitted to the network.</TransactionSubmitText>
 
-            <ConnectWalletBtn ref="connector" :block="$vuetify.breakpoint.mobile" color="primary" @error="(ex) => transactionError = ex.toString()">
+            <ConnectWalletBtn no-eth ref="connector" :block="$vuetify.breakpoint.mobile" color="primary" @error="(ex) => transactionError = ex.toString()">
               <template v-slot:action>
                 <v-btn
                   :block="$vuetify.breakpoint.mobile"

@@ -7,6 +7,7 @@ import * as axios from 'axios';
 import BufferWriter from './bufferwriter';
 import eos from "./eos";
 import bch from "./bch";
+import eth from "./eth";
 import { getFromCache } from "@/novusphere-js/utility";
 import { spawn, Worker } from "threads";
 
@@ -370,8 +371,21 @@ async function signHash(hash256, key) {
     }
 }
 
+//
+// Connect to a wallet interface
+// 
+
+async function connectWallet(name) {
+    if (eos.getWalletNames().some(n => n == name))
+        return eos.connectWallet(name);
+    else if (eth.getWalletNames().some(n => n == name))
+        return eth.connectWallet(name);
+    throw new Error(`Unable to connect to unknown wallet ${name}`);
+}
+
 export {
     eos,
+    eth,
     bch,
     encrypt,
     decrypt,
@@ -395,6 +409,7 @@ export {
     createArtificalTips,
     createTransferActions,
     signText,
-    signHash
+    signHash,
+    connectWallet
 }
 
