@@ -125,14 +125,20 @@ export default {
       // include people who the user is following
       let items = this.followingUsers.map(u => ({
         pub: u.pub,
-        displayName: u.displayName
+        displayName: [u.displayName]
       }));
 
       // include people who have participated in current thread
       if (this.parentPost && this.parentPost.threadTree) {
         for (const { post } of Object.values(this.parentPost.threadTree)) {
-          if (items.find(i => i.pub == post.pub)) continue;
-          items.push({ pub: post.pub, displayName: post.displayName });
+          const existing = items.find(i => i.pub == post.pub);
+          if (existing) {
+            if (!existing.displayName.some(dn => dn == post.displayName)) {
+              existing.displayName.push(post.displayName);
+            }
+          } else {
+            items.push({ pub: post.pub, displayName: [post.displayName] });
+          }
         }
       }
 
@@ -142,7 +148,9 @@ export default {
         return items;
       }
       const regex = new RegExp(`^${query}`, "i");
-      const filtered = items.filter(i => regex.test(i.displayName));
+      const filtered = items.filter(i =>
+        i.displayName.some(dn => regex.test(dn))
+      );
 
       console.proxyLog(`mentions after filter: ${JSON.stringify(filtered)}`);
 

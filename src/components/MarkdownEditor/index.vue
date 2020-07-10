@@ -35,24 +35,32 @@
 
       <editor-content class="editor-content" :editor="editor" />
     </div>
-    <div v-show="showSuggestions" ref="suggestions">
-      <v-card>
-        <template v-if="hasResults">
-          <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
-            <PublicKeyIcon :publicKey="user.pub" />
-            {{ user.displayName }}
-          </v-list-item>
-        </template>
-        <div v-else>
-          <v-card-text>No users found</v-card-text>
-        </div>
-      </v-card>
-    </div>
+
+    <v-menu
+      :value="showSuggestions"
+      :close-on-content-click="false"
+      :position-x="popoverX"
+      :position-y="popoverY"
+    >
+      <div ref="suggestions">
+        <v-card>
+          <template v-if="hasResults">
+            <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
+              <PublicKeyIcon :publicKey="user.pub" />
+              {{ user.displayName[0] }}
+            </v-list-item>
+          </template>
+          <div v-else>
+            <v-card-text>No users found</v-card-text>
+          </div>
+        </v-card>
+      </div>
+    </v-menu>
   </div>
 </template>
 
 <script>
-import tippy, { sticky } from "tippy.js";
+//import tippy, { sticky } from "tippy.js";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import { Editor, EditorContent, EditorMenuBar } from "tiptap";
 import {
@@ -93,6 +101,8 @@ export default {
   },
   data() {
     return {
+      popoverX: 0,
+      popoverY: 0,
       // mention suggestion
       query: null,
       suggestionRange: null,
@@ -392,38 +402,25 @@ export default {
       this.insertMention({
         range: this.suggestionRange,
         attrs: {
-          name: user.displayName.replace(/\s/g, "_"), // replace spaces in name with an underscore
-          href: `/u/${user.displayName}-${user.pub}`
+          name: user.displayName[user.displayName.length - 1].replace(
+            /\s/g,
+            "_"
+          ), // replace spaces in name with an underscore
+          href: `/u/${user.displayName[user.displayName.length - 1]}-${
+            user.pub
+          }`
         }
       });
       this.editor.focus();
     },
     // renders a popup with suggestions
-    // tiptap provides a virtualNode object for using popper.js (or tippy.js) for popups
     renderPopup(node) {
-      if (this.popup) {
-        return;
-      }
-      // ref: https://atomiks.github.io/tippyjs/v6/all-props/
-      this.popup = tippy(".v-application", {
-        getReferenceClientRect: node.getBoundingClientRect,
-        appendTo: () => document.body,
-        interactive: true,
-        sticky: true, // make sure position of tippy is updated when content changes
-        plugins: [sticky],
-        content: this.$refs.suggestions,
-        trigger: "mouseenter", // manual
-        showOnCreate: true,
-        placement: "top-start",
-        inertia: true,
-        duration: [400, 200]
-      });
+      let rect = node.getBoundingClientRect();
+      this.popoverX = rect.x + rect.width + 10;
+      this.popoverY = rect.y;
     },
     destroyPopup() {
-      if (this.popup) {
-        this.popup[0].destroy();
-        this.popup = null;
-      }
+      this.query = "";
     }
   },
 

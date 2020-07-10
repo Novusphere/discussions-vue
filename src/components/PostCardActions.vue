@@ -36,7 +36,7 @@
             <span>Edit</span>
           </v-btn>
         </v-list-item>
-        <v-list-item v-show="isCommentDisplay">
+        <v-list-item>
           <PostThreadLink btn copy :post="post">
             <v-icon>link</v-icon>
             <span>copy link</span>

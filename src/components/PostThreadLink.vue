@@ -37,8 +37,7 @@ export default {
   data: () => ({}),
   methods: {
     copyLink() {
-      console.log(`copying...`);
-      this.$copyText(this.link);
+      this.$copyText(`${window.location.origin}${this.link}`);
     },
     async goToLink() {
       if (this.isThreadDialogOpen) {
