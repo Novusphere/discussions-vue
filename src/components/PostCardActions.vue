@@ -37,9 +37,9 @@
           </v-btn>
         </v-list-item>
         <v-list-item v-show="isCommentDisplay">
-          <PostThreadLink btn :post="post">
+          <PostThreadLink btn copy :post="post">
             <v-icon>link</v-icon>
-            <span>link</span>
+            <span>copy link</span>
           </PostThreadLink>
         </v-list-item>
         <v-list-item v-show="(myPublicKey != post.pub) && (post.uuid == post.threadUuid)">

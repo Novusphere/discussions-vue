@@ -114,15 +114,20 @@ export default {
               // this allows us to call it inside of our custom popup
               // via keyboard navigation and on click
               this.insertTag = command;
+
+              console.proxyLog(`hash enter: ${this.tag}`);
             },
             // is called when a suggestion has changed
             onChange: ({ query, range }) => {
               this.tag = query;
               this.tagRange = range;
+
+              console.proxyLog(`hash change: ${this.tag}`);
             },
             // is called when a suggestion is cancelled
             onExit: () => {
               if (this.tag) {
+                console.proxyLog(`hash exit: ${this.tag}`);
                 // this is pretty much a hack
                 const android = /Android \d/.test(navigator.userAgent);
                 if (android) {
@@ -150,6 +155,7 @@ export default {
                 event.key == " " ||
                 event.key == "Tab"
               ) {
+                console.proxyLog(`hash keydown: ${this.tag}`);
                 this.insertTag({
                   range: this.tagRange,
                   attrs: {
@@ -175,6 +181,7 @@ export default {
               // this allows us to call it inside of our custom popup
               // via keyboard navigation and on click
               this.insertMention = command;
+              console.proxyLog(`mention enter: ${this.query}`);
             },
             // is called when a suggestion has changed
             onChange: ({ items, query, range, virtualNode }) => {
@@ -182,6 +189,7 @@ export default {
               this.filteredUsers = items;
               this.suggestionRange = range;
               this.renderPopup(virtualNode);
+              console.proxyLog(`mention change: ${this.query}`);
             },
             // is called when a suggestion is cancelled
             onExit: () => {
@@ -190,6 +198,7 @@ export default {
               this.filteredUsers = [];
               this.suggestionRange = null;
               this.destroyPopup();
+              console.proxyLog(`mention exit`);
             },
             // is called on every keyDown event while a suggestion is active
             onKeyDown: ({ event }) => {
@@ -199,6 +208,11 @@ export default {
                 event.key == "Tab"
               ) {
                 const user = this.filteredUsers[0];
+                console.proxyLog(
+                  `mention keydown: ${
+                    user ? JSON.stringify(user) : "[undefined]"
+                  }`
+                );
                 if (user) {
                   this.selectUser(user);
                 }

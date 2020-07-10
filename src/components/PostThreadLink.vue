@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline">
-    <v-btn text v-if="btn" @click="goToLink()">
+    <v-btn text v-if="btn" @click="copy ? copyLink() : goToLink()">
       <slot></slot>
     </v-btn>
     <router-link class="thread-link" :to="link" v-else>
@@ -17,6 +17,7 @@ export default {
   components: {},
   props: {
     btn: Boolean,
+    copy: Boolean,
     post: Object
   },
   computed: {
@@ -35,6 +36,10 @@ export default {
   },
   data: () => ({}),
   methods: {
+    copyLink() {
+      console.log(`copying...`);
+      this.$copyText(this.link);
+    },
     async goToLink() {
       if (this.isThreadDialogOpen) {
         window.history.pushState({}, null, this.link);
