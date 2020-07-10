@@ -6,6 +6,10 @@ import { getFromCache, markdownToHTML, htmlToText } from "@/novusphere-js/utilit
 import { Post } from './Post';
 import { createTransferActions, signText, signHash, getSymbols } from "@/novusphere-js/uid";
 
+window._test = {
+    axios
+}
+
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
 };

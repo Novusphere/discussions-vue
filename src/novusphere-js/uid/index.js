@@ -56,7 +56,7 @@ async function brainKeyToKeys(brainKey) {
     function getKeyAt(index) {
         // m/44'/0'/0' = read.cash
         let child = node.derivePath(`m/80'/0'/0'/${index}`);
-        const wif = child.toWIF();
+        const wif = ecc.PrivateKey(child.privateKey).toWif();
         return {
             key: wif,
             pub: ecc.privateToPublic(wif),
