@@ -53,9 +53,9 @@ const getDefaultState = () => ({
     // --- saved ---
     lastSeenNotificationsTime: 0,
     subscribedTags: [],
-    followingUsers: [], // { displayName, pub, uidw }
+    followingUsers: [], // { displayName, pub, uidw, nameTime }
     watchedThreads: [], // { uuid, transaction, watchedAt }
-    delegatedMods: [ // { displayName, pub, tag }
+    delegatedMods: [ // { displayName, pub, tag, nameTime }
         // hard coded list of preset moderators
         { displayName: 'xia256', pub: 'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', tag: 'all' },
         { displayName: 'JacquesWhales', pub: 'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', tag: 'all' }
@@ -223,10 +223,10 @@ export default new Vuex.Store({
             state.darkMode = value;
             saveAccount(state);
         },
-        addModerator(state, { displayName, pub, tag }) {
+        addModerator(state, { displayName, pub, tag, nameTime }) {
             tag = tag.toLowerCase();
             if (state.delegatedMods.some(dm => dm.pub == pub && dm.tag == tag)) return;
-            state.delegatedMods.push({ displayName, pub, tag });
+            state.delegatedMods.push({ displayName, pub, tag, nameTime });
             saveAccount(state);
         },
         removeModerator(state, { pub, tag }) {
@@ -248,10 +248,10 @@ export default new Vuex.Store({
         setNotificationCount(state, count) {
             state.notificationCount = count;
         },
-        followUser(state, { displayName, pub, uidw }) {
+        followUser(state, { displayName, pub, uidw, nameTime }) {
             if (pub == state.keys.arbitrary.pub) return; // self follow disallowed
             if (state.followingUsers.find(u => u.pub == pub)) return;
-            state.followingUsers.push({ displayName, pub, uidw });
+            state.followingUsers.push({ displayName, pub, uidw, nameTime });
             saveAccount(state);
         },
         unfollowUser(state, pub) {
@@ -344,6 +344,29 @@ export default new Vuex.Store({
             state.needSyncAccount = true;
             saveAccount(state, false);
         },
+        updateDisplayNames(state, users) {
+            let save = false;
+
+            function update({ pub, displayName, nameTime }, collection, name) {
+                const eu = collection.find(i => i.pub == pub);
+                if (eu && (!eu.nameTime || nameTime > eu.nameTime) && eu.displayName != displayName) {
+                    eu.displayName = displayName;
+                    eu.nameTime = nameTime;
+                    save = true;
+
+                    console.log(name + ` ` + JSON.stringify(eu));
+                }
+            }
+
+            for (const u of users) {
+                update(u, state.followingUsers, `following`);
+                update(u, state.delegatedMods, `delegated`);
+            }
+
+            if (save) {
+                saveAccount(state);
+            }
+        },
         syncAccount(state, account) {
             state.needSyncAccount = false;
             if (!account) return;
@@ -358,7 +381,7 @@ export default new Vuex.Store({
             state.followingUsers = [...account.followingUsers];
 
             const fixedMods = getDefaultState().delegatedMods;
-            state.delegatedMods = [...fixedMods, ...account.delegatedMods.filter(dm => !fixedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag))];
+            state.delegatedMods = [...account.delegatedMods, ...fixedMods.filter(dm => !account.delegatedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag))];
         },
         forgetLoginSession(state) {
             const defaultState = getDefaultState();

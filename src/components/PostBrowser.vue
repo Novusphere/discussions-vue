@@ -102,6 +102,16 @@ export default {
           );
         }
         this.posts.push(...posts);
+
+        this.$store.commit(
+          "updateDisplayNames",
+          posts.map(p => ({
+            pub: p.pub,
+            displayName: p.displayName,
+            nameTime: p.createdAt
+          }))
+        );
+
         $state.loaded();
       } else {
         $state.complete();

@@ -22,7 +22,7 @@
     <p class="text-center" style="margin-bottom: 0px">OR</p>
     <v-row no-gutters :align="'center'" :justify="'center'">
       <v-col v-for="(wn, i) in walletNames" :key="i">
-        <v-btn color="lightgray" text outlined @click="connect(wn)" :disabled="waiting">
+        <v-btn :block="$vuetify.breakpoint.mobile" color="lightgray" text outlined @click="connect(wn)" :disabled="waiting">
           <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>
           <img v-show="!waiting" class="mr-1" :src="`/static/wallet/${wn}.png`" style="width: 32px; height: 32px" />
           {{ wn }}

@@ -2,18 +2,21 @@
   <v-card :flat="flat">
     <v-card-text>
       <v-row no-gutters>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 5">
-          <UserProfileLink class="d-inline" big :displayName="displayName" :publicKey="publicKey">
-            <slot></slot>
-          </UserProfileLink>
+        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 5">
+          <PublicKeyIcon :size="80" :publicKey="publicKey" />
+          <div class="d-inline-block ml-2">
+            <router-link style="text-decoration: none;" :to="link">
+              <h1 class="d-inline">{{ displayName }}</h1>
+            </router-link>
+          </div>
           <v-spacer />
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 5"></v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 2">
+        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 5"></v-col>
+        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 2">
           <v-btn
             v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"
-            @click="isLoggedIn ? $store.commit('followUser', { displayName, pub: publicKey, uidw }) : $store.commit('setLoginDialogOpen', true)"
+            @click="isLoggedIn ? $store.commit('followUser', { displayName, pub: publicKey, uidw, nametime: Date.now() }) : $store.commit('setLoginDialogOpen', true)"
           >
             <v-icon>person_add</v-icon>
             <span>Follow</span>
@@ -25,11 +28,11 @@
           >
             <v-icon>person_remove</v-icon>
             <span>Unfollow</span>
-          </v-btn>  
+          </v-btn>
           <v-btn
-            v-if="(publicKey != myPublicKey)"
+            v-if="uidw && (publicKey != myPublicKey)"
             color="primary"
-            :class="{ 'mt-2': !$vuetify.breakpoint.mobile, 'ml-1': $vuetify.breakpoint.mobile }"
+            :class="{ 'mt-2': !($vuetify.breakpoint.mobile || small), 'ml-1': $vuetify.breakpoint.mobile || small }"
             @click="sendTip()"
           >
             <v-icon>attach_money</v-icon>
@@ -43,25 +46,28 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
-import UserProfileLink from "@/components/UserProfileLink";
+import PublicKeyIcon from "@/components/PublicKeyIcon";
 
 export default {
   name: "UserProfileCard",
   components: {
-    UserProfileLink
+    PublicKeyIcon
   },
   props: {
     displayName: String,
     publicKey: String,
     uidw: String,
     flat: Boolean,
-    noView: Boolean
+    small: Boolean
   },
   computed: {
     ...mapGetters(["isLoggedIn", "isFollowing"]),
     ...mapState({
       myPublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
-    })
+    }),
+    link() {
+      return `/u/${this.displayName}-${this.publicKey}`;
+    }
   },
   data: () => ({}),
   methods: {

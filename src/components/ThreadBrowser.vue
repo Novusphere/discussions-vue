@@ -79,6 +79,17 @@ export default {
 
       mergeThreadToTree(thread, this.tree);
 
+      this.$store.commit(
+        "updateDisplayNames",
+        Object.values(this.tree)
+          .map(p => p.post)
+          .map(p => ({
+            pub: p.pub,
+            displayName: p.displayName,
+            nameTime: p.createdAt
+          }))
+      );
+
       setTimeout(() => this.mergeNewComments(), 3000);
     },
     async load() {
