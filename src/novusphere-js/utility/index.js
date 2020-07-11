@@ -79,7 +79,7 @@ const _oembedMaxAttempt = 10;
 let _oembedAttempts = _oembedMaxAttempt;
 let _oembedNextAttempt = 0;
 (async function _refreshOEmbed() {
-    for (;;) {
+    for (; ;) {
         const now = Date.now();
         if (_oembedAttempts < _oembedMaxAttempt && now >= _oembedNextAttempt) {
             _oembedNextAttempt = now + 1000;
@@ -88,17 +88,17 @@ let _oembedNextAttempt = 0;
             if (window.FB) {
                 window.FB.XFBML.parse()
             }
-    
+
             if (window.twttr) {
                 window.twttr.widgets.load()
             }
-    
+
             if (window.instgrm) {
                 window.instgrm.Embeds.process()
             }
 
             loadTelegram(window);
-        } 
+        }
         await sleep(100);
     }
 })();
@@ -108,12 +108,14 @@ function refreshOEmbed() {
     _oembedNextAttempt = 0; // schedule immediately
 }
 
-function waitFor(predicate, sleep = 5, timeOut) {
+function waitFor(predicate, sleep = 5, timeOut, errorMessage) {
     let waited = 0;
     return new Promise((resolve, reject) => {
         async function attempt() {
             if (await predicate()) resolve();
-            else if (timeOut && waited >= timeOut) return reject();
+            else if (timeOut && waited >= timeOut) {
+                return reject(new Error(errorMessage || `Wait for condition has exceeded limit`));
+            }
             else {
                 setTimeout(attempt, sleep);
                 waited += sleep;

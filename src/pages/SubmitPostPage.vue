@@ -99,20 +99,26 @@ export default {
 
       const transaction = post.transaction;
       let p = undefined;
-      await waitFor(
-        async () => {
-          p = await getSinglePost(transaction);
-          return p != undefined;
-        },
-        500,
-        5000
-      );
 
-      if (p) {
-        this.$router.push(
-          `/tag/${p.sub}/${p.getEncodedId()}/${p.getSnakeCaseTitle()}`
+      try {
+        await waitFor(
+          async () => {
+            p = await getSinglePost(transaction);
+            return p != undefined;
+          },
+          500,
+          10000
         );
-      } else {
+
+        if (p) {
+          this.$router.push(
+            `/tag/${p.sub}/${p.getEncodedId()}/${p.getSnakeCaseTitle()}`
+          );
+        } else {
+          console.log(`Thread couldnt be found... ${transaction}`);
+        }
+      } catch (ex) {
+        console.log(ex);
         console.log(`Thread couldnt be found... ${transaction}`);
       }
     },

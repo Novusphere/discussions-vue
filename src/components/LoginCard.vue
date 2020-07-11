@@ -6,39 +6,30 @@
           <div v-if="!hasLoginSession">
             <v-row>
               <v-col cols="12">
-                <v-tabs v-model="keyMethodTab">
-                  <v-tab>Brain Key</v-tab>
-                  <v-tab>Wallet</v-tab>
-                </v-tabs>
+                <v-textarea
+                  v-model="brainKey"
+                  :rules="brainKeyRules"
+                  label="Brain Key Mnemonic"
+                  hint="Enter your brain key mnemonic"
+                  required
+                ></v-textarea>
 
-                <v-tabs-items v-model="keyMethodTab">
-                  <v-tab-item>
-                    <v-textarea
-                      v-model="brainKey"
-                      :rules="brainKeyRules"
-                      label="Brain Key Mnemonic"
-                      hint="Enter your brain key mnemonic"
-                      required
-                    >
-                    </v-textarea>
-                  </v-tab-item>
-                  <v-tab-item>
-                    <div class="text-center" v-show="walletError">
-                      <span class="error--text">{{ walletError }}</span>
-                    </div>
-                    <ConnectWalletBtn
-                      ref="connector"
-                      color="primary"
-                      class="mt-2"
-                      @connected="walletConnected"
-                      @error="(e) => walletError = e"
-                    >
-                      <template v-slot:disconnect="{ logout }">
-                        <v-btn class="ml-2" color="primary" @click="logout">Disconnect Wallet</v-btn>
-                      </template>
-                    </ConnectWalletBtn>
-                  </v-tab-item>
-                </v-tabs-items>
+                <div class="text-center" v-show="walletError">
+                  <span class="error--text">{{ walletError }}</span>
+                </div>
+                <ConnectWalletBtn
+                  list
+                  ref="connector"
+                  color="primary"
+                  class="mt-2"
+                  @start-connect="walletError = ''"
+                  @connected="walletConnected"
+                  @error="(e) => walletError = e"
+                >
+                  <template v-slot:disconnect="{ logout }">
+                    <v-btn class="ml-2" color="primary" @click="logout">Disconnect Wallet</v-btn>
+                  </template>
+                </ConnectWalletBtn>
               </v-col>
             </v-row>
             <v-row>
