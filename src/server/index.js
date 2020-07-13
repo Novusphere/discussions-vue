@@ -39,6 +39,7 @@ let config = {};
         };
 
         if (head) {
+            Object.keys(head).forEach(key => head[key] === undefined && delete head[key]);
             Object.assign(_head, head);
         }
 

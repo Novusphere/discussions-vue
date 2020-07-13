@@ -37,6 +37,12 @@
           <v-col :cols="12">
             <v-btn color="primary" @click="reveal()">Reveal Private Keys</v-btn>
           </v-col>
+          <v-col :cols="12">
+            <p class="text-center red--text">
+              This page allows you to see your private keys, which are used to make posts, manage your account and transfer token out of Discussions.
+              Please be cautious when accessing this page in areas where others can easily see your screen.
+            </p>
+          </v-col>
         </v-row>
       </v-card-text>
     </v-card>

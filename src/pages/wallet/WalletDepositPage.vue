@@ -4,7 +4,7 @@
       <v-row>
         <v-col :cols="12">
           <v-form ref="form" v-model="valid">
-            <UserAssetSelect :item-text="`symbol`" allow-zero v-model="symbol" required></UserAssetSelect>
+            <UserAssetSelect no-amount :item-text="`symbol`" allow-zero v-model="symbol" required></UserAssetSelect>
 
             <v-text-field v-model="amount" label="Amount" required @change="amountChange()"></v-text-field>
 

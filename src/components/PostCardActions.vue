@@ -42,7 +42,7 @@
             <span>copy link</span>
           </PostThreadLink>
         </v-list-item>
-        <v-list-item v-show="(myPublicKey != post.pub) && (post.uuid == post.threadUuid)">
+        <v-list-item v-show="(isLoggedIn) && (post.uuid == post.threadUuid)">
           <v-btn text @click="watchThread()">
             <v-icon>watch_later</v-icon>
             <span>{{ isThreadWatched(post.uuid) ? 'unwatch' : 'watch' }}</span>
@@ -71,6 +71,18 @@
             <v-icon>zoom_in</v-icon>On Chain
           </TransactionLink>
         </v-list-item>
+        <v-list-item>
+          <v-btn text @click="share('twitter')">
+            <v-icon>mdi-twitter</v-icon>
+            <span>Share</span>
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn text @click="share('fb')">
+            <v-icon>mdi-facebook</v-icon>
+            <span>Share</span>
+          </v-btn>
+        </v-list-item>
       </v-list>
     </v-menu>
   </v-card-actions>
@@ -80,6 +92,7 @@
 import { mapState, mapGetters } from "vuex";
 import { submitVote, modPolicySetTags } from "@/novusphere-js/discussions/api";
 import { sleep } from "@/novusphere-js/utility";
+import config from "@/server/site";
 
 import PostThreadLink from "@/components/PostThreadLink";
 import TransactionLink from "@/components/TransactionLink";
@@ -108,6 +121,41 @@ export default {
     //
   }),
   methods: {
+    share(where) {
+      let link = `/tag/${this.post.sub}`;
+      if (this.post.op && this.post.transaction != this.post.op.transaction) {
+        link += `/${this.post.op.getEncodedId()}/${this.post.op.getSnakeCaseTitle()}/${this.post.getEncodedId()}`;
+      } else {
+        link += `/${this.post.getEncodedId()}/${this.post.getSnakeCaseTitle()}`;
+      }
+
+      link = config.url + link;
+      console.log(link);
+
+      const tags = this.post.tags.filter(t => !["all"].some(t2 => t2 == t));
+
+      let url = undefined;
+      let features = undefined;
+      if (where == "twitter") {
+        url =
+          `https://twitter.com/intent/tweet?url=${link}` +
+          `&via=thenovusphere` +
+          `&hashtags=${tags.join(",")}` +
+          `&text=`;
+        features =
+          "menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=600,height=600";
+      } else if (where == "fb") {
+        url =
+          `https://www.facebook.com/sharer/sharer.php?u=${link}` +
+          `&t=${tags.join(", ")}`;
+        features =
+          "menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600";
+      }
+
+      if (url) {
+        window.open(url, "", features);
+      }
+    },
     isMyPolicy(tag) {
       let pol = this.post.getMyModPolicy(this.myPublicKey);
       return pol.find(t => t == tag);
@@ -160,7 +208,11 @@ export default {
           displayName: this.post.displayName,
           uuid: this.post.uuid,
           callback: ({ transaction, transferActions }) =>
-            this.$emit("tip", { uuid: this.post.uuid, transaction, transferActions })
+            this.$emit("tip", {
+              uuid: this.post.uuid,
+              transaction,
+              transferActions
+            })
         }
       });
     },

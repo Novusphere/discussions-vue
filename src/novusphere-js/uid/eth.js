@@ -15,7 +15,7 @@ class MetamaskWallet {
         this.web3 = window.web3;
 
         this.ethereum.enable(); // we do not await this since older versions do not throw ex when canceling
-        await waitFor(async () => this.web3.eth.accounts.length > 0, 500, 10000,
+        await waitFor(async () => this.web3.eth.accounts.length > 0, 500, 25000,
             `Connecting to metamask has taken too long, try again`);
     }
     async login() {
