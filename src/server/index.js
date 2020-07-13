@@ -17,7 +17,10 @@ let config = {};
     }*/
 
     Object.assign(config, siteConfig);
-    Object.assign(config, getConfig('server', {}));
+    if (argv.config) {
+        console.log(`Updating site settings from config: ${argv.config}`);
+        Object.assign(config, getConfig(argv.config, {}));
+    }
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
     const BUILD_TIME = Date.now();
