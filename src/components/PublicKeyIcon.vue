@@ -38,7 +38,7 @@ export default {
             "https://atmosdb.novusphere.io/discussions/upload/image/1594331019213.png"
         },
         {
-          pun: "EOS6sYMyMHzHhGtfwjCcZkRaw3YK5ws8xoD6ke2DNUmnHT3j1cpjV", // brain
+          pub: "EOS6sYMyMHzHhGtfwjCcZkRaw3YK5ws8xoD6ke2DNUmnHT3j1cpjV", // brain
           link:
             "https://atmosdb.novusphere.io/discussions/upload/image/1594331754924.png"
         },

@@ -2,8 +2,12 @@ import express from 'express';
 import fs from 'fs';
 import { argv } from 'yargs';
 import createRoutes from "./routes";
-import config from "./site";
+import siteConfig from "./site";
+import { getConfig } from "@/novusphere-js/utility";
+
 //import { getDatabase } from "./mongo";
+
+let config = {};
 
 (async function () {
     /*try { await getDatabase(); }
@@ -11,6 +15,9 @@ import config from "./site";
         console.error(ex);
         return;
     }*/
+
+    Object.assign(config, siteConfig);
+    Object.assign(config, getConfig('server', {}));
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
     const BUILD_TIME = Date.now();
