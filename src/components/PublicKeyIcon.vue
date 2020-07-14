@@ -51,7 +51,7 @@ export default {
       if (special) this.link = special.link;
       else
         this.link =
-          "https://atmosdb.novusphere.io/discussions/keyicon/" + this.publicKey;
+          `/v1/api/data/keyicon/${this.publicKey}.svg?dark=${this.$vuetify.theme.dark ? 'true' : ''}`;
     }
   }
 };

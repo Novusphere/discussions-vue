@@ -20,5 +20,8 @@ export default {
             /https:\/\/medium.com/,
             /https:\/\/whaleshares.io/
         ]
-    }
+    },
+    "trustedRelay": [
+        "EOS7YrEup7dQ82v3wF3RjxXe7RG3yosz1SXVRjMwgT1fdHsgHZ8MJ"
+    ]
 }

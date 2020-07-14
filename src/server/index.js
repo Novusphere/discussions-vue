@@ -1,16 +1,26 @@
 import express from 'express';
 import fs from 'fs';
 import { argv } from 'yargs';
+import { attachControllers } from '@decorators/express';
 import createRoutes from "./routes";
 import config from "./site";
-//import { getDatabase } from "./mongo";
+import { getDatabase } from "./mongo";
+import services from "./services";
+
+import AccountController from "./controllers/AccountController";
+import ActionController from "./controllers/ActionController";
+import DataController from "./controllers/DataController";
+import ModerationController from "./controllers/ModerationController";
+import SearchController from "./controllers/SearchController";
+import UnifiedIdController from "./controllers/UnifiedIdController";
+import UploadController from "./controllers/UploadController";
 
 (async function () {
-    /*try { await getDatabase(); }
+    try { await getDatabase(); }
     catch (ex) {
         console.error(ex);
         return;
-    }*/
+    }
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
     const BUILD_TIME = Date.now();
@@ -85,11 +95,24 @@ import config from "./site";
     // hook up all our routes
     createRoutes().forEach(r => addRoute(r));
 
+    const apiRouter = express.Router();
+    attachControllers(apiRouter, [
+        AccountController, 
+        ActionController, 
+        DataController, 
+        ModerationController, 
+        SearchController, 
+        UnifiedIdController, 
+        UploadController]);
+
+    app.use('/v1/api', apiRouter);
+
     app.get('*', (req, res) => {
         // TO-DO: 404
         serve(res);
     });
 
     app.listen(config.port, () => console.log(`Server is listening at port ${config.port}`));
+    services.start();
 
 })();

@@ -10,6 +10,8 @@
     "discord-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/discord.js"
   },
   "dependencies": {
+    "@decorators/di": "^1.0.2",
+    "@decorators/express": "^2.4.0",
     "@hapi/joi": "^17.1.1",
     "aes-js": "^3.1.2",
     "axios": "^0.19.2",
@@ -26,6 +28,7 @@
     "eosjs": "^20.0.3",
     "eosjs-ecc": "^4.0.7",
     "express": "^4.17.1",
+    "identicon.js": "^2.3.3",
     "jsdom": "^16.2.2",
     "mongodb": "^3.5.9",
     "sanitize-html": "^1.27.0",
@@ -48,6 +51,7 @@
     "@babel/cli": "^7.10.3",
     "@babel/core": "^7.10.3",
     "@babel/node": "^7.10.3",
+    "@babel/plugin-proposal-decorators": "^7.10.4",
     "@babel/plugin-transform-modules-commonjs": "^7.10.1",
     "@babel/preset-env": "^7.10.3",
     "@vue/cli-plugin-babel": "~4.4.0",
