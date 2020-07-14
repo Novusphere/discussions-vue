@@ -7,6 +7,7 @@
           <div class="d-inline-block ml-2">
             <router-link style="text-decoration: none;" :to="link">
               <h1 class="d-inline">{{ displayName }}</h1>
+              <slot></slot>
             </router-link>
           </div>
           <v-spacer />

@@ -11,7 +11,7 @@
   >
     <template v-slot:item="{ item }">
       <TokenIcon :symbol="item.symbol" />
-      {{ item.asset }}
+      {{ !noAmount ? item.asset : (item.asset.split(' ')[1]) }}
     </template>
   </v-select>
 </template>
@@ -34,6 +34,7 @@ export default {
     value: String,
     required: Boolean,
     allowZero: Boolean,
+    noAmount: Boolean,
     itemText: { type: String, default: "asset" }
   },
   computed: {

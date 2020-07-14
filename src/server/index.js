@@ -2,8 +2,10 @@ import express from 'express';
 import fs from 'fs';
 import { argv } from 'yargs';
 import { attachControllers } from '@decorators/express';
+import { getConfig } from "@/novusphere-js/utility";
+
 import createRoutes from "./routes";
-import config from "./site";
+import siteConfig from "./site";
 import { getDatabase } from "./mongo";
 import services from "./services";
 
@@ -15,11 +17,19 @@ import SearchController from "./controllers/SearchController";
 import UnifiedIdController from "./controllers/UnifiedIdController";
 import UploadController from "./controllers/UploadController";
 
+let config = {};
+
 (async function () {
     try { await getDatabase(); }
     catch (ex) {
         console.error(ex);
         return;
+    }
+
+    Object.assign(config, siteConfig);
+    if (argv.config) {
+        console.log(`Updating site settings from config: ${argv.config}`);
+        Object.assign(config, getConfig(argv.config, {}));
     }
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
@@ -39,6 +49,7 @@ import UploadController from "./controllers/UploadController";
         };
 
         if (head) {
+            Object.keys(head).forEach(key => head[key] === undefined && delete head[key]);
             Object.assign(_head, head);
         }
 

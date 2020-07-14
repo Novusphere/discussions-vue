@@ -16,6 +16,7 @@
           </div>
           <div class="d-inline-block pr-3">
             <UserProfileLink
+              popover
               :class="{'moderator': isModerator(post.sub, post.pub)}"
               :displayName="post.displayName"
               :publicKey="post.pub"
