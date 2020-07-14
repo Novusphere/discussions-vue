@@ -1,20 +1,30 @@
 import express from 'express';
 import fs from 'fs';
 import { argv } from 'yargs';
-import createRoutes from "./routes";
-import siteConfig from "./site";
+import { attachControllers } from '@decorators/express';
 import { getConfig } from "@/novusphere-js/utility";
 
-//import { getDatabase } from "./mongo";
+import createRoutes from "./routes";
+import siteConfig from "./site";
+import { getDatabase } from "./mongo";
+import services from "./services";
+
+import AccountController from "./controllers/AccountController";
+import ActionController from "./controllers/ActionController";
+import DataController from "./controllers/DataController";
+import ModerationController from "./controllers/ModerationController";
+import SearchController from "./controllers/SearchController";
+import UnifiedIdController from "./controllers/UnifiedIdController";
+import UploadController from "./controllers/UploadController";
 
 let config = {};
 
 (async function () {
-    /*try { await getDatabase(); }
+    try { await getDatabase(); }
     catch (ex) {
         console.error(ex);
         return;
-    }*/
+    }
 
     Object.assign(config, siteConfig);
     if (argv.config) {
@@ -96,11 +106,24 @@ let config = {};
     // hook up all our routes
     createRoutes().forEach(r => addRoute(r));
 
+    const apiRouter = express.Router();
+    attachControllers(apiRouter, [
+        AccountController, 
+        ActionController, 
+        DataController, 
+        ModerationController, 
+        SearchController, 
+        UnifiedIdController, 
+        UploadController]);
+
+    app.use('/v1/api', apiRouter);
+
     app.get('*', (req, res) => {
         // TO-DO: 404
         serve(res);
     });
 
     app.listen(config.port, () => console.log(`Server is listening at port ${config.port}`));
+    services.start();
 
 })();
