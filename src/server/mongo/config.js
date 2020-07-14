@@ -8,7 +8,9 @@ import { getConfig } from "@/novusphere-js/utility";
 let config = {
     "connection": "mongodb://localhost:27017",
     "database": "discussions2",
-    "actionDatabase": "atmosdb2",
+    "actions": {
+        "discussions": "atmosdb2::discussions_actions"
+    },
     "contract": {
         "discussions": "discussionsx",
         "uid": "nsuidcntract"
