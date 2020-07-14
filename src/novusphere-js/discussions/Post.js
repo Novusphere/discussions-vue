@@ -172,6 +172,12 @@ export class Post {
     async getContentImage() {
         let doc = await this.getContentDocument();
 
+        for (const { src } of Array.from(doc.images)) {
+            if (src) {
+                return src;
+            }
+        }
+
         for (const { href } of Array.from(doc.links)) {
             if (new RegExp(IMAGE_REGEX).test(href)) {
                 return href;
