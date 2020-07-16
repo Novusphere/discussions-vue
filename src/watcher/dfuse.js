@@ -2,18 +2,6 @@ const { createDfuseClient } = require("@dfuse/client");
 global.fetch = require('node-fetch');
 global.WebSocket = require('ws');
 
-async function webSocketFactory(url) {
-    const webSocket = new WebSocketClient(url, {
-        handshakeTimeout: 30 * 1000, // 30s
-        maxPayload: 200 * 1024 * 1000 * 1000 // 200Mb
-    });
-    const onUpgrade = (response) => {
-        webSocket.removeListener("upgrade", onUpgrade);
-    }
-    webSocket.on("upgrade", onUpgrade);
-    return webSocket;
-}
-
 export default class DfuseWatcher {
     constructor(apiKey) {
         this._apiKey = apiKey;
