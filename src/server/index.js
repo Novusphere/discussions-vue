@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import * as rendertron from 'rendertron-middleware';
+import axios from 'axios';
 import fs from 'fs';
 import { argv } from 'yargs';
 import { attachControllers } from '@decorators/express';
@@ -35,9 +35,6 @@ import UploadController from "./controllers/UploadController";
     const BUILD_TIME = Date.now();
 
     const app = express();
-    const rendertronService = rendertron.makeMiddleware({
-        proxyUrl: siteConfig.rendertron,
-    });
 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
@@ -46,15 +43,19 @@ import UploadController from "./controllers/UploadController";
     app.use(`/css`, express.static(`./dist/css`));
     app.use(`/static`, express.static(`./dist/static`));
 
-    function serve(req, res) {
+    async function serve(req, res, next) {
         const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
-        if (req.get('user-agent').match(botRegex)) {
-            rendertronService(req, res, next);
+        const userAgent = req.get('user-agent');
+        if (userAgent.match(botRegex) || req.query.rendertron) {
+            const url = `${siteConfig.rendertron}/${siteConfig.url}${req.path}`;
+            console.log(`[rendertron] ${userAgent} - ${siteConfig.url}${req.path}`);
+            const { data } = await axios.get(url);
+            res.setHeader('content-type', 'text/html');
+            res.send(data);
         }
         else {
             const header = `
             <script>window.__BUILD__ = ${BUILD_TIME}</script>`;
-
             let index = INDEX_FILE;
             index = index.replace(/<\/head>/, `${header}</head>`);
             res.setHeader('content-type', 'text/html');
@@ -67,7 +68,7 @@ import UploadController from "./controllers/UploadController";
             const fullPath = path + route.path;
             console.log(`Added route for ${fullPath}`);
             app.get(fullPath, async (req, res, next) => {
-                serve(req, res);
+                serve(req, res, next);
             });
         }
         else {
@@ -95,9 +96,9 @@ import UploadController from "./controllers/UploadController";
 
     app.use('/v1/api', cors(), apiRouter);
 
-    app.get('*', (req, res) => {
+    app.get('*', (req, res, next) => {
         // TO-DO: 404
-        serve(req, res);
+        serve(req, res, next);
     });
 
     app.listen(siteConfig.port, () => console.log(`Server is listening at port ${siteConfig.port}`));

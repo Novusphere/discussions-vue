@@ -581,7 +581,12 @@ async function modPolicySetTags(postKey, uuid, tags, domain) {
 // Get user account object
 //
 async function getUserAccountObject(identityKey, domain) {
-    return await apiRequest(`/v1/api/account/get`, {}, { key: identityKey, domain });
+    try {
+        return await apiRequest(`/v1/api/account/get`, {}, { key: identityKey, domain });
+    }
+    catch (ex) { // not found
+        return null;
+    }
 }
 
 //

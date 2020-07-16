@@ -74,35 +74,39 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach(async (to) => {
+    let head = {
+        title: site.title,
+        description: site.description,
+        image: `${site.url}${site.image}`
+    };
+
     const meta = to.meta;
     if (meta) {
         try {
             const context = meta.context ? (await meta.context(to.params)) : undefined;
 
-            let head = {};
             if (meta.head) {
-                head = await meta.head(context);
+                let _head = await meta.head(context);
+                // removed undefined
+                Object.keys(_head).forEach(key => _head[key] === undefined && delete _head[key]);
+                Object.assign(head, _head);
             }
-
-            head.title = head.title || site.title;
-            head.description = head.description || site.description;
-            head.image = head.image || `${site.url}${site.image}`;
-
-            document.title = head.title;
-            setMeta("og:title", head.title);
-            setMeta("twitter:title", head.title);
-
-            setMeta("description", head.description);
-            setMeta("og:description", head.description);
-            setMeta("twitter:description", head.description);
-
-            setMeta("og:image", head.image);
-            setMeta("twitter:image", head.image);
         }
         catch (ex) {
             console.log(ex);
         }
     }
+
+    document.title = head.title;
+    setMeta("og:title", head.title);
+    setMeta("twitter:title", head.title);
+
+    setMeta("description", head.description);
+    setMeta("og:description", head.description);
+    setMeta("twitter:description", head.description);
+
+    setMeta("og:image", head.image);
+    setMeta("twitter:image", head.image);
 });
 
 function setMeta(name, content) {

@@ -25,7 +25,7 @@ export default class AccountController {
             .next();
 
         if (!document) {
-            throw new Error(`Account could not be found`);
+            throw new Error(`Account not found`);
         }
 
         return res.success(document);

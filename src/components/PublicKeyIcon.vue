@@ -45,8 +45,9 @@ export default {
             "https://atmosdb.novusphere.io/discussions/upload/image/1594331754924.png"
         },
         {
-          pub: "paul", // paul
-          link: ""
+          pub: "EOS5Hc64gNfSzpbE8iECJoPh4QD6WCLhFPsgeJ1yK9uvhHscayBMe", // jenina
+          link:
+            "https://atmosdb.novusphere.io/discussions/upload/image/1594701899794.png"
         }
       ].find(sp => sp.pub == this.publicKey);
 

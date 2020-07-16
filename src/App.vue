@@ -188,8 +188,7 @@ export default {
 
         if (oldAccount) {
           console.log(`Found old Discussions account... trying to migrate...`);
-
-          //console.log(oldAccount);
+          console.log(oldAccount);
 
           // upgrade to new object format
           const migrated = {

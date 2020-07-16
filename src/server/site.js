@@ -1,6 +1,6 @@
 export default {
     "port": 8008,
-    "rendertron": "http://localhost:8010",
+    "rendertron": "http://localhost:8010/render",
     "title": "Discussions",
     "description": "An open forum for discussions built on blockchain. Supporting and nurturing token communities of all kind",
     "image": "/static/banner.png",

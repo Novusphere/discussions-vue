@@ -17,6 +17,7 @@
           <v-btn
             v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"
+            outlined
             @click="isLoggedIn ? $store.commit('followUser', { displayName, pub: publicKey, uidw, nametime: Date.now() }) : $store.commit('setLoginDialogOpen', true)"
           >
             <v-icon>person_add</v-icon>
