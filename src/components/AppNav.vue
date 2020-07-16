@@ -5,6 +5,7 @@
     </v-list-item>
     <v-list-item>
       <v-text-field
+        dense
         hide-details
         append-icon="search"
         class="mt-3"

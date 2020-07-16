@@ -9,7 +9,7 @@
         @click:outside="$store.commit('setLoginDialogOpen', false)"
       >
         <v-card>
-          <v-tabs v-model="loginTab">
+          <v-tabs v-model="loginTab" background-color="primary" slider-color="accent" dark grow>
             <v-tab>Log in</v-tab>
             <v-tab>Sign up</v-tab>
           </v-tabs>
@@ -172,6 +172,7 @@ export default {
       console.log(`Synchronizing account...`);
 
       let account = await getUserAccountObject(this.keys.identity.key);
+
       if (account && account.data) {
         account = account.data;
         console.log(`Retrieved account successfully`);

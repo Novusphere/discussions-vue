@@ -11,7 +11,10 @@
         </v-card-text>
       </v-card>
       <v-btn small dense text :to="`/settings/content`">Content</v-btn>
-      <v-btn small dense text :to="`/settings/watched`">Watched Threads</v-btn>
+      <v-btn small dense text :to="`/settings/watched`">Watched</v-btn>
+      <v-btn small dense text :to="`/settings/moderated/pinned`">Pinned</v-btn>
+      <v-btn small dense text :to="`/settings/moderated/spam`">Spam</v-btn>
+      <v-btn small dense text :to="`/settings/moderated/nsfw`">NSFW</v-btn>
       <v-btn small dense text :to="`/settings/keys`">Keys</v-btn>
     </template>
     <template v-slot:content>

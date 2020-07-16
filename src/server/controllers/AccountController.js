@@ -10,13 +10,13 @@ export default class AccountController {
     //
     // Account retrieval
     //
-    @Api({ requiredAuth: false })
-    @Get('/')
+    @Api()
+    @Post('/get')
     async get(req, res) {
-        let { pub, domain } = req.unpack();
+        let { pub, domain } = req.unpackAuthenticated();
 
         let db = await getDatabase();
-        let document = await db.collection(config.tables.accounts)
+        let document = await db.collection(config.table.accounts)
             .find({
                 pub: pub,
                 domain: domain
@@ -34,17 +34,16 @@ export default class AccountController {
     //
     // Account saving
     //
-    @Api({ requiredAuth: false })
-    @Post('/')
+    @Api()
+    @Post('/save')
     async post(req, res) {
-        let { pub, domain, sig, time, data } = req.unpack();
-        let account = JSON.parse(data);
+        let { pub, sig, domain, time, data, _data } = req.unpackAuthenticated();
 
-        if (data.length >= 1025 * 256) throw new Error(`Data must be smaller than 256kb`);
+        if (_data.length >= 256 * 1024) throw new Error(`Data must be less than 256kb`);
 
         let db = await getDatabase();
-        let update = await db.collection(config.tables.accounts)
-            .update(
+        let update = await db.collection(config.table.accounts)
+            .updateOne(
                 {
                     pub: pub,
                     domain: domain
@@ -57,12 +56,12 @@ export default class AccountController {
                     $set: {
                         sig: sig,
                         time: time,
-                        _data: data,
-                        data: account
+                        _data: _data,
+                        data: data
                     }
                 },
                 { upsert: true });
 
-        return req.success();
+        return res.success();
     }
 }

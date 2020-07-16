@@ -19,6 +19,7 @@ import BrowseNotifications from "@/pages/BrowseNotifications";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import ContentSettingsPage from "@/pages/settings/ContentSettingsPage";
 import BrowseWatchedThreadsPage from "@/pages/settings/BrowseWatchedThreadsPage";
+import BrowseModeratedPostsPage from "@/pages/settings/BrowseModeratedPostsPage";
 import KeysSettingsPage from "@/pages/settings/KeysSettingsPage";
 
 import WalletPage from "@/pages/wallet/WalletPage";
@@ -46,6 +47,7 @@ let components = {
     SettingsPage,
     ContentSettingsPage,
     BrowseWatchedThreadsPage,
+    BrowseModeratedPostsPage,
     KeysSettingsPage,
     WalletPage,
     WalletAssetsPage,
@@ -76,20 +78,38 @@ router.afterEach(async (to) => {
     if (meta) {
         try {
             const context = meta.context ? (await meta.context(to.params)) : undefined;
+
+            let head = {};
             if (meta.head) {
-                const head = await meta.head(context);
-                if (head.title) {
-                    document.title = head.title;
-                }
+                head = await meta.head(context);
             }
-            else {
-                document.title = site.title;
-            }
+
+            head.title = head.title || site.title;
+            head.description = head.description || site.description;
+            head.image = head.image || `${site.url}${site.image}`;
+
+            document.title = head.title;
+            setMeta("og:title", head.title);
+            setMeta("twitter:title", head.title);
+
+            setMeta("description", head.description);
+            setMeta("og:description", head.description);
+            setMeta("twitter:description", head.description);
+
+            setMeta("og:image", head.image);
+            setMeta("twitter:image", head.image);
         }
         catch (ex) {
             console.log(ex);
         }
     }
 });
+
+function setMeta(name, content) {
+    const node = document.querySelector(`meta[property="${name}"], meta[name="${name}"]`);
+    if (node) {
+        node.setAttribute("content", content);
+    }
+}
 
 export default router;

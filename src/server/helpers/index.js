@@ -1,8 +1,9 @@
-function Api({ requireAuth } = {}) {
+import ecc from "eosjs-ecc/lib/api_common";
+
+function Api() {
     return function (target, name, descriptor) {
         let fn = descriptor.value;
         let newFn = async function (req, res, next) {
-            res.setHeader('Access-Control-Allow-Origin', '*');
             res.setHeader('content-type', 'application/json');
 
             res.success = (json) => {
@@ -18,24 +19,48 @@ function Api({ requireAuth } = {}) {
                 }));
             }
 
-            req.unpack = () => {
+            req.unpack = (defaultObject = {}) => {
                 let unpacked = {};
+                Object.assign(unpacked, defaultObject);
                 Object.assign(unpacked, req.params);
                 Object.assign(unpacked, req.query);
                 Object.assign(unpacked, req.body);
                 return unpacked;
             }
 
-            try {
-                if (requireAuth) {
-                    if (!req.query.test) {
-                        throw new Error(`Unauthorized`);
-                    }
+            req.unpackAuthenticated = (defaultObject) => {
+                let { sig, data } = req.unpack();
+                let { pub, time, domain, ...rest } = JSON.parse(data);
+
+                const recoveredKey = ecc.recover(sig, data);
+                if (recoveredKey != pub) {
+                    throw new Error(`Recovered key ${recoveredKey} does not match supplied key ${pub}`);
                 }
 
+                if (Math.abs(Date.now() - time) > 30000) {
+                    throw new Error(`Signature must be within a 30 second threshold, it's possible your system clock is out of sync`);
+                }
+
+                if (!domain || domain.length > 16) {
+                    throw new Error(`Invalid domain ${domain}`);
+                }
+
+                let realData = {};
+                Object.assign(realData, defaultObject);
+                Object.assign(realData, rest);
+
+                return {
+                    pub, sig, time, domain,
+                    _data: data,
+                    data: realData
+                };
+            }
+
+            try {
                 await fn.apply(target, arguments);
             }
             catch (ex) {
+                console.log(ex);
                 res.error(ex);
             }
         };

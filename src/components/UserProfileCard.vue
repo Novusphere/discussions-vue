@@ -33,7 +33,7 @@
           <v-btn
             v-if="uidw && (publicKey != myPublicKey)"
             color="primary"
-            :class="{ 'mt-2': !($vuetify.breakpoint.mobile || small), 'ml-1': $vuetify.breakpoint.mobile || small }"
+            class="ml-1"
             @click="sendTip()"
           >
             <v-icon>attach_money</v-icon>

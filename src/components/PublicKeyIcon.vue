@@ -5,6 +5,8 @@
 </template>
 
 <script>
+import { API_URL } from "@/novusphere-js/discussions/api";
+
 export default {
   name: "PublicKeyIcon",
   components: {},
@@ -50,8 +52,9 @@ export default {
 
       if (special) this.link = special.link;
       else
-        this.link =
-          `/v1/api/data/keyicon/${this.publicKey}.svg?dark=${this.$vuetify.theme.dark ? 'true' : ''}`;
+        this.link = `${API_URL}/v1/api/data/keyicon/${
+          this.publicKey
+        }.svg?dark=${this.$vuetify.theme.dark ? "true" : ""}`;
     }
   }
 };

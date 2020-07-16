@@ -1,4 +1,7 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import * as rendertron from 'rendertron-middleware';
 import fs from 'fs';
 import { argv } from 'yargs';
 import { attachControllers } from '@decorators/express';
@@ -6,73 +9,57 @@ import { getConfig } from "@/novusphere-js/utility";
 
 import createRoutes from "./routes";
 import siteConfig from "./site";
-import { getDatabase } from "./mongo";
+import { connectDatabase, getDatabase } from "./mongo";
 import services from "./services";
 
 import AccountController from "./controllers/AccountController";
-import ActionController from "./controllers/ActionController";
+import BlockchainController from "./controllers/BlockchainController";
 import DataController from "./controllers/DataController";
 import ModerationController from "./controllers/ModerationController";
 import SearchController from "./controllers/SearchController";
-import UnifiedIdController from "./controllers/UnifiedIdController";
 import UploadController from "./controllers/UploadController";
 
-let config = {};
 
 (async function () {
-    try { await getDatabase(); }
-    catch (ex) {
-        console.error(ex);
-        return;
-    }
+    if (!await connectDatabase()) return;
 
-    Object.assign(config, siteConfig);
-    if (argv.config) {
-        console.log(`Updating site settings from config: ${argv.config}`);
-        Object.assign(config, getConfig(argv.config, {}));
-    }
+    // update our config
+    (function () {
+        if (argv.config) {
+            console.log(`Updating site settings from config: ${argv.config}`);
+            Object.assign(siteConfig, getConfig(argv.config));
+        }
+    })();
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
     const BUILD_TIME = Date.now();
 
     const app = express();
+    const rendertronService = rendertron.makeMiddleware({
+        proxyUrl: siteConfig.rendertron,
+    });
+
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
 
     app.use(`/js`, express.static(`./dist/js`));
     app.use(`/css`, express.static(`./dist/css`));
     app.use(`/static`, express.static(`./dist/static`));
 
-    function serve(res, head, body) {
-        let _head = {
-            title: config.title,
-            description: config.description,
-            image: config.url + config.image // need non-relative URL for twitter image preview
-        };
-
-        if (head) {
-            Object.keys(head).forEach(key => head[key] === undefined && delete head[key]);
-            Object.assign(_head, head);
+    function serve(req, res) {
+        const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
+        if (req.get('user-agent').match(botRegex)) {
+            rendertronService(req, res, next);
         }
+        else {
+            const header = `
+            <script>window.__BUILD__ = ${BUILD_TIME}</script>`;
 
-        const header = `
-        <title>${_head.title}</title>
-        <meta name="description" content="${_head.description}"/>
-        <meta property="og:title" content="${_head.title}"/>
-        <meta property="og:description" content="${_head.description}"/>
-        <meta property="og:image" content="${_head.image}"/>
-        <meta name="twitter:title" content="${_head.title}">
-        <meta name="twitter:description" content="${_head.description}">
-        <meta name="twitter:image" content="${_head.image}">
-        <meta name="twitter:card" content="summary_large_image">
-        <script>window.__BUILD__ = ${BUILD_TIME}</script>`;
-
-        let index = INDEX_FILE;
-        index = index.replace(/<title>[A-Za-z0-9_-\s]+?<\/title>/, ``); // strip title
-        index = index.replace(/<\/head>/, `${header}</head>`);
-        if (body) {
-            index = index.replace(/<\/div>/, `${body}</div>`); // should be the app div
+            let index = INDEX_FILE;
+            index = index.replace(/<\/head>/, `${header}</head>`);
+            res.setHeader('content-type', 'text/html');
+            res.send(index);
         }
-        res.setHeader('content-type', 'text/html');
-        res.send(index);
     }
 
     function addRoute(route, path = '') {
@@ -80,16 +67,7 @@ let config = {};
             const fullPath = path + route.path;
             console.log(`Added route for ${fullPath}`);
             app.get(fullPath, async (req, res, next) => {
-                const meta = route.meta;
-                let head = undefined;
-                let body = undefined;
-                if (meta) {
-                    const context = meta.context ? (await meta.context(req.params)) : undefined;
-                    if (meta.head) {
-                        head = await meta.head(context);
-                    }
-                }
-                serve(res, head, body);
+                serve(req, res);
             });
         }
         else {
@@ -108,22 +86,21 @@ let config = {};
 
     const apiRouter = express.Router();
     attachControllers(apiRouter, [
-        AccountController, 
-        ActionController, 
-        DataController, 
-        ModerationController, 
-        SearchController, 
-        UnifiedIdController, 
+        AccountController,
+        BlockchainController,
+        DataController,
+        ModerationController,
+        SearchController,
         UploadController]);
 
-    app.use('/v1/api', apiRouter);
+    app.use('/v1/api', cors(), apiRouter);
 
     app.get('*', (req, res) => {
         // TO-DO: 404
-        serve(res);
+        serve(req, res);
     });
 
-    app.listen(config.port, () => console.log(`Server is listening at port ${config.port}`));
+    app.listen(siteConfig.port, () => console.log(`Server is listening at port ${siteConfig.port}`));
     services.start();
 
 })();

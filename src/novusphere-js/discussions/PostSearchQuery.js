@@ -1,6 +1,6 @@
 import Joi from "@hapi/joi";
-import * as axios from "axios";
 import { Post } from "./Post";
+import { apiRequest } from "./api";
 
 const schema = Joi.object({
     id: Joi.number().default(0),
@@ -76,38 +76,31 @@ export class PostSearchQuery {
     // Returns a Post[] of next posts for the query asynchronously
     //
     async nextRaw() {
-        const url = `https://atmosdb.novusphere.io/discussions/search`;
-
         const queryObject = {
-            cursorId: this.id,
+            id: this.id,
             pipeline: this.pipeline,
             count: this.count,
             limit: this.limit,
             sort: this.sort,
-            key: this.votePublicKey,
-            op: this.includeOpeningPost,
-            mods: this.moderatorKeys
+            votePublicKey: this.votePublicKey,
+            includeOpeningPost: this.includeOpeningPost,
+            moderatorKeys: this.moderatorKeys
         };
-
-        const query = `data=${encodeURIComponent(JSON.stringify(queryObject))}`;
-        //console.log(JSON.stringify(queryObject));
 
         try {
             const startTime = Date.now();
-            const { data } = await axios.post(url, query);
-            if (data.error) {
-                throw new Error(data.message);
-            }
 
-            this.id = data.cursorId;
-            this.count = data.count;
-            this.limit = data.limimt;
+            const { id, count, limit, posts } = await apiRequest(`/v1/api/search/posts`, queryObject);
+
+            this.id = id;
+            this.count = count;
+            this.limit = limit;
 
             const deltaTime = Date.now() - startTime;
             if (deltaTime > 1000)
                 console.proxyLog(`PostSearchQuery took ${deltaTime}ms to return results`, this.pipeline);
 
-            return data.payload;
+            return posts;
         }
         catch (ex) {
             console.error(`Search query error`, this, ex);

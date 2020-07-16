@@ -399,16 +399,16 @@ export default {
     // we have to replace our suggestion text with a mention
     // so it's important to pass also the position of your suggestion text
     selectUser(user) {
+      const displayName = user.displayName[user.displayName.length - 1].replace(
+        /\s/g,
+        "_"
+      );
+
       this.insertMention({
         range: this.suggestionRange,
         attrs: {
-          name: user.displayName[user.displayName.length - 1].replace(
-            /\s/g,
-            "_"
-          ), // replace spaces in name with an underscore
-          href: `/u/${user.displayName[user.displayName.length - 1]}-${
-            user.pub
-          }`
+          name: displayName, // replace spaces in name with an underscore
+          href: `/u/${encodeURIComponent(displayName)}-${user.pub}`
         }
       });
       this.editor.focus();

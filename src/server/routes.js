@@ -91,6 +91,7 @@ const routes = [
                 children: [
                     { path: 'content', component: `ContentSettingsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Content` }) } },
                     { path: 'watched', component: `BrowseWatchedThreadsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Watched Threads` }) } },
+                    { path: 'moderated/:tag', component: "BrowseModeratedPostsPage", meta: { head: async () => ({ title: `Discussions - Settings - Moderated Posts` }) } },
                     { path: 'keys', component: `KeysSettingsPage`, meta: { head: async () => ({ title: `Discussions - Settings - Keys` }) } }
                 ]
             }

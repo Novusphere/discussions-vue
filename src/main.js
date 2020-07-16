@@ -6,6 +6,9 @@ import router from './plugins/router';
 import store from './plugins/vuex';
 import App from './App.vue';
 
+import * as axios from 'axios';
+window._axios = axios;
+
 import VueClipboard from 'vue-clipboard2'
 Vue.use(VueClipboard);
 

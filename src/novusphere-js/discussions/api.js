@@ -2,23 +2,63 @@ import * as axios from 'axios';
 import ecc from 'eosjs-ecc';
 import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
-import { getFromCache, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
+import { getFromCache } from "@/novusphere-js/utility";
 import { Post } from './Post';
-import { createTransferActions, signText, signHash, getSymbols } from "@/novusphere-js/uid";
+import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
 
-let API_URL = `https://atmosdb.novusphere.io`;
+let API_URL = `http://localhost:8008`;
+
+if (typeof window != "undefined") {
+    if (!window.location.origin.match(/localhost/i)) {
+        API_URL = window.location.origin;
+    }
+}
 
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
 };
 
+async function apiRequest(endpoint, body = undefined, { key, domain } = {}) {
+    const url = `${API_URL}${endpoint}`;
+
+    let result = undefined;
+    if (body) {
+
+        if (key) {
+            const signData = JSON.stringify({
+                ...body,
+                pub: ecc.privateToPublic(key),
+                time: Date.now(),
+                domain: domain || window.location.host
+            });
+
+            const sig = await signText(signData, key);
+
+            body = { sig, data: signData };
+        }
+
+        const { data } = await axios.post(url, body);
+        result = data;
+    }
+    else {
+        const { data } = await axios.get(url);
+        result = data;
+    }
+
+    if (result.error) {
+        console.log(`api error`);
+        throw new Error(result.message);
+    }
+
+    return result.payload;
+}
+
 //
-// Performs a CORS request
+// Performs a a request to obtain an embed for a link
 // NOTE: Will fail if `url` is not whitelisted
 //
-async function cors(url) {
-    const { data } = await axios.get(`https://atmosdb.novusphere.io/cors?${url}`);
-    return data;
+async function oembed(url) {
+    return await apiRequest(`/v1/api/data/oembed?url=${url}`);
 }
 
 //
@@ -51,19 +91,14 @@ async function uploadImage(file) {
 // Retrieve the tags currently trending on Discussions
 //
 async function getTrendingTags() {
-    const { data } = await axios.get('https://atmosdb.novusphere.io/discussions/search/trendingtags');
-    return data.payload; // { tag, members }
+    return await apiRequest(`/v1/api/data/trending`);
 }
 
 //
 // Retrieves information about a users profile
 //
 async function getUserProfile(key) {
-    const startTime = Date.now();
-    const { data } = await axios.get(`https://atmosdb.novusphere.io/discussions/site/profile/${key}`);
-    let displayName = (data ? data.displayName : '') || '[unknown]';
-    console.proxyLog(`Took ${Date.now() - startTime}ms to retrieve profile object for ${displayName}@${key}`);
-    return data;
+    return await apiRequest(`/v1/api/data/profile?publicKey=${key}`);
 }
 
 //
@@ -71,8 +106,7 @@ async function getUserProfile(key) {
 //
 async function getTokens() {
     return getFromCache(cache, 'tokens', async () => {
-        const { data } = await axios.get('https://atmosdb.novusphere.io/discussions/site/tokens');
-        return data;
+        return await apiRequest(`/v1/api/data/tokens`);
     });
 }
 
@@ -81,33 +115,7 @@ async function getTokens() {
 //
 async function getCommunities() {
     return getFromCache(cache, 'communities', async () => {
-        const { data } = await axios.get('https://atmosdb.novusphere.io/discussions/site');
-        const tags = data["discussions.app"].tags;
-
-        const { data: data2 } = await axios.get(`https://atmosdb.novusphere.io/discussions/site/members/${Object.keys(tags).join(',')}`);
-        for (const { tag, count } of data2) {
-            tags[tag].members = count;
-        }
-
-
-        const symbols = await getSymbols();
-        let communities = Object
-            .keys(tags)
-            .map(t => ({
-                tag: t,
-                desc: tags[t].desc,
-                icon: tags[t].icon,
-                members: tags[t].members,
-                html: markdownToHTML(tags[t].desc),
-                symbol: tags[t].symbol || t.toUpperCase()
-            }))
-            .map(t => ({
-                ...t,
-                description: htmlToText(t.html),
-                symbol: symbols.some(s => s == t.symbol) ? t.symbol : undefined
-            }));
-
-        return communities;
+        return await apiRequest(`/v1/api/data/communities`);
     });
 }
 
@@ -118,6 +126,7 @@ async function getCommunities() {
 async function getCommunityByTag(tag, artifical = 'atmos') {
     const communities = await getCommunities();
     let community = communities.find(c => c.tag == tag);
+
     if (!community && artifical) {
         let borrow = communities.find(c => c.tag == artifical);
         if (borrow) {
@@ -490,35 +499,23 @@ function searchPostsByNotifications(key, lastSeenTime, watchedThreads) {
 //
 // Submit a vote
 //
-async function submitVote(signKey, vote) {
-    if (vote.value < -1 || vote.value > 1) throw new Error(`Invalid vote value`);
-
+async function submitVote(signKey, { uuid, value }) {
     const pub = ecc.privateToPublic(signKey);
     const nonce = Date.now();
 
-    let request = {
+    let vote = {
         voter: '',
-        uuid: vote.uuid,
-        value: vote.value,
+        uuid: uuid,
+        value: Number(value),
         metadata: JSON.stringify({
             nonce: nonce,
             pub: pub,
-            sig: await signText(ecc.sha256(`${vote.value} ${vote.uuid} ${nonce}`), signKey)
+            sig: await signText(ecc.sha256(`${value} ${uuid} ${nonce}`), signKey)
         })
     };
 
-    const requestData = JSON.stringify(request);
-
-    const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/discussions/vote`,
-        `data=${encodeURIComponent(requestData)}`
-    );
-
-    if (data.error) {
-        throw new Error(data.message);
-    }
-
-    return data.transaction;
+    const { transaction_id } = await apiRequest(`/v1/api/blockchain/vote`, { vote });
+    return transaction_id;
 }
 
 //
@@ -561,115 +558,82 @@ async function submitPost(signKey, post, transferActions) {
         metadata: JSON.stringify(metadata)
     };
 
+    let transfers = undefined;
+    let notify = undefined;
+
     if (transferActions && transferActions.length > 0) {
-        request.transfers = await createTransferActions(transferActions);
-        request.notify = JSON.stringify({ name: 'tip', data: { parentUuid: post.parentUuid } });
+        transfers = await createTransferActions(transferActions);
+        notify = { name: 'tip', data: { parentUuid: post.parentUuid } };
     }
 
-    const requestData = JSON.stringify(request);
-
-    const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/discussions/post`,
-        `data=${encodeURIComponent(requestData)}`
-    );
-
-    if (data.error) {
-        throw new Error(data.message);
-    }
-
-    return data.transaction;
-}
-
-//
-// Creates a standard signed request
-// 
-async function createStandardSignedRequest(key, domain, useSignHash, contents) {
-    const time = Date.now();
-    const pub = ecc.privateToPublic(key);
-    const hash = ecc.sha256(contents || `${domain}-${time}`);
-    const sig = await (useSignHash ? signHash : signText)(hash, key); // TO-DO: fix requests that use sign()
-
-    return { time, pub, sig };
+    const { transaction_id } = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers, notify });
+    return transaction_id;
 }
 
 //
 // Sets a users tags for their mod policiy
 //
 async function modPolicySetTags(postKey, uuid, tags, domain) {
-    domain = domain || window.location.host;
-    const { time, pub, sig } = await createStandardSignedRequest(postKey, domain);
-
-    const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/discussions/moderation/settags`,
-        `time=${time}&pub=${pub}&sig=${sig}&tags=${tags.join(',')}&uuid=${uuid}&domain=${domain}`
-    )
-
-    //console.log(data);
-
-    return data;
+    return await apiRequest(`/v1/api/moderation/settags`, { uuid, tags }, { key: postKey, domain });
 }
 
 //
 // Get user account object
 //
 async function getUserAccountObject(identityKey, domain) {
-    domain = domain || window.location.host;
-    const { time, pub, sig } = await createStandardSignedRequest(identityKey, domain, false); // TO-DO: fix this request to use sign
-
-    const startTime = Date.now();
-    const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/account/data`,
-        `time=${time}&pub=${pub}&sig=${sig}&domain=${domain}`
-    )
-    console.proxyLog(`Took ${Date.now() - startTime}ms to retrieve account object for ${identityKey} @ ${domain}`);
-
-    return data.payload; // TO-DO: standardize this request...
+    return await apiRequest(`/v1/api/account/get`, {}, { key: identityKey, domain });
 }
 
 //
 // Saves a user account object
 //
 async function saveUserAccountObject(identityKey, accountObject, domain) {
-    const json = JSON.stringify(accountObject);
-    const { time, pub, sig } = await createStandardSignedRequest(identityKey, domain, false, json);
-
-    const startTime = Date.now();
-    const qs =
-        `time=${time}&pub=${pub}&sig=${sig}&domain=${domain}&data=${encodeURIComponent(json)}`;
-    //console.log(qs);
-    const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/account/save`,
-        qs
-    );
-    if (!data.payload) {
-        console.log(data);
-    }
-    console.proxyLog(`Took ${Date.now() - startTime}ms to save account object for ${identityKey} @ ${domain}`);
+    return await apiRequest(`/v1/api/account/save`, accountObject, { key: identityKey, domain });
 }
 
-//
-// Get pinned posts (top level only)
-//
-async function getPinnedPosts(key, mods, tags, domain) {
-    domain = domain || window.location.host;
-    mods = moderators(key, mods);
-
-    const qs = `domain=${domain}&mods=${mods.join(',')}&tags=${tags.join(',')}`;
-    const { data } = await axios.post(`https://atmosdb.novusphere.io/discussions/moderation/pinned`, qs);
-
-    let posts = [];
-    if (data && data.length > 0) {
-        const trxids = data.map(p => p.transaction);
+async function restorePartialPosts(key, mods, thread, partialPosts) {
+    const posts = [];
+    if (partialPosts && partialPosts.length > 0) {
+        const trxids = partialPosts.map(p => p.transaction);
 
         const cursor = searchPostsByTransactions(trxids);
         cursor.moderatorKeys = mods;
         cursor.votePublicKey = key;
+        cursor.includeOpeningPost = thread ? false : true; // if it's a thread, no need to include op b/c it is the op
 
         do { posts.push(...await cursor.next()) }
         while (cursor.hasMore());
     }
-
     return posts;
+}
+
+async function getModeratedPosts(key, mods, tag, tags, domain, thread) {
+    mods = moderators(key, mods);
+    domain = domain || window.location.host;
+
+    const partialPosts = await apiRequest(`/v1/api/moderation/posts/${tag}`, { mods, tags, domain, thread });
+    return await restorePartialPosts(key, mods, thread, partialPosts);
+}
+
+//
+// Get pinned moderated posts
+//
+async function getPinnedPosts(key, mods, tags, domain, thread = true) {
+    return await getModeratedPosts(key, mods, 'pinned', tags, domain, thread);
+}
+
+//
+// Get spam moderated posts
+//
+async function getSpamPosts(key, mods, tags, domain) {
+    return await getModeratedPosts(key, mods, 'spam', tags, domain);
+}
+
+//
+// Get nsfw moderated posts
+//
+async function getNsfwPosts(key, mods, tags, domain) {
+    return await getModeratedPosts(key, mods, 'nsfw', tags, domain);
 }
 
 //
@@ -680,9 +644,11 @@ function moderators(key, mods) {
 }
 
 export {
+    API_URL,
     Post,
     PostSearchQuery,
-    cors,
+    apiRequest,
+    oembed,
     uploadImage,
     submitPost,
     submitVote,
@@ -705,6 +671,8 @@ export {
     getTokens,
     modPolicySetTags,
     getPinnedPosts,
+    getSpamPosts,
+    getNsfwPosts,
     getUserAccountObject,
     saveUserAccountObject
 }
