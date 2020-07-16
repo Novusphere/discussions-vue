@@ -6,11 +6,14 @@ import { getFromCache } from "@/novusphere-js/utility";
 import { Post } from './Post';
 import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
 
-let API_URL = `http://localhost:8008`;
+let API_URL = `https://beta.discussions.app`;
 
 if (typeof window != "undefined") {
     if (!window.location.origin.match(/localhost/i)) {
         API_URL = window.location.origin;
+    }
+    else {
+        //API_URL = `http://localhost:8008`;
     }
 }
 

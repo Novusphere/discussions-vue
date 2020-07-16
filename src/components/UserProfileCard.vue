@@ -12,8 +12,8 @@
           </div>
           <v-spacer />
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 5"></v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 2">
+        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 3"></v-col>
+        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 4">
           <v-btn
             v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"

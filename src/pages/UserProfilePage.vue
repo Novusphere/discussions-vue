@@ -7,8 +7,8 @@
 
       <v-row>
         <v-btn text :to="`/u/${$route.params.who}/blog`">Blog</v-btn>
-        <v-btn text :to="`/u/${$route.params.who}/posts`">{{ posts }} Posts</v-btn>
-        <v-btn text :to="`/u/${$route.params.who}/threads`">{{ threads }} Threads</v-btn>
+        <v-btn text :to="`/u/${$route.params.who}/posts`">{{ $vuetify.breakpoint.mobile ? '' : posts }} Posts</v-btn>
+        <v-btn text :to="`/u/${$route.params.who}/threads`">{{ $vuetify.breakpoint.mobile ? '' : threads }} Threads</v-btn>
       </v-row>
     </template>
     <template v-slot:content>
