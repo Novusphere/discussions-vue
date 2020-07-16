@@ -41,7 +41,7 @@ function Api() {
                     throw new Error(`Signature must be within a 30 second threshold, it's possible your system clock is out of sync`);
                 }
 
-                if (!domain || domain.length > 16) {
+                if (!domain || domain.length > 32) {
                     throw new Error(`Invalid domain ${domain}`);
                 }
 
