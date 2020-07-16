@@ -351,7 +351,7 @@ class discussionsx {
 
         for (; ;) {
             const state = await this.getState();
-            console.log(`[discussionsx] state position = ${new Date(state.time).toLocaleString()}`);
+            console.log(`[discussionsx] state position = ${new Date(state.time).toLocaleString()}, now ${new Date().toLocaleString()}`);
 
             let actionCollection = await this.getActionCollection();
             let actions = (await actionCollection

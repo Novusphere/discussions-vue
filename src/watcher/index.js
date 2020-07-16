@@ -3,8 +3,8 @@ import DfuseWatcher from "./dfuse";
 import siteConfig from "../server/site";
 import { connectDatabase, getCollection, config } from "../server/mongo";
 
-async function startActionWriter(contract, watcher) {
-    const collection = await getCollection(contract);
+async function startActionWriter(contract, table, watcher) {
+    const collection = await getCollection(table);
 
     let previousAction = await collection
         .find()
@@ -61,5 +61,6 @@ async function startActionWriter(contract, watcher) {
 
     const watcher = new DfuseWatcher(siteConfig.dfuse);
 
-    startActionWriter(config.contract.discussions, watcher);
+    startActionWriter(config.contract.discussions, config.table.discussions, watcher);
+    startActionWriter(config.contract.uid, config.table.uid, watcher);
 })();

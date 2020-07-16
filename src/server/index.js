@@ -46,7 +46,7 @@ import UploadController from "./controllers/UploadController";
     async function serve(req, res, next) {
         const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
         const userAgent = req.get('user-agent');
-        if (userAgent.match(botRegex) || req.query.rendertron) {
+        if (!userAgent || userAgent.match(botRegex) || req.query.rendertron) {
             const url = `${siteConfig.rendertron}/${siteConfig.url}${req.path}`;
             console.log(`[rendertron] ${userAgent} - ${siteConfig.url}${req.path}`);
             const { data } = await axios.get(url);

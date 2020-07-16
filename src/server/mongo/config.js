@@ -8,9 +8,6 @@ import { getConfig } from "@/novusphere-js/utility";
 let config = {
     "connection": "mongodb://localhost:27017",
     "database": "discussions2",
-    "actions": {
-        "discussions": "discussionsx"
-    },
     "contract": {
         "discussions": "discussionsx",
         "uid": "nsuidcntract"
@@ -26,6 +23,10 @@ let config = {
     },
     "index": {
         "discussionsx": {
+            "transaction": 1,
+            "name": 1,
+        },
+        "nsuidcntract": {
             "transaction": 1,
             "name": 1,
         },
