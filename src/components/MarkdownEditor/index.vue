@@ -65,19 +65,19 @@ import PublicKeyIcon from "@/components/PublicKeyIcon";
 import { Editor, EditorContent, EditorMenuBar } from "tiptap";
 import {
   Blockquote,
-  CodeBlock,
-  HardBreak,
+  //CodeBlock,
+  //HardBreak,
   Heading,
-  OrderedList,
+  //OrderedList,
   BulletList,
   ListItem,
-  TodoItem,
-  TodoList,
+  //TodoItem,
+  //TodoList,
   Bold,
-  Code,
+  //Code,
   Italic,
-  Strike,
-  Underline,
+  //Strike,
+  //Underline,
   Image,
   History
 } from "tiptap-extensions";
@@ -237,21 +237,13 @@ export default {
           }),
 
           new Blockquote(),
-          new CodeBlock(),
-          new HardBreak(),
           new Heading({ levels: [1, 2, 3] }),
-          new BulletList(),
-          new OrderedList(),
           new ListItem(),
-          new TodoItem(),
-          new TodoList(),
+          new BulletList(),
           new Bold(),
-          new Code(),
           new Image(),
           new Italic(),
           new Link2(),
-          new Strike(),
-          new Underline(),
           new History()
         ],
         content: ``
@@ -439,7 +431,10 @@ export default {
 .ProseMirror img,
 .ProseMirror iframe {
   min-width: 0px !important; /* instagram override */
-  max-width: min(100%, 512px) !important;
+  max-width: 100% !important;
+  /*max-width: min(100%, 512px) !important;*/
+  max-width: clamp(0px, 100%, 512px) !important;
+  display: block;
 }
 </style>
 
