@@ -121,7 +121,7 @@ export default {
 
         if (this.isBlog) {
           // search query is our public key, and has the "blog" tag
-          cursor = searchPostsByKeys([publicKey]);
+          cursor = searchPostsByKeys([publicKey], undefined, true);
           let { $match } = cursor.pipeline[0];
           $match.tags = { $in: ["blog"] };
         } else {
