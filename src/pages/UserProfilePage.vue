@@ -6,7 +6,7 @@
       </UserProfileCard>
     </template>
     <template v-slot:header2>
-      <v-tabs class="no-underline mt-1">
+      <v-tabs v-model="tab" class="no-underline mt-1">
         <v-tab :to="`/u/${$route.params.who}/blog`">
           <span>Blog</span>
         </v-tab>
@@ -16,12 +16,22 @@
         <v-tab :to="`/u/${$route.params.who}/threads`">
           <span>{{ $vuetify.breakpoint.mobile ? '' : threads }} Threads</span>
         </v-tab>
+        <v-tab :to="`/u/${$route.params.who}/following`">
+          <span>Following</span>
+        </v-tab>
       </v-tabs>
     </template>
     <template v-slot:content>
-      <PostBrowser ref="browser" :cursor="cursor">
-        <template v-slot:body></template>
-      </PostBrowser>
+      <div v-if="cursor">
+        <PostBrowser ref="browser" :cursor="cursor">
+          <template v-slot:body></template>
+        </PostBrowser>
+      </div>
+      <div v-else>
+        <div v-for="(fu, i) in followingUsers" :key="i">
+          <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
+        </div>
+      </div>
     </template>
   </BrowsePageLayout>
 </template>
@@ -51,6 +61,10 @@ export default {
       this.setCursor();
     },
     "$route.params.tab": function() {
+      const tabs = ["blog", "posts", "threads", "following"];
+      const tab = tabs.find(t => t == this.$route.params.tab);
+      this.tab = tab > -1 ? tab : 0;
+
       this.setCursor();
     },
     async votePublicKey() {
@@ -61,11 +75,13 @@ export default {
     }
   },
   data: () => ({
+    tab: 0,
     uidw: "",
     displayName: "",
     publicKey: "",
     cursor: null,
     followers: 0,
+    following: [],
     posts: 0,
     threads: 0
   }),
@@ -86,21 +102,6 @@ export default {
   methods: {
     async setCursor() {
       const [, publicKey] = this.$route.params.who.split("-");
-      let cursor = undefined;
-
-      if (this.isBlog) {
-        // search query is our public key, and has the "blog" tag
-        cursor = searchPostsByKeys([publicKey]);
-        let { $match } = cursor.pipeline[0];
-        $match.tags = { $in: ["blog"] };
-      } else {
-        cursor = searchPostsByKeys([publicKey], "recent", this.isThreads);
-      }
-
-      // enable this since we might not be dealing with only top level posts, we need the op to determine the link to the post
-      cursor.includeOpeningPost = true;
-      cursor.votePublicKey = this.votePublicKey;
-
       const info = await getUserProfile(publicKey);
 
       this.uidw = info.uidw;
@@ -109,10 +110,32 @@ export default {
       this.followers = info.followers;
       this.posts = info.posts;
       this.threads = info.threads;
+      this.followingUsers = info.followingUsers || [];
 
-      this.cursor = cursor;
-      if (this.$refs.browser) {
-        this.$refs.browser.reset(cursor);
+      //console.log(info);
+
+      if (this.$route.params.tab == "following") {
+        this.cursor = null;
+      } else {
+        let cursor = undefined;
+
+        if (this.isBlog) {
+          // search query is our public key, and has the "blog" tag
+          cursor = searchPostsByKeys([publicKey]);
+          let { $match } = cursor.pipeline[0];
+          $match.tags = { $in: ["blog"] };
+        } else {
+          cursor = searchPostsByKeys([publicKey], "recent", this.isThreads);
+        }
+
+        // enable this since we might not be dealing with only top level posts, we need the op to determine the link to the post
+        cursor.includeOpeningPost = true;
+        cursor.votePublicKey = this.votePublicKey;
+
+        this.cursor = cursor;
+        if (this.$refs.browser) {
+          this.$refs.browser.reset(cursor);
+        }
       }
     }
   }
