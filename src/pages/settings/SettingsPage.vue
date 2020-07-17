@@ -12,7 +12,7 @@
       </v-card>
     </template>
     <template v-slot:header2>
-      <v-tabs class="mt-1">
+      <v-tabs center-active show-arrows class="mt-1">
         <v-tab :to="`/settings/content`">Content</v-tab>
         <v-tab :to="`/settings/watched`">Watched</v-tab>
         <v-tab :to="`/settings/moderated/pinned`">Pinned</v-tab>

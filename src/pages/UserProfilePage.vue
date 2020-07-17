@@ -6,7 +6,7 @@
       </UserProfileCard>
     </template>
     <template v-slot:header2>
-      <v-tabs v-model="tab" class="no-underline mt-1">
+      <v-tabs center-active show-arrows v-model="tab" class="no-underline mt-1">
         <v-tab :to="`/u/${$route.params.who}/blog`">
           <span>Blog</span>
         </v-tab>

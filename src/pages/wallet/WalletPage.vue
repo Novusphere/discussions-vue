@@ -20,7 +20,7 @@
       </v-card>
     </template>
     <template v-slot:header2>
-      <v-tabs class="mt-1">
+      <v-tabs center-active show-arrows class="mt-1">
         <v-tab :to="`/wallet/assets`">Assets</v-tab>
         <v-tab :to="`/wallet/deposit`">Deposit</v-tab>
         <v-tab :to="`/wallet/withdraw`">Withdraw</v-tab>

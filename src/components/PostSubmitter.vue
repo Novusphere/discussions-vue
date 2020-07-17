@@ -8,7 +8,7 @@
         hint="Enter your post title (optional)"
         required
       ></v-text-field>
-      <v-tabs v-model="tab">
+      <v-tabs center-active show-arrows v-model="tab">
         <v-tab>Editor</v-tab>
         <v-tab>Preview</v-tab>
       </v-tabs>
