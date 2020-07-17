@@ -182,6 +182,9 @@ export default {
     removeNSFWOverlay: false
   }),
   async mounted() {
+    if (this.isCompactDisplay) this.expanded = -1;
+    else this.expanded = 0;
+    
     this.postHTML = await this.post.getContentHTML();
   },
   updated() {

@@ -68,7 +68,7 @@
           </v-row>
           <v-row>
             <v-col :cols="12">
-              <ThreadBrowser :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
+              <ThreadBrowser class="mt-3" :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
             </v-col>
           </v-row>
         </v-card>

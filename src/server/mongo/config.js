@@ -32,8 +32,8 @@ let config = {
         },
         "accounts": {
             "pub": 1,
-            "data.arbitraryPublicKey": 1,
-            "data.uidw": 1,
+            "data.publicKeys.arbitrary": 1,
+            "data.publicKeys.wallet": 1,
             "data.subscribedTags": 1,
             "data.followingUsers.pub": 1
         },

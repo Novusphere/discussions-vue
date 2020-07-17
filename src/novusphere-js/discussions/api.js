@@ -100,8 +100,8 @@ async function getTrendingTags() {
 //
 // Retrieves information about a users profile
 //
-async function getUserProfile(key) {
-    return await apiRequest(`/v1/api/data/profile?publicKey=${key}`);
+async function getUserProfile(key, domain) {
+    return await apiRequest(`/v1/api/data/profile?publicKey=${key}&domain=${domain || window.location.host}`);
 }
 
 //
@@ -345,13 +345,13 @@ function searchPostsByFeed(tags, users, sort) {
     sort = validated.sort;
 
     return searchPosts({
+        includeOpeningPost: true,
         sort,
         pipeline: [
             {
                 $match: {
-                    parentUuid: '', // top level only
                     $or: [
-                        { tags: { $in: tags } },
+                        { parentUuid: '', tags: { $in: tags } }, // top level only
                         { pub: { $in: users } }
                     ]
                 }

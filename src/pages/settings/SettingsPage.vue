@@ -10,12 +10,16 @@
           </v-row>
         </v-card-text>
       </v-card>
-      <v-btn small dense text :to="`/settings/content`">Content</v-btn>
-      <v-btn small dense text :to="`/settings/watched`">Watched</v-btn>
-      <v-btn small dense text :to="`/settings/moderated/pinned`">Pinned</v-btn>
-      <v-btn small dense text :to="`/settings/moderated/spam`">Spam</v-btn>
-      <v-btn small dense text :to="`/settings/moderated/nsfw`">NSFW</v-btn>
-      <v-btn small dense text :to="`/settings/keys`">Keys</v-btn>
+    </template>
+    <template v-slot:header2>
+      <v-tabs class="mt-1">
+        <v-tab :to="`/settings/content`">Content</v-tab>
+        <v-tab :to="`/settings/watched`">Watched</v-tab>
+        <v-tab :to="`/settings/moderated/pinned`">Pinned</v-tab>
+        <v-tab :to="`/settings/moderated/spam`">Spam</v-tab>
+        <v-tab :to="`/settings/moderated/nsfw`">NSFW</v-tab>
+        <v-tab :to="`/settings/keys`">Keys</v-tab>
+      </v-tabs>
     </template>
     <template v-slot:content>
       <router-view></router-view>

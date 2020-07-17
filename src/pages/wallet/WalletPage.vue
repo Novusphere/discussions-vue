@@ -18,11 +18,14 @@
           </v-row>
         </v-card-text>
       </v-card>
-
-      <v-btn small dense text :to="`/wallet/assets`">Assets</v-btn>
-      <v-btn small dense text :to="`/wallet/deposit`">Deposit</v-btn>
-      <v-btn small dense text :to="`/wallet/withdraw`">Withdraw</v-btn>
-      <v-btn small dense text :to="`/wallet/eos-account`">EOS Account</v-btn>
+    </template>
+    <template v-slot:header2>
+      <v-tabs class="mt-1">
+        <v-tab :to="`/wallet/assets`">Assets</v-tab>
+        <v-tab :to="`/wallet/deposit`">Deposit</v-tab>
+        <v-tab :to="`/wallet/withdraw`">Withdraw</v-tab>
+        <v-tab :to="`/wallet/eos-account`">EOS Account</v-tab>
+      </v-tabs>
     </template>
     <template v-slot:content>
       <router-view></router-view>

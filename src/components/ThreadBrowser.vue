@@ -2,7 +2,7 @@
   <div>
     <v-progress-linear v-if="!opening" indeterminate></v-progress-linear>
     <div v-else>
-      <PostReplyCard ref="reply" class="mt-3" :reply="opening" @submit-post="submitPost" />
+      <PostReplyCard ref="reply" :reply="opening" @submit-post="submitPost" />
     </div>
   </div>
 </template>

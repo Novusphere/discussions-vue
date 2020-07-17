@@ -80,7 +80,7 @@ export default class DataController {
     @Api()
     @Get("/profile")
     async profile(req, res) {
-        const { publicKey: pub } = req.unpack();
+        const { publicKey: pub, domain } = req.unpack();
 
         const db = await getDatabase();
 
@@ -102,12 +102,21 @@ export default class DataController {
                 "parentUuid": ""
             });
 
+        let user = await db.collection(config.table.accounts)
+            .find({
+                "data.publicKeys.arbitrary": pub,
+                "domain": domain
+            })
+            .limit(1)
+            .next();
+
         return res.success({
             followers,
             posts,
             threads,
             uidw: lastPost ? lastPost.uidw : undefined,
-            displayName: lastPost ? lastPost.displayName : undefined
+            displayName: lastPost ? lastPost.displayName : undefined,
+            followingUsers: user ? user.data.followingUsers : []
         });
     }
 

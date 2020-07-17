@@ -6,6 +6,7 @@
         <PostSortSelect v-if="!noSort" v-model="sort" />
         <PostDisplaySelect v-model="display" />
       </v-row>
+      <slot name="body"></slot>
       <PostScroller
         ref="scroller"
         :pinned="pinned"
@@ -124,7 +125,6 @@ export default {
         if (!this.cursor.hasMore()) {
           $state.complete();
         }
-        
       } else {
         $state.complete();
       }

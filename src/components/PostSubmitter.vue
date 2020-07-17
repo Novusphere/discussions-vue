@@ -8,28 +8,28 @@
         hint="Enter your post title (optional)"
         required
       ></v-text-field>
-      <v-tabs v-model="tab" hide-slider>
+      <v-tabs v-model="tab">
         <v-tab>Editor</v-tab>
         <v-tab>Preview</v-tab>
       </v-tabs>
       <v-tabs-items v-model="tab">
         <v-tab-item :transition="false" :reverse-transition="false">
           <MarkdownEditor class="mt-1" :mention-suggester="mentionSuggester" ref="editor" />
-          <div class="mt-2 error--text text-center" v-show="submitError">{{ submitError }}</div>
-          <div class="mt-2">
-            <v-btn color="primary" @click="submitPost()" :disabled="disablePost">
-              <v-progress-circular class="mr-2" indeterminate v-if="disablePost"></v-progress-circular>
-              <span>Submit</span>
-            </v-btn>
-            <v-btn color="primary" class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
-          </div>
         </v-tab-item>
         <v-tab-item :transition="false" :reverse-transition="false">
-          <div v-if="preview">
+          <div class="mt-1" v-if="preview">
             <PostCard v-if="preview" :post="preview" />
           </div>
         </v-tab-item>
       </v-tabs-items>
+      <div class="mt-2 error--text text-center" v-show="submitError">{{ submitError }}</div>
+      <div class="mt-2">
+        <v-btn color="primary" @click="submitPost()" :disabled="disablePost">
+          <v-progress-circular class="mr-2" indeterminate v-if="disablePost"></v-progress-circular>
+          <span>Submit</span>
+        </v-btn>
+        <v-btn color="primary" class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
+      </div>
     </div>
     <div v-else>
       <v-btn

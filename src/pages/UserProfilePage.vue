@@ -4,15 +4,24 @@
       <UserProfileCard flat no-view :displayName="displayName" :publicKey="publicKey" :uidw="uidw">
         <span class="d-block text-center">{{ followers }} followers</span>
       </UserProfileCard>
-
-      <v-row>
-        <v-btn text :to="`/u/${$route.params.who}/blog`">Blog</v-btn>
-        <v-btn text :to="`/u/${$route.params.who}/posts`">{{ $vuetify.breakpoint.mobile ? '' : posts }} Posts</v-btn>
-        <v-btn text :to="`/u/${$route.params.who}/threads`">{{ $vuetify.breakpoint.mobile ? '' : threads }} Threads</v-btn>
-      </v-row>
+    </template>
+    <template v-slot:header2>
+      <v-tabs class="no-underline mt-1">
+        <v-tab :to="`/u/${$route.params.who}/blog`">
+          <span>Blog</span>
+        </v-tab>
+        <v-tab :to="`/u/${$route.params.who}/posts`">
+          <span>{{ $vuetify.breakpoint.mobile ? '' : posts }} Posts</span>
+        </v-tab>
+        <v-tab :to="`/u/${$route.params.who}/threads`">
+          <span>{{ $vuetify.breakpoint.mobile ? '' : threads }} Threads</span>
+        </v-tab>
+      </v-tabs>
     </template>
     <template v-slot:content>
-      <PostBrowser ref="browser" :cursor="cursor" />
+      <PostBrowser ref="browser" :cursor="cursor">
+        <template v-slot:body></template>
+      </PostBrowser>
     </template>
   </BrowsePageLayout>
 </template>
@@ -20,6 +29,7 @@
 <script>
 import { mapState } from "vuex";
 import BrowsePageLayout from "@/components/BrowsePageLayout";
+//import PostSubmitter from "@/components/PostSubmitter";
 import UserProfileCard from "@/components/UserProfileCard";
 import PostBrowser from "@/components/PostBrowser";
 import {
@@ -31,6 +41,7 @@ export default {
   name: "UserProfilePage",
   components: {
     BrowsePageLayout,
+    //PostSubmitter,
     PostBrowser,
     UserProfileCard
   },
@@ -107,3 +118,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.no-underline a {
+  text-decoration: none;
+}
+</style>
