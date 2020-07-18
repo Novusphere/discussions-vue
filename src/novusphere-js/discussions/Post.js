@@ -267,6 +267,10 @@ export class Post {
         return Post.encodeId(this.transaction, this.createdAt)
     }
 
+    equalsReferenceId(id) {
+        return this.transaction == id || this.uuid == id || this.getEncodedId() == id;
+    }
+
     setMyModPolicy(myKey, tags) {
         const pol = this.modPolicy.find(mp => mp.mod == myKey);
         if (pol) pol.tags = tags;

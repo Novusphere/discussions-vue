@@ -6,23 +6,45 @@ import { getFromCache } from "@/novusphere-js/utility";
 import { Post } from './Post';
 import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
 
-let API_URL = `https://beta.discussions.app`;
-
-if (typeof window != "undefined") {
-    if (!window.location.origin.match(/localhost/i)) {
-        API_URL = window.location.origin;
-    }
-    else {
-        //API_URL = `http://localhost:8008`;
-    }
-}
-
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
 };
 
+async function getAPIHost() {
+    return await getFromCache(cache, 'apiHost', async () => {
+        const attempt = ["https://beta.discussions.app"];
+        
+        if (typeof window != "undefined") {
+            attempt.unshift(window.location.origin);
+            if (window.location.origin.match(/localhost/i)) {
+                attempt.unshift("http://localhost:8008");
+            }
+        }
+
+        for (const url of attempt) {
+            try {
+                const pingUrl = `${url}/v1/api/data/test?ping=pong`;
+                console.log(`Trying to connect to API: ${url}`);
+                const { data } = await axios.get(pingUrl, { timeout: 1000 });
+                if (data.payload.ping == 'pong') {
+                    console.log(`Connected to ${url}`);
+                    return url;
+                }
+            }
+            catch {
+                continue;
+            }
+        }
+
+        const defaultApi = attempt[attempt.length - 1];
+        console.log(`Could not connect to any API, defaulting to ${defaultApi}`);
+        return defaultApi;
+    });
+}
+
 async function apiRequest(endpoint, body = undefined, { key, domain } = {}) {
-    const url = `${API_URL}${endpoint}`;
+    const host = await getAPIHost();
+    const url = `${host}${endpoint}`;
 
     let result = undefined;
     if (body) {
@@ -652,9 +674,9 @@ function moderators(key, mods) {
 }
 
 export {
-    API_URL,
     Post,
     PostSearchQuery,
+    getAPIHost,
     apiRequest,
     oembed,
     uploadImage,

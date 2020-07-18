@@ -47,6 +47,11 @@ export default {
     async isLoggedIn() {
       // reload perspective
       await this.load();
+    },
+    async referenceId() {
+      await this.load();
+      await this.mergeNewComments();
+      await this.scrollToPost();
     }
   },
   async created() {

@@ -2,7 +2,7 @@
   <v-card :flat="flat">
     <v-card-text>
       <v-row no-gutters>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 3">
+        <v-col :cols="dense || $vuetify.breakpoint.mobile ? 12 : 3">
           <TagLink class="d-inline" big :tag="community.tag">
             <span
               class="d-block text-center"
@@ -10,14 +10,14 @@
             >{{ community.members }} members</span>
           </TagLink>
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 7">
+        <v-col :cols="dense || $vuetify.breakpoint.mobile ? 12 : 7">
           <div
             class="community-html mr-3"
             v-html="community.html"
             :class="{ 'invert': $vuetify.theme.dark }"
           ></div>
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 2">
+        <v-col :cols="dense || $vuetify.breakpoint.mobile ? 12 : 2">
           <v-btn v-if="!isSubscribed(community.tag)" color="primary" @click="subscribeTag()">
             <v-icon>person_add</v-icon>Join
           </v-btn>
@@ -47,6 +47,7 @@ export default {
     TagLink
   },
   props: {
+    dense: Boolean,
     community: Object,
     flat: Boolean,
     noView: Boolean

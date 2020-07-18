@@ -98,6 +98,56 @@ let _oembedNextAttempt = 0;
             }
 
             loadTelegram(window);
+
+            const relativeAnchors = Array.from(document.querySelectorAll(`a:not([class])`))
+                .map((a) => ({ a, href: a.getAttribute('href') }))
+                .filter(({ href }) => href && (href.indexOf('/') == 0 || href.indexOf('discussions.app/') > -1));
+
+            relativeAnchors.forEach(({ a, href }) => {
+
+                // turn into relative
+                if (href.indexOf('/') != 0) {
+                    href = href.substring(href.indexOf('/', href.indexOf('//') + 2));
+                    a.setAttribute('href', href);
+                }
+
+                a.setAttribute('class', '_');
+                a.addEventListener('click', (e) => {
+                    if (window.$vue) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        window.$vue.$router.push(href);
+                    }
+                });
+            });
+
+            /*const tagAnchors = relativeAnchors.filter(({ href }) => href.indexOf('/tag/') == 0);
+            const userAnchors = relativeAnchors.filter(({ href }) => href.indexOf('/u/') == 0);
+
+            tagAnchors.forEach(({ a, href }) => {
+                a.setAttribute('class', '_');
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tags = href.split('/').filter(s => s)[1];
+                    if (tags) {
+                        console.log(tags);
+                    }
+                });
+            });
+
+            userAnchors.forEach(({ a, href }) => {
+                a.setAttribute('class', '_');
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const user = href.split('/').filter(s => s)[1];
+                    if (user) {
+                        let [displayName, publicKey] = user.split('-');
+                        console.log(`${displayName} ${publicKey}`);
+                    }
+                });
+            });*/
+
         }
         await sleep(100);
     }
@@ -142,6 +192,7 @@ async function getFromCache(cache, name, createAsync) {
             cache[name] = await createAsync();
         }
         catch (ex) {
+            console.log(ex);
             cache[name] = undefined;
         }
     }

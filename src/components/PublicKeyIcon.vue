@@ -6,7 +6,7 @@
 
 <script>
 import * as axios from "axios";
-import { API_URL } from "@/novusphere-js/discussions/api";
+import { getAPIHost } from "@/novusphere-js/discussions/api";
 import { getFromCache } from "@/novusphere-js/utility";
 
 let cache = {};
@@ -51,7 +51,7 @@ export default {
 
       if (special) this.link = special.link;
       else
-        this.link = `${API_URL}/v1/api/data/keyicon/${
+        this.link = `${await getAPIHost()}/v1/api/data/keyicon/${
           this.publicKey
         }.svg?dark=${this.$vuetify.theme.dark ? "true" : ""}`;
     }

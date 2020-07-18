@@ -17,7 +17,7 @@ Vue.use(InfiniteLoading, { /* options */ });
 
 Vue.config.productionTip = false;
 
-new Vue({
+window.$vue = new Vue({
   vuetify,
   router,
   store,

@@ -1,9 +1,19 @@
 <template>
   <div class="d-inline-block tag-link">
+    <v-menu
+      max-width="400"
+      v-if="popover"
+      v-model="showPopover"
+      :position-x="popoverX"
+      :position-y="popoverY"
+      :close-on-content-click="false"
+    >
+      <slot></slot>
+    </v-menu>
     <v-btn :to="link" v-if="btn">
       <slot></slot>
     </v-btn>
-    <router-link :to="link" v-else>
+    <a @click="clicked" v-else>
       <div class="d-inline" v-if="useSlot">
         <slot></slot>
       </div>
@@ -23,7 +33,7 @@
         <TagIcon v-show="!noIcon" :tag="tag" />
         <span class="ml-1">#{{ tag }}</span>
       </div>
-    </router-link>
+    </a>
   </div>
 </template>
 
@@ -41,20 +51,41 @@ export default {
     btn: Boolean,
     tag: String,
     big: Boolean,
-    inline: Boolean
+    inline: Boolean,
+    popover: { type: Boolean, default: false }
   },
   computed: {
     tagWidth() {
-      if (this.$vuetify.breakpoint.lg) return '13ch';
-      return '20ch';
+      if (this.$vuetify.breakpoint.lg) return "13ch";
+      return "20ch";
     },
     link() {
       return `/tag/${this.tag.toLowerCase()}`;
     }
   },
   data: () => ({
-    //
-  })
+    showPopover: false,
+    popoverX: 0,
+    popoverY: 0
+  }),
+  async created() {},
+  methods: {
+    async clicked(e) {
+      e.stopPropagation();
+
+      if (!this.popover) {
+        this.$router.push(this.link);
+        return;
+      }
+
+      this.$emit("show-popover");
+
+      const rect = this.$el.getBoundingClientRect();
+      this.popoverX = rect.x + rect.width + 10;
+      this.popoverY = rect.y - 10;
+      this.showPopover = true;
+    }
+  }
 };
 </script>
 
