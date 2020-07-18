@@ -1,6 +1,6 @@
 <template>
   <v-avatar :size="size ? size : 32">
-    <img :src="link" />
+    <img v-show="link" :src="link" />
   </v-avatar>
 </template>
 
