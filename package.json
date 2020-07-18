@@ -6,13 +6,15 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "server": "babel-node --config-file ./src/server/babel.config.json ./src/server/",
-    "server-alpha": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=server",
-    "discord-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/discord.js"
+    "server-beta": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=server-beta",
+    "server-alpha": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=server-alpha",
+    "discord-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/discord.js",
+    "watcher": "babel-node --config-file ./src/server/babel.config.json ./src/watcher/"
   },
   "dependencies": {
     "@decorators/di": "^1.0.2",
     "@decorators/express": "^2.4.0",
+    "@dfuse/client": "^0.3.10",
     "@hapi/joi": "^17.1.1",
     "aes-js": "^3.1.2",
     "axios": "^0.19.2",
@@ -21,6 +23,7 @@
     "bip39": "^3.0.2",
     "bs58": "^4.0.1",
     "core-js": "^3.6.5",
+    "cors": "^2.8.5",
     "date-fns": "^2.14.0",
     "discord.js": "^12.2.0",
     "eos-transit": "^4.0.7",
@@ -32,6 +35,8 @@
     "identicon.js": "^2.3.3",
     "jsdom": "^16.2.2",
     "mongodb": "^3.5.9",
+    "node-fetch": "^2.6.0",
+    "rendertron-middleware": "^0.1.5",
     "sanitize-html": "^1.27.0",
     "showdown": "^1.9.1",
     "threads": "^1.6.3",
@@ -46,6 +51,7 @@
     "vue-router": "^3.3.4",
     "vuetify": "^2.2.11",
     "vuex": "^3.4.0",
+    "ws": "^7.3.1",
     "yargs": "^15.3.1"
   },
   "devDependencies": {

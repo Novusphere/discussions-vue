@@ -12,11 +12,12 @@
           </div>
           <v-spacer />
         </v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 5"></v-col>
-        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 2">
+        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 3"></v-col>
+        <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 4">
           <v-btn
             v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"
+            outlined
             @click="isLoggedIn ? $store.commit('followUser', { displayName, pub: publicKey, uidw, nametime: Date.now() }) : $store.commit('setLoginDialogOpen', true)"
           >
             <v-icon>person_add</v-icon>
@@ -33,7 +34,7 @@
           <v-btn
             v-if="uidw && (publicKey != myPublicKey)"
             color="primary"
-            :class="{ 'mt-2': !($vuetify.breakpoint.mobile || small), 'ml-1': $vuetify.breakpoint.mobile || small }"
+            class="ml-1"
             @click="sendTip()"
           >
             <v-icon>attach_money</v-icon>

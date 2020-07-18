@@ -1,11 +1,12 @@
 <template>
   <div>
-    <v-progress-linear v-if="!cursor" indeterminate></v-progress-linear>
+    <v-progress-linear v-if="!cursor && !noCursor" indeterminate></v-progress-linear>
     <div v-else>
       <v-row align="start" justify="end">
         <PostSortSelect v-if="!noSort" v-model="sort" />
         <PostDisplaySelect v-model="display" />
       </v-row>
+      <slot name="body"></slot>
       <PostScroller
         ref="scroller"
         :pinned="pinned"
@@ -32,6 +33,7 @@ export default {
   },
   props: {
     noSort: Boolean,
+    noCursor: Boolean,
     cursor: Object,
     pinned: Array
   },
@@ -84,6 +86,12 @@ export default {
     },
     async infinite($state) {
       console.proxyLog(`PostBrowser infinite scroller called`);
+
+      if (this.noCursor) {
+        $state.loaded();
+        $state.complete();
+      }
+
       let posts = undefined;
       try {
         posts = await this.cursor.next();
@@ -113,6 +121,10 @@ export default {
         );
 
         $state.loaded();
+
+        if (!this.cursor.hasMore()) {
+          $state.complete();
+        }
       } else {
         $state.complete();
       }

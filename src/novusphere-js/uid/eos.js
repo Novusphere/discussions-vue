@@ -55,10 +55,10 @@ async function connectWallet(name) {
     //throw new Error(`Unable to connect to any EOS wallet`);
 }
 
-function getAPI(rpcEndpoint) {
+function getAPI(rpcEndpoint, keys=[], rpcConfig={}) {
     rpcEndpoint = rpcEndpoint || DEFAULT_EOS_RPC;
-    const signatureProvider = new JsSignatureProvider([]);
-    const jsonRpc = new JsonRpc(rpcEndpoint);
+    const signatureProvider = new JsSignatureProvider(keys);
+    const jsonRpc = new JsonRpc(rpcEndpoint, rpcConfig);
     const api = new Api({
         rpc: jsonRpc,
         signatureProvider,

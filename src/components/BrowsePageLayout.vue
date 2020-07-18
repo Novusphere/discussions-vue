@@ -8,6 +8,7 @@
             <slot name="header"></slot>
           </v-card-text>
         </v-card>
+        <slot name="header2"></slot>
       </v-col>
     </v-row>
     <v-row v-if="$vuetify.breakpoint.mobile">

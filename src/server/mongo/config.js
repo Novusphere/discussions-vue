@@ -8,14 +8,13 @@ import { getConfig } from "@/novusphere-js/utility";
 let config = {
     "connection": "mongodb://localhost:27017",
     "database": "discussions2",
-    "actions": {
-        "discussions": "atmosdb2::discussions_actions"
-    },
     "contract": {
         "discussions": "discussionsx",
         "uid": "nsuidcntract"
     },
     "table": {
+        "discussions": "discussionsx",
+        "uid": "nsuidcntract",
         "state": "state",
         "posts": "posts",
         "votes": "votes",
@@ -23,10 +22,18 @@ let config = {
         "moderation": "moderation"
     },
     "index": {
+        "discussionsx": {
+            "transaction": 1,
+            "name": 1,
+        },
+        "nsuidcntract": {
+            "transaction": 1,
+            "name": 1,
+        },
         "accounts": {
             "pub": 1,
-            "data.arbitraryPublicKey": 1,
-            "data.uidw": 1,
+            "data.publicKeys.arbitrary": 1,
+            "data.publicKeys.wallet": 1,
             "data.subscribedTags": 1,
             "data.followingUsers.pub": 1
         },

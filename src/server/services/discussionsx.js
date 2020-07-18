@@ -10,6 +10,38 @@ const DEFAULT_STATE = {
     time: 0
 };
 
+function verifyPostSignature(action) {
+    const { pub, sig } = action.data.metadata;
+    if (!pub || !sig) return false;
+
+    const { uuid, content } = action.data;
+
+    const hash0 = ecc.sha256(uuid + ecc.sha256(content));
+    const publicKey = ecc.recover(sig, hash0);
+    if (publicKey != pub) {
+        return false;
+    }
+
+    return true;
+}
+
+function verifyVoteSignature(action) {
+    const { pub, sig, nonce } = action.data.metadata;
+    if (!pub || !sig || !nonce) return false;
+
+    const { value, uuid } = action.data;
+    if (!uuid) return false;
+
+    if (value < -1 || value > 1 || isNaN(value)) return false; // vote values are -1, 0, 1
+
+    const hash0 = ecc.sha256(`${value} ${uuid} ${nonce}`);
+    const publicKey = ecc.recover(sig, hash0);
+    if (publicKey != pub) {
+        return false;
+    }
+    return true;
+}
+
 //
 // Monitors the actions from `discussionsx` and updates state accordingly 
 //
@@ -48,45 +80,15 @@ class discussionsx {
     sanitizeAction(action) {
         if (!action.data) action.data = {};
         if (action.data.metadata) {
-            try { action.data.metadata = JSON.parse(action.data.metadata); }
-            catch (ex) { action.data.metadata = {}; }
+            if (typeof (action.data.metadata) == "string") {
+                try { action.data.metadata = JSON.parse(action.data.metadata); }
+                catch (ex) { action.data.metadata = {}; }
+            }
         }
         else {
             action.data.metadata = {};
         }
         return action;
-    }
-
-    verifyPostSignature(action) {
-        const { pub, sig } = action.data.metadata;
-        if (!pub || !sig) return false;
-
-        const { uuid, content } = action.data;
-
-        const hash0 = ecc.sha256(uuid + ecc.sha256(content));
-        const publicKey = ecc.recover(sig, hash0);
-        if (publicKey != pub) {
-            return false;
-        }
-
-        return true;
-    }
-
-    verifyVoteSignature(action) {
-        const { pub, sig, nonce } = action.data.metadata;
-        if (!pub || !sig || !nonce) return false;
-
-        const { value, uuid } = action.data;
-        if (!uuid) return false;
-
-        if (value < -1 || value > 1 || isNaN(value)) return false; // vote values are -1, 0, 1
-
-        const hash0 = ecc.sha256(`${value} ${uuid} ${nonce}`);
-        const publicKey = ecc.recover(sig, hash0);
-        if (publicKey != pub) {
-            return false;
-        }
-        return true;
     }
 
     pushUpdate(table, update) {
@@ -136,7 +138,7 @@ class discussionsx {
     }
 
     async post(action) {
-        if (!this.verifyPostSignature(action)) return;// console.log(`${action.transaction} failed signature`);
+        if (!verifyPostSignature(action)) return;// console.log(`${action.transaction} failed signature`);
         if (action.data.metadata.edit) return await this.edit(action);
 
         if (action.data.parentUuid) {
@@ -203,7 +205,7 @@ class discussionsx {
     }
 
     async vote(action) {
-        if (!this.verifyVoteSignature(action)) return;
+        if (!verifyVoteSignature(action)) return;
 
         const value = Number(action.data.value);
         const db = await getDatabase();
@@ -260,24 +262,21 @@ class discussionsx {
     }
 
     async tip(action) {
-        if (!action.metadata) return;
-        if (!action.metadata.data) return;
-
-        let { parentUuid } = action.metadata.data;
-        if (!parentUuid) return;
+        let { parentUuid } = action.data.metadata.data;
+        if (!parentUuid) return;// console.log(`invalid parent uuid`);
 
         const db = await getDatabase();
         const parent = await db.collection(config.table.posts)
-            .find({ uuid: metadata.data.parentUuid })
+            .find({ uuid: parentUuid })
             .limit(1)
             .next();
 
-        if (!parent) return;
-        if (!parent.uidw) return;
+        if (!parent) return;// console.log(`parent not found`);
+        if (!parent.uidw) return;// console.log(`parent has no uidw`);
 
         let actionCollection = await this.getActionCollection();
         let tips = (await actionCollection
-            .find({ transaction: i.transaction, name: 'transfer' })
+            .find({ transaction: action.transaction, name: 'transfer' })
             .toArray())
             .filter(t => t.data.to == parent.uidw)
             .map(t => ({
@@ -288,7 +287,7 @@ class discussionsx {
         if (tips.length > 0) {
             let tipscore = tips
                 .filter(t => !site.trustedRelay || site.trustedRelay.some(tr => t.data.relayer == tr))
-                .reduce((t, score) => {
+                .reduce((score, t) => {
                     let [, token] = t.data.amount.split(' ');
                     if (token == 'ATMOS') {
                         const total = parseFloat(t.data.amount) + parseFloat(t.data.fee);
@@ -300,7 +299,7 @@ class discussionsx {
             this.pushUpdate(config.table.posts, {
                 q: { transaction: parent.transaction },
                 u: {
-                    $inc: { tipscore: tipscore },
+                    $inc: { tipscore: Math.round(tipscore + 0.5) },
                     $push: { tips: { $each: tips } }
                 }
             });
@@ -308,9 +307,9 @@ class discussionsx {
     }
 
     async notify(action) {
-        if (!action.metadata) return;
+        if (!action.data.metadata) return;
 
-        let { name } = action.metadata;
+        let { name } = action.data.metadata;
         if (!name) return;
 
         const dispatch = {
@@ -338,7 +337,7 @@ class discussionsx {
     }
 
     async getActionCollection() {
-        const collection = await getCollection(config.actions.discussions);
+        const collection = await getCollection(config.table.discussions);
         return collection;
     }
 
@@ -352,7 +351,7 @@ class discussionsx {
 
         for (; ;) {
             const state = await this.getState();
-            console.log(`[discussionsx] state position = ${new Date(state.time).toLocaleString()}`);
+            console.log(`[discussionsx] state position = ${new Date(state.time).toLocaleString()}, now ${new Date().toLocaleString()}`);
 
             let actionCollection = await this.getActionCollection();
             let actions = (await actionCollection
@@ -386,6 +385,8 @@ class discussionsx {
 }
 
 export default {
+    verifyPostSignature,
+    verifyVoteSignature,
     start() {
         let contract = new discussionsx();
         contract.start();
