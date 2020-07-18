@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${post.transaction}`" outlined>
+  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${this.post.transaction}`">
     <v-row no-gutters class="overline">
       <div class="pl-3 mt-1">
         <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || post.threadTree">
@@ -12,7 +12,9 @@
             class="d-inline-block pr-3"
             v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)"
           >
-            <TagLink inline :tag="post.sub" />
+            <TagLink inline popover @show-popover="setCommunity()" :tag="post.sub">
+              <CommunityCard dense no-view :community="community" v-if="community" />
+            </TagLink>
           </div>
           <div class="d-inline-block pr-3">
             <UserProfileLink
@@ -63,7 +65,7 @@
         <v-expansion-panels class="mt-2" flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content>
-              <v-card flat @click.native="cardClicked()">
+              <v-card flat @click.native="cardClicked()" :color="contentBackgroundColor">
                 <div
                   :class="{ 
                     'content-fade': isPreviewDisplay && !isCompactContent, 
@@ -105,6 +107,8 @@ import TagLink from "@/components/TagLink";
 import PostTips from "@/components/PostTips";
 import PostThreadLink from "@/components/PostThreadLink";
 //import PostSubmitter from "@/components/PostSubmitter";
+import CommunityCard from "@/components/CommunityCard";
+import { getCommunityByTag } from "@/novusphere-js/discussions/api";
 
 export default {
   name: "BrowsePostCard",
@@ -115,7 +119,8 @@ export default {
     //PublicKeyIcon,
     //PostCardActions,
     PostTips,
-    PostThreadLink
+    PostThreadLink,
+    CommunityCard
     //PostSubmitter
   },
   props: {
@@ -126,6 +131,19 @@ export default {
     editing: Boolean
   },
   computed: {
+    contentBackgroundColor() {
+      if (
+        this.$route.params.referenceId2 &&
+        this.post.equalsReferenceId(this.$route.params.referenceId2)
+      ) {
+        if (this.$vuetify.theme.dark) {
+          return "#585858";
+        } else {
+          return "#ffc";
+        }
+      }
+      return undefined;
+    },
     shouldShowPostHTML() {
       return true;
     },
@@ -176,18 +194,23 @@ export default {
     }
   },
   data: () => ({
+    community: null,
     expanded: 0, // 0 is show, -1 is don't show
     postHTML: "",
     forceReveal: false,
     removeNSFWOverlay: false
   }),
   async mounted() {
+    if (this.isCompactDisplay) this.expanded = -1;
+    else this.expanded = 0;
+
     this.postHTML = await this.post.getContentHTML();
-  },
-  updated() {
     refreshOEmbed();
   },
   methods: {
+    async setCommunity() {
+      this.community = await getCommunityByTag(this.post.sub);
+    },
     async tip({ transaction, transferActions }) {
       let artificalTips = await createArtificalTips(
         this.keys.wallet.pub,
@@ -287,6 +310,11 @@ export default {
 </style>
 
 <style scoped>
+.accent--border {
+  border: solid #ffc;
+  padding: 5px;
+}
+
 .post-replies {
   border-left: 2px solid lightgray;
 }

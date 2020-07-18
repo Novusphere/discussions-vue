@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-menu max-width="400" v-model="showPopover" :position-x="popoverX" :position-y="popoverY">
+    <v-menu max-width="400" v-model="showPopover" :position-x="popoverX" :position-y="popoverY" :close-on-content-click="false">
       <UserProfileCard
         v-if="showPopover"
         :displayName="displayName"

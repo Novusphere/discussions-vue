@@ -1,12 +1,8 @@
 import bigInt from 'big-integer';
-import { markdownToHTML, generateUuid } from "@/novusphere-js/utility";
-import { cors } from "@/novusphere-js/discussions/api";
+import { markdownToHTML, getOEmbedHtml, IMAGE_REGEX, LINK_REGEX, TIME_ENCODE_GENESIS } from "@/novusphere-js/utility";
+import { oembed } from "@/novusphere-js/discussions/api";
 import { createDOMParser } from "@/novusphere-js/utility";
-
-// Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
-const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
-const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
-const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi);
+import siteConfig from "@/server/site";
 
 export class Post {
     isOpeningPost() {
@@ -55,7 +51,7 @@ export class Post {
     }
 
     static fromDbObject(o) {
-        // Takes a post json object from AtmosDB and transforms it into a [Post] object
+        // Takes a post json object from db and transforms it into a [Post] object
 
         let p = new Post(o.chain);
         p.id = o.id;
@@ -172,6 +168,12 @@ export class Post {
     async getContentImage() {
         let doc = await this.getContentDocument();
 
+        for (const { src } of Array.from(doc.images)) {
+            if (src) {
+                return src;
+            }
+        }
+
         for (const { href } of Array.from(doc.links)) {
             if (new RegExp(IMAGE_REGEX).test(href)) {
                 return href;
@@ -218,67 +220,39 @@ export class Post {
             }
         })(doc.body);
 
-        for (const node of Array.from(doc.links)) {
+        const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
+        if (typeof navigator == "undefined" || !navigator.userAgent.match(botRegex)) {
+            for (const node of Array.from(doc.links)) {
 
-            const { href, innerText } = node;
-            let insertHTML = undefined;
-            let oembed = undefined;
+                const { href, innerText } = node;
+                let innerHTML = undefined;
 
-            if (new RegExp(IMAGE_REGEX).test(href) ||
-                (/https?:\/\/(www.)?tradingview.com\/x\//gi).test(href)) {
-                // Images auto embed
-                // Trading view chart image
-                insertHTML = `<img src="${href}" alt="${href}" />`;
-            }
-            else if ((/t.me\/([a-zA-Z0-9_!@+]+)\/([a-zA-Z0-9]+)/gi).test(href)) {
-                // Telegram
-                const [, ids] = href.split('t.me/')
-                if (ids) {
-                    insertHTML = `<span data-telegram-rn="${generateUuid()}" data-telegram-post="${ids}" data-width="100%"></span>`
-                }
-            }
-            else if ((/https:\/\/twitter.com\/[a-zA-Z0-9-_]+\/status\/[0-9]+/gi).test(href)) {
-                // Twitter
-                oembed = `https://publish.twitter.com/oembed?url=${href}`;
-            }
-            else if ((/https?:\/\/www.youtube.com\/watch\?feature=(.*?)&v=[a-zA-Z0-9-_]+/).test(href) ||
-                (/https?:\/\/www.youtube.com\/watch\?t=[0-9]+/).test(href) ||
-                (/https?:\/\/(www|m)?.youtube.com\/watch\?v=[a-zA-Z0-9-_]+/).test(href) ||
-                (/https?:\/\/youtu.be\/[a-zA-Z0-9-_]+/).test(href)) {
-                // Youtube
-                oembed = `https://www.youtube.com/oembed?format=json&url=${href.replace(/feature=(.*?)&/, '')}`;
-            }
-            else if ((/https?:\/\/www.instagr.am(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href) ||
-                (/https?:\/\/www.instagram.com(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href)) {
-                // Instagram
-                oembed = `https://api.instagram.com/oembed/?url=${href}`;
-            }
-            else if ((/soundcloud/).test(href)) {
-                // Sound Cloud
-                oembed = `https://soundcloud.com/oembed?format=json&url=${href}`;
-            }
-
-            if (oembed) {
                 try {
-                    const oembedResult = await cors(oembed);
-                    if (oembedResult.html) {
-                        insertHTML = oembedResult.html;
+                    const { insertHTML, oembed: cors } = getOEmbedHtml(href);
+                    if (insertHTML)
+                        innerHTML = insertHTML;
+                    else if (cors) {
+                        const { html } = await oembed(href);
+                        if (html) {
+                            innerHTML = html;
+                        }
                     }
                 }
                 catch (ex) {
-                    // failed...
+                    innerHTML = undefined;
+                    console.log(ex);
                 }
-            }
 
-            if (!insertHTML) continue;
+                if (!innerHTML) continue;
 
-            const div = doc.createElement('div');
-            div.classList.add('post-embed-content');
-            div.innerHTML = insertHTML;
+                const div = doc.createElement('div');
+                div.classList.add('post-embed-content');
+                div.innerHTML = innerHTML;
 
-            node.parentNode.insertBefore(div, node);
-            if (href == innerText) {
-                node.remove();
+                node.parentNode.insertBefore(div, node);
+                if (href == innerText) {
+                    node.remove();
+                }
             }
         }
 
@@ -291,6 +265,10 @@ export class Post {
 
     getEncodedId() {
         return Post.encodeId(this.transaction, this.createdAt)
+    }
+
+    equalsReferenceId(id) {
+        return this.transaction == id || this.uuid == id || this.getEncodedId() == id;
     }
 
     setMyModPolicy(myKey, tags) {

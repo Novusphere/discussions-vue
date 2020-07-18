@@ -54,8 +54,20 @@ async function getCollection(name) {
     }
 }
 
+async function connectDatabase() {
+    try {
+        await getDatabase();
+        return true;
+    }
+    catch (ex) {
+        console.error(ex);
+        return false;
+    }
+}
+
 export {
     config,
     getDatabase,
-    getCollection
+    getCollection,
+    connectDatabase
 }

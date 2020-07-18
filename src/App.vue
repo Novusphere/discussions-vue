@@ -9,7 +9,7 @@
         @click:outside="$store.commit('setLoginDialogOpen', false)"
       >
         <v-card>
-          <v-tabs v-model="loginTab">
+          <v-tabs v-model="loginTab" background-color="primary" slider-color="accent" dark grow>
             <v-tab>Log in</v-tab>
             <v-tab>Sign up</v-tab>
           </v-tabs>
@@ -68,7 +68,7 @@
           </v-row>
           <v-row>
             <v-col :cols="12">
-              <ThreadBrowser :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
+              <ThreadBrowser class="mt-3" :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
             </v-col>
           </v-row>
         </v-card>
@@ -172,6 +172,7 @@ export default {
       console.log(`Synchronizing account...`);
 
       let account = await getUserAccountObject(this.keys.identity.key);
+
       if (account && account.data) {
         account = account.data;
         console.log(`Retrieved account successfully`);
@@ -187,8 +188,7 @@ export default {
 
         if (oldAccount) {
           console.log(`Found old Discussions account... trying to migrate...`);
-
-          //console.log(oldAccount);
+          console.log(oldAccount);
 
           // upgrade to new object format
           const migrated = {

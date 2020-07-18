@@ -3,30 +3,14 @@
     <div v-if="pinned">
       <v-row class="mb-2" v-for="(p, i) in pinned" :key="i">
         <v-col cols="12">
-          <PostCard :clickable="true" :display="display" :post="p">
-            <template v-slot:actions>
-              <PostCardActions
-                no-edit
-                :post="p"
-                :isCommentDisplay="false"
-              />
-            </template>
-          </PostCard>
+          <PostScrollCard :display="display" :post="p" />
         </v-col>
       </v-row>
     </div>
     <div>
       <v-row class="mb-2" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
         <v-col cols="12">
-          <PostCard :clickable="true" :display="display" :post="p">
-            <template v-slot:actions>
-              <PostCardActions
-                no-edit
-                :post="p"
-                :isCommentDisplay="false"
-              />
-            </template>
-          </PostCard>
+          <PostScrollCard :display="display" :post="p" />
         </v-col>
       </v-row>
       <infinite-loading ref="infiniteLoading" @infinite="infinite">
@@ -42,14 +26,12 @@
 
 <script>
 import { mapState } from "vuex";
-import PostCard from "@/components/PostCard";
-import PostCardActions from "@/components/PostCardActions";
+import PostScrollCard from "@/components/PostScrollCard";
 
 export default {
   name: "PostScroller",
   components: {
-    PostCard,
-    PostCardActions
+    PostScrollCard
   },
   props: {
     pinned: Array,

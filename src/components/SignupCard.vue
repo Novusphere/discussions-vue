@@ -44,11 +44,7 @@
         <v-expansion-panel-content>
           <v-row>
             <v-col cols="12">
-              <v-textarea
-                v-model="generatedBrainKey"
-                label="Brain Key Mnemonic"
-                required
-              >
+              <v-textarea v-model="generatedBrainKey" label="Brain Key Mnemonic" required>
                 <template v-slot:append>
                   <v-btn icon @click="$copyText(generatedBrainKey)">
                     <v-icon>content_copy</v-icon>
@@ -108,7 +104,7 @@ export default {
     ...brainKeyRules("brainKey"),
     brainKeyRules2() {
       const rules = [];
-      if (this.brainKey != this.generatedBrainKey) {
+      if (this.brainKey.trim() != this.generatedBrainKey) {
         rules.push(`Entered brain key does not match generated brain key`);
       }
       rules.push(...this.brainKeyRules);

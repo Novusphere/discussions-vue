@@ -1,7 +1,20 @@
 <template>
   <BrowsePageLayout>
     <template v-slot:header v-if="community">
-      <CommunityCard flat no-view :community="community" v-if="community" />
+      <CommunityCard
+        flat
+        no-view
+        :community="community"
+        v-if="community && community.tag != 'blog'"
+      />
+      <UserProfileCard
+        v-else-if="opening"
+        flat
+        no-view
+        :displayName="opening.post.displayName"
+        :publicKey="opening.post.pub"
+        :uidw="opening.post.uidw"
+      ></UserProfileCard>
     </template>
     <template v-slot:content>
       <ThreadBrowser
@@ -20,6 +33,7 @@
 <script>
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import CommunityCard from "@/components/CommunityCard";
+import UserProfileCard from "@/components/UserProfileCard";
 import AssetCard from "@/components/AssetCard";
 import ThreadBrowser from "@/components/ThreadBrowser";
 import { getCommunityByTag } from "@/novusphere-js/discussions/api";
@@ -30,6 +44,7 @@ export default {
   components: {
     BrowsePageLayout,
     CommunityCard,
+    UserProfileCard,
     AssetCard,
     ThreadBrowser
   },

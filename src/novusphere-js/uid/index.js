@@ -3,13 +3,14 @@ import * as ecc from 'eosjs-ecc';
 import * as aesjs from 'aes-js';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import * as axios from 'axios';
+import { spawn, Worker } from "threads";
+import { apiRequest } from "@/novusphere-js/discussions/api";
+import { getFromCache } from "@/novusphere-js/utility";
+
 import BufferWriter from './bufferwriter';
 import eos from "./eos";
 import bch from "./bch";
 import eth from "./eth";
-import { getFromCache } from "@/novusphere-js/utility";
-import { spawn, Worker } from "threads";
 
 let eccWorker = undefined;
 if (typeof window != "undefined") {
@@ -134,8 +135,7 @@ async function getAmountFeeAssetsForTotal(totalAsset) {
 //
 async function getTokensInfo() {
     const eosTokensInfo = await getFromCache(cache, 'eosTokensInfo', async () => {
-        const { data } = await axios.get(`https://atmosdb.novusphere.io/unifiedid/p2k`);
-        return data;
+        return apiRequest(`/v1/api/blockchain/p2k`);
     });
 
     return eosTokensInfo;
@@ -300,14 +300,12 @@ async function createTransferActions(actions) {
 async function transfer(actions, notify) {
 
     const transfers = await createTransferActions(actions);
-    const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/unifiedid/relay`,
-        `data=${encodeURIComponent(JSON.stringify({
-            transfers: transfers,
-            notify: notify ? JSON.stringify(notify) : undefined
-        }))}`);
+    const trx = await apiRequest(`/v1/api/blockchain/transfer`, { 
+        transfers, 
+        notify
+    });
 
-    return data;
+    return trx;
     //return { transaction_id: "dee67ccdf1aae10cb1f59c5f4ab87bc4b02b5be5ad1710600a352b4d8ebed2a0" };
 }
 

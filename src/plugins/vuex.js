@@ -256,6 +256,7 @@ export default new Vuex.Store({
         },
         unfollowUser(state, pub) {
             state.followingUsers = state.followingUsers.filter(u => u.pub != pub);
+            saveAccount(state);
         },
         subscribeTag(state, tag) {
             tag = tag.toLowerCase();

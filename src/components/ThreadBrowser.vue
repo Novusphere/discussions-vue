@@ -2,7 +2,7 @@
   <div>
     <v-progress-linear v-if="!opening" indeterminate></v-progress-linear>
     <div v-else>
-      <PostReplyCard ref="reply" class="mt-3" :reply="opening" @submit-post="submitPost" />
+      <PostReplyCard ref="reply" :reply="opening" @submit-post="submitPost" />
     </div>
   </div>
 </template>
@@ -47,6 +47,11 @@ export default {
     async isLoggedIn() {
       // reload perspective
       await this.load();
+    },
+    async referenceId() {
+      await this.load();
+      await this.mergeNewComments();
+      await this.scrollToPost();
     }
   },
   async created() {

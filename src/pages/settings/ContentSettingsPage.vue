@@ -63,7 +63,7 @@
               <v-col
                 v-for="(dm, i) in delegatedMods"
                 :key="i"
-                :cols="$vuetify.breakpoint.mobile ? 12 : 4"
+                :cols="$vuetify.breakpoint.mobile ? 12 : 6"
               >
                 <TagLink inline class="mr-2" :tag="dm.tag" />
                 <UserProfileLink
