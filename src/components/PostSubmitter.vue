@@ -30,6 +30,7 @@
         </v-btn>
         <v-btn color="primary" class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
       </div>
+      <div style="height: 5px"></div>
     </div>
     <div v-else>
       <v-btn

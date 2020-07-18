@@ -5,6 +5,7 @@
     </v-list-item>
     <v-list-item>
       <v-text-field
+        type="search"
         dense
         hide-details
         append-icon="search"
@@ -134,7 +135,7 @@ export default {
   },
   watch: {
     "$route.query.q": function() {
-      this.search = this.$route.query.q;
+      this.search = this.$route.query.q || '';
     }
   },
   computed: {

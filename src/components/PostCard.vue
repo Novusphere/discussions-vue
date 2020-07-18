@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${post.transaction}`">
+  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${this.post.transaction}`">
     <v-row no-gutters class="overline">
       <div class="pl-3 mt-1">
         <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || post.threadTree">
@@ -65,11 +65,7 @@
         <v-expansion-panels class="mt-2" flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content>
-              <v-card
-                flat
-                @click.native="cardClicked()"
-                :class="{ 'accent--border': $route.params.referenceId2 && post.equalsReferenceId($route.params.referenceId2) }"
-              >
+              <v-card flat @click.native="cardClicked()" :color="contentBackgroundColor">
                 <div
                   :class="{ 
                     'content-fade': isPreviewDisplay && !isCompactContent, 
@@ -135,6 +131,19 @@ export default {
     editing: Boolean
   },
   computed: {
+    contentBackgroundColor() {
+      if (
+        this.$route.params.referenceId2 &&
+        this.post.equalsReferenceId(this.$route.params.referenceId2)
+      ) {
+        if (this.$vuetify.theme.dark) {
+          return "#585858";
+        } else {
+          return "#ffc";
+        }
+      }
+      return undefined;
+    },
     shouldShowPostHTML() {
       return true;
     },
@@ -302,7 +311,7 @@ export default {
 
 <style scoped>
 .accent--border {
-  border: thin solid #49c193;
+  border: solid #ffc;
   padding: 5px;
 }
 
