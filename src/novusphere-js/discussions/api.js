@@ -13,7 +13,7 @@ let cache = {
 async function getAPIHost() {
     return await getFromCache(cache, 'apiHost', async () => {
         const attempt = ["https://beta.discussions.app"];
-        
+
         if (typeof window != "undefined") {
             attempt.unshift(window.location.origin);
             if (window.location.origin.match(/localhost/i)) {
@@ -399,12 +399,19 @@ function searchPostsByTags(tags, sort) {
     sort = validated.sort;
 
     return searchPosts({
+        includeOpeningPost: true,
         sort,
         pipeline: [
             {
                 $match: {
                     tags: { $in: tags },
-                    parentUuid: '' // top level only
+                    $or: [
+                        { parentUuid: '' }, // top level only
+                        {
+                            "tags.1": { $exists: true },
+                            "tags.0": { $nin: tags }
+                        }
+                    ]
                 }
             }
         ]

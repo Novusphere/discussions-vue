@@ -7,7 +7,7 @@
       <PostBrowser :pinned="pinned" ref="browser" :cursor="cursor" />
     </template>
     <template v-slot:right>
-      <AssetCard class="mb-2" :symbol="community.symbol" v-if="community && community.symbol"  />
+      <AssetCard class="mb-2" :symbol="community.symbol" v-if="community && community.symbol" />
     </template>
   </BrowsePageLayout>
 </template>
@@ -61,7 +61,7 @@ export default {
       this.cursor = null;
       this.pinned = [];
 
-      const tags = this.$route.params.tags.split(",");
+      const tags = this.$route.params.tags.toLowerCase().split(",");
       const mods = this.getModeratorKeys(tags);
       const cursor = searchPostsByTags(tags);
       cursor.moderatorKeys = mods;
