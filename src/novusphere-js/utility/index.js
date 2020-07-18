@@ -6,6 +6,11 @@ import { uuid } from "uuidv4";
 import loadTelegram from "./telegram";
 import Lock from "./lock";
 
+// Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
+const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
+const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
+const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi);
+
 const turndownService = new Turndown();
 const showdownService = new Showdown.Converter({
     smartIndentationFix: true,
@@ -230,6 +235,47 @@ function saveConfig(name, config) {
     fs.writeFileSync(fn, JSON.stringify(config));
 }
 
+function getOEmbedHtml(href) {
+    let insertHTML = undefined;
+    let oembed = undefined;
+
+    if (new RegExp(IMAGE_REGEX).test(href) ||
+        (/https?:\/\/(www.)?tradingview.com\/x\//gi).test(href)) {
+        // Images auto embed
+        // Trading view chart image
+        insertHTML = `<img src="${href}" alt="${href}" />`;
+    }
+    else if ((/t.me\/([a-zA-Z0-9_!@+]+)\/([a-zA-Z0-9]+)/gi).test(href)) {
+        // Telegram
+        const [, ids] = href.split('t.me/')
+        if (ids) {
+            insertHTML = `<span data-telegram-rn="${generateUuid()}" data-telegram-post="${ids}" data-width="100%"></span>`
+        }
+    }
+    else if ((/https:\/\/twitter.com\/[a-zA-Z0-9-_]+\/status\/[0-9]+/gi).test(href)) {
+        // Twitter
+        oembed = `https://publish.twitter.com/oembed?url=${href}`;
+    }
+    else if ((/https?:\/\/www.youtube.com\/watch\?feature=(.*?)&v=[a-zA-Z0-9-_]+/).test(href) ||
+        (/https?:\/\/www.youtube.com\/watch\?t=[0-9]+/).test(href) ||
+        (/https?:\/\/(www|m)?.youtube.com\/watch\?v=[a-zA-Z0-9-_]+/).test(href) ||
+        (/https?:\/\/youtu.be\/[a-zA-Z0-9-_]+/).test(href)) {
+        // Youtube
+        oembed = `https://www.youtube.com/oembed?format=json&url=${href.replace(/feature=(.*?)&/, '')}`;
+    }
+    else if ((/https?:\/\/www.instagr.am(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href) ||
+        (/https?:\/\/www.instagram.com(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href)) {
+        // Instagram
+        oembed = `https://api.instagram.com/oembed/?url=${href}`;
+    }
+    else if ((/soundcloud/).test(href)) {
+        // Sound Cloud
+        oembed = `https://soundcloud.com/oembed?format=json&url=${href}`;
+    }
+
+    return { insertHTML, oembed };
+}
+
 (function () {
 
     // hijack the log function for logging to a string variable
@@ -259,6 +305,9 @@ function saveConfig(name, config) {
 })();
 
 export {
+    TIME_ENCODE_GENESIS,
+    LINK_REGEX,
+    IMAGE_REGEX,
     Lock,
     getConfig,
     saveConfig,
@@ -270,5 +319,6 @@ export {
     waitFor,
     sleep,
     getFromCache,
-    createDOMParser
+    createDOMParser,
+    getOEmbedHtml
 }

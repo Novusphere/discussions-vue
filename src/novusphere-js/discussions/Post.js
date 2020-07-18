@@ -1,13 +1,8 @@
 import bigInt from 'big-integer';
-import { markdownToHTML } from "@/novusphere-js/utility";
+import { markdownToHTML, getOEmbedHtml, IMAGE_REGEX, LINK_REGEX, TIME_ENCODE_GENESIS } from "@/novusphere-js/utility";
 import { oembed } from "@/novusphere-js/discussions/api";
 import { createDOMParser } from "@/novusphere-js/utility";
 import siteConfig from "@/server/site";
-
-// Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
-const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
-const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
-const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi);
 
 export class Post {
     isOpeningPost() {
@@ -230,24 +225,29 @@ export class Post {
             for (const node of Array.from(doc.links)) {
 
                 const { href, innerText } = node;
-                let insertHTML = undefined;
+                let innerHTML = undefined;
 
                 try {
-                    const { html } = await oembed(href);
-                    if (html) {
-                        insertHTML = html;
+                    const { insertHTML, oembed: cors } = getOEmbedHtml(href);
+                    if (insertHTML)
+                        innerHTML = insertHTML;
+                    else if (cors) {
+                        const { html } = await oembed(href);
+                        if (html) {
+                            innerHTML = html;
+                        }
                     }
                 }
                 catch (ex) {
-                    insertHTML = undefined;
+                    innerHTML = undefined;
                     console.log(ex);
                 }
 
-                if (!insertHTML) continue;
+                if (!innerHTML) continue;
 
                 const div = doc.createElement('div');
                 div.classList.add('post-embed-content');
-                div.innerHTML = insertHTML;
+                div.innerHTML = innerHTML;
 
                 node.parentNode.insertBefore(div, node);
                 if (href == innerText) {

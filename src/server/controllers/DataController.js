@@ -1,13 +1,10 @@
 import * as axios from 'axios';
-import { generateUuid, markdownToHTML, htmlToText } from "@/novusphere-js/utility";
+import { generateUuid, markdownToHTML, htmlToText, getOEmbedHtml, IMAGE_REGEX, LINK_REGEX } from "@/novusphere-js/utility";
 import { Controller, Get, Post, All } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 import Identicon from 'identicon.js';
 import { PublicKey } from 'eosjs-ecc';
-
-const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
-const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi);
 
 @Controller('/data')
 export default class DataController {
@@ -159,7 +156,7 @@ export default class DataController {
         return res.success(tags);
     }
 
-    @Api()
+    @Api({ contentType: 'image/svg+xml', cacheControl: 'public, max-age=604800, immutable' })
     @Get("/keyicon/:publicKey")
     async publicKeyIcon(req, res) {
         let { publicKey, dark } = req.unpack();
@@ -171,57 +168,22 @@ export default class DataController {
 
         const options = {
             //foreground: [0, 0, 0, 255],  // rgba black
-            background: dark ? [0, 0, 0, 255] : [255, 255, 255, 255],
+            //background: dark ? [0, 0, 0, 255] : [255, 255, 255, 255],
+            background: [0, 0, 0, 0],
             //margin: 0.2,  // 20% margin
             size: 420, // 420px square
             format: 'svg' // use SVG instead of PNG
         };
 
         const icon = new Identicon(PublicKey.fromString(publicKey).toHex(), options).toString(true);
-        res.setHeader('content-type', 'image/svg+xml');
-        return res.send(icon);
+        return res.success(icon);
     }
 
     @Api()
     @Get("/oembed")
     async oembed(req, res) {
         let { url: href } = req.unpack();
-        let insertHTML = undefined;
-        let oembed = undefined;
-
-        if (new RegExp(IMAGE_REGEX).test(href) ||
-            (/https?:\/\/(www.)?tradingview.com\/x\//gi).test(href)) {
-            // Images auto embed
-            // Trading view chart image
-            insertHTML = `<img src="${href}" alt="${href}" />`;
-        }
-        else if ((/t.me\/([a-zA-Z0-9_!@+]+)\/([a-zA-Z0-9]+)/gi).test(href)) {
-            // Telegram
-            const [, ids] = href.split('t.me/')
-            if (ids) {
-                insertHTML = `<span data-telegram-rn="${generateUuid()}" data-telegram-post="${ids}" data-width="100%"></span>`
-            }
-        }
-        else if ((/https:\/\/twitter.com\/[a-zA-Z0-9-_]+\/status\/[0-9]+/gi).test(href)) {
-            // Twitter
-            oembed = `https://publish.twitter.com/oembed?url=${href}`;
-        }
-        else if ((/https?:\/\/www.youtube.com\/watch\?feature=(.*?)&v=[a-zA-Z0-9-_]+/).test(href) ||
-            (/https?:\/\/www.youtube.com\/watch\?t=[0-9]+/).test(href) ||
-            (/https?:\/\/(www|m)?.youtube.com\/watch\?v=[a-zA-Z0-9-_]+/).test(href) ||
-            (/https?:\/\/youtu.be\/[a-zA-Z0-9-_]+/).test(href)) {
-            // Youtube
-            oembed = `https://www.youtube.com/oembed?format=json&url=${href.replace(/feature=(.*?)&/, '')}`;
-        }
-        else if ((/https?:\/\/www.instagr.am(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href) ||
-            (/https?:\/\/www.instagram.com(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href)) {
-            // Instagram
-            oembed = `https://api.instagram.com/oembed/?url=${href}`;
-        }
-        else if ((/soundcloud/).test(href)) {
-            // Sound Cloud
-            oembed = `https://soundcloud.com/oembed?format=json&url=${href}`;
-        }
+        let { insertHTML, oembed } = getOEmbedHtml(href);
 
         if (oembed) {
             try {

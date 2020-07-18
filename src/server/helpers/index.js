@@ -1,18 +1,32 @@
-import ecc from "eosjs-ecc/lib/api_common";
+import ecc from "eosjs-ecc";
 
-function Api() {
+const CONTENT_TYPE_JSON = 'application/json';
+const NO_CACHE = 'no-cache';
+
+function Api({ cacheControl, contentType } = {}) {
     return function (target, name, descriptor) {
         let fn = descriptor.value;
         let newFn = async function (req, res, next) {
-            res.setHeader('content-type', 'application/json');
 
-            res.success = (json) => {
-                res.send(JSON.stringify({
-                    payload: json ? json : true
-                }));
+            res.success = (result) => {
+                const type = contentType || CONTENT_TYPE_JSON;
+                res.setHeader('Content-Type', type);
+                res.setHeader('Cache-Control', cacheControl || NO_CACHE);
+
+                if (type == CONTENT_TYPE_JSON) {
+                    res.send(JSON.stringify({
+                        payload: result ? result : true
+                    }));
+                }
+                else {
+                    res.send(result);
+                }
             }
 
             res.error = (err) => {
+                res.setHeader('Content-Type', CONTENT_TYPE_JSON);
+                res.setHeader('Cache-Control', NO_CACHE);
+
                 res.send(JSON.stringify({
                     error: true,
                     message: err.message
