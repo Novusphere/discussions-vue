@@ -23,9 +23,10 @@ export default class DataController {
     @Api()
     @Get("/communities")
     async communities(req, res) {
-        const { data } = await axios.get(`https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/community.json`);
+        const { data, domain } = await axios.get(`https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/community.json`);
         const tags = Object.keys(data);
         const pipeline = [
+            { $match: { domain: domain } },
             { $unwind: "$data.tags" },
             { $match: { "data.tags": { $in: tags } } },
             { $group: { _id: "$data.tags", count: { $sum: 1 } } },

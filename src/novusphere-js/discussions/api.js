@@ -138,9 +138,9 @@ async function getTokens() {
 //
 // Retrieves all predefined community tags
 //
-async function getCommunities() {
+async function getCommunities(domain) {
     return getFromCache(cache, 'communities', async () => {
-        return await apiRequest(`/v1/api/data/communities`);
+        return await apiRequest(`/v1/api/data/communities?domain=${domain || window.location.host}`);
     });
 }
 
