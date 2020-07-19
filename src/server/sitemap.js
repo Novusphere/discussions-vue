@@ -1,4 +1,5 @@
 import { getCommunities } from "@/novusphere-js/discussions/api";
+import { getConfig } from "@/novusphere-js/utility";
 import { argv } from 'yargs';
 import VueRouterSitemap from 'vue-router-sitemap';
 import path from 'path';
@@ -37,7 +38,7 @@ function unwindRoutes(routes, basePath = '') {
     routes.push(...communities.map(comm => ({ path: `/tag/${comm.tag}` })));
     console.log(routes);
 
-    const staticSitemap = path.resolve('./public/static', 'sitemap.xml');
+    const staticSitemap = path.resolve('./public/', 'sitemap.xml');
     new VueRouterSitemap({ options: { routes } })
         .build(siteConfig.url)
         .save(staticSitemap);

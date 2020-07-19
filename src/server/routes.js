@@ -6,6 +6,7 @@ const routes = [
         redirect: '/tag/all',
         component: `BlankPage`,
         children: [
+            { path: '404', component: 'MissingPage', meta: { head: async () => ({ title: `Discussions - 404` }) } },
             { path: 'submit', component: `SubmitPostPage` },
             { path: 'logout', component: `LogOutPage` },
             { path: 'feed', component: `BrowseFeedPage`, meta: { head: async () => ({ title: `Discussions - Feed` }) } },
@@ -68,7 +69,7 @@ const routes = [
                         return ({
                             title: `Discussions - ${info.displayName}`,
                             description: `${info.pub} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
-                            image: `${await getAPIHost()}/v1/api/data/keyicon/${info.pub}.svg`
+                            image: `${await getAPIHost()}/v1/api/data/keyicon/${info.pub}.png`
                         });
                     }
                 }

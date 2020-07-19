@@ -9,7 +9,7 @@ import { getConfig } from "@/novusphere-js/utility";
 
 import createRoutes from "./routes";
 import siteConfig from "./site";
-import { connectDatabase, getDatabase } from "./mongo";
+import { connectDatabase } from "./mongo";
 import services from "./services";
 
 import AccountController from "./controllers/AccountController";
@@ -37,10 +37,6 @@ import UploadController from "./controllers/UploadController";
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
 
-    app.use(`/js`, express.static(`./dist/js`));
-    app.use(`/css`, express.static(`./dist/css`));
-    app.use(`/static`, express.static(`./dist/static`));
-
     async function serve(req, res, next) {
         const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
         const userAgent = req.get('user-agent');
@@ -52,8 +48,7 @@ import UploadController from "./controllers/UploadController";
             res.send(data);
         }
         else {
-            const header = `
-            <script>window.__BUILD__ = ${BUILD_TIME}</script>`;
+            const header = `<script>window.__BUILD__ = ${BUILD_TIME}</script>`;
             let index = INDEX_FILE;
             index = index.replace(/<\/head>/, `${header}</head>`);
             res.setHeader('content-type', 'text/html');
@@ -80,9 +75,9 @@ import UploadController from "./controllers/UploadController";
         }
     }
 
-    // hook up all our routes
     const routes = createRoutes();
     routes.forEach(r => addRoute(r));
+    app.get(`/`, serve);
 
     const apiRouter = express.Router();
     attachControllers(apiRouter, [
@@ -95,9 +90,11 @@ import UploadController from "./controllers/UploadController";
 
     app.use('/v1/api', cors(), apiRouter);
 
-    app.get('*', (req, res, next) => {
-        // TO-DO: 404
-        serve(req, res, next);
+    app.use(express.static(`./dist/`));
+
+    app.get('*', (req, res) => {
+        res.status(404);
+        res.redirect('/404');
     });
 
     app.listen(siteConfig.port, () => console.log(`Server is listening at port ${siteConfig.port}`));

@@ -160,30 +160,30 @@ export default class DataController {
         return res.success(tags);
     }
 
-    @Api({ contentType: 'image/svg+xml', cacheControl: 'public, max-age=604800, immutable' })
+    @Api()
     @Get("/keyicon/:publicKey")
     async publicKeyIcon(req, res) {
         let { publicKey, dark } = req.unpack();
         const dot = publicKey.indexOf('.');
         if (dot > -1) {
-            // remove the .svg
+            // remove the .svg / .png
             publicKey = publicKey.substring(0, dot);
         }
 
-        const icon = await getFromCache(keyIconCache, publicKey, async() => {
+        const icon = await getFromCache(keyIconCache, publicKey, async () => {
             const options = {
                 //foreground: [0, 0, 0, 255],  // rgba black
                 //background: dark ? [0, 0, 0, 255] : [255, 255, 255, 255],
                 background: [0, 0, 0, 0],
                 //margin: 0.2,  // 20% margin
                 size: 420, // 420px square
-                format: 'svg' // use SVG instead of PNG
+                //format: 'svg' // use SVG instead of PNG
             };
-    
+
             return new Identicon(PublicKey.fromString(publicKey).toHex(), options).toString(true);
         });
 
-        return res.success(icon);
+        return res.success(icon, { contentType: 'image/png', cacheControl: 'public, max-age=604800, immutable' });
     }
 
     @Api()

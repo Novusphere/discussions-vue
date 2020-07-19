@@ -6,7 +6,7 @@
           alt="Logo"
           class="shrink mr-2"
           contain
-          src="https://novusphere.io/static/img/logo.svg"
+          src="/logo.svg"
           transition="scale-transition"
           width="40"
         />

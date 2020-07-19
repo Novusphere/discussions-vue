@@ -32,6 +32,8 @@ import TestsPage from "@/pages/tests/TestsPage";
 import TestEditorPage from '@/pages/tests/TestEditorPage';
 import TestBrowsePostsPage from '@/pages/tests/posts/TestBrowsePostsPage';
 
+import MissingPage from "@/pages/MissingPage";
+
 let components = {
     BlankPage,
     LogOutPage,
@@ -56,7 +58,8 @@ let components = {
     EOSAccountCreatePage,
     TestsPage,
     TestEditorPage,
-    TestBrowsePostsPage
+    TestBrowsePostsPage,
+    MissingPage
 }
 
 import createRoutes from "@/server/routes";
