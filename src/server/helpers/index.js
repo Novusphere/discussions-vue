@@ -8,7 +8,7 @@ function Api() {
         let fn = descriptor.value;
         let newFn = async function (req, res, next) {
 
-            res.success = (result, { cacheControl, contentType } = { cacheControl: CONTENT_TYPE_JSON, cacheControl: NO_CACHE }) => {
+            res.success = (result, { cacheControl, contentType } = { contentType: CONTENT_TYPE_JSON, cacheControl: NO_CACHE }) => {
                 if (contentType)
                     res.setHeader('Content-Type', contentType);
                 if (cacheControl)
