@@ -33,7 +33,10 @@ export default {
     })
   },
   mounted() {
-    if (navigator.userAgent.match(/safari/i)) {
+    if (
+      navigator.userAgent.match(/safari/i) &&
+      !navigator.userAgent.match(/chrome/i)
+    ) {
       console.log(`Using safari v-file-input fix...`);
       let inputs = document.querySelectorAll(".v-file-input input");
       [...inputs].forEach(input => {
