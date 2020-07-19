@@ -9,17 +9,19 @@ function Api() {
         let newFn = async function (req, res, next) {
 
             res.success = (result, { cacheControl, contentType } = { contentType: CONTENT_TYPE_JSON, cacheControl: NO_CACHE }) => {
-                if (contentType)
-                    res.setHeader('Content-Type', contentType);
+                console.log(contentType);
+                
                 if (cacheControl)
                     res.setHeader('Cache-Control', cacheControl);
 
                 if (contentType == CONTENT_TYPE_JSON) {
+                    res.setHeader('Content-Type', CONTENT_TYPE_JSON);
                     res.send(JSON.stringify({
                         payload: result ? result : true
                     }));
                 }
                 else {
+                    res.setHeader('Content-Type', contentType);
                     res.send(result);
                 }
             }

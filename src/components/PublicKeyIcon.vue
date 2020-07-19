@@ -50,7 +50,7 @@ export default {
       const special = specialIcons.find(sp => sp.pub == this.publicKey);
 
       if (special) this.link = special.link;
-      else this.link = `${await getAPIHost()}/v1/api/data/keyicon/${this.publicKey}.png`;
+      else this.link = `${await getAPIHost()}/v1/api/data/keyicon/${this.publicKey}.svg`;
     }
   }
 };

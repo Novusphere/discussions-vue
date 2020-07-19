@@ -177,13 +177,13 @@ export default class DataController {
                 background: [0, 0, 0, 0],
                 //margin: 0.2,  // 20% margin
                 size: 420, // 420px square
-                //format: 'svg' // use SVG instead of PNG
+                format: 'svg' // use SVG instead of PNG
             };
 
             return new Identicon(PublicKey.fromString(publicKey).toHex(), options).toString(true);
         });
 
-        return res.success(icon, { contentType: 'image/png', cacheControl: 'public, max-age=604800, immutable' });
+        return res.success(icon, { contentType: 'image/svg+xml', cacheControl: 'public, max-age=604800, immutable' });
     }
 
     @Api()

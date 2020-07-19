@@ -69,7 +69,7 @@ const routes = [
                         return ({
                             title: `Discussions - ${info.displayName}`,
                             description: `${info.pub} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
-                            image: `${await getAPIHost()}/v1/api/data/keyicon/${info.pub}.png`
+                            image: `${await getAPIHost()}/v1/api/data/keyicon/${info.pub}.svg`
                         });
                     }
                 }
