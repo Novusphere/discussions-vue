@@ -1,9 +1,8 @@
-import { Controller, Get, Post } from '@decorators/express';
+import { Controller, Post } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 
-@Controller('/moderation')
-export default class ModerationController {
+export default @Controller('/moderation') class ModerationController {
     constructor() {
     }
 
@@ -88,7 +87,8 @@ export default class ModerationController {
         if (!Array.isArray(tags)) throw new Error(`Tags must be an array`);
 
         let db = await getDatabase();
-        let payload = await db.collection(config.table.moderation).updateOne({
+
+        await db.collection(config.table.moderation).updateOne({
             pub: pub,
             domain: domain,
             uuid: uuid

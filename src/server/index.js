@@ -37,7 +37,7 @@ import UploadController from "./controllers/UploadController";
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
 
-    async function serve(req, res, next) {
+    async function serve(req, res) {
         const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
         const userAgent = req.get('user-agent');
         if (!userAgent || userAgent.match(botRegex) || req.query.rendertron) {

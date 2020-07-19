@@ -27,7 +27,7 @@ import { getConfig, saveConfig, sleep } from "@/novusphere-js/utility";
     }
 
     function login(bot) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             bot.on('ready', () => {
                 resolve(bot);
             });
@@ -38,7 +38,8 @@ import { getConfig, saveConfig, sleep } from "@/novusphere-js/utility";
                 console.error(e);
                 reject(e);
             });
-            await bot.login(config.token);
+
+            bot.login(config.token);
         });
     }
 
@@ -56,7 +57,7 @@ import { getConfig, saveConfig, sleep } from "@/novusphere-js/utility";
         return posts;
     }
 
-    while (true) {
+    for (;;) {
 
         console.log('Trying to log in...');
         const bot = await login(new Discord.Client());
@@ -76,7 +77,7 @@ import { getConfig, saveConfig, sleep } from "@/novusphere-js/utility";
                         // this is mainly just a precaution, but it should never occur
                         if (p.createdAt.getTime() <= config.lastPostTime) break;
 
-                        const time = p.createdAt.toLocaleString("en-US", { timeZone: 'UTC' });
+                        //const time = p.createdAt.toLocaleString("en-US", { timeZone: 'UTC' });
                         const tags = p.tags.map(t => `#${t}`).join(', ');
                         const content = await p.getContentText({ removeImages: true });
                         const links = (await p.getContentDocument()).links;

@@ -6,7 +6,7 @@ const NO_CACHE = 'no-cache';
 function Api() {
     return function (target, name, descriptor) {
         let fn = descriptor.value;
-        let newFn = async function (req, res, next) {
+        let newFn = async function (req, res) {
 
             res.success = (result, { cacheControl, contentType } = { contentType: CONTENT_TYPE_JSON, cacheControl: NO_CACHE }) => {
                 if (cacheControl)

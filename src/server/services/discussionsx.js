@@ -342,7 +342,6 @@ class discussionsx {
     }
 
     async start() {
-        const db = await getDatabase();
         const dispatch = {
             "post": this.post,
             "vote": this.vote,

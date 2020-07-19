@@ -1,9 +1,8 @@
-import { Controller, Get, Post } from '@decorators/express';
+import { Controller, Post } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 
-@Controller('/account')
-export default class AccountController {
+export default @Controller('/account') class AccountController {
     constructor() {
     }
 
@@ -42,7 +41,8 @@ export default class AccountController {
         if (_data.length >= 256 * 1024) throw new Error(`Data must be less than 256kb`);
 
         let db = await getDatabase();
-        let update = await db.collection(config.table.accounts)
+
+        await db.collection(config.table.accounts)
             .updateOne(
                 {
                     pub: pub,

@@ -43,7 +43,6 @@ async function getDatabase(name) {
 
 async function getCollection(name) {
     const nameData = name.split('::');
-    let collection = undefined;
     if (nameData.length > 1) {
         let database = await getDatabase(nameData[0]);
         return database.collection(nameData[1]);

@@ -1,9 +1,6 @@
-import { Controller, Get, Post } from '@decorators/express';
-import { Api } from "../helpers";
-import { config, getDatabase } from "../mongo";
+import { Controller } from '@decorators/express';
 
-@Controller('/upload')
-export default class UploadController {
+export default @Controller('/upload') class UploadController {
     constructor() {
     }
 }

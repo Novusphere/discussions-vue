@@ -1,6 +1,6 @@
 import * as axios from 'axios';
-import { getFromCache, generateUuid, markdownToHTML, htmlToText, getOEmbedHtml, IMAGE_REGEX, LINK_REGEX } from "@/novusphere-js/utility";
-import { Controller, Get, Post, All } from '@decorators/express';
+import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml } from "@/novusphere-js/utility";
+import { Controller, Get, All } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 import Identicon from 'identicon.js';
@@ -8,8 +8,7 @@ import { PublicKey } from 'eosjs-ecc';
 
 let keyIconCache = {};
 
-@Controller('/data')
-export default class DataController {
+export default @Controller('/data') class DataController {
     constructor() {
     }
 
@@ -163,7 +162,7 @@ export default class DataController {
     @Api()
     @Get("/keyicon/:publicKey")
     async publicKeyIcon(req, res) {
-        let { publicKey, dark } = req.unpack();
+        let { publicKey } = req.unpack();
         const dot = publicKey.indexOf('.');
         if (dot > -1) {
             // remove the .svg / .png

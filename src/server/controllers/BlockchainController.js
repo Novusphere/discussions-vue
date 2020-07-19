@@ -1,13 +1,12 @@
-import { Controller, Post, All, Get } from '@decorators/express';
+import { Controller, Post, Get } from '@decorators/express';
 import { Api } from "../helpers";
-import { config, getDatabase } from "../mongo";
+import { config } from "../mongo";
 import siteConfig from "../site";
 import eos from "@/novusphere-js/uid/eos";
 import axios from 'axios';
 import discussionsx from "../services/discussionsx";
 
-@Controller('/blockchain')
-export default class BlockchainController {
+export default @Controller('/blockchain') class BlockchainController {
     constructor() {
     }
 

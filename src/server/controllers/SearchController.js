@@ -1,9 +1,8 @@
-import { Controller, Get, Post, All } from '@decorators/express';
+import { Controller, All } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 
-@Controller('/search')
-export default class SearchController {
+export default @Controller('/search') class SearchController {
     constructor() {
     }
 
