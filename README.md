@@ -6,8 +6,8 @@ Posts are written to the blockchain not to a centralized database and are then i
 
 Public interfaces should comply with local laws, this means by hosting a public interface you take it upon yourself to comply with said laws. Freedom of speech does not mean lawless content, spam, etc.
 
-Discord: https://discord.gg/PtXzUVr
-Twitter: https://twitter.com/thenovusphere
+- Discord: https://discord.gg/PtXzUVr
+- Twitter: https://twitter.com/thenovusphere
 
 Come chat with us, feedback is appreciated!
 
