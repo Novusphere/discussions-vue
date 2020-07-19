@@ -1,10 +1,12 @@
 import * as axios from 'axios';
-import { generateUuid, markdownToHTML, htmlToText, getOEmbedHtml, IMAGE_REGEX, LINK_REGEX } from "@/novusphere-js/utility";
+import { getFromCache, generateUuid, markdownToHTML, htmlToText, getOEmbedHtml, IMAGE_REGEX, LINK_REGEX } from "@/novusphere-js/utility";
 import { Controller, Get, Post, All } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 import Identicon from 'identicon.js';
 import { PublicKey } from 'eosjs-ecc';
+
+let keyIconCache = {};
 
 @Controller('/data')
 export default class DataController {
@@ -168,16 +170,19 @@ export default class DataController {
             publicKey = publicKey.substring(0, dot);
         }
 
-        const options = {
-            //foreground: [0, 0, 0, 255],  // rgba black
-            //background: dark ? [0, 0, 0, 255] : [255, 255, 255, 255],
-            background: [0, 0, 0, 0],
-            //margin: 0.2,  // 20% margin
-            size: 420, // 420px square
-            format: 'svg' // use SVG instead of PNG
-        };
+        const icon = await getFromCache(keyIconCache, publicKey, async() => {
+            const options = {
+                //foreground: [0, 0, 0, 255],  // rgba black
+                //background: dark ? [0, 0, 0, 255] : [255, 255, 255, 255],
+                background: [0, 0, 0, 0],
+                //margin: 0.2,  // 20% margin
+                size: 420, // 420px square
+                format: 'svg' // use SVG instead of PNG
+            };
+    
+            return new Identicon(PublicKey.fromString(publicKey).toHex(), options).toString(true);
+        });
 
-        const icon = new Identicon(PublicKey.fromString(publicKey).toHex(), options).toString(true);
         return res.success(icon);
     }
 
