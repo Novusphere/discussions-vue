@@ -9,8 +9,6 @@ function Api() {
         let newFn = async function (req, res, next) {
 
             res.success = (result, { cacheControl, contentType } = { contentType: CONTENT_TYPE_JSON, cacheControl: NO_CACHE }) => {
-                console.log(contentType);
-                
                 if (cacheControl)
                     res.setHeader('Cache-Control', cacheControl);
 
