@@ -10,6 +10,13 @@ let cache = {
     communities: undefined, // { tag, desc, icon }[]
 };
 
+function windowHost() {
+    if (typeof window != "undefined") {
+        return window.location.host;
+    }
+    return undefined;
+}
+
 async function getAPIHost() {
     return await getFromCache(cache, 'apiHost', async () => {
         const attempt = ["https://discussions.app", "https://beta.discussions.app"];
@@ -54,7 +61,7 @@ async function apiRequest(endpoint, body = undefined, { key, domain } = {}) {
                 ...body,
                 pub: ecc.privateToPublic(key),
                 time: Date.now(),
-                domain: domain || window.location.host
+                domain: domain || windowHost()
             });
 
             const sig = await signText(signData, key);
@@ -123,7 +130,7 @@ async function getTrendingTags() {
 // Retrieves information about a users profile
 //
 async function getUserProfile(key, domain) {
-    return await apiRequest(`/v1/api/data/profile?publicKey=${key}&domain=${domain || window.location.host}`);
+    return await apiRequest(`/v1/api/data/profile?publicKey=${key}&domain=${domain || windowHost()}`);
 }
 
 //
@@ -140,7 +147,7 @@ async function getTokens() {
 //
 async function getCommunities(domain) {
     return getFromCache(cache, 'communities', async () => {
-        return await apiRequest(`/v1/api/data/communities?domain=${domain || window.location.host}`);
+        return await apiRequest(`/v1/api/data/communities?domain=${domain || windowHost()}`);
     });
 }
 
@@ -646,7 +653,7 @@ async function restorePartialPosts(key, mods, thread, partialPosts) {
 
 async function getModeratedPosts(key, mods, tag, tags, domain, thread) {
     mods = moderators(key, mods);
-    domain = domain || window.location.host;
+    domain = domain || windowHost();
 
     const partialPosts = await apiRequest(`/v1/api/moderation/posts/${tag}`, { mods, tags, domain, thread });
     return await restorePartialPosts(key, mods, thread, partialPosts);

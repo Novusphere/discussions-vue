@@ -24,12 +24,10 @@ import UploadController from "./controllers/UploadController";
     if (!await connectDatabase()) return;
 
     // update our config
-    (function () {
-        if (argv.config) {
-            console.log(`Updating site settings from config: ${argv.config}`);
-            Object.assign(siteConfig, getConfig(argv.config));
-        }
-    })();
+    if (argv.config) {
+        console.log(`Updating site settings from config: ${argv.config}`);
+        Object.assign(siteConfig, getConfig(argv.config));
+    }
 
     const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
     const BUILD_TIME = Date.now();
@@ -83,7 +81,8 @@ import UploadController from "./controllers/UploadController";
     }
 
     // hook up all our routes
-    createRoutes().forEach(r => addRoute(r));
+    const routes = createRoutes();
+    routes.forEach(r => addRoute(r));
 
     const apiRouter = express.Router();
     attachControllers(apiRouter, [

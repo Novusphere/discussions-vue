@@ -6,7 +6,7 @@
           <PublicKeyIcon :size="80" :publicKey="publicKey" />
           <div class="d-inline-block ml-2">
             <router-link style="text-decoration: none;" :to="link">
-              <h1 class="d-inline">{{ displayName }}</h1>
+              <h2 class="d-inline">{{ displayName }}</h2>
               <slot></slot>
             </router-link>
           </div>

@@ -66,7 +66,7 @@ const routes = createRoutes(components);
 const router = new VueRouter({
     mode: 'history',
     routes
-})
+});
 
 router.beforeEach((to, from, next) => {
     console.proxyLog(`Route change from ${from.path} to ${to.path}`);

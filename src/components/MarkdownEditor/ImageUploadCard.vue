@@ -32,6 +32,15 @@ export default {
       onImageUpload: state => state.onImageUpload
     })
   },
+  mounted() {
+    if (navigator.userAgent.match(/safari/i)) {
+      console.log(`Using safari v-file-input fix...`);
+      let inputs = document.querySelectorAll(".v-file-input input");
+      [...inputs].forEach(input => {
+        input.remove();
+      });
+    }
+  },
   methods: {
     async upload() {
       this.error = "";
