@@ -197,9 +197,8 @@ export default class BlockchainController {
         let { transfers, notify } = req.unpack();
         if (!transfers || !Array.isArray(transfers)) throw new Error(`Expected actions to be of type Array`);
 
-        if (notify) actions.push(this.makeNotifiyAction(notify));
-
         let actions = await this.makeTransferActions(transfers);
+        if (notify) actions.push(this.makeNotifiyAction(notify));
         actions = this.addAuthorizationToActions(actions);
 
         const trx = await this.transact(actions);

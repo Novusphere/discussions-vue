@@ -176,6 +176,7 @@ export default {
           console.log(receipt);
         }
       } catch (ex) {
+        console.log(ex);
         this.disableSubmit = false;
         this.transactionError = ex.toString();
       }
