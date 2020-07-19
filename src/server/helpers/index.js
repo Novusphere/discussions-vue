@@ -14,7 +14,7 @@ function Api() {
                 if (cacheControl)
                     res.setHeader('Cache-Control', cacheControl);
 
-                if (type == CONTENT_TYPE_JSON) {
+                if (contentType == CONTENT_TYPE_JSON) {
                     res.send(JSON.stringify({
                         payload: result ? result : true
                     }));
