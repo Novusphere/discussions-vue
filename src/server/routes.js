@@ -1,4 +1,4 @@
-import { getSinglePost, getCommunityByTag, getUserProfile } from "@/novusphere-js/discussions/api";
+import { getSinglePost, getCommunityByTag, getUserProfile, getAPIHost } from "@/novusphere-js/discussions/api";
 
 const routes = [
     {
@@ -60,7 +60,7 @@ const routes = [
                         const [, key] = p.who.split('-');
                         if (key) {
                             const info = await getUserProfile(key);
-                            return info;
+                            return { ...info, pub: key };
                         }
                         return undefined;
                     },
@@ -68,7 +68,7 @@ const routes = [
                         return ({
                             title: `Discussions - ${info.displayName}`,
                             description: `${info.pub} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,
-                            image: `https://atmosdb.novusphere.io/discussions/keyicon/${info.pub}`
+                            image: `${await getAPIHost()}/v1/api/data/keyicon/${info.pub}.svg`
                         });
                     }
                 }

@@ -109,6 +109,7 @@ export default class DataController {
             .next();
 
         return res.success({
+            pub,
             followers,
             posts,
             threads,
