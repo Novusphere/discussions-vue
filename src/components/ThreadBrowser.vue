@@ -90,6 +90,7 @@ export default {
           .map(p => p.post)
           .map(p => ({
             pub: p.pub,
+            uidw: p.uidw,
             displayName: p.displayName,
             nameTime: p.createdAt
           }))

@@ -55,7 +55,7 @@ const getDefaultState = () => ({
     subscribedTags: [],
     followingUsers: [], // { displayName, pub, uidw, nameTime }
     watchedThreads: [], // { uuid, transaction, watchedAt }
-    delegatedMods: [ // { displayName, pub, tag, nameTime }
+    delegatedMods: [ // { displayName, pub, tag, uidw?, nameTime }
         // hard coded list of preset moderators
         { displayName: 'xia256', pub: 'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', tag: 'all' },
         { displayName: 'JacquesWhales', pub: 'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', tag: 'all' }
@@ -348,9 +348,19 @@ export default new Vuex.Store({
         updateDisplayNames(state, users) {
             let save = false;
 
-            function update({ pub, displayName, nameTime }, collection, name) {
+            function update({ pub, uidw, displayName, nameTime }, collection, name) {
                 const eu = collection.find(i => i.pub == pub);
-                if (eu && (!eu.nameTime || nameTime > eu.nameTime) && eu.displayName != displayName) {
+                if (!eu) return;
+                
+                // legacy update
+                if (!eu.uidw && uidw) {
+                    eu.uidw = uidw;
+                    save = true;
+                    
+                    console.log(name + ` ` + JSON.stringify(eu));
+                }
+
+                if ((!eu.nameTime || nameTime > eu.nameTime) && eu.displayName != displayName) {
                     eu.displayName = displayName;
                     eu.nameTime = nameTime;
                     save = true;

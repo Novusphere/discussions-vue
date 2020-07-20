@@ -84,6 +84,7 @@ export default @Controller('/data') class DataController {
         const db = await getDatabase();
 
         let followers = await db.collection(config.table.accounts)
+            .find({ "domain": domain })
             .countDocuments({ "data.followingUsers.pub": pub });
 
         let lastPost = await db.collection(config.table.posts)

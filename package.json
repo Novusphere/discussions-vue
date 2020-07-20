@@ -10,6 +10,7 @@
     "server-alpha": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=server-alpha",
     "sitemap": "babel-node --config-file ./src/server/babel.config.json ./src/server/sitemap.js --config=server-alpha",
     "discord-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/discord.js",
+    "twitter-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/twitter.js",
     "watcher": "babel-node --config-file ./src/server/babel.config.json ./src/watcher/"
   },
   "dependencies": {
@@ -45,6 +46,7 @@
     "tiptap-commands": "^1.13.1",
     "tiptap-extensions": "^1.29.1",
     "turndown": "^6.0.0",
+    "twitter": "^1.7.1",
     "uuidv4": "^6.1.0",
     "vue": "^2.6.11",
     "vue-clipboard2": "^0.3.1",

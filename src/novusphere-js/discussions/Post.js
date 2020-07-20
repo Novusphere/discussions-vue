@@ -154,7 +154,7 @@ export class Post {
             .split(' ')
             .filter(s => s)
             .map(s => s.toLowerCase())
-            .join('_');
+            .join('-');
         return title || '_';
     }
 

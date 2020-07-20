@@ -45,7 +45,8 @@ export default {
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      keys: state => state.keys
+      keys: state => state.keys,
+      delegatedMods: state => state.delegatedMods
     })
   },
   watch: {
@@ -72,6 +73,10 @@ export default {
   methods: {
     reset(cursor) {
       cursor = cursor || this.cursor;
+      cursor.moderatorKeys =
+        this.delegatedMods.length > 0
+          ? this.delegatedMods.map(dm => dm.pub)
+          : undefined;
       cursor.votePublicKey = this.isLoggedIn
         ? this.keys.arbitrary.pub
         : undefined;
@@ -115,6 +120,7 @@ export default {
           "updateDisplayNames",
           posts.map(p => ({
             pub: p.pub,
+            uidw: p.uidw,
             displayName: p.displayName,
             nameTime: p.createdAt
           }))
