@@ -242,8 +242,8 @@ export default {
           new BulletList(),
           new Bold(),
           new Image(),
-          new Italic(),
           new Link2(),
+          new Italic(),
           new History()
         ],
         content: ``
