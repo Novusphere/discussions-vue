@@ -182,7 +182,9 @@ export default {
         threadUuid: this.parentPost ? this.parentPost.threadUuid : uuid,
         parentUuid: this.parentPost ? this.parentPost.uuid : "",
         tags: tags,
-        mentions: mentions,
+        mentions: this.edit
+          ? Array.from(new Set([...this.parentPost.mentions, ...mentions])) // keep the mentions from the original post being edited
+          : mentions,
         uidw: this.keys.wallet.pub,
         sub: this.sub
           ? this.sub

@@ -99,9 +99,7 @@ router.afterEach(async (to) => {
             console.log(ex);
         }
     }
-
-    console.log(head);
-
+    
     document.title = head.title;
     setMeta("og:title", head.title);
     setMeta("twitter:title", head.title);
