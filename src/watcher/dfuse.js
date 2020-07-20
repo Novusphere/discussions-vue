@@ -10,7 +10,9 @@ export default class DfuseWatcher {
     }
 
     async startWatch(account, previousAction, onAction) {
-        const operation = `
+        try {
+            for (; ;) {
+                const operation = `
                 subscription {
                     searchTransactionsForward(
                         query: "(auth:${account} OR receiver:${account})"
@@ -35,24 +37,21 @@ export default class DfuseWatcher {
                             }
                         }
                     }
-                }
-        `;
+                }`;
 
-        for (; ;) {
-            this._client = createDfuseClient({
-                apiKey: this._apiKey,
-                network: "mainnet.eos.dfuse.io",
-            });
+                this._client = createDfuseClient({
+                    apiKey: this._apiKey,
+                    network: "mainnet.eos.dfuse.io",
+                });
 
-            const stream = await this._client.graphql(operation, message => {
-                if (message.type === 'data') {
-                    const {
-                        cursor,
-                        trace: { id, block, executedActions }
-                    } = message.data.searchTransactionsForward;
+                const stream = await this._client.graphql(operation, message => {
+                    if (message.type === 'data') {
+                        const {
+                            cursor,
+                            trace: { id, block, executedActions }
+                        } = message.data.searchTransactionsForward;
 
-                    executedActions.forEach((act) => {
-                        const action = {
+                        const actions = executedActions.map((act) => ({
                             id: Number(act.seq),
                             position: 0, // ???
                             account: act.account,
@@ -63,34 +62,44 @@ export default class DfuseWatcher {
                             name: act.name,
                             hexData: act.hexData,
                             data: act.data
-                        };
+                        }));
 
-                        if (onAction) onAction(action);
-                    });
+                        actions.forEach(action => {
+                            if (onAction) {
+                                onAction(action);
+                            }
+                            if (!previousAction || action.block > previousAction.block) {
+                                previousAction = action;
+                            }
+                        });
 
-                    // Mark stream at cursor location, on re-connect, we will start back at cursor
-                    stream.mark({ cursor });
+                        // Mark stream at cursor location, on re-connect, we will start back at cursor
+                        stream.mark({ cursor });
+                    }
+
+                    if (message.type === 'error') {
+                        console.log('An error occurred', message.errors, message.terminal);
+                    }
+
+                    if (message.type === 'complete') {
+                        console.log('Completed');
+                    }
+                });
+
+                // wait 1 hour, then re-establish the connection
+                // dfuse seems to randomly stop providing data, and no indication the connection has "died"
+                await sleep(1 * 60 * 60 * 1000);
+
+                try { await this._client.release(); }
+                catch (ex) {
+                    // do nothing, we're reiniting the client
                 }
 
-                if (message.type === 'error') {
-                    console.log('An error occurred', message.errors, message.terminal);
-                }
-
-                if (message.type === 'complete') {
-                    console.log('Completed');
-                }
-            });
-
-            // wait 1 hour, then re-establish the connection
-            // dfuse seems to randomly stop providing data, and no indication the connection has "died"
-            await sleep(1 * 60 * 60 * 1000);
-
-            try { await this._client.release(); }
-            catch (ex) {
-                // do nothing, we're reiniting the client
+                console.log(`Force re-establishing connection to dfuse...`);
             }
-
-            console.log(`Force re-establishing connection to dfuse...`);
+        }
+        catch (ex) {
+            console.error(`Dfuse stream error for ${account}`, ex);
         }
     }
 }
