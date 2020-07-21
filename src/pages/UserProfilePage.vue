@@ -84,6 +84,8 @@ export default {
       this.load();
     },
     "$route.params.tab": function(_, old) {
+      if (this.$route.params.tab == "blog" && !old) return;
+      if (this.$route.params.tab == "submit" && !old) return;
       if (this.$route.params.tab == "blog" && old == "submit") return;
       if (this.$route.params.tab == "submit" && old == "blog") return;
 
