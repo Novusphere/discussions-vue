@@ -79,38 +79,52 @@ export default @Controller('/data') class DataController {
     @Api()
     @Get("/profile")
     async profile(req, res) {
-        const { publicKey: pub, domain } = req.unpack();
+        let { publicKey: pub, domain } = req.unpack();
 
         const db = await getDatabase();
 
-        let followers = await db.collection(config.table.accounts)
-            .countDocuments({
-                "domain": domain,
-                "data.followingUsers.pub": pub
-            });
-
-        let lastPost = await db.collection(config.table.posts)
-            .find({ "pub": pub })
-            .sort({ "createdAt": -1 })
-            .limit(1)
-            .next();
-
-        let posts = await db.collection(config.table.posts)
-            .countDocuments({ "pub": pub });
-
-        let threads = await db.collection(config.table.posts)
-            .countDocuments({
-                "pub": pub,
-                "parentUuid": ""
-            });
+        let followers = 0;
+        let lastPost = null
+        let threads = 0;
+        let posts = 0;
 
         let user = await db.collection(config.table.accounts)
             .find({
-                "data.publicKeys.arbitrary": pub,
+                "data.publicKeys.arbitrary": { $regex: `${pub}$` },
                 "domain": domain
             })
             .limit(1)
             .next();
+
+        if (user) {
+            // resolve the public key to it's full version
+            if (user.data && user.data.publicKeys) {
+                pub = user.data.publicKeys.arbitrary;
+            }
+        }
+
+        if (pub && pub.length >= 50) {
+            followers = await db.collection(config.table.accounts)
+                .countDocuments({
+                    "domain": domain,
+                    "data.followingUsers.pub": pub
+                });
+
+            lastPost = await db.collection(config.table.posts)
+                .find({ "pub": pub })
+                .sort({ "createdAt": -1 })
+                .limit(1)
+                .next();
+
+            posts = await db.collection(config.table.posts)
+                .countDocuments({ "pub": pub });
+
+            threads = await db.collection(config.table.posts)
+                .countDocuments({
+                    "pub": pub,
+                    "parentUuid": ""
+                });
+        }
 
         return res.success({
             pub,

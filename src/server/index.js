@@ -44,14 +44,16 @@ import UploadController from "./controllers/UploadController";
             const url = `${siteConfig.rendertron}/${siteConfig.url}${req.path}`;
             console.log(`[rendertron] ${userAgent} - ${siteConfig.url}${req.path}`);
             const { data } = await axios.get(url);
-            res.setHeader('content-type', 'text/html');
+            res.setHeader('Cache-Control', 'no-store');
+            res.setHeader('Content-Type', 'text/html');
             res.send(data);
         }
         else {
             const header = `<script>window.__BUILD__ = ${BUILD_TIME}</script>`;
             let index = INDEX_FILE;
             index = index.replace(/<\/head>/, `${header}</head>`);
-            res.setHeader('content-type', 'text/html');
+            res.setHeader('Cache-Control', 'no-store');
+            res.setHeader('Content-Type', 'text/html');
             res.send(index);
         }
     }
