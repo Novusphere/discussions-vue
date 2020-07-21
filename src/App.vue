@@ -54,23 +54,27 @@
         eager
         @click:outside="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
       >
-        <v-card v-if="isThreadDialogOpen" class="thread-dialog-card">
-          <v-row>
-            <v-col :cols="12" class="text-right">
-              <v-btn
-                class="mr-4"
-                icon
-                @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
-              >
-                <v-icon>close</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col :cols="12">
-              <ThreadBrowser class="mt-3" :referenceId="threadDialogRef1" :referenceId2="threadDialogRef2" />
-            </v-col>
-          </v-row>
+        <v-card v-if="isThreadDialogOpen">
+          <v-card-title class="justify-end">
+            <v-btn
+              class="mr-4"
+              icon
+              @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col :cols="12">
+                <ThreadBrowser
+                  class="mt-3"
+                  :referenceId="threadDialogRef1"
+                  :referenceId2="threadDialogRef2"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
         </v-card>
       </v-dialog>
 
@@ -101,8 +105,7 @@
         <v-row>
           <v-col cols="2"></v-col>
           <v-col cols="2">
-            <v-card>
-              <!-- TO-REFINE: fix the nav bar so that it scrolls with the user -->
+            <v-card class="nav--sticky">
               <AppNav />
             </v-card>
           </v-col>
@@ -115,8 +118,7 @@
       <v-container fluid v-else>
         <v-row>
           <v-col cols="2">
-            <v-card>
-              <!-- TO-REFINE: fix the nav bar so that it scrolls with the user -->
+            <v-card class="nav--sticky">
               <AppNav />
             </v-card>
           </v-col>
@@ -271,6 +273,13 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.nav--sticky {
+  position: sticky;
+  top: 88px;
+}
+</style>
 
 <style>
 html {
