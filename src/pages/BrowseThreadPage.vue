@@ -14,6 +14,7 @@
         :displayName="opening.post.displayName"
         :publicKey="opening.post.pub"
         :uidw="opening.post.uidw"
+        :extended-info="posterInfo"
       ></UserProfileCard>
     </template>
     <template v-slot:content>
@@ -36,7 +37,10 @@ import CommunityCard from "@/components/CommunityCard";
 import UserProfileCard from "@/components/UserProfileCard";
 import AssetCard from "@/components/AssetCard";
 import ThreadBrowser from "@/components/ThreadBrowser";
-import { getCommunityByTag } from "@/novusphere-js/discussions/api";
+import {
+  getCommunityByTag,
+  getUserProfile
+} from "@/novusphere-js/discussions/api";
 import { getSymbols } from "@/novusphere-js/uid";
 
 export default {
@@ -52,7 +56,8 @@ export default {
   data: () => ({
     opening: null,
     community: null,
-    symbol: null
+    symbol: null,
+    posterInfo: null
   }),
   mounted() {
     window.addEventListener("beforeunload", this.leaveGuard);
@@ -84,6 +89,9 @@ export default {
         this.symbol = null;
       }
       this.community = await getCommunityByTag(this.opening.post.sub);
+
+      const info = await getUserProfile(this.opening.post.pub);
+      this.posterInfo = info;
     },
     leaveGuard(e) {
       if (this.$refs.browser && this.$refs.browser.hasInput()) {

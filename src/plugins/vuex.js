@@ -83,7 +83,7 @@ async function saveAccount(state, external = true) {
                 displayName: state.displayName,
                 publicKeys: {
                     arbitrary: state.keys.arbitrary.pub,
-                    identity: state.keys.arbitrary.pub,
+                    identity: state.keys.identity.pub,
                     wallet: state.keys.wallet.pub // uidw 
                 },
                 publicKeyProofs: {

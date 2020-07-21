@@ -73,15 +73,17 @@ export default {
   methods: {
     reset(cursor) {
       cursor = cursor || this.cursor;
-      cursor.moderatorKeys =
-        this.delegatedMods.length > 0
-          ? this.delegatedMods.map(dm => dm.pub)
+      if (cursor) {
+        cursor.moderatorKeys =
+          this.delegatedMods.length > 0
+            ? this.delegatedMods.map(dm => dm.pub)
+            : undefined;
+        cursor.votePublicKey = this.isLoggedIn
+          ? this.keys.arbitrary.pub
           : undefined;
-      cursor.votePublicKey = this.isLoggedIn
-        ? this.keys.arbitrary.pub
-        : undefined;
-      cursor.sort = this.sort;
-      cursor.reset();
+        cursor.sort = this.sort;
+        cursor.reset();
+      }
 
       this.posts = [];
 

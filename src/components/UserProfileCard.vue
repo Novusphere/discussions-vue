@@ -7,7 +7,9 @@
           <div class="d-inline-block ml-2">
             <router-link style="text-decoration: none;" :to="link">
               <h2 class="d-inline">{{ displayName }}</h2>
-              <slot></slot>
+              <div v-if="extendedInfo">
+                <span class="d-block text-center">{{ extendedInfo.followers }} followers</span>
+              </div>
             </router-link>
           </div>
           <v-spacer />
@@ -56,6 +58,7 @@ export default {
     PublicKeyIcon
   },
   props: {
+    extendedInfo: Object,
     displayName: String,
     publicKey: String,
     uidw: String,

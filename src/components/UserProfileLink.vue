@@ -1,15 +1,20 @@
 <template>
   <div>
-    <v-menu max-width="400" v-model="showPopover" :position-x="popoverX" :position-y="popoverY" :close-on-content-click="false">
+    <v-menu
+      max-width="400"
+      v-model="showPopover"
+      :position-x="popoverX"
+      :position-y="popoverY"
+      :close-on-content-click="false"
+    >
       <UserProfileCard
         v-if="showPopover"
         :displayName="displayName"
         :publicKey="publicKey"
         :uidw="uidw"
+        :extended-info="profileInfo"
         small
-      >
-        <span class="d-block text-center">{{ followers }} followers</span>
-      </UserProfileCard>
+      />
     </v-menu>
     <v-btn text v-if="btn" :to="link">
       <PublicKeyIcon v-show="!noIcon" :publicKey="publicKey" />
@@ -34,9 +39,7 @@
 <script>
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import UserProfileCard from "@/components/UserProfileCard";
-import {
-  getUserProfile
-} from "@/novusphere-js/discussions/api";
+import { getUserProfile } from "@/novusphere-js/discussions/api";
 
 export default {
   name: "UserProfileLink",
@@ -62,7 +65,7 @@ export default {
     popoverX: 0,
     popoverY: 0,
     uidw: "",
-    followers: 0
+    profileInfo: null
   }),
   methods: {
     async clicked(e) {
@@ -76,11 +79,7 @@ export default {
       const info = await getUserProfile(this.publicKey);
 
       this.uidw = info.uidw;
-      //this.publicKey = publicKey;
-      //this.displayName = info.displayName;
-      this.followers = info.followers;
-      //this.posts = info.posts;
-      //this.threads = info.threads;
+      this.profileInfo = info;
 
       const rect = this.$el.getBoundingClientRect();
       this.popoverX = rect.x + rect.width + 10;

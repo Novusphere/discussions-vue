@@ -235,6 +235,10 @@ function saveConfig(name, config) {
     fs.writeFileSync(fn, JSON.stringify(config));
 }
 
+function getShortPublicKey(publicKey) {
+    return publicKey.substring(publicKey.length - 4);
+}
+
 function getOEmbedHtml(href) {
     let insertHTML = undefined;
     let oembed = undefined;
@@ -320,5 +324,6 @@ export {
     sleep,
     getFromCache,
     createDOMParser,
-    getOEmbedHtml
+    getOEmbedHtml,
+    getShortPublicKey
 }

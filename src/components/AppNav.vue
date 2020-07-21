@@ -161,6 +161,8 @@ export default {
           // only take a single tag
           const tag = this.$route.params.tags.split(",")[0];
           await this.$router.push(`/tag/${tag}/submit`);
+        } else if (this.$route.params.who) {
+          await this.$router.push(`/u/${this.$route.params.who}/submit`);
         } else {
           await this.$router.push(`/submit`);
         }

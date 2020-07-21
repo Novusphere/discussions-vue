@@ -1,9 +1,15 @@
 <template>
   <BrowsePageLayout v-if="publicKey">
     <template v-slot:header>
-      <UserProfileCard flat no-view :displayName="displayName" :publicKey="publicKey" :uidw="uidw">
-        <span class="d-block text-center">{{ followers }} followers</span>
-      </UserProfileCard>
+      <UserProfileCard
+        v-show="displayName"
+        flat
+        no-view
+        :displayName="displayName"
+        :publicKey="publicKey"
+        :uidw="uidw"
+        :extended-info="profileInfo"
+      />
     </template>
     <template v-slot:header2>
       <v-tabs center-active show-arrows v-model="tab" class="no-underline mt-1">
@@ -22,56 +28,76 @@
       </v-tabs>
     </template>
     <template v-slot:content>
+      <div v-if="isBlogSubmit">
+        <PostSubmitter
+          cancelable
+          :sub="'blog'"
+          ref="submitter"
+          :title-field="true"
+          @submit-post="submitPost"
+          @cancel="$router.push(`/u/${$route.params.who}/blog`)"
+        />
+      </div>
+      <div v-else-if="isBlog && keys && publicKey == keys.arbitrary.pub">
+        <v-btn block color="primary" :to="`/u/${$route.params.who}/submit`">New Blog</v-btn>
+      </div>
+      <div v-else-if="isViewFollowing">
+        <div v-for="(fu, i) in followingUsers" :key="i">
+          <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
+        </div>
+      </div>
       <div v-if="cursor">
         <PostBrowser ref="browser" :cursor="cursor">
           <template v-slot:body></template>
         </PostBrowser>
-      </div>
-      <div v-else>
-        <div v-for="(fu, i) in followingUsers" :key="i">
-          <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
-        </div>
       </div>
     </template>
   </BrowsePageLayout>
 </template>
 
 <script>
-import { mapState } from "vuex";
-import BrowsePageLayout from "@/components/BrowsePageLayout";
-//import PostSubmitter from "@/components/PostSubmitter";
-import UserProfileCard from "@/components/UserProfileCard";
-import PostBrowser from "@/components/PostBrowser";
+import { mapState, mapGetters } from "vuex";
+
 import {
   searchPostsByKeys,
-  getUserProfile
+  getUserProfile,
+  getSinglePost
 } from "@/novusphere-js/discussions/api";
+import { sleep, waitFor, getShortPublicKey } from "@/novusphere-js/utility";
+
+import BrowsePageLayout from "@/components/BrowsePageLayout";
+import PostSubmitter from "@/components/PostSubmitter";
+import UserProfileCard from "@/components/UserProfileCard";
+import PostBrowser from "@/components/PostBrowser";
 
 export default {
   name: "UserProfilePage",
   components: {
     BrowsePageLayout,
-    //PostSubmitter,
+    PostSubmitter,
     PostBrowser,
     UserProfileCard
   },
   props: {},
   watch: {
     "$route.params.who": function() {
-      this.setCursor();
+      this.load();
     },
-    "$route.params.tab": function() {
-      const tabs = ["blog", "posts", "threads", "following"];
-      const tab = tabs.find(t => t == this.$route.params.tab);
-      this.tab = tab > -1 ? tab : 0;
+    "$route.params.tab": function(_, old) {
+      if (this.$route.params.tab == "blog" && old == "submit") return;
+      if (this.$route.params.tab == "submit" && old == "blog") return;
 
-      this.setCursor();
-    },
-    async votePublicKey() {
-      // reload cursor from votePublicKey perspective
-      if (this.votePublicKey) {
-        await this.setCursor();
+      const tabs = ["blog", "posts", "threads", "following"];
+      let tab = tabs.findIndex(t => t == this.$route.params.tab);
+      if (tab == -1 && this.isBlogSubmit) tab = 0;
+
+      if (tab != this.tab) {
+        this.tab = tab > -1 ? tab : 0;
+        this.load();
       }
+    },
+    async isLoggedIn() {
+      await this.load();
     }
   },
   data: () => ({
@@ -83,54 +109,99 @@ export default {
     followers: 0,
     following: [],
     posts: 0,
-    threads: 0
+    threads: 0,
+    profileInfo: null
   }),
   computed: {
+    isViewFollowing() {
+      return this.$route.params.tab == "following";
+    },
+    isBlogSubmit() {
+      return this.$route.params.tab == "submit";
+    },
     isBlog() {
-      return this.$route.params.tab == "blog" || !this.$route.params.tab;
+      return (
+        !this.$route.params.tab ||
+        this.$route.params.tab == "blog" ||
+        this.isBlogSubmit
+      );
     },
     isThreads() {
       return this.$route.params.tab == "threads";
     },
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      votePublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
+      keys: state => state.keys
     })
   },
   async created() {
-    await this.setCursor();
+    await this.load();
   },
   methods: {
-    async setCursor() {
+    async submitPost({ post }) {
+      this.waitSubmit = true;
+
+      await sleep(250);
+
+      const transaction = post.transaction;
+      let p = undefined;
+
+      try {
+        await waitFor(
+          async () => {
+            p = await getSinglePost(transaction);
+            return p != undefined;
+          },
+          500,
+          10000
+        );
+
+        if (p) {
+          await this.load(); // reset the cursor so the post shows up in the feed
+        } else {
+          console.log(`Thread couldnt be found... ${transaction}`);
+        }
+      } catch (ex) {
+        console.log(ex);
+        console.log(`Thread couldnt be found... ${transaction}`);
+      }
+    },
+    async load() {
       const [, publicKey] = this.$route.params.who.split("-");
       const info = await getUserProfile(publicKey);
 
       this.uidw = info.uidw;
-      this.publicKey = publicKey;
+      this.publicKey = info.pub;
       this.displayName = info.displayName;
       this.followers = info.followers;
       this.posts = info.posts;
       this.threads = info.threads;
       this.followingUsers = info.followingUsers || [];
+      this.profileInfo = info;
 
-      //console.log(info);
+      const shortPublicKey = getShortPublicKey(info.pub);
+      if (info.displayName && publicKey != shortPublicKey) {
+        const tab = this.$route.params.tab || "";
+        const path = `/u/${info.displayName}-${shortPublicKey}/${tab}`;
+        window.history.replaceState({}, null, path);
+      }
 
-      if (this.$route.params.tab == "following") {
+      if (this.isViewFollowing) {
         this.cursor = null;
       } else {
         let cursor = undefined;
 
         if (this.isBlog) {
           // search query is our public key, and has the "blog" tag
-          cursor = searchPostsByKeys([publicKey], undefined, true);
+          cursor = searchPostsByKeys([info.pub], undefined, true);
           let { $match } = cursor.pipeline[0];
           $match.tags = { $in: ["blog"] };
         } else {
-          cursor = searchPostsByKeys([publicKey], "recent", this.isThreads);
+          cursor = searchPostsByKeys([info.pub], "recent", this.isThreads);
         }
-
         // enable this since we might not be dealing with only top level posts, we need the op to determine the link to the post
         cursor.includeOpeningPost = true;
-        cursor.votePublicKey = this.votePublicKey;
+        cursor.votePublicKey = this.keys.arbitrary.pub;
 
         this.cursor = cursor;
         if (this.$refs.browser) {

@@ -1,7 +1,7 @@
 <template>
   <BrowsePageLayout>
     <template v-slot:header v-if="community">
-      <CommunityCard flat no-view :community="community" v-if="community" />
+      <CommunityCard flat no-view :community="community" />
     </template>
     <template v-slot:content>
       <v-progress-linear v-if="waitSubmit" indeterminate></v-progress-linear>
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 import {
   getCommunityByTag,
   getSinglePost
@@ -24,12 +24,14 @@ import { waitFor, sleep } from "@/novusphere-js/utility";
 
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import CommunityCard from "@/components/CommunityCard";
+//import UserProfileCard from "@/components/UserProfileCard";
 import PostSubmitter from "@/components/PostSubmitter";
 
 export default {
   name: "SubmitPostPage",
   components: {
     BrowsePageLayout,
+    //UserProfileCard,
     CommunityCard,
     PostSubmitter
   },
@@ -43,7 +45,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(["isLoggedIn"])
+    ...mapGetters(["isLoggedIn"]),
+    ...mapState({
+      displayName: state => state.displayName,
+      keys: state => state.keys
+    })
   },
   data: () => ({
     tag: "all",
