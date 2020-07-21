@@ -60,12 +60,12 @@ const routes = [
                     context: async (p) => {
                         const [, key] = p.who.split('-');
                         if (key) {
-                            const info = await getUserProfile(key);
-                            return { ...info, pub: key };
+                            return await getUserProfile(key);
                         }
                         return undefined;
                     },
                     head: async (info) => {
+                        if (!info.displayName) return undefined;
                         return ({
                             title: `Discussions - ${info.displayName}`,
                             description: `${info.pub} - ${info.followers} followers, ${info.posts} posts, ${info.threads} threads`,

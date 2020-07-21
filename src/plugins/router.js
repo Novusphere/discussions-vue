@@ -90,16 +90,18 @@ router.afterEach(async (to) => {
 
             if (meta.head) {
                 let _head = await meta.head(context);
-                // removed undefined
-                Object.keys(_head).forEach(key => _head[key] === undefined && delete _head[key]);
-                Object.assign(head, _head);
+                if (_head) {
+                    // removed undefined
+                    Object.keys(_head).forEach(key => _head[key] === undefined && delete _head[key]);
+                    Object.assign(head, _head);
+                }
             }
         }
         catch (ex) {
             console.log(ex);
         }
     }
-    
+
     document.title = head.title;
     setMeta("og:title", head.title);
     setMeta("twitter:title", head.title);
