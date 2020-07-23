@@ -1,5 +1,5 @@
 <template>
-  <BrowsePageLayout v-if="publicKey">
+  <BrowsePageLayout no-trending v-if="publicKey">
     <template v-slot:header>
       <UserProfileCard
         v-show="displayName"
@@ -12,6 +12,14 @@
       />
     </template>
     <template v-slot:header2>
+      <SocialMediasCard
+        v-if="$vuetify.breakpoint.mobile"
+        :isMyProfile="isMyProfile"
+        :auth="auth"
+        class="no-underline mt-1"
+        @remove="(name) => auth = auth.filter((a) => a.name != name)"
+      />
+
       <v-tabs center-active show-arrows v-model="tab" class="no-underline mt-1">
         <v-tab :to="`/u/${$route.params.who}/blog`">
           <span>Blog</span>
@@ -52,20 +60,28 @@
         </PostBrowser>
       </div>
     </template>
+    <template v-slot:right>
+      <SocialMediasCard
+        :isMyProfile="isMyProfile"
+        :auth="auth"
+        class="no-underline mt-1"
+        @remove="(name) => auth = auth.filter((a) => a.name != name)"
+      />
+    </template>
   </BrowsePageLayout>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
-
 import {
   searchPostsByKeys,
   getUserProfile,
-  getSinglePost
+  getSinglePost,
 } from "@/novusphere-js/discussions/api";
 import { sleep, waitFor, getShortPublicKey } from "@/novusphere-js/utility";
 
 import BrowsePageLayout from "@/components/BrowsePageLayout";
+import SocialMediasCard from "@/components/SocialMediasCard";
 import PostSubmitter from "@/components/PostSubmitter";
 import UserProfileCard from "@/components/UserProfileCard";
 import PostBrowser from "@/components/PostBrowser";
@@ -74,23 +90,24 @@ export default {
   name: "UserProfilePage",
   components: {
     BrowsePageLayout,
+    SocialMediasCard,
     PostSubmitter,
     PostBrowser,
-    UserProfileCard
+    UserProfileCard,
   },
   props: {},
   watch: {
-    "$route.params.who": function() {
+    "$route.params.who": function () {
       this.load();
     },
-    "$route.params.tab": function(_, old) {
+    "$route.params.tab": function (_, old) {
       if (this.$route.params.tab == "blog" && !old) return;
       if (this.$route.params.tab == "submit" && !old) return;
       if (this.$route.params.tab == "blog" && old == "submit") return;
       if (this.$route.params.tab == "submit" && old == "blog") return;
 
       const tabs = ["blog", "posts", "threads", "following"];
-      let tab = tabs.findIndex(t => t == this.$route.params.tab);
+      let tab = tabs.findIndex((t) => t == this.$route.params.tab);
       if (tab == -1 && this.isBlogSubmit) tab = 0;
 
       if (tab != this.tab) {
@@ -100,7 +117,7 @@ export default {
     },
     async isLoggedIn() {
       await this.load();
-    }
+    },
   },
   data: () => ({
     tab: 0,
@@ -112,7 +129,8 @@ export default {
     following: [],
     posts: 0,
     threads: 0,
-    profileInfo: null
+    profileInfo: null,
+    auth: [],
   }),
   computed: {
     isViewFollowing() {
@@ -131,10 +149,13 @@ export default {
     isThreads() {
       return this.$route.params.tab == "threads";
     },
+    isMyProfile() {
+      return this.isLoggedIn && this.keys.arbitrary.pub == this.publicKey;
+    },
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      keys: state => state.keys
-    })
+      keys: (state) => state.keys,
+    }),
   },
   async created() {
     await this.load();
@@ -172,6 +193,7 @@ export default {
       const [, publicKey] = this.$route.params.who.split("-");
       const info = await getUserProfile(publicKey);
 
+      this.profileInfo = info;
       this.uidw = info.uidw;
       this.publicKey = info.pub;
       this.displayName = info.displayName;
@@ -179,7 +201,7 @@ export default {
       this.posts = info.posts;
       this.threads = info.threads;
       this.followingUsers = info.followingUsers || [];
-      this.profileInfo = info;
+      this.auth = info.auth;
 
       const shortPublicKey = getShortPublicKey(info.pub);
       if (info.displayName && publicKey != shortPublicKey) {
@@ -210,12 +232,12 @@ export default {
           this.$refs.browser.reset(cursor);
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style scoped>
+<style>
 .no-underline a {
   text-decoration: none;
 }

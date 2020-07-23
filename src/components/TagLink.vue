@@ -1,15 +1,5 @@
 <template>
   <div class="d-inline-block tag-link">
-    <v-menu
-      max-width="400"
-      v-if="popover"
-      v-model="showPopover"
-      :position-x="popoverX"
-      :position-y="popoverY"
-      :close-on-content-click="false"
-    >
-      <slot></slot>
-    </v-menu>
     <v-btn :to="link" v-if="btn">
       <slot></slot>
     </v-btn>
@@ -39,11 +29,12 @@
 
 <script>
 import TagIcon from "@/components/TagIcon";
+import { getCommunityByTag } from "@/novusphere-js/discussions/api";
 
 export default {
   name: "TagLink",
   components: {
-    TagIcon
+    TagIcon,
   },
   props: {
     noIcon: Boolean,
@@ -52,7 +43,7 @@ export default {
     tag: String,
     big: Boolean,
     inline: Boolean,
-    popover: { type: Boolean, default: false }
+    popover: { type: Boolean, default: false },
   },
   computed: {
     tagWidth() {
@@ -61,12 +52,12 @@ export default {
     },
     link() {
       return `/tag/${this.tag.toLowerCase()}`;
-    }
+    },
   },
   data: () => ({
     showPopover: false,
     popoverX: 0,
-    popoverY: 0
+    popoverY: 0,
   }),
   async created() {},
   methods: {
@@ -78,14 +69,17 @@ export default {
         return;
       }
 
-      this.$emit("show-popover");
-
       const rect = this.$el.getBoundingClientRect();
-      this.popoverX = rect.x + rect.width + 10;
-      this.popoverY = rect.y - 10;
-      this.showPopover = true;
-    }
-  }
+      const community = await getCommunityByTag(this.tag);
+
+      this.$store.commit("setPopoverOpen", {
+        value: true,
+        type: "tag",
+        rect,
+        community,
+      });
+    },
+  },
 };
 </script>
 

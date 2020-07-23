@@ -5,6 +5,7 @@ import fs from 'fs';
 import { uuid } from "uuidv4";
 import loadTelegram from "./telegram";
 import Lock from "./lock";
+import { getCommunityByTag, getUserProfile } from "../discussions/api";
 
 // Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
 const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
@@ -108,7 +109,7 @@ let _oembedNextAttempt = 0;
                 .map((a) => ({ a, href: a.getAttribute('href') }))
                 .filter(({ href }) => href && (href.indexOf('/') == 0 || href.indexOf('discussions.app/') > -1));
 
-            relativeAnchors.forEach(({ a, href }) => {
+            relativeAnchors.forEach(async ({ a, href }) => {
 
                 // turn into relative
                 if (href.indexOf('/') != 0) {
@@ -117,41 +118,49 @@ let _oembedNextAttempt = 0;
                 }
 
                 a.setAttribute('class', '_');
-                a.addEventListener('click', (e) => {
-                    if (window.$vue) {
-                        e.preventDefault();
-                        e.stopPropagation();
+                a.addEventListener('click', async function (e) {
+                    const $vue = window.$vue;
+                    if (!$vue) return;
 
-                        window.$vue.$router.push(href);
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (href.indexOf('/u/') == 0) {
+                        const user = href.split('/').filter(s => s)[1];
+                        if (user) {
+                            let [displayName, publicKey] = user.split('-');
+                            const info = await getUserProfile(this.publicKey);
+                            const rect = this.getBoundingClientRect();
+
+                            return $vue.$store.commit("setPopoverOpen", {
+                                value: true,
+                                type: "profile",
+                                rect,
+                                uidw: info.uidw,
+                                displayName: displayName,
+                                publicKey: publicKey,
+                                profileInfo: info,
+                            });
+                        }
                     }
+                    else if (href.indexOf('/tag/') == 0) {
+                        const tags = href.split('/').filter(s => s)[1].split(',');
+                        if (tags.length == 1) {
+                            const rect = this.getBoundingClientRect();
+                            const community = await getCommunityByTag(tags[0]);
+
+                            return $vue.$store.commit("setPopoverOpen", {
+                                value: true,
+                                type: "tag",
+                                rect,
+                                community,
+                            });
+                        }
+                    }
+
+                    return $vue.$router.push(href);
                 });
             });
-
-            /*const tagAnchors = relativeAnchors.filter(({ href }) => href.indexOf('/tag/') == 0);
-            const userAnchors = relativeAnchors.filter(({ href }) => href.indexOf('/u/') == 0);
-
-            tagAnchors.forEach(({ a, href }) => {
-                a.setAttribute('class', '_');
-                a.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const tags = href.split('/').filter(s => s)[1];
-                    if (tags) {
-                        console.log(tags);
-                    }
-                });
-            });
-
-            userAnchors.forEach(({ a, href }) => {
-                a.setAttribute('class', '_');
-                a.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const user = href.split('/').filter(s => s)[1];
-                    if (user) {
-                        let [displayName, publicKey] = user.split('-');
-                        console.log(`${displayName} ${publicKey}`);
-                    }
-                });
-            });*/
 
         }
         await sleep(100);

@@ -23,7 +23,7 @@
       </v-col>
       <v-col :cols="3" v-if="!noRight">
         <slot name="right"></slot>
-        <TrendingCard />
+        <TrendingCard v-if="!noTrending" />
         <AboutUsCard class="mt-2" />
       </v-col>
     </v-row>
@@ -43,7 +43,8 @@ export default {
     AboutUsCard
   },
   props: {
-    noRight: Boolean
+    noRight: Boolean,
+    noTrending: Boolean
   },
   computed: {
     ...mapState({

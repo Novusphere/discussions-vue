@@ -12,9 +12,7 @@
             class="d-inline-block pr-3"
             v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)"
           >
-            <TagLink inline popover @show-popover="setCommunity()" :tag="post.sub">
-              <CommunityCard dense no-view :community="community" v-if="community" />
-            </TagLink>
+            <TagLink inline popover :tag="post.sub" />
           </div>
           <div class="d-inline-block pr-3">
             <UserProfileLink
@@ -107,8 +105,8 @@ import TagLink from "@/components/TagLink";
 import PostTips from "@/components/PostTips";
 import PostThreadLink from "@/components/PostThreadLink";
 //import PostSubmitter from "@/components/PostSubmitter";
-import CommunityCard from "@/components/CommunityCard";
-import { getCommunityByTag } from "@/novusphere-js/discussions/api";
+//import CommunityCard from "@/components/CommunityCard";
+//import { getCommunityByTag } from "@/novusphere-js/discussions/api";
 
 export default {
   name: "BrowsePostCard",
@@ -120,7 +118,7 @@ export default {
     //PostCardActions,
     PostTips,
     PostThreadLink,
-    CommunityCard
+    //CommunityCard,
     //PostSubmitter
   },
   props: {
@@ -128,7 +126,7 @@ export default {
     post: Object,
     comments: Array,
     display: String,
-    editing: Boolean
+    editing: Boolean,
   },
   computed: {
     contentBackgroundColor() {
@@ -179,26 +177,26 @@ export default {
     },
     ...mapGetters(["isModerator"]),
     ...mapState({
-      hideSpam: state => state.hideSpam,
-      blurNSFW: state => state.blurNSFW,
-      keys: state => state.keys
-    })
+      hideSpam: (state) => state.hideSpam,
+      blurNSFW: (state) => state.blurNSFW,
+      keys: (state) => state.keys,
+    }),
   },
   watch: {
-    "post.content": async function() {
+    "post.content": async function () {
       this.postHTML = await this.post.getContentHTML();
     },
     isCompactDisplay() {
       if (this.isCompactDisplay) this.expanded = -1;
       else this.expanded = 0;
-    }
+    },
   },
   data: () => ({
     community: null,
     expanded: 0, // 0 is show, -1 is don't show
     postHTML: "",
     forceReveal: false,
-    removeNSFWOverlay: false
+    removeNSFWOverlay: false,
   }),
   async mounted() {
     if (this.isCompactDisplay) this.expanded = -1;
@@ -208,9 +206,6 @@ export default {
     refreshOEmbed();
   },
   methods: {
-    async setCommunity() {
-      this.community = await getCommunityByTag(this.post.sub);
-    },
     async tip({ transaction, transferActions }) {
       let artificalTips = await createArtificalTips(
         this.keys.wallet.pub,
@@ -273,7 +268,7 @@ export default {
         sub,
         referenceId,
         title,
-        referenceId2
+        referenceId2,
       });
 
       /*let link = `/tag/${this.post.sub}`;
@@ -282,8 +277,8 @@ export default {
       }
       link += `/${this.post.getEncodedId()}`;
       this.$router.push(link);*/
-    }
-  }
+    },
+  },
 };
 </script>
 

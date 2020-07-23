@@ -3,9 +3,10 @@ import { getSinglePost, getCommunityByTag, getUserProfile, getAPIHost } from "@/
 const routes = [
     {
         path: '/',
-        redirect: '/tag/all',
+        redirect: '/home',
         component: `BlankPage`,
         children: [
+            { path: `home`, component: `HomePage` },
             { path: '404', component: 'MissingPage', meta: { head: async () => ({ title: `Discussions - 404` }) } },
             { path: 'submit', component: `SubmitPostPage` },
             { path: 'logout', component: `LogOutPage` },

@@ -20,6 +20,11 @@ const testerPublicKeys = [
 const getDefaultState = () => ({
     syncTime: 0,
     //
+    popover: {
+        tag: { value: false },
+        profile: { value: false },
+    },
+    //
     isLoginDialogOpen: false,
     //
     isTransferDialogOpen: false,
@@ -162,6 +167,12 @@ export default new Vuex.Store({
                     .map(dm => dm.pub);
                 return mods;
             }
+        },
+        isPopoverOpen: state => {
+            return name => {
+                const popover = state.popover[name];
+                return popover && popover.open;
+            }
         }
     },
     mutations: {
@@ -269,6 +280,20 @@ export default new Vuex.Store({
             state.subscribedTags = state.subscribedTags.filter(t => t != tag);
             saveAccount(state);
         },
+        setPopoverOpen(state, { value, type, rect, ...rest }) {
+            if (value) {
+                const x = rect.x + rect.width + 10;
+                const y = rect.y - 10;
+                const popover = { open: true, x, y };
+                
+                Object.assign(popover, rest);
+
+                state.popover[type] = popover;
+            }
+            else {
+                state.popover[type] = { open: false };
+            }
+        },
         setSendTipDialogOpen(state, { value, recipient }) {
             if (value) {
                 state.isSendTipDialogOpen = true;
@@ -351,12 +376,12 @@ export default new Vuex.Store({
             function update({ pub, uidw, displayName, nameTime }, collection, name) {
                 const eu = collection.find(i => i.pub == pub);
                 if (!eu) return;
-                
+
                 // legacy update
                 if (!eu.uidw && uidw) {
                     eu.uidw = uidw;
                     save = true;
-                    
+
                     console.log(name + ` ` + JSON.stringify(eu));
                 }
 

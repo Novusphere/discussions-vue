@@ -2,6 +2,34 @@
   <v-app>
     <AppBar />
     <v-main :style="{background: $vuetify.theme.themes[theme].background}">
+      <v-menu
+        v-if="popover.profile.open"
+        max-width="400"
+        v-model="profilePopover"
+        :position-x="popover.profile.x"
+        :position-y="popover.profile.y"
+        :close-on-content-click="false"
+      >
+        <UserProfileCard
+          :displayName="popover.profile.displayName"
+          :publicKey="popover.profile.publicKey"
+          :uidw="popover.profile.uidw"
+          :extended-info="popover.profile.profileInfo"
+          small
+        />
+      </v-menu>
+
+      <v-menu
+        v-if="popover.tag.open"
+        max-width="400"
+        v-model="tagPopover"
+        :position-x="popover.tag.x"
+        :position-y="popover.tag.y"
+        :close-on-content-click="false"
+      >
+        <CommunityCard dense no-view :community="popover.tag.community" />
+      </v-menu>
+
       <v-dialog
         :retain-focus="false"
         max-width="600"
@@ -132,7 +160,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import { getUserAccountObject } from "@/novusphere-js/discussions/api";
 
 import AppBar from "@/components/AppBar";
@@ -144,6 +172,8 @@ import InsertLinkCard from "@/components/MarkdownEditor/InsertLinkCard";
 import ApproveTransfersCard from "@/components/ApproveTransfersCard";
 import SendTipCard from "@/components/SendTipCard";
 import ThreadBrowser from "@/components/ThreadBrowser";
+import UserProfileCard from "@/components/UserProfileCard";
+import CommunityCard from "@/components/CommunityCard";
 
 export default {
   name: "App",
@@ -156,7 +186,9 @@ export default {
     InsertLinkCard,
     ApproveTransfersCard,
     SendTipCard,
-    ThreadBrowser
+    ThreadBrowser,
+    UserProfileCard,
+    CommunityCard,
   },
   watch: {
     darkMode() {
@@ -197,14 +229,14 @@ export default {
             // NOTE: we didn't bother migrating watched posts
             lastSeenNotificationsTime: oldAccount.data.lastCheckedNotifications,
             subscribedTags: oldAccount.data.tags,
-            followingUsers: oldAccount.data.following.map(fu => ({
+            followingUsers: oldAccount.data.following.map((fu) => ({
               pub: fu.pub,
-              displayName: fu.name
+              displayName: fu.name,
             })),
-            delegatedMods: oldAccount.data.moderation.delegated.map(m => {
+            delegatedMods: oldAccount.data.moderation.delegated.map((m) => {
               const [displayName, pub] = m[0].split(":");
               return { displayName, pub, tag: m[1] };
-            })
+            }),
           };
 
           //console.log(migrated);
@@ -216,33 +248,59 @@ export default {
       }
 
       this.$store.commit("syncAccount", account);
-    }
+    },
   },
   computed: {
+    profilePopover: {
+      get() {
+        return this.popover.profile.open;
+      },
+      set(value) {
+        if (value) return;
+        this.$store.commit("setPopoverOpen", {
+          value: false,
+          type: "profile",
+        });
+      },
+    },
+    tagPopover: {
+      get() {
+        return this.popover.tag.open;
+      },
+      set(value) {
+        if (value) return;
+        this.$store.commit("setPopoverOpen", {
+          value: false,
+          type: "tag",
+        });
+      },
+    },
     theme() {
       return this.darkMode ? "dark" : "light";
     },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
     },
+    ...mapGetters(["isPopoverOpen"]),
     ...mapState({
-      darkMode: state => state.darkMode,
-      needSyncAccount: state => state.needSyncAccount,
-      isLoginDialogOpen: state => state.isLoginDialogOpen,
-      isTransferDialogOpen: state => state.isTransferDialogOpen,
-      isSendTipDialogOpen: state => state.isSendTipDialogOpen,
-      isThreadDialogOpen: state => state.isThreadDialogOpen,
-      isImageUploadDialogOpen: state => state.isImageUploadDialogOpen,
-      isInsertLinkDialogOpen: state => state.isInsertLinkDialogOpen,
-      threadDialogRef1: state => state.threadDialogRef1,
-      threadDialogRef2: state => state.threadDialogRef2,
-      pendingTransfers: state => state.pendingTransfers,
-      sendTipRecipient: state => state.sendTipRecipient,
-      keys: state => state.keys
-    })
+      darkMode: (state) => state.darkMode,
+      needSyncAccount: (state) => state.needSyncAccount,
+      popover: (state) => state.popover,
+      isLoginDialogOpen: (state) => state.isLoginDialogOpen,
+      isTransferDialogOpen: (state) => state.isTransferDialogOpen,
+      isSendTipDialogOpen: (state) => state.isSendTipDialogOpen,
+      isThreadDialogOpen: (state) => state.isThreadDialogOpen,
+      isImageUploadDialogOpen: (state) => state.isImageUploadDialogOpen,
+      isInsertLinkDialogOpen: (state) => state.isInsertLinkDialogOpen,
+      threadDialogRef1: (state) => state.threadDialogRef1,
+      threadDialogRef2: (state) => state.threadDialogRef2,
+      pendingTransfers: (state) => state.pendingTransfers,
+      sendTipRecipient: (state) => state.sendTipRecipient,
+      keys: (state) => state.keys,
+    }),
   },
   data: () => ({
-    loginTab: null
+    loginTab: null,
   }),
   created() {
     this.$store.commit("init");
@@ -269,8 +327,8 @@ export default {
     async submitTransfer(password) {
       this.$store.commit("setTempPassword", password);
       this.$store.commit("setTransferDialogOpen", { value: false });
-    }
-  }
+    },
+  },
 };
 </script>
 

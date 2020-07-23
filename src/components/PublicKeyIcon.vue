@@ -19,7 +19,7 @@ export default {
     size: Number
   },
   data: () => ({
-    link: String
+    link: ''
   }),
   watch: {
     async publicKey() {

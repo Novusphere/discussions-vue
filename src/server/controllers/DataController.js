@@ -77,6 +77,42 @@ export default @Controller('/data') class DataController {
     }
 
     @Api()
+    @Get("/auth")
+    async auth(req, res) {
+        let { publicKey: pub, domain } = req.unpack();
+
+        const db = await getDatabase();
+        let user = await db.collection(config.table.accounts)
+            .find({
+                "data.publicKeys.arbitrary": { $regex: `${pub}$` },
+                "domain": domain
+            })
+            .limit(1)
+            .next();
+
+        let auth = [];
+
+        if (user) {
+            // resolve the public key to it's full version
+            if (user.data && user.data.publicKeys) {
+                pub = user.data.publicKeys.arbitrary;
+            }
+
+            if (user.auth) {
+                auth = Object.keys(user.auth).map(name => ({
+                    name: name,
+                    username: user.auth[name].username
+                }));
+            }
+        }
+
+        return res.success({
+            pub,
+            auth: auth
+        });
+    }
+
+    @Api()
     @Get("/profile")
     async profile(req, res) {
         let { publicKey: pub, domain } = req.unpack();
@@ -96,10 +132,19 @@ export default @Controller('/data') class DataController {
             .limit(1)
             .next();
 
+        let auth = [];
+
         if (user) {
             // resolve the public key to it's full version
             if (user.data && user.data.publicKeys) {
                 pub = user.data.publicKeys.arbitrary;
+            }
+
+            if (user.auth) {
+                auth = Object.keys(user.auth).map(name => ({
+                    name: name,
+                    username: user.auth[name].username
+                }));
             }
         }
 
@@ -133,7 +178,8 @@ export default @Controller('/data') class DataController {
             threads,
             uidw: lastPost ? lastPost.uidw : undefined,
             displayName: lastPost ? lastPost.displayName : undefined,
-            followingUsers: user ? user.data.followingUsers : []
+            followingUsers: user ? user.data.followingUsers : [],
+            auth: auth
         });
     }
 

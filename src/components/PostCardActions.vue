@@ -90,7 +90,11 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
-import { submitVote, modPolicySetTags } from "@/novusphere-js/discussions/api";
+import {
+  submitVote,
+  modPolicySetTags,
+  getUserAuth,
+} from "@/novusphere-js/discussions/api";
 import { sleep } from "@/novusphere-js/utility";
 import config from "@/server/site";
 
@@ -102,26 +106,26 @@ export default {
   components: {
     //PublicKeyIcon
     PostThreadLink,
-    TransactionLink
+    TransactionLink,
     //PostTips
   },
   props: {
     post: Object,
     noEdit: Boolean,
-    isCommentDisplay: Boolean
+    isCommentDisplay: Boolean,
   },
   computed: {
     ...mapGetters(["isLoggedIn", "isThreadWatched"]),
     ...mapState({
-      keys: state => state.keys,
-      myPublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
-    })
+      keys: (state) => state.keys,
+      myPublicKey: (state) => (state.keys ? state.keys.arbitrary.pub : ""),
+    }),
   },
   data: () => ({
     //
   }),
   methods: {
-    share(where) {
+    async share(where) {
       let link = `/tag/${this.post.sub}`;
       if (this.post.op && this.post.transaction != this.post.op.transaction) {
         link += `/${this.post.op.getEncodedId()}/${this.post.op.getSnakeCaseTitle()}/${this.post.getEncodedId()}`;
@@ -130,18 +134,38 @@ export default {
       }
 
       link = config.url + link;
-      console.log(link);
-
-      const tags = this.post.tags.filter(t => !["all"].some(t2 => t2 == t));
+      
+      const tags = this.post.tags.filter((t) => !["all"].some((t2) => t2 == t));
 
       let url = undefined;
       let features = undefined;
       if (where == "twitter") {
-        url =
-          `https://twitter.com/intent/tweet?url=${link}` +
-          `&via=thenovusphere` +
-          `&hashtags=${tags.join(",")}` +
-          `&text=`;
+        const { auth: authorAuth } = await getUserAuth(this.post.pub);
+        const authorTwitter = authorAuth.find((a) => a.name == "twitter");
+
+        const by = authorTwitter ? authorTwitter.username : '';
+        const mentions = [];
+
+        for (const mentionedPub of this.post.mentions) {
+          const { auth } = await getUserAuth(mentionedPub);
+          const twitter = auth.find((a) => a.name == "twitter");
+          if (twitter) {
+            console.log(`Found ${mentionedPub} -> @${twitter.username}`);
+            mentions.push(twitter.username);
+          }
+        }
+
+        let tweet = ``;
+        if (this.post.title) tweet += this.post.title + " ";
+        tweet += `${link} via @thenovusphere `;
+        if (by) tweet += `by @${by} `;
+        if (tags.length > 0) tweet += `${tags.map((t) => `#${t}`).join(" ")} `;
+        if (mentions.length > 0)
+          tweet += `${mentions.map((m) => `@${m}`).join(" ")} `;
+
+        url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          tweet
+        )}`;
         features =
           "menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=600,height=600";
       } else if (where == "fb") {
@@ -158,7 +182,7 @@ export default {
     },
     isMyPolicy(tag) {
       let pol = this.post.getMyModPolicy(this.myPublicKey);
-      return pol.find(t => t == tag);
+      return pol.find((t) => t == tag);
     },
     async adjustModPolicy(tag) {
       if (!this.isLoggedIn) {
@@ -168,7 +192,7 @@ export default {
 
       let pol = this.post.getMyModPolicy(this.myPublicKey);
 
-      if (pol.find(t => t == tag)) pol = pol.filter(t => t != tag);
+      if (pol.find((t) => t == tag)) pol = pol.filter((t) => t != tag);
       else pol.push(tag);
 
       this.post.setMyModPolicy(this.myPublicKey, pol);
@@ -182,7 +206,7 @@ export default {
       } else {
         this.$store.commit("watchThread", {
           uuid: this.post.uuid,
-          transaction: this.post.transaction
+          transaction: this.post.transaction,
         });
       }
     },
@@ -211,9 +235,9 @@ export default {
             this.$emit("tip", {
               uuid: this.post.uuid,
               transaction,
-              transferActions
-            })
-        }
+              transferActions,
+            }),
+        },
       });
     },
     async vote(value) {
@@ -239,12 +263,12 @@ export default {
       await sleep(500);
       const trxid = await submitVote(this.keys.arbitrary.key, {
         value: value,
-        uuid: this.post.uuid
+        uuid: this.post.uuid,
       });
 
       console.log(`vote trxid: ${trxid}`);
-    }
-  }
+    },
+  },
 };
 </script>
 

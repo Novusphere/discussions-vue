@@ -46,12 +46,11 @@
 import { mapState, mapGetters } from "vuex";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import PostCard from "@/components/PostCard";
-import { waitFor, sleep, generateUuid } from "@/novusphere-js/utility";
+import { waitFor, generateUuid } from "@/novusphere-js/utility";
 import {
   Post,
-  getSinglePost,
   submitPost,
-  getUserProfile
+  getUserProfile,
 } from "@/novusphere-js/discussions/api";
 import {
   createAsset,
@@ -59,40 +58,40 @@ import {
   getChainForSymbol,
   getAmountFeeAssetsForTotal,
   brainKeyToKeys,
-  decrypt
+  decrypt,
 } from "@/novusphere-js/uid";
 
 export default {
   name: "PostSubmitter",
   components: {
     MarkdownEditor,
-    PostCard
+    PostCard,
   },
   props: {
     sub: String,
     parentPost: Object,
     cancelable: Boolean,
     edit: Boolean,
-    titleField: Boolean
+    titleField: Boolean,
   },
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      displayName: state => state.displayName,
-      keys: state => state.keys,
-      isTransferDialogOpen: state => state.isTransferDialogOpen,
-      encryptedBrainKey: state => state.encryptedBrainKey,
-      encryptedTest: state => state.encryptedTest,
-      tempPassword: state => state.tempPassword,
-      followingUsers: state => state.followingUsers
-    })
+      displayName: (state) => state.displayName,
+      keys: (state) => state.keys,
+      isTransferDialogOpen: (state) => state.isTransferDialogOpen,
+      encryptedBrainKey: (state) => state.encryptedBrainKey,
+      encryptedTest: (state) => state.encryptedTest,
+      tempPassword: (state) => state.tempPassword,
+      followingUsers: (state) => state.followingUsers,
+    }),
   },
   data: () => ({
     preview: null,
     tab: 0,
     disablePost: false,
     title: "",
-    submitError: ""
+    submitError: "",
   }),
   watch: {
     async tab() {
@@ -100,7 +99,7 @@ export default {
         const { artificalSubmission } = await this.generateSubmission();
         this.preview = artificalSubmission;
       }
-    }
+    },
   },
   async created() {},
   mounted() {},
@@ -124,17 +123,17 @@ export default {
     mentionSuggester(query) {
       console.proxyLog(`mentionsSuggester: ${query}`);
       // include people who the user is following
-      let items = this.followingUsers.map(u => ({
+      let items = this.followingUsers.map((u) => ({
         pub: u.pub,
-        displayName: [u.displayName]
+        displayName: [u.displayName],
       }));
 
       // include people who have participated in current thread
       if (this.parentPost && this.parentPost.threadTree) {
         for (const { post } of Object.values(this.parentPost.threadTree)) {
-          const existing = items.find(i => i.pub == post.pub);
+          const existing = items.find((i) => i.pub == post.pub);
           if (existing) {
-            if (!existing.displayName.some(dn => dn == post.displayName)) {
+            if (!existing.displayName.some((dn) => dn == post.displayName)) {
               existing.displayName.push(post.displayName);
             }
           } else {
@@ -149,8 +148,8 @@ export default {
         return items;
       }
       const regex = new RegExp(`^${query}`, "i");
-      const filtered = items.filter(i =>
-        i.displayName.some(dn => regex.test(dn))
+      const filtered = items.filter((i) =>
+        i.displayName.some((dn) => regex.test(dn))
       );
 
       console.proxyLog(`mentions after filter: ${JSON.stringify(filtered)}`);
@@ -166,11 +165,27 @@ export default {
     async generateSubmission() {
       const content = this.$refs.editor.getMarkdown();
       const tags = this.$refs.editor.getTags();
-      const mentions = this.$refs.editor.getMentions().map(m => m.pub);
+      const mentions = this.$refs.editor.getMentions().map((m) => m.pub);
 
       if (this.parentPost) {
         // include the person we're replying to as a silent mention
         mentions.push(this.parentPost.pub);
+
+        // keep original mentions
+        if (this.edit) {
+          mentions.push(...this.parentPost.mentions);
+        }
+
+        // always tag OP in blogs
+        if (this.parentPost.sub == "blog") {
+          const threadTree = this.parentPost.threadTree;
+          if (threadTree) {
+            const op = threadTree[this.parentPost.threadUuid];
+            if (op) {
+              mentions.push(op.post.pub);
+            }
+          }
+        }
       }
 
       const uuid = generateUuid();
@@ -182,9 +197,7 @@ export default {
         threadUuid: this.parentPost ? this.parentPost.threadUuid : uuid,
         parentUuid: this.parentPost ? this.parentPost.uuid : "",
         tags: tags,
-        mentions: this.edit
-          ? Array.from(new Set([...this.parentPost.mentions, ...mentions])) // keep the mentions from the original post being edited
-          : mentions,
+        mentions: mentions,
         uidw: this.keys.wallet.pub,
         sub: this.sub
           ? this.sub
@@ -193,7 +206,7 @@ export default {
           : tags.length > 0
           ? tags[0]
           : "all",
-        edit: this.edit
+        edit: this.edit,
       };
 
       let artificalSubmission = new Post();
@@ -236,8 +249,8 @@ export default {
             // attempt to find [uidw] from the thread tree
             if (this.parentPost && this.parentPost.threadTree) {
               const attempt = Object.values(this.parentPost.threadTree)
-                .map(c => c.post)
-                .find(p => p.pub == pub);
+                .map((c) => c.post)
+                .find((p) => p.pub == pub);
 
               if (attempt) {
                 uidw = attempt.uidw;
@@ -250,7 +263,7 @@ export default {
 
             // attempt to find [uidw] from a persons following
             if (!uidw) {
-              const attempt = this.followingUsers.find(u => u.pub == pub);
+              const attempt = this.followingUsers.find((u) => u.pub == pub);
               if (attempt) {
                 uidw = attempt.uidw;
                 recipientName = attempt.displayName;
@@ -283,7 +296,7 @@ export default {
                 uidw,
                 recipientName,
                 symbol,
-                quantity
+                quantity,
               })}`
             );
           }
@@ -303,16 +316,16 @@ export default {
             // non-standard transfer action data (used in transfer dialog)
             recipient: {
               pub: pub || this.parentPost.pub, // their posting (arbitrary) key
-              displayName: recipientName
+              displayName: recipientName,
             },
             symbol: symbol,
-            total: await sumAsset(amountAsset, feeAsset)
+            total: await sumAsset(amountAsset, feeAsset),
           });
         }
 
         this.$store.commit("setTransferDialogOpen", {
           value: true,
-          transfers: transferActions.map(ta => ({ ...ta })) // so that [transferActions] isnt observed
+          transfers: transferActions.map((ta) => ({ ...ta })), // so that [transferActions] isnt observed
         });
 
         await waitFor(async () => !this.isTransferDialogOpen);
@@ -327,9 +340,9 @@ export default {
         const keys = await brainKeyToKeys(
           decrypt(this.encryptedBrainKey, tempPassword)
         );
-        transferActions = transferActions.map(ta => ({
+        transferActions = transferActions.map((ta) => ({
           ...ta,
-          senderPrivateKey: keys.wallet.key
+          senderPrivateKey: keys.wallet.key,
         }));
       }
 
@@ -355,6 +368,9 @@ export default {
         //trxid =
         //  "30072ef2bf4c3b22bd417709fa4f14aabf2dfbabdd9a03a2a3a34e73bb038c31";
 
+        //console.log(post);
+        //if (!trxid) throw new Error(`stop`);
+
         trxid = await submitPost(
           this.keys.arbitrary.key,
           post,
@@ -368,7 +384,7 @@ export default {
       }
 
       // only trxid needs to be checked, the rest is to prevent the linter from complaining about stuff we might need to toggle back on
-      if (trxid && getSinglePost && submitPost && sleep) {
+      if (trxid) {
         artificalSubmission.transaction = trxid;
 
         this.disablePost = false;
@@ -381,14 +397,14 @@ export default {
           console.log(`post trxid: ${trxid}`);
           this.$emit("submit-post", {
             post: artificalSubmission,
-            transferActions: transferActions.map(ta => ({
+            transferActions: transferActions.map((ta) => ({
               ...ta,
-              senderPrivateKey: ""
-            }))
+              senderPrivateKey: "",
+            })),
           });
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>

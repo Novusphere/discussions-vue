@@ -17,6 +17,8 @@
         outlined
         @keydown.enter="goSearch()"
         @click:append="goSearch()"
+        :readonly="searchReadonly"
+        @focus="searchReadonly = false"
       ></v-text-field>
     </v-list-item>
     <v-list-item>
@@ -126,27 +128,28 @@ export default {
   name: "AppNav",
   components: {
     TagLink,
-    UserProfileLink
+    UserProfileLink,
   },
   data() {
     return {
       search: this.$route.query.q || "",
-      subscribeTag: ""
+      subscribeTag: "",
+      searchReadonly: true,
     };
   },
   watch: {
-    "$route.query.q": function() {
+    "$route.query.q": function () {
       this.search = this.$route.query.q || "";
-    }
+    },
   },
   computed: {
     ...mapGetters(["isLoggedIn", "isTester"]),
     ...mapState({
-      darkMode: state => state.darkMode,
-      subscribedTags: state => state.subscribedTags,
-      keys: state => state.keys,
-      displayName: state => state.displayName
-    })
+      darkMode: (state) => state.darkMode,
+      subscribedTags: (state) => state.subscribedTags,
+      keys: (state) => state.keys,
+      displayName: (state) => state.displayName,
+    }),
   },
   created() {},
   methods: {
@@ -180,8 +183,8 @@ export default {
       if (this.subscribeTag.length < 3) return;
       this.$store.commit("subscribeTag", this.subscribeTag);
       this.subscribeTag = "";
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -1,21 +1,5 @@
 <template>
   <div>
-    <v-menu
-      max-width="400"
-      v-model="showPopover"
-      :position-x="popoverX"
-      :position-y="popoverY"
-      :close-on-content-click="false"
-    >
-      <UserProfileCard
-        v-if="showPopover"
-        :displayName="displayName"
-        :publicKey="publicKey"
-        :uidw="uidw"
-        :extended-info="profileInfo"
-        small
-      />
-    </v-menu>
     <v-btn text v-if="btn" :to="link">
       <PublicKeyIcon v-show="!noIcon" :publicKey="publicKey" />
       <span>{{ displayName }}</span>
@@ -38,14 +22,14 @@
 
 <script>
 import PublicKeyIcon from "@/components/PublicKeyIcon";
-import UserProfileCard from "@/components/UserProfileCard";
+//import UserProfileCard from "@/components/UserProfileCard";
 import { getUserProfile } from "@/novusphere-js/discussions/api";
 
 export default {
   name: "UserProfileLink",
   components: {
     PublicKeyIcon,
-    UserProfileCard
+    //UserProfileCard
   },
   props: {
     noIcon: Boolean,
@@ -53,20 +37,14 @@ export default {
     publicKey: String,
     big: Boolean,
     btn: Boolean,
-    popover: { type: Boolean, default: false }
+    popover: { type: Boolean, default: false },
   },
   computed: {
     link() {
       return `/u/${this.displayName}-${this.publicKey}`;
-    }
+    },
   },
-  data: () => ({
-    showPopover: false,
-    popoverX: 0,
-    popoverY: 0,
-    uidw: "",
-    profileInfo: null
-  }),
+  data: () => ({}),
   methods: {
     async clicked(e) {
       e.stopPropagation();
@@ -77,15 +55,18 @@ export default {
       }
 
       const info = await getUserProfile(this.publicKey);
-
-      this.uidw = info.uidw;
-      this.profileInfo = info;
-
       const rect = this.$el.getBoundingClientRect();
-      this.popoverX = rect.x + rect.width + 10;
-      this.popoverY = rect.y - 10;
-      this.showPopover = true;
-    }
-  }
+
+      this.$store.commit("setPopoverOpen", {
+        value: true,
+        type: "profile",
+        rect,
+        uidw: info.uidw,
+        displayName: this.displayName,
+        publicKey: this.publicKey,
+        profileInfo: info,
+      });
+    },
+  },
 };
 </script>

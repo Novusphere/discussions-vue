@@ -1,9 +1,115 @@
-import { Controller, Post } from '@decorators/express';
+import { Controller, Post, Get } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
+import { getConfig } from "@/novusphere-js/utility";
+import passport from 'passport';
+import { Strategy } from 'passport-twitter';
+import siteConfig from "../site";
 
 export default @Controller('/account') class AccountController {
     constructor() {
+        this.setupPassport();
+    }
+
+    async setupPassport() {
+        const twitter = await getConfig('twitter', {});
+        if (twitter.options) {
+            const {
+                consumer_key,
+                consumer_secret
+            } = twitter.options;
+
+            if (consumer_key) {
+                const callback = `${siteConfig.url}/v1/api/account/passport/twitter/callback`;
+                const options = {
+                    consumerKey: consumer_key,
+                    consumerSecret: consumer_secret,
+                    callbackURL: callback,
+                    passReqToCallback: true,
+                    state: true
+                };
+                passport.use(new Strategy(options, this.twitter));
+                console.log(`Added twitter passport  ${callback}`);
+            }
+        }
+    }
+
+    async twitter(req, token, tokenSecret, profile, done) {
+        const { pub, domain } = JSON.parse(req.session.state);
+
+        const user = {
+            token: token,
+            secret: tokenSecret,
+            username: profile.username
+        };
+
+        console.log({ pub, domain });
+        console.log(user);
+
+        const db = await getDatabase();
+        await db.collection(config.table.accounts).updateOne(
+            {
+                pub: pub,
+                domain: domain
+            },
+            {
+                $set: {
+                    "auth.twitter": user
+                }
+            });
+
+        done(null, {});
+    }
+
+    @Get('/passport/:what/redirect')
+    async redirect(req, res) {
+        const { redirect } = JSON.parse(req.session.state);
+        req.logout();
+        return res.redirect(redirect);
+    }
+
+    @Api()
+    @Post('/passport/:what/remove')
+    async passportRemove(req, res) {
+        const { pub, domain, data } = req.unpackAuthenticated();
+        const { what } = req.params;
+        
+        const field = {};
+        field[`auth.${what}`] = "";
+
+        const db = await getDatabase();
+        await db.collection(config.table.accounts).updateOne(
+            {
+                pub: pub,
+                domain: domain
+            },
+            {
+                $unset: field
+            });
+
+        return res.success();
+    }
+
+    @Get('/passport/:what/callback')
+    async passportCallback(req, res, next) {
+        const authenticate = passport.authenticate(req.params.what, {
+            failureRedirect: `/v1/api/account/passport/${req.params.what}/redirect`,
+            successRedirect: `/v1/api/account/passport/${req.params.what}/redirect`,
+            session: false
+        });
+
+        authenticate(req, res, next);
+    }
+
+    @Api()
+    @Get('/passport/:what')
+    async passport(req, res, next) {
+        const { data: { redirect }, pub, domain } = req.unpackAuthenticated();
+        const state = { redirect, pub, domain };
+        req.session.state = JSON.stringify(state);
+
+        const authenticate = passport.authenticate(req.params.what);
+        authenticate(req, res, next);
     }
 
     //

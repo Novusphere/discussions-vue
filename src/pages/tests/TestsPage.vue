@@ -64,11 +64,13 @@
 
 <script>
 import { getBuildVersion } from "@/utility";
+import { connectOAuth } from "@/novusphere-js/discussions/api";
 import { testPosts } from "./posts/posts";
 
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
 
-import eth from "@/novusphere-js/uid/eth";
+//import eth from "@/novusphere-js/uid/eth";
+import { mapState } from 'vuex';
 
 export default {
   name: "TestsPage",
@@ -92,7 +94,10 @@ export default {
       set(value) {
         console.enableProxyLog(value);
       }
-    }
+    },
+    ...mapState({
+      keys: (state) => state.keys
+    })
   },
   data: () => ({
     posts: [...testPosts],
@@ -111,8 +116,7 @@ export default {
   },
   methods: {
     async trxTest() {
-      const wallet = new eth.MetamaskWallet();
-      await wallet.login();
+      await connectOAuth(this.keys.identity.key, 'twitter');
 
       /*const actions = [
         {

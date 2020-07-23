@@ -1,4 +1,5 @@
 import express from 'express';
+import expressSession from 'express-session';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import axios from 'axios';
@@ -36,6 +37,11 @@ import UploadController from "./controllers/UploadController";
 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
+    app.use(expressSession({
+        secret: 'this is open source so its not much of a secret huh',
+        resave: false,
+        saveUninitialized: true,
+    }));
 
     async function serve(req, res) {
         const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
@@ -96,7 +102,7 @@ import UploadController from "./controllers/UploadController";
 
     app.get('*', (req, res) => {
         res.status(404);
-        res.redirect('/404');
+        res.redirect(`/404?path=${req.path}`);
     });
 
     app.listen(siteConfig.port, () => console.log(`Server is listening at port ${siteConfig.port}`));

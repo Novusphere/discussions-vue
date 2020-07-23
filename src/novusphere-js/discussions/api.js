@@ -49,7 +49,7 @@ async function getAPIHost() {
     });
 }
 
-async function apiRequest(endpoint, body = undefined, { key, domain } = {}) {
+async function apiRequest(endpoint, body = undefined, { key, domain, redirect } = {}) {
     const host = await getAPIHost();
     const url = `${host}${endpoint}`;
 
@@ -69,6 +69,11 @@ async function apiRequest(endpoint, body = undefined, { key, domain } = {}) {
             body = { sig, data: signData };
         }
 
+        if (redirect) {
+            window.location.href = url + `?sig=${body.sig}&data=${encodeURIComponent(body.data)}`;
+            return;
+        }
+
         const { data } = await axios.post(url, body);
         result = data;
     }
@@ -83,6 +88,28 @@ async function apiRequest(endpoint, body = undefined, { key, domain } = {}) {
     }
 
     return result.payload;
+}
+
+//
+//
+//
+async function connectOAuth(identityKey, name, redirect, domain) {
+    redirect = redirect || window.location.href;
+    return await apiRequest(`/v1/api/account/passport/${name}`, { redirect }, {
+        key: identityKey,
+        redirect: true,
+        domain
+    });
+}
+
+//
+//
+//
+async function removeOAuth(identityKey, name, domain) {
+    return await apiRequest(`/v1/api/account/passport/${name}/remove`, {}, {
+        key: identityKey,
+        domain
+    });
 }
 
 //
@@ -131,6 +158,13 @@ async function getTrendingTags() {
 //
 async function getUserProfile(key, domain) {
     return await apiRequest(`/v1/api/data/profile?publicKey=${key}&domain=${domain || windowHost()}`);
+}
+
+//
+// Retrieves connected social medias / auth for a user
+//
+async function getUserAuth(key, domain) {
+    return await apiRequest(`/v1/api/data/auth?publicKey=${key}&domain=${domain || windowHost()}`);
 }
 
 //
@@ -709,6 +743,7 @@ export {
     createThreadTree,
     mergeThreadToTree,
     getUserProfile,
+    getUserAuth,
     getTrendingTags,
     getCommunities,
     getCommunityByTag,
@@ -718,5 +753,7 @@ export {
     getSpamPosts,
     getNsfwPosts,
     getUserAccountObject,
-    saveUserAccountObject
+    saveUserAccountObject,
+    connectOAuth,
+    removeOAuth
 }

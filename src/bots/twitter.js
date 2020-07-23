@@ -7,7 +7,8 @@ const Twitter = require('twitter');
 (async function () {
     try {
         const PRIMARY_TAG = "twitter";
-        const DELAY_DURATION = 5 * 60 * 1000; // 5 minutes -- how often we post a tweet
+        const TWEET_DURATION = 1 * 60 * 60 * 1000; // 1 hour -- only tweet from an account every hour
+        const DELAY_DURATION = 5 * 60 * 1000; // 5 minutes -- how long do we wait after tweeting
         const SLEEP_DURATION = 10 * 1000; // 10 seconds -- how often we do our process loop
 
         const config = await getConfig('twitter', {
@@ -28,7 +29,12 @@ const Twitter = require('twitter');
             for (const w of config.watch) {
                 console.log(`Checking ${w.screen_name} for new tweets... ${new Date()}`);
 
-                const { since_id } = twitterState[w.screen_name] || {};
+                const { since_id, since_time } = twitterState[w.screen_name] || {};
+
+                if (since_time && (Date.now() - since_time) < TWEET_DURATION) {
+                    const remMin = (Date.now() - since_time) / 60 * 1000;
+                    console.log(`Skipped ${w.screen_name}... ${remMin} until it can post again`);
+                }
 
                 const tweets = await client.get('statuses/user_timeline', {
                     screen_name: `@${w.screen_name}`,
@@ -81,7 +87,8 @@ const Twitter = require('twitter');
                             ...twitterState[w.screen_name],
                             since_id: id_str,
                             since_url: url,
-                            since_trxid: trxid
+                            since_trxid: trxid,
+                            since_time: Date.now()
                         }
 
                         await saveConfig('twitter-state', twitterState);
