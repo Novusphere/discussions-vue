@@ -133,7 +133,7 @@
         <v-row>
           <v-col cols="2"></v-col>
           <v-col cols="2">
-            <v-card class="nav--sticky">
+            <v-card>
               <AppNav />
             </v-card>
           </v-col>
@@ -146,7 +146,7 @@
       <v-container fluid v-else>
         <v-row>
           <v-col cols="2">
-            <v-card class="nav--sticky">
+            <v-card>
               <AppNav />
             </v-card>
           </v-col>
