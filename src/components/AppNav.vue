@@ -18,7 +18,7 @@
         @keydown.enter="goSearch()"
         @click:append="goSearch()"
         :readonly="searchReadonly"
-        @focus="searchReadonly = false"
+        @focus="searchFocus()"
       ></v-text-field>
     </v-list-item>
     <v-list-item>
@@ -153,6 +153,16 @@ export default {
   },
   created() {},
   methods: {
+    searchFocus() {
+      this.searchReadonly = false;
+      const [textInput] = this.$el.getElementsByTagName("input");
+      if (textInput.hasAttribute("readonly")) {
+        textInput.removeAttribute("readonly");
+        // safari mobile fix
+        textInput.blur();
+        textInput.focus();
+      }
+    },
     async createPost() {
       if (!this.isLoggedIn) {
         this.$store.commit("setLoginDialogOpen", true);
