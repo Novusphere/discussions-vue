@@ -55,7 +55,7 @@
         </div>
       </div>
       <div v-if="cursor">
-        <PostBrowser ref="browser" :cursor="cursor">
+        <PostBrowser ref="browser" :cursor="cursor" no-sort>
           <template v-slot:body></template>
         </PostBrowser>
       </div>
@@ -181,6 +181,7 @@ export default {
 
         if (p) {
           await this.load(); // reset the cursor so the post shows up in the feed
+          this.$router.push(`/u/${this.$route.params.who}/blog`);
         } else {
           console.log(`Thread couldnt be found... ${transaction}`);
         }
@@ -226,6 +227,7 @@ export default {
         // enable this since we might not be dealing with only top level posts, we need the op to determine the link to the post
         cursor.includeOpeningPost = true;
         cursor.votePublicKey = this.keys.arbitrary.pub;
+        cursor.sort = "recent";
 
         this.cursor = cursor;
         if (this.$refs.browser) {

@@ -79,6 +79,17 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach(async (to) => {
+
+    window.$vue.$store.commit("setPopoverOpen", {
+        value: false,
+        type: "profile",
+    });
+
+    window.$vue.$store.commit("setPopoverOpen", {
+        value: false,
+        type: "tag",
+    });
+
     let head = {
         title: site.title,
         description: site.description,

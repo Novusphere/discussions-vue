@@ -75,23 +75,23 @@ export default {
     AppNav,
     AboutUsCard,
     UserProfileLink,
-    NotificationsButton
+    NotificationsButton,
   },
   watch: {
     $route() {
       this.menu = false;
-    }
+    },
   },
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      darkMode: state => state.darkMode,
-      displayName: state => state.displayName,
-      keys: state => state.keys
-    })
+      darkMode: (state) => state.darkMode,
+      displayName: (state) => state.displayName,
+      keys: (state) => state.keys,
+    }),
   },
   data: () => ({
-    menu: false
+    menu: false,
   }),
   methods: {
     async createPost() {
@@ -105,15 +105,16 @@ export default {
           // only take a single tag
           const tag = this.$route.params.tags.split(",")[0];
           await this.$router.push(`/tag/${tag}/submit`);
-        } else if (this.$route.params.who) {
-          await this.$router.push(`/u/${this.$route.params.who}/submit`);
+        } else if (this.$route.params.who && this.isLoggedIn) {
+          const who = `${this.displayName}-${this.keys.arbitrary.pub}`;
+          await this.$router.push(`/u/${who}/submit`);
         } else {
           await this.$router.push(`/submit`);
         }
       } catch (ex) {
         return; // Avoided redundant navigation
       }
-    }
-  }
+    },
+  },
 };
 </script>
