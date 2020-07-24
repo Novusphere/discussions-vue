@@ -134,7 +134,7 @@ export default {
       }
 
       link = config.url + link;
-      
+
       const tags = this.post.tags.filter((t) => !["all"].some((t2) => t2 == t));
 
       let url = undefined;
@@ -143,7 +143,7 @@ export default {
         const { auth: authorAuth } = await getUserAuth(this.post.pub);
         const authorTwitter = authorAuth.find((a) => a.name == "twitter");
 
-        const by = authorTwitter ? authorTwitter.username : '';
+        const by = authorTwitter ? authorTwitter.username : "";
         const mentions = [];
 
         for (const mentionedPub of this.post.mentions) {
@@ -155,10 +155,13 @@ export default {
           }
         }
 
-        let tweet = ``;
-        if (this.post.title) tweet += this.post.title + " ";
-        tweet += `${link} via @thenovusphere `;
+        let tweet = `A `;
+        if (this.post.uuid == this.post.threadUuid && this.post.sub == "blog")
+          tweet += `blog `;
+        else tweet += `post `;
+
         if (by) tweet += `by @${by} `;
+        tweet += `via @thenovusphere ${link} `;
         if (tags.length > 0) tweet += `${tags.map((t) => `#${t}`).join(" ")} `;
         if (mentions.length > 0)
           tweet += `${mentions.map((m) => `@${m}`).join(" ")} `;

@@ -206,6 +206,8 @@ export default {
 
       const shortPublicKey = getShortPublicKey(info.pub);
       if (info.displayName && publicKey != shortPublicKey) {
+        //console.log(info);
+
         const tab = this.$route.params.tab || "";
         const path = `/u/${info.displayName}-${shortPublicKey}/${tab}`;
         window.history.replaceState({}, null, path);
