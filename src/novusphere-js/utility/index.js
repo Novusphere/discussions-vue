@@ -111,6 +111,8 @@ let _oembedNextAttempt = 0;
 
             relativeAnchors.forEach(async ({ a, href }) => {
 
+                if (a.getAttribute('target')) return;
+
                 // turn into relative
                 if (href.indexOf('/') != 0) {
                     href = href.substring(href.indexOf('/', href.indexOf('//') + 2));
