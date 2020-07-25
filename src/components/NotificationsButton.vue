@@ -25,24 +25,25 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { searchPostsByNotifications } from "@/novusphere-js/discussions/api";
+import { searchTransactions } from "@/novusphere-js/uid";
 
 export default {
   name: "NotificationsButton",
   components: {},
   props: {
-    chip: Boolean
+    chip: Boolean,
   },
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      notificationCount: state => state.notificationCount,
-      lastSeenNotificationsTime: state => state.lastSeenNotificationsTime,
-      keys: state => state.keys,
-      watchedThreads: state => state.watchedThreads
-    })
+      notificationCount: (state) => state.notificationCount,
+      lastSeenNotificationsTime: (state) => state.lastSeenNotificationsTime,
+      keys: (state) => state.keys,
+      watchedThreads: (state) => state.watchedThreads,
+    }),
   },
   data: () => ({
-    stopChecking: false
+    stopChecking: false,
   }),
   async created() {
     await this.checkNotifications();
@@ -65,13 +66,19 @@ export default {
         );
         cursor.includeOpeningPost = false; // dont need this
         cursor.pipeline.push({ $count: "n" });
+
+        const cursor2 = searchTransactions(this.keys.wallet.pub, "received");
+        cursor2.pipeline[0].$match["time"] = { $gt: this.lastSeenNotificationsTime };
+        cursor2.pipeline.push({ $count: "n" });
+
         let n = 0;
         try {
           const raw = await cursor.nextRaw();
-          //console.log(this.lastSeenNotificationsTime);
-          //console.log(raw);
-          n = raw.length > 0 ? raw[0].n : 0;
-          
+          n += raw.length > 0 ? raw[0].n : 0;
+
+          const raw2 = await cursor2.nextRaw();
+          n += raw2.length > 0 ? raw2[0].n : 0;
+
           if (n > 0 && n != this.notificationCount) {
             if (Notification && Notification.permission == "granted") {
               new Notification(
@@ -85,10 +92,11 @@ export default {
           this.$store.commit("setNotificationCount", n);
         } catch (ex) {
           n = 0;
+          console.log(ex);
         }
       }
       setTimeout(() => this.checkNotifications(), 5000);
-    }
-  }
+    },
+  },
 };
 </script>

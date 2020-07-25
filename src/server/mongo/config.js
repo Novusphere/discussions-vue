@@ -29,6 +29,11 @@ let config = {
         "nsuidcntract": {
             "transaction": 1,
             "name": 1,
+            "time": 1,
+            "data.relayer": 1,
+            "data.from": 1,
+            "data.to": 1,
+            "data.memo": 1, // unfortunately, we need an index on memos for depositing...
         },
         "accounts": {
             "pub": 1,

@@ -324,6 +324,7 @@ export {
     Lock,
     getConfig,
     saveConfig,
+    sanitize,
     htmlToMarkdown,
     htmlToText,
     markdownToHTML,

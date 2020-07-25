@@ -152,7 +152,7 @@ export class Post {
         const title = this.title
             .replace(/[^0-9a-z]/gi, ' ')
             .split(' ')
-            .filter(s => s)
+            .filter(s => s && s.length >= 2)
             .map(s => s.toLowerCase())
             .join('-');
         return title || '_';
@@ -181,6 +181,16 @@ export class Post {
         }
 
         return undefined;
+    }
+
+    getRelativeUrl(includeTitle = true) {
+        let link = `/tag/${this.sub}`;
+        if (this.op && this.transaction != this.op.transaction) {
+            link += `/${this.op.getEncodedId()}/${includeTitle ? this.op.getSnakeCaseTitle() : '_'}/${this.getEncodedId()}`;
+        } else {
+            link += `/${this.getEncodedId()}/${includeTitle ? this.getSnakeCaseTitle() : '_'}`;
+        }
+        return link;
     }
 
     async getContentText({ removeImages }) {

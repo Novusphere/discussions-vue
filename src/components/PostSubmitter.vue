@@ -305,6 +305,11 @@ export default {
             await createAsset(quantity, symbol)
           );
 
+          let memo = `tip from ${this.displayName} to ${recipientName}`;
+          if (this.parentPost) {
+            memo += ` for ${this.parentPost.getRelativeUrl(false)}`;
+          }
+
           transferActions.push({
             chain: await getChainForSymbol(symbol),
             senderPrivateKey: "",
@@ -312,7 +317,7 @@ export default {
             amount: amountAsset,
             fee: feeAsset,
             nonce: Date.now(),
-            memo: `tip`,
+            memo: memo,
             // non-standard transfer action data (used in transfer dialog)
             recipient: {
               pub: pub || this.parentPost.pub, // their posting (arbitrary) key

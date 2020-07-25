@@ -7,6 +7,7 @@ import { spawn, Worker } from "threads";
 import { apiRequest } from "@/novusphere-js/discussions/api";
 import { getFromCache } from "@/novusphere-js/utility";
 
+import { TransactionSearchQuery } from "./TransactionSearchQuery";
 import BufferWriter from './bufferwriter';
 import eos from "./eos";
 import bch from "./bch";
@@ -35,6 +36,58 @@ function decrypt(data, password) {
     const decryptedBytes = aesCtr.decrypt(encryptedBytes);
     const decryptedText = aesjs.utils.utf8.fromBytes(decryptedBytes);
     return decryptedText;
+}
+
+function searchTransactions(pub, type) {
+    type = (type || 'all').toLowerCase();
+    let pipeline = [];
+
+    if (type == 'sent') {
+        pipeline.push({
+            $match: {
+                name: "transfer",
+                "data.from": pub
+            }
+        });
+    }
+    else if (type == 'received') {
+        pipeline.push({
+            $match: {
+                name: "transfer",
+                $or: [
+                    { "data.to": pub },
+                    { "data.memo": pub } // for deposits
+                ]
+            }
+        });
+    }
+    else //if (type == 'all') {
+        pipeline.push({
+            $match: {
+                name: "transfer",
+                $or: [
+                    { "data.to": pub },
+                    { "data.from": pub },
+                    { "data.memo": pub } // for deposits
+                ]
+            }
+        });
+
+    pipeline.push({
+        $project: {
+            "id": "$id",
+            "time": "$time",
+            "transaction": "$transaction",
+            "data": "$data",
+        }
+    });
+    pipeline.push({
+        $sort: {
+            "time": -1, // descending
+        }
+    });
+
+    return new TransactionSearchQuery({ pipeline });
 }
 
 function generateBrainKey() {
@@ -96,7 +149,17 @@ function getTokenAddress(token, publicKey) {
 async function getToken(symbol) {
     const eosTokensInfo = await getTokensInfo();
     const token = eosTokensInfo.find(t => t.symbol == symbol);
-    if (!token) throw new Error(`Symbol "${symbol}" was not found in Unified ID token symbols`);
+    if (!token) throw new Error(`Symbol "${symbol}" was not found in Unified ID tokens`);
+    return token;
+}
+
+//
+// Get token info for a given chain_id, throws an exception if not found
+//
+async function getTokenForChain(chain) {
+    const eosTokensInfo = await getTokensInfo();
+    const token = eosTokensInfo.find(t => t.p2k.chain == chain);
+    if (!token) throw new Error(`Chain "${chain}" was not found in Unified ID tokens`);
     return token;
 }
 
@@ -300,8 +363,8 @@ async function createTransferActions(actions) {
 async function transfer(actions, notify) {
 
     const transfers = await createTransferActions(actions);
-    const trx = await apiRequest(`/v1/api/blockchain/transfer`, { 
-        transfers, 
+    const trx = await apiRequest(`/v1/api/blockchain/transfer`, {
+        transfers,
         notify
     });
 
@@ -387,6 +450,7 @@ export {
     bch,
     encrypt,
     decrypt,
+    searchTransactions,
     generateBrainKey,
     isValidBrainKey,
     brainKeyToKeys,
@@ -399,6 +463,7 @@ export {
     getAmountFeeAssetsForTotal,
     getTokensInfo,
     getToken,
+    getTokenForChain,
     getTransactionLink,
     createAsset,
     sumAsset,

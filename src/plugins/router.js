@@ -15,7 +15,10 @@ import BrowseFeedPage from "@/pages/BrowseFeedPage";
 import BrowseThreadPage from "@/pages/BrowseThreadPage";
 import BrowseTrendingPostsPage from "@/pages/BrowseTrendingPostsPage";
 import BrowseTagPostsPage from "@/pages/BrowseTagPostsPage";
-import BrowseNotifications from "@/pages/BrowseNotifications";
+
+import NotificationsPage from "@/pages/notifications/NotificationsPage";
+import BrowsePostNotificationsPage from "@/pages/notifications/BrowsePostNotificationsPage";
+import BrowseTrxNotificationsPage from "@/pages/notifications/BrowseTrxNotificationsPage";
 
 import SettingsPage from "@/pages/settings/SettingsPage";
 import ContentSettingsPage from "@/pages/settings/ContentSettingsPage";
@@ -47,7 +50,9 @@ let components = {
     BrowseThreadPage,
     BrowseTrendingPostsPage,
     BrowseTagPostsPage,
-    BrowseNotifications,
+    NotificationsPage,
+    BrowsePostNotificationsPage,
+    BrowseTrxNotificationsPage,
     SettingsPage,
     ContentSettingsPage,
     BrowseWatchedThreadsPage,

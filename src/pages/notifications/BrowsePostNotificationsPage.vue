@@ -1,33 +1,26 @@
 <template>
-  <BrowsePageLayout>
-    <template v-slot:content>
-      <PostBrowser no-sort :cursor="cursor" />
-    </template>
-  </BrowsePageLayout>
+  <PostBrowser no-sort :cursor="cursor" />
 </template>
 
 <script>
 import { mapState } from "vuex";
-import { requireLoggedIn } from "@/utility";
-import BrowsePageLayout from "@/components/BrowsePageLayout";
 import PostBrowser from "@/components/PostBrowser";
 import { searchPostsByNotifications } from "@/novusphere-js/discussions/api";
 
-export default requireLoggedIn({
-  name: "BrowseFeedPage",
+export default {
+  name: "BrowsePostNotificationsPage",
   components: {
-    BrowsePageLayout,
-    PostBrowser
+    PostBrowser,
   },
   props: {},
   data: () => ({
-    cursor: null
+    cursor: null,
   }),
   computed: {
     ...mapState({
-      keys: state => state.keys,
-      watchedThreads: state => state.watchedThreads
-    })
+      keys: (state) => state.keys,
+      watchedThreads: (state) => state.watchedThreads,
+    }),
   },
   async created() {
     this.cursor = searchPostsByNotifications(
@@ -37,6 +30,6 @@ export default requireLoggedIn({
     );
     this.$store.commit("seenNotifications");
   },
-  methods: {}
-});
+  methods: {},
+};
 </script>

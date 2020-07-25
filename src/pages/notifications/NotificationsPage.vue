@@ -1,0 +1,28 @@
+<template>
+  <BrowsePageLayout no-right>
+    <template v-slot:header2>
+      <v-tabs center-active show-arrows class="mt-1">
+        <v-tab :to="`/notifications/posts`">Posts</v-tab>
+        <v-tab :to="`/notifications/trx`">Transactions</v-tab>
+      </v-tabs>
+    </template>
+    <template v-slot:content>
+      <router-view></router-view>
+    </template>
+  </BrowsePageLayout>
+</template>
+
+<script>
+import BrowsePageLayout from "@/components/BrowsePageLayout";
+import { requireLoggedIn } from "@/utility";
+
+export default requireLoggedIn({
+  name: "NotificationsPage",
+  components: {
+    BrowsePageLayout,
+  },
+  props: {},
+  computed: {},
+  data: () => ({}),
+});
+</script>

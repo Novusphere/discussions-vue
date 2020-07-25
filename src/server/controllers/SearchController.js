@@ -7,6 +7,34 @@ export default @Controller('/search') class SearchController {
     }
 
     @Api()
+    @All("/uid")
+    async searchUnifiedIdTrx(req, res) {
+        let { id, pipeline, count, limit } = req.unpack();
+
+        if (!pipeline || !Array.isArray(pipeline)) throw new Error(`Pipeline must be specified and of type Array`);
+
+        id = id || 0;
+        count = count || 0;
+        limit = Math.max(Math.min(Number(limit || 20), 100), 1);
+
+        let cursor = undefined;
+        ({ id, cursor } = await this.getCursorById(id, async () => {
+            const db = await getDatabase();
+            return await db.collection(config.table.uid).aggregate(pipeline);
+        }));
+
+        let items = [];
+        ({ id, cursor, count, limit, items } = await this.consumeCursor(id, cursor, count, limit));
+
+        return res.success({
+            trxs: items,
+            id,
+            count,
+            limit
+        });
+    }
+
+    @Api()
     @All("/posts")
     async searchPosts(req, res) {
         let { id, pipeline, count, limit, sort, votePublicKey, includeOpeningPost, moderatorKeys } = req.unpack();
@@ -35,20 +63,27 @@ export default @Controller('/search') class SearchController {
             this.addOpeningPostToPipeline(pipeline);
         }
 
-        if (!this.cursors) {
-            this.cursors = {};
-        }
-
-        let cursor = id ? this.getCursorById(id) : undefined;
-        if (!cursor) {
+        let cursor = undefined;
+        ({ id, cursor } = await this.getCursorById(id, async () => {
             const db = await getDatabase();
-            cursor = await db.collection(config.table.posts).aggregate(pipeline);
-            id = this.addCursor(cursor);
-        }
+            return await db.collection(config.table.posts).aggregate(pipeline);
+        }));
 
-        const posts = [];
-        while (posts.length < limit && await cursor.hasNext()) {
-            posts.push(await cursor.next());
+        let items = [];
+        ({ id, cursor, count, limit, items } = await this.consumeCursor(id, cursor, count, limit));
+
+        return res.success({
+            posts: items,
+            id,
+            count,
+            limit
+        });
+    }
+
+    async consumeCursor(id, cursor, count, limit) {
+        const items = [];
+        while (items.length < limit && await cursor.hasNext()) {
+            items.push(await cursor.next());
             count++;
         }
 
@@ -59,12 +94,7 @@ export default @Controller('/search') class SearchController {
 
         this.cleanCursors();
 
-        return res.success({
-            posts,
-            id,
-            count,
-            limit
-        });
+        return { id, cursor, count, limit, items };
     }
 
     cleanCursors() {
@@ -80,9 +110,24 @@ export default @Controller('/search') class SearchController {
         delete (this.cursors[id]);
     }
 
-    getCursorById(id) {
-        const obj = this.cursors[id];
-        return obj ? obj.cursor : undefined;
+    async getCursorById(id, create) {
+        if (!this.cursors) {
+            this.cursors = {};
+        }
+
+        let cursor = undefined;
+
+        if (id) {
+            const obj = this.cursors[id];
+            cursor = obj ? obj.cursor : undefined;
+        }
+
+        if (!cursor) {
+            cursor = await create();
+            id = this.addCursor(cursor);
+        }
+
+        return { id, cursor };
     }
 
     addCursor(cursor) {

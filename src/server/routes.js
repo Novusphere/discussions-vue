@@ -12,7 +12,6 @@ const routes = [
             { path: 'logout', component: `LogOutPage` },
             { path: 'feed', component: `BrowseFeedPage`, meta: { head: async () => ({ title: `Discussions - Feed` }) } },
             { path: 'search', component: `BrowseSearchPage` },
-            { path: 'notifications', component: `BrowseNotifications` },
             { path: 'tag/all', component: `BrowseTrendingPostsPage`, meta: { head: async () => ({ title: `Discussions - Trending`, description: `View trending posts on Discussions.app` }) } },
             { path: 'tag/:tags/submit', component: `SubmitPostPage` },
             {
@@ -74,6 +73,15 @@ const routes = [
                         });
                     }
                 }
+            },
+            {
+                path: 'notifications',
+                component: `NotificationsPage`,
+                redirect: `/notifications/posts`,
+                children: [
+                    { path: 'posts', component: `BrowsePostNotificationsPage`, meta: { head: async () => ({ title: `Discussions - Notifications - Posts` }) } },
+                    { path: 'trx', component: `BrowseTrxNotificationsPage`, meta: { head: async () => ({ title: `Discussions - Notifications - Transactions` }) } },
+                ]
             },
             {
                 path: 'wallet',
