@@ -25,6 +25,7 @@ export default {
         'pinterest',
         'quora link preview',
         'rogerbot',
+        'redditbot',
         'showyoubot',
         'Slackbot',
         'TelegramBot',
