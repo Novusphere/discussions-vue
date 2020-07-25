@@ -20,11 +20,12 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "PostDisplaySelect",
   components: {},
   props: {
-    value: String
+    value: String,
   },
   computed: {
     valueProxy: {
@@ -33,31 +34,37 @@ export default {
       },
       set(value) {
         this.$emit("input", value);
-      }
-    }
+      },
+    },
+    ...mapState({
+      postViewType: (state) => state.postViewType,
+    }),
   },
   data: () => ({
     views: [
       { name: "compact", text: "Compact View", icon: "view_headline" },
       { name: "preview", text: "Preview", icon: "view_day" },
-      { name: "full", text: "Full View", icon: "view_agenda" }
+      { name: "full", text: "Full View", icon: "view_agenda" },
     ],
-    view: null
+    view: null,
   }),
   watch: {
     valueProxy() {
-      this.view = this.views.find(v => v.name == this.valueProxy);
-    }
+      this.view = this.views.find((v) => v.name == this.valueProxy);
+      this.$store.commit("setPostViewType", this.valueProxy);
+      //console.log(`PostDisplaySelect`, this.valueProxy);
+    },
   },
   created() {
+    //console.log(`PostDisplaySelect`, `created`, this.postViewType);
     if (!this.valueProxy) {
-      this.valueProxy = "full";
+      this.valueProxy = this.postViewType || "full";
     }
   },
   methods: {
     change(value) {
       this.valueProxy = value.name;
-    }
-  }
+    },
+  },
 };
 </script>

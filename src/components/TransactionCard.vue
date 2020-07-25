@@ -6,8 +6,8 @@
           <TokenIcon v-if="token" :size="64" :symbol="token.symbol" />
         </v-col>
         <v-col :cols="2">
-          <strong class="d-block">Time</strong>
-          <span class="d-block">{{ shortTime() }}</span>
+          <span class="d-block">{{ time.toLocaleDateString() }}</span>
+          <span class="d-block">{{ time.toLocaleTimeString() }}</span>
           <span class="d-block">{{ isReceived ? 'Received' : 'Sent' }}</span>
         </v-col>
         <v-col :cols="7">
@@ -49,7 +49,6 @@
 
 <script>
 import { mapState } from "vuex";
-import { formatDistance } from "date-fns";
 import { sanitize } from "@/novusphere-js/utility";
 import { getToken, getTokenForChain, sumAsset } from "@/novusphere-js/uid";
 import TokenIcon from "@/components/TokenIcon";
@@ -81,8 +80,11 @@ export default {
     token: null,
     total: "",
     memoHtml: "",
+    time: new Date(0),
   }),
   async created() {
+    this.time = new Date(this.trx.time);
+
     if (this.trx.data.quantity) {
       const [, symbol] = this.trx.data.quantity.split(" ");
       this.token = await getToken(symbol);
@@ -108,29 +110,6 @@ export default {
       this.memoHtml = memoHtml;
     }
   },
-  methods: {
-    shortTime() {
-      const t = new Date(this.trx.time);
-      if (!this.$vuetify.breakpoint.mobile)
-        return formatDistance(t, new Date(), { addSuffix: true });
-      else {
-        const delta = Date.now() - t;
-        const second = 1000;
-        const minute = second * 60;
-        const hour = minute * 60;
-        const day = hour * 24;
-
-        let unit = (u, s) => {
-          const n = Math.max(1, Math.ceil(delta / u));
-          return `${n}${s}`;
-        };
-
-        if (delta < minute) return unit(second, `s`);
-        else if (delta < hour) return unit(minute, `m`);
-        else if (delta < day) return unit(hour, `h`);
-        else return unit(day, `d`);
-      }
-    },
-  },
+  methods: {},
 };
 </script>

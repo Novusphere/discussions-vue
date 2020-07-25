@@ -47,7 +47,7 @@ import {
   decrypt,
   brainKeyToKeys,
   getTransactionLink,
-  transfer
+  transfer,
 } from "@/novusphere-js/uid";
 
 import UserAssetSelect from "@/components/UserAssetSelect";
@@ -59,11 +59,11 @@ export default {
   components: {
     UserAssetSelect,
     ApproveTransfersCard,
-    TransactionSubmitText
+    TransactionSubmitText,
   },
   props: {
     closable: Boolean,
-    recipient: Object // { pub, uidw, displayName, uuid?, callback? }
+    recipient: Object, // { pub, uidw, displayName, uuid?, callback? }
   },
   data: () => ({
     disableSubmit: false,
@@ -72,15 +72,15 @@ export default {
     amount: 0,
     transfers: [],
     transactionLink: "",
-    transactionError: ""
+    transactionError: "",
   }),
   computed: {
     ...mapState({
-      keys: state => state.keys,
-      encryptedBrainKey: state => state.encryptedBrainKey,
-      encryptedTest: state => state.encryptedTest,
-      tempPassword: state => state.tempPassword
-    })
+      keys: (state) => state.keys,
+      encryptedBrainKey: (state) => state.encryptedBrainKey,
+      encryptedTest: (state) => state.encryptedTest,
+      tempPassword: (state) => state.tempPassword,
+    }),
   },
   methods: {
     async close() {
@@ -109,14 +109,14 @@ export default {
         amount: amountAsset,
         fee: feeAsset,
         nonce: Date.now(),
-        memo: `tip`,
+        memo: this.recipient.memo || `tip`,
         // non-standard transfer action data (used in transfer dialog)
         recipient: {
           pub: this.recipient.pub, // their posting (arbitrary) key
-          displayName: this.recipient.displayName
+          displayName: this.recipient.displayName,
         },
         symbol: this.symbol,
-        total: await sumAsset(amountAsset, feeAsset)
+        total: await sumAsset(amountAsset, feeAsset),
       });
 
       this.transfers = transferActions;
@@ -134,9 +134,9 @@ export default {
         decrypt(this.encryptedBrainKey, tempPassword)
       );
 
-      transferActions = transferActions.map(ta => ({
+      transferActions = transferActions.map((ta) => ({
         ...ta,
-        senderPrivateKey: keys.wallet.key
+        senderPrivateKey: keys.wallet.key,
       }));
 
       let notify = undefined;
@@ -163,10 +163,10 @@ export default {
           if (this.recipient.callback) {
             this.recipient.callback({
               transaction: receipt.transaction_id,
-              transferActions: transferActions.map(ta => ({
+              transferActions: transferActions.map((ta) => ({
                 ...ta,
-                senderPrivateKey: ""
-              }))
+                senderPrivateKey: "",
+              })),
             });
           }
         } else {
@@ -180,7 +180,7 @@ export default {
         this.disableSubmit = false;
         this.transactionError = ex.toString();
       }
-    }
-  }
+    },
+  },
 };
 </script>

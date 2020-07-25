@@ -3,7 +3,7 @@
     <template v-slot:header2>
       <v-tabs center-active show-arrows class="mt-1">
         <v-tab :to="`/notifications/posts`">Posts</v-tab>
-        <v-tab :to="`/notifications/trx`">Transactions</v-tab>
+        <v-tab :to="`/notifications/trx`">Tips</v-tab>
       </v-tabs>
     </template>
     <template v-slot:content>

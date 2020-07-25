@@ -2,7 +2,7 @@
   <div>
     <v-row class="mb-2" v-for="(trx, i) in trxs" :key="i.id">
       <v-col cols="12">
-          <TransactionCard :trx="trx" />
+        <TransactionCard :trx="trx" />
       </v-col>
     </v-row>
     <infinite-loading ref="infiniteLoading" @infinite="infinite">
@@ -21,7 +21,7 @@ import TransactionCard from "@/components/TransactionCard";
 export default {
   name: "TransactionScroller",
   components: {
-      TransactionCard
+    TransactionCard,
   },
   props: {
     trxs: Array,
@@ -31,6 +31,10 @@ export default {
   computed: {},
   data: () => ({}),
   created() {},
-  methods: {},
+  methods: {
+    reset() {
+      this.$refs.infiniteLoading.stateChanger.reset();
+    },
+  },
 };
 </script>

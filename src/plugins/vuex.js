@@ -20,6 +20,7 @@ const testerPublicKeys = [
 const getDefaultState = () => ({
     syncTime: 0,
     //
+    //
     popover: {
         tag: { value: false },
         profile: { value: false },
@@ -56,6 +57,11 @@ const getDefaultState = () => ({
     needSyncAccount: false,
     notificationCount: 0,
     // --- saved ---
+    postViewType: "",
+    drafts: {
+        thread: "",
+        blog: ""
+    },
     lastSeenNotificationsTime: 0,
     subscribedTags: [],
     followingUsers: [], // { displayName, pub, uidw, nameTime }
@@ -70,6 +76,8 @@ const getDefaultState = () => ({
 async function saveAccount(state, external = true) {
     await saver.lock(async () => {
         const local = {
+            drafts: state.drafts,
+            postViewType: state.postViewType,
             encryptedTest: state.encryptedTest,
             encryptedBrainKey: state.encryptedBrainKey,
             displayName: state.displayName,
@@ -190,6 +198,8 @@ export default new Vuex.Store({
                     state.displayName = local.displayName;
                     state.keys = local.keys;
                     state.darkMode = local.darkMode;
+                    state.drafts = local.drafts || {};
+                    state.postViewType = local.postViewType;
 
                     // if false, they have a session -- but are not logged in.
                     if (state.keys.arbitrary.key)
@@ -229,6 +239,14 @@ export default new Vuex.Store({
                 // ---
                 return;
             }
+        },
+        setPostViewType(state, type) {
+            state.postViewType = type;
+            saveAccount(state, false);
+        },
+        saveDraft(state, { draftType, draft }) {
+            state.drafts[draftType] = draft;
+            saveAccount(state, false);
         },
         setDarkMode(state, value) {
             state.darkMode = value;
@@ -285,7 +303,7 @@ export default new Vuex.Store({
                 const x = rect.x + rect.width + 10;
                 const y = rect.y - 10;
                 const popover = { open: true, x, y };
-                
+
                 Object.assign(popover, rest);
 
                 state.popover[type] = popover;

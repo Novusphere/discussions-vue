@@ -7,7 +7,13 @@
       <v-progress-linear v-if="waitSubmit" indeterminate></v-progress-linear>
       <v-card v-else>
         <v-card-text>
-          <PostSubmitter :sub="tag" ref="submitter" :title-field="true" @submit-post="submitPost" />
+          <PostSubmitter
+            :draft="'thread'"
+            :sub="tag"
+            ref="submitter"
+            :title-field="true"
+            @submit-post="submitPost"
+          />
         </v-card-text>
       </v-card>
     </template>
@@ -18,7 +24,7 @@
 import { mapGetters, mapState } from "vuex";
 import {
   getCommunityByTag,
-  getSinglePost
+  getSinglePost,
 } from "@/novusphere-js/discussions/api";
 import { waitFor, sleep } from "@/novusphere-js/utility";
 
@@ -33,7 +39,7 @@ export default {
     BrowsePageLayout,
     //UserProfileCard,
     CommunityCard,
-    PostSubmitter
+    PostSubmitter,
   },
   props: {},
   watch: {
@@ -42,21 +48,21 @@ export default {
     },
     isLoggedIn() {
       if (!this.isLoggedIn) this.$router.push(`/`);
-    }
+    },
   },
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      displayName: state => state.displayName,
-      keys: state => state.keys
-    })
+      displayName: (state) => state.displayName,
+      keys: (state) => state.keys,
+    }),
   },
   data: () => ({
     tag: "all",
     community: null,
     editorTags: [],
     stopSyncEditor: false,
-    waitSubmit: false
+    waitSubmit: false,
   }),
   async created() {
     if (!this.isLoggedIn) this.$router.push(`/`);
@@ -154,7 +160,7 @@ export default {
 
       this.tag = tag;
       this.community = community ? community : null;
-    }
-  }
+    },
+  },
 };
 </script>

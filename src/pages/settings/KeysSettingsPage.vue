@@ -39,7 +39,7 @@
           </v-col>
           <v-col :cols="12">
             <p class="text-center red--text">
-              This page allows you to see your private keys, which are used to make posts, manage your account and transfer token out of Discussions.
+              Enter your password to reveal your private keys, which are used to make posts, manage your account and transfer tokens.
               Please be cautious when accessing this page in areas where others can easily see your screen.
             </p>
           </v-col>

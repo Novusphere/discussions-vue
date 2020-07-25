@@ -85,15 +85,17 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach(async (to) => {
 
-    window.$vue.$store.commit("setPopoverOpen", {
-        value: false,
-        type: "profile",
-    });
-
-    window.$vue.$store.commit("setPopoverOpen", {
-        value: false,
-        type: "tag",
-    });
+    const $vue = window.$vue;
+    if ($vue && $vue.$store) {
+        $vue.$store.commit("setPopoverOpen", {
+            value: false,
+            type: "profile",
+        });
+        $vue.$store.commit("setPopoverOpen", {
+            value: false,
+            type: "tag",
+        });
+    }
 
     let head = {
         title: site.title,

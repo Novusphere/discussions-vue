@@ -68,6 +68,7 @@ export default {
     PostCard,
   },
   props: {
+    draft: String,
     sub: String,
     parentPost: Object,
     cancelable: Boolean,
@@ -77,6 +78,7 @@ export default {
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
+      drafts: (state) => state.drafts,
       displayName: (state) => state.displayName,
       keys: (state) => state.keys,
       isTransferDialogOpen: (state) => state.isTransferDialogOpen,
@@ -87,6 +89,7 @@ export default {
     }),
   },
   data: () => ({
+    saveDraftInterval: null,
     preview: null,
     tab: 0,
     disablePost: false,
@@ -102,9 +105,43 @@ export default {
     },
   },
   async created() {},
-  mounted() {},
-  beforeDestroy() {},
+  mounted() {
+    if (this.draft) {
+      const html = this.drafts[this.draft];
+      if (html) {
+        //console.log(`restore draft`, html);
+        const editor = this.getEditor();
+        editor.setFromHtml(html);
+      }
+      this.saveDraftInterval = setInterval(() => this.saveDraft(), 1000);
+    }
+  },
+  beforeDestroy() {
+    if (this.saveDraftInterval) {
+      clearInterval(this.saveDraftInterval);
+    }
+  },
   methods: {
+    saveDraft() {
+      const editor = this.getEditor();
+      if (!editor) return;
+      if (!this.draft) return;
+
+      const html = editor.getHTML();
+      if (html.length >= 8) {
+        //console.log(this.draft, html);
+        this.$store.commit("saveDraft", { draftType: this.draft, draft: html });
+      }
+    },
+    clear() {
+      const editor = this.getEditor();
+      if (!editor) return;
+
+      this.getEditor().clear();
+
+      if (!this.draft) return;
+      this.$store.commit("saveDraft", { draftType: this.draft, draft: "" });
+    },
     hasInput() {
       const editor = this.getEditor();
       if (!editor) return false;
@@ -374,6 +411,7 @@ export default {
         //  "30072ef2bf4c3b22bd417709fa4f14aabf2dfbabdd9a03a2a3a34e73bb038c31";
 
         //console.log(post);
+        //this.clear();
         //if (!trxid) throw new Error(`stop`);
 
         trxid = await submitPost(
@@ -393,7 +431,7 @@ export default {
         artificalSubmission.transaction = trxid;
 
         this.disablePost = false;
-        this.getEditor().clear();
+        this.clear();
 
         if (this.edit) {
           console.log(`edit trxid: ${trxid}`);

@@ -1,9 +1,11 @@
 import { Controller, Post, Get } from '@decorators/express';
-import { Api } from "../helpers";
-import { config, getDatabase } from "../mongo";
 import { getConfig } from "@/novusphere-js/utility";
 import passport from 'passport';
 import { Strategy } from 'passport-twitter';
+import ecc from 'eosjs-ecc';
+
+import { Api } from "../helpers";
+import { config, getDatabase } from "../mongo";
 import siteConfig from "../site";
 
 export default @Controller('/account') class AccountController {
@@ -73,7 +75,7 @@ export default @Controller('/account') class AccountController {
     async passportRemove(req, res) {
         const { pub, domain, data } = req.unpackAuthenticated();
         const { what } = req.params;
-        
+
         const field = {};
         field[`auth.${what}`] = "";
 
@@ -145,6 +147,19 @@ export default @Controller('/account') class AccountController {
         let { pub, sig, domain, time, data, _data } = req.unpackAuthenticated();
 
         if (_data.length >= 256 * 1024) throw new Error(`Data must be less than 256kb`);
+
+        // verify public key claims integrity
+        if (data.publicKeys) {
+
+            // xxxYYY means [YYY] was signed with [xxx]
+            const { identityArbitrary, arbitraryWallet } = data.publicKeyProofs;
+
+            if (!identityArbitrary || ecc.recover(identityArbitrary, data.publicKeys.arbitrary) != data.publicKeys.identity)
+                throw new Error(`Failed identityArbitrary public key proof`);
+
+            if (!arbitraryWallet || ecc.recover(arbitraryWallet, data.publicKeys.wallet) != data.publicKeys.arbitrary)
+                throw new Error(`Failed arbitraryWallet public key proof`);
+        }
 
         let db = await getDatabase();
 

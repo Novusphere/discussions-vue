@@ -233,6 +233,7 @@ export default {
           pub: this.post.pub,
           uidw: this.post.uidw,
           displayName: this.post.displayName,
+          memo: `tip to ${this.post.displayName} for ${this.post.getRelativeUrl(false)}`,
           uuid: this.post.uuid,
           callback: ({ transaction, transferActions }) =>
             this.$emit("tip", {

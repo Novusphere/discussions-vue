@@ -47,7 +47,7 @@
           <template v-if="hasResults">
             <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
               <PublicKeyIcon class="mr-2" :publicKey="user.pub" />
-              {{ user.displayName[0] }}
+              {{ user.displayName }}
             </v-list-item>
           </template>
           <div v-else>
@@ -79,7 +79,7 @@ import {
   //Strike,
   //Underline,
   Image,
-  History
+  History,
 } from "tiptap-extensions";
 
 import Link2 from "./nodes/Link2";
@@ -94,10 +94,10 @@ export default {
   components: {
     EditorMenuBar,
     EditorContent,
-    PublicKeyIcon
+    PublicKeyIcon,
   },
   props: {
-    mentionSuggester: Function
+    mentionSuggester: Function,
   },
   data() {
     return {
@@ -123,7 +123,21 @@ export default {
               // we save the command for inserting a selected mention
               // this allows us to call it inside of our custom popup
               // via keyboard navigation and on click
-              this.insertTag = command;
+              this.insertTag = ({ range }) => {
+                const tag = this.tag.replace(/[^a-zA-Z0-9]/gi, "");
+                if (tag) {
+                  command({
+                    range,
+                    attrs: {
+                      tag: tag,
+                      href: `/tag/${tag}`,
+                    },
+                  });
+                } else {
+                  const transaction = this.editor.state.tr.insertText(" ");
+                  this.editor.view.dispatch(transaction);
+                }
+              };
 
               console.proxyLog(`hash enter: ${this.tag}`);
             },
@@ -144,12 +158,8 @@ export default {
                   this.insertTag({
                     range: {
                       from: this.tagRange.from,
-                      to: this.tagRange.to + 1
+                      to: this.tagRange.to + 1,
                     },
-                    attrs: {
-                      tag: this.tag,
-                      href: `/tag/${this.tag}`
-                    }
                   });
                   this.editor.focus();
                 }
@@ -162,22 +172,18 @@ export default {
             onKeyDown: ({ event }) => {
               if (
                 event.key === "Enter" ||
-                event.key == " " ||
-                event.key == "Tab"
+                event.key == "Tab" ||
+                event.key == " "
               ) {
                 console.proxyLog(`hash keydown: ${this.tag}`);
-                this.insertTag({
-                  range: this.tagRange,
-                  attrs: {
-                    tag: this.tag,
-                    href: `/tag/${this.tag}`
-                  }
-                });
+
+                this.insertTag({ range: this.tagRange });
+
                 this.editor.focus();
                 return true;
               }
               return false;
-            }
+            },
           }),
 
           new Mention({
@@ -233,7 +239,7 @@ export default {
             // is called when a suggestion has changed
             onFilter: (_, query) => {
               return this.getMentionSuggestions(query);
-            }
+            },
           }),
 
           new Blockquote(),
@@ -244,10 +250,10 @@ export default {
           new Image(),
           new Link2(),
           new Italic(),
-          new History()
+          new History(),
         ],
-        content: ``
-      })
+        content: ``,
+      }),
     };
   },
 
@@ -257,7 +263,7 @@ export default {
     },
     showSuggestions() {
       return this.query || this.hasResults;
-    }
+    },
   },
 
   methods: {
@@ -270,29 +276,29 @@ export default {
       if (from == to) return; // no selection
 
       let marks = [];
-      state.doc.nodesBetween(from, to, node => {
+      state.doc.nodesBetween(from, to, (node) => {
         marks = [...marks, ...node.marks];
       });
 
-      const mark = marks.find(markItem => markItem.type.name === "link");
+      const mark = marks.find((markItem) => markItem.type.name === "link");
       let presetUrl = mark && mark.attrs.href ? mark.attrs.href : "";
 
       this.$store.commit("setInsertLinkDialogOpen", {
         value: true,
         initialInsertedLink: presetUrl,
-        onInsertLink: href => {
+        onInsertLink: (href) => {
           command({ href: href });
           this.$store.commit("setInsertLinkDialogOpen", { value: false });
-        }
+        },
       });
     },
     async uploadImage(command) {
       this.$store.commit("setImageUploadDialogOpen", {
         value: true,
-        onImageUpload: args => {
+        onImageUpload: (args) => {
           command(args);
           this.$store.commit("setImageUploadDialogOpen", { value: false });
-        }
+        },
       });
     },
     getMentionSuggestions(query) {
@@ -321,7 +327,7 @@ export default {
       const html = doc.body.innerHTML;
 
       const tipMatch = /<a href="\/tag\/tip" .+?>#tip<\/a>\s[0-9.]+\s[A-Z]+(\s<a href="\/u\/.+?<\/a>)?/gi;
-      const matches = [...html.matchAll(tipMatch)].map(m => m[0]);
+      const matches = [...html.matchAll(tipMatch)].map((m) => m[0]);
 
       for (const tipString of matches) {
         const endATag = `</a>`;
@@ -331,7 +337,7 @@ export default {
           tipString.indexOf(endATag) + endATag.length
         );
 
-        let [quantity, symbol] = parsedString.split(" ").filter(s => s);
+        let [quantity, symbol] = parsedString.split(" ").filter((s) => s);
 
         parsedString = parsedString.substring(
           parsedString.indexOf(hrefField) + hrefField.length
@@ -375,7 +381,7 @@ export default {
           const who = hrefSplit[hrefSplit.length - 1].split("-");
           mentions.push({
             displayName: decodeURIComponent(who[who.length - 2]),
-            pub: who[who.length - 1]
+            pub: who[who.length - 1],
           });
         }
       }
@@ -384,9 +390,12 @@ export default {
     clear() {
       this.editor.setContent("");
     },
+    setFromHtml(html) {
+      this.editor.setContent(html);
+    },
     setFromMarkdown(markdown) {
       const html = markdownToHTML(markdown);
-      this.editor.setContent(html);
+      this.setFromHtml(html);
     },
     // we have to replace our suggestion text with a mention
     // so it's important to pass also the position of your suggestion text
@@ -400,8 +409,8 @@ export default {
         range: this.suggestionRange,
         attrs: {
           name: displayName, // replace spaces in name with an underscore
-          href: `/u/${encodeURIComponent(displayName)}-${user.pub}`
-        }
+          href: `/u/${encodeURIComponent(displayName)}-${user.pub}`,
+        },
       });
       this.editor.focus();
     },
@@ -413,13 +422,13 @@ export default {
     },
     destroyPopup() {
       this.query = "";
-    }
+    },
   },
 
   beforeDestroy() {
     this.destroyPopup();
     this.editor.destroy();
-  }
+  },
 };
 </script>
 

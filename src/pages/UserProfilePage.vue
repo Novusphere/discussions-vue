@@ -39,6 +39,7 @@
       <div v-if="isBlogSubmit">
         <PostSubmitter
           cancelable
+          :draft="'blog'"
           :sub="'blog'"
           ref="submitter"
           :title-field="true"

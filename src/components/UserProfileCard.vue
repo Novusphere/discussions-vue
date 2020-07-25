@@ -55,7 +55,7 @@ import PublicKeyIcon from "@/components/PublicKeyIcon";
 export default {
   name: "UserProfileCard",
   components: {
-    PublicKeyIcon
+    PublicKeyIcon,
   },
   props: {
     extendedInfo: Object,
@@ -63,16 +63,16 @@ export default {
     publicKey: String,
     uidw: String,
     flat: Boolean,
-    small: Boolean
+    small: Boolean,
   },
   computed: {
     ...mapGetters(["isLoggedIn", "isFollowing"]),
     ...mapState({
-      myPublicKey: state => (state.keys ? state.keys.arbitrary.pub : "")
+      myPublicKey: (state) => (state.keys ? state.keys.arbitrary.pub : ""),
     }),
     link() {
       return `/u/${this.displayName}-${this.publicKey}`;
-    }
+    },
   },
   data: () => ({}),
   methods: {
@@ -88,10 +88,11 @@ export default {
         recipient: {
           pub: this.publicKey,
           uidw: this.uidw,
-          displayName: this.displayName
-        }
+          displayName: this.displayName,
+          memo: `tip to ${this.displayName}`,
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
