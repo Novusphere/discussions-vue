@@ -47,7 +47,7 @@
           <template v-if="hasResults">
             <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
               <PublicKeyIcon class="mr-2" :publicKey="user.pub" />
-              {{ user.displayName }}
+              {{ user.displayName[0] }}
             </v-list-item>
           </template>
           <div v-else>
