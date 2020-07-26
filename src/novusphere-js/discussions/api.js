@@ -190,6 +190,7 @@ async function getCommunities(domain) {
 // if [artifical] is enabled, if the community doesn't exist it'll borrow from the artifical community
 //
 async function getCommunityByTag(tag, artifical = 'atmos') {
+    tag = tag.toLowerCase();
     const communities = await getCommunities();
     let community = communities.find(c => c.tag == tag);
 

@@ -30,6 +30,7 @@
 <script>
 import TagIcon from "@/components/TagIcon";
 import { getCommunityByTag } from "@/novusphere-js/discussions/api";
+import { sleep } from "@/novusphere-js/utility";
 
 export default {
   name: "TagLink",
@@ -71,6 +72,8 @@ export default {
 
       const rect = this.$el.getBoundingClientRect();
       const community = await getCommunityByTag(this.tag);
+
+      await sleep(100); // incase there's another popover open
 
       this.$store.commit("setPopoverOpen", {
         value: true,

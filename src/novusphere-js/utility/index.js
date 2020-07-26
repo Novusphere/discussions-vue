@@ -151,6 +151,8 @@ let _oembedNextAttempt = 0;
                             const rect = this.getBoundingClientRect();
                             const community = await getCommunityByTag(tags[0]);
 
+                            await sleep(100); // incase there's another popover open
+
                             return $vue.$store.commit("setPopoverOpen", {
                                 value: true,
                                 type: "tag",
