@@ -6,24 +6,48 @@ import eos from "@/novusphere-js/uid/eos";
 import axios from 'axios';
 import discussionsx from "../services/discussionsx";
 
+// https://docs.dfuse.io/guides/eosio/tutorials/write-chain/
+let dfuseClient = undefined;
+global.fetch = require('node-fetch');
+global.WebSocket = require('ws');
+const { createDfuseClient } = require("@dfuse/client");
+async function dfuseFetch(input, init) {
+    if (init.headers === undefined) {
+        init.headers = {}
+    }
+
+    // This is highly optimized and cached, so while the token is fresh, this is very fast
+    const apiTokenInfo = await dfuseClient.getTokenInfo()
+
+    const headers = init.headers;
+    headers["Authorization"] = `Bearer ${apiTokenInfo.token}`;
+    headers["X-Eos-Push-Guarantee"] = 'in-block';
+
+    const fetch = require('node-fetch');
+    return global.fetch(input, init);
+}
+
 export default @Controller('/blockchain') class BlockchainController {
     constructor() {
     }
 
     async transact(actions) {
-        async function axiosFetch(url, { body }) {
-            // eosjs only makes POST requests
-            let result = await axios.post(url, body);
-            return {
-                ok: true,
-                json: async function () {
-                    return result.data;
-                }
-            };
-        }
-
         if (!siteConfig.relay.key) throw new Error(`Relay key has not been configured`);
-        const api = eos.getAPI(eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch: axiosFetch });
+
+        let api = undefined;
+        if (siteConfig.relay.dfuse) {
+            if (!dfuseClient) {
+
+                dfuseClient = createDfuseClient({
+                    apiKey: siteConfig.relay.dfuse,
+                    network: "mainnet.eos.dfuse.io",
+                });
+            }
+            api = await eos.getAPI(dfuseClient.endpoints.restUrl, [siteConfig.relay.key], { fetch: dfuseFetch });
+        }
+        else {
+            api = await eos.getAPI(eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch });
+        }
 
         const trx = await api.transact({ actions: actions },
             {
@@ -87,7 +111,7 @@ export default @Controller('/blockchain') class BlockchainController {
     }
 
     makeVoteAction(data) {
-        
+
         if (!data || isNaN(data.value) || data.value < -1 || data.value > 1) throw new Error(`Invalid vote value`);
 
         const action = {
@@ -114,7 +138,7 @@ export default @Controller('/blockchain') class BlockchainController {
     }
 
     makePostAction(data) {
-        
+
         if (data.content.length > 40 * 1024) throw new Error(`Post content must be less than 40kb`);
 
         const action = {
