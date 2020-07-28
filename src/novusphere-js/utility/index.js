@@ -262,19 +262,18 @@ function getOEmbedHtml(href) {
         // Trading view chart image
         insertHTML = `<img src="${href}" alt="${href}" />`;
     }
-    else if (/lbry.tv/.test(href) ||
-        /open.lbry.com/.test(href)) {
+    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/@[A-Za-z0-9]+:[a-z0-9]+\/[A-Za-z0-9]+:[a-z0-9]+/gi.test(href)) {
+        const [, id] = href.substring(href.indexOf('/@') + 2).split('/');
+        const colon = id.indexOf(':');
+        const id2 = colon > -1 ? id.substring(0, colon) : id;
 
-        const fragments = href.split('/');
-        const lastFragment = fragments[fragments.length - 1];
-        const [id] = lastFragment.split(':');
-        if (id) {
-            insertHTML = `<iframe id="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${id}" allowfullscreen></iframe>`;
-        }
+        insertHTML = `<iframe id="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${id2}" allowfullscreen></iframe>`;
     }
-    else if (/https:\/\/d.tube\/#!\//.test(href)) {
-        const [, user, id] = href.substring(href.indexOf('#!/') + 3).split('/');
-        insertHTML = `<iframe width="560" height="315" src="https://emb.d.tube/#!/${user}/${id}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    else if (/http(s)?:\/\/d.tube\/(#!\/)?v\//gi.test(href)) {
+        // Cannot disable autoplay: https://github.com/dtube/embed/issues/37
+        //
+        //const [user, id] = href.substring(href.indexOf('v/') + 2).split('/');
+        //insertHTML = `<iframe width="560" height="315" src="https://emb.d.tube/#!/${user}/${id}" autoplay="0" frameborder="0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     }
     else if ((/t.me\/([a-zA-Z0-9_!@+]+)\/([a-zA-Z0-9]+)/gi).test(href)) {
         // Telegram
