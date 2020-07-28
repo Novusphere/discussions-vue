@@ -159,7 +159,10 @@ export class Post {
     }
 
     async getContentDocument() {
-        const html = markdownToHTML(this.content);
+        const md = this.content.replace(/[\ufffc-\uffff]/g, "");
+        //console.log(md);
+
+        const html = markdownToHTML(md);
         let domParser = createDOMParser();
         let doc = domParser.parseFromString(html, 'text/html');
         return doc;
@@ -266,7 +269,8 @@ export class Post {
             }
         }
 
-        return doc.body.innerHTML;
+        const resultHtml = doc.body.innerHTML;
+        return resultHtml;
     }
 
     getVoteScore() {

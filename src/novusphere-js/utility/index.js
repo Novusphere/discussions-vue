@@ -10,7 +10,7 @@ import { getCommunityByTag, getUserProfile } from "../discussions/api";
 // Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
 const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
 const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
-const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi);
+const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=!]*)/gi);
 
 const turndownService = new Turndown();
 const showdownService = new Showdown.Converter({
@@ -262,6 +262,20 @@ function getOEmbedHtml(href) {
         // Trading view chart image
         insertHTML = `<img src="${href}" alt="${href}" />`;
     }
+    else if (/lbry.tv/.test(href) ||
+        /open.lbry.com/.test(href)) {
+
+        const fragments = href.split('/');
+        const lastFragment = fragments[fragments.length - 1];
+        const [id] = lastFragment.split(':');
+        if (id) {
+            insertHTML = `<iframe id="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${id}" allowfullscreen></iframe>`;
+        }
+    }
+    else if (/https:\/\/d.tube\/#!\//.test(href)) {
+        const [, user, id] = href.substring(href.indexOf('#!/') + 3).split('/');
+        insertHTML = `<iframe width="560" height="315" src="https://emb.d.tube/#!/${user}/${id}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    }
     else if ((/t.me\/([a-zA-Z0-9_!@+]+)\/([a-zA-Z0-9]+)/gi).test(href)) {
         // Telegram
         const [, ids] = href.split('t.me/')
@@ -269,7 +283,7 @@ function getOEmbedHtml(href) {
             insertHTML = `<span data-telegram-rn="${generateUuid()}" data-telegram-post="${ids}" data-width="100%"></span>`
         }
     }
-    else if ((/https:\/\/twitter.com\/[a-zA-Z0-9-_]+\/status\/[0-9]+/gi).test(href)) {
+    else if ((/https:\/\/(mobile.)?twitter.com\/[a-zA-Z0-9-_]+\/status\/[0-9]+/gi).test(href)) {
         // Twitter
         oembed = `https://publish.twitter.com/oembed?url=${href}`;
     }

@@ -66,7 +66,7 @@ export default {
     window.removeEventListener("beforeunload", this.leaveGuard);
   },
   beforeRouteLeave(to, from, next) {
-    if (this.$refs.browser && this.$refs.browser.hasInput()) {
+    if (this.$refs.browser && this.$refs.browser.hasUnsavedInput()) {
       const answer = window.confirm(
         "Do you really want to leave? you have unsaved changes!"
       );
@@ -94,7 +94,7 @@ export default {
       this.posterInfo = info;
     },
     leaveGuard(e) {
-      if (this.$refs.browser && this.$refs.browser.hasInput()) {
+      if (this.$refs.browser && this.$refs.browser.hasUnsavedInput()) {
         // Cancel the event
         e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
         // Chrome requires returnValue to be set

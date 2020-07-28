@@ -8,7 +8,7 @@
       <v-card v-else>
         <v-card-text>
           <PostSubmitter
-            :draft="'thread'"
+            :draft="true"
             :sub="tag"
             ref="submitter"
             :title-field="true"
@@ -82,7 +82,7 @@ export default {
     window.removeEventListener("beforeunload", this.leaveGuard);
   },
   beforeRouteLeave(to, from, next) {
-    if (this.$refs.submitter && this.$refs.submitter.hasInput()) {
+    if (this.$refs.submitter && this.$refs.submitter.hasUnsavedInput()) {
       const answer = window.confirm(
         "Do you really want to leave? you have unsaved changes!"
       );
@@ -97,7 +97,7 @@ export default {
   },
   methods: {
     leaveGuard(e) {
-      if (this.$refs.submitter && this.$refs.submitter.hasInput()) {
+      if (this.$refs.submitter && this.$refs.submitter.hasUnsavedInput()) {
         // Cancel the event
         e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
         // Chrome requires returnValue to be set

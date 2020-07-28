@@ -114,6 +114,7 @@ export default {
       insertTag: () => {},
       // editor
       editor: new Editor({
+        onUpdate: () => this.$emit("change"),
         extensions: [
           new Hashtag({
             // is called when a suggestion starts

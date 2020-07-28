@@ -17,6 +17,10 @@ function windowHost() {
     return undefined;
 }
 
+function setAPIHost(host) {
+    cache['apiHost'] = host;
+}
+
 async function getAPIHost() {
     return await getFromCache(cache, 'apiHost', async () => {
         const attempt = ["https://discussions.app", "https://beta.discussions.app"];
@@ -573,7 +577,7 @@ function searchPostsByNotifications(key, lastSeenTime, watchedThreads) {
 //
 // Submit a vote
 //
-async function submitVote(signKey, { uuid, value }) {
+async function submitVote(signKey, { uuid, value, uidw }) {
     const pub = ecc.privateToPublic(signKey);
     const nonce = Date.now();
 
@@ -582,8 +586,9 @@ async function submitVote(signKey, { uuid, value }) {
         uuid: uuid,
         value: Number(value),
         metadata: JSON.stringify({
-            nonce: nonce,
-            pub: pub,
+            uidw,
+            nonce,
+            pub,
             sig: await signText(ecc.sha256(`${value} ${uuid} ${nonce}`), signKey)
         })
     };
@@ -614,6 +619,7 @@ async function submitPost(signKey, post, transferActions) {
         uuid: post.uuid,
         value: 1,
         metadata: JSON.stringify({
+            uidw: post.uidw || undefined,
             nonce: nonce,
             pub: pub,
             sig: await signText(ecc.sha256(`${1} ${post.uuid} ${nonce}`), signKey)
@@ -650,6 +656,15 @@ async function submitPost(signKey, post, transferActions) {
 async function modPolicySetTags(postKey, uuid, tags, domain) {
     return await apiRequest(`/v1/api/moderation/settags`, { uuid, tags }, { key: postKey, domain });
 }
+
+async function getUserDrafts(identityKey, domain) {
+    return await apiRequest(`/v1/api/account/getdrafts`, {}, { key: identityKey, domain });
+}
+
+async function saveUserDrafts(identityKey, drafts, domain) {
+    return await apiRequest(`/v1/api/account/savedrafts`, { drafts }, { key: identityKey, domain });
+}
+
 
 //
 // Get user account object
@@ -726,6 +741,7 @@ export {
     Post,
     PostSearchQuery,
     getAPIHost,
+    setAPIHost,
     apiRequest,
     oembed,
     uploadImage,
@@ -755,6 +771,8 @@ export {
     getNsfwPosts,
     getUserAccountObject,
     saveUserAccountObject,
+    getUserDrafts,
+    saveUserDrafts,
     connectOAuth,
     removeOAuth
 }

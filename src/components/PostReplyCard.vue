@@ -87,10 +87,10 @@ export default {
         this.reply.post.content
       );
     },
-    hasInput() {
+    hasUnsavedInput() {
       return (
-        (this.$refs.submitter && this.$refs.submitter.hasInput()) ||
-        (this.$refs.replies && this.$refs.replies.some(r => r.hasInput()))
+        (this.$refs.submitter && this.$refs.submitter.hasUnsavedInput()) ||
+        (this.$refs.replies && this.$refs.replies.some(r => r.hasUnsavedInput()))
       );
     },
     submitPost({ post, transferActions }) {

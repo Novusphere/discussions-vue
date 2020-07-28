@@ -3,14 +3,14 @@
     <div v-if="pinned">
       <v-row class="mb-2" v-for="(p, i) in pinned" :key="i">
         <v-col cols="12">
-          <PostScrollCard :display="display" :post="p" />
+          <PostScrollCard :show-reply="showReply" :display="display" :post="p" />
         </v-col>
       </v-row>
     </div>
     <div>
       <v-row class="mb-2" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
         <v-col cols="12">
-          <PostScrollCard :display="display" :post="p" />
+          <PostScrollCard :show-reply="showReply" :display="display" :post="p" />
         </v-col>
       </v-row>
       <infinite-loading ref="infiniteLoading" @infinite="infinite">
@@ -37,7 +37,8 @@ export default {
     pinned: Array,
     posts: Array,
     infinite: Function,
-    display: String
+    display: String,
+    showReply: Boolean
   },
   watch: {
     //posts() {

@@ -90,6 +90,10 @@ function searchTransactions(pub, type) {
     return new TransactionSearchQuery({ pipeline });
 }
 
+async function getActiveWallets() {
+    return await apiRequest(`/v1/api/data/active48h`);
+}
+
 function generateBrainKey() {
     return bip39.generateMnemonic()
 }
@@ -451,6 +455,7 @@ export {
     encrypt,
     decrypt,
     searchTransactions,
+    getActiveWallets,
     generateBrainKey,
     isValidBrainKey,
     brainKeyToKeys,

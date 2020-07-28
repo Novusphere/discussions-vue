@@ -37,15 +37,19 @@
     </template>
     <template v-slot:content>
       <div v-if="isBlogSubmit">
-        <PostSubmitter
-          cancelable
-          :draft="'blog'"
-          :sub="'blog'"
-          ref="submitter"
-          :title-field="true"
-          @submit-post="submitPost"
-          @cancel="$router.push(`/u/${$route.params.who}/blog`)"
-        />
+        <v-card>
+          <v-card-text>
+            <PostSubmitter
+              cancelable
+              :draft="true"
+              :sub="'blog'"
+              ref="submitter"
+              :title-field="true"
+              @submit-post="submitPost"
+              @cancel="$router.push(`/u/${$route.params.who}/blog`)"
+            />
+          </v-card-text>
+        </v-card>
       </div>
       <div v-else-if="isBlog && keys && publicKey == keys.arbitrary.pub">
         <v-btn block color="primary" :to="`/u/${$route.params.who}/submit`">New Blog</v-btn>

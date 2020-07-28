@@ -114,12 +114,58 @@ export default @Controller('/account') class AccountController {
         authenticate(req, res, next);
     }
 
+    @Api()
+    @Post('/getdrafts')
+    async getDrafts(req, res) {
+        let { pub, domain } = req.unpackAuthenticated();
+
+        let db = await getDatabase();
+        let document = await db.collection(config.table.accounts)
+            .find({
+                pub: pub,
+                domain: domain
+            })
+            .limit(1)
+            .next();
+
+        if (document && document.drafts) {
+            return res.success(document.drafts);
+        }
+
+        return res.success([]);
+    }
+
+    @Api()
+    @Post('/savedrafts')
+    async saveDrafts(req, res) {
+        let { pub, domain, data: { drafts }, _data } = req.unpackAuthenticated();
+        
+        if (_data.length >= 256 * 1024) throw new Error(`Data must be less than 256kb`);
+        if (!drafts || !Array.isArray(drafts)) throw new Error(`Expected drafts to be an array`);
+
+        let db = await getDatabase();
+
+        await db.collection(config.table.accounts)
+            .updateOne(
+                {
+                    pub: pub,
+                    domain: domain
+                },
+                {
+                    $set: {
+                        drafts: drafts
+                    }
+                });
+
+        return res.success();
+    }
+
     //
     // Account retrieval
     //
     @Api()
     @Post('/get')
-    async get(req, res) {
+    async getUser(req, res) {
         let { pub, domain } = req.unpackAuthenticated();
 
         let db = await getDatabase();
@@ -143,7 +189,7 @@ export default @Controller('/account') class AccountController {
     //
     @Api()
     @Post('/save')
-    async post(req, res) {
+    async saveUser(req, res) {
         let { pub, sig, domain, time, data, _data } = req.unpackAuthenticated();
 
         if (_data.length >= 256 * 1024) throw new Error(`Data must be less than 256kb`);

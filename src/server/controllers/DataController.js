@@ -113,6 +113,43 @@ export default @Controller('/data') class DataController {
     }
 
     @Api()
+    @Get("/active48h")
+    async active48h(req, res) {
+        const ago48h = Date.now() - (2 * 24 * 60 * 60 * 1000);
+        const db = await getDatabase();
+
+        const pipeline = [
+            {
+                $match: {
+                    account: "discussionsx",
+                    time: { $gte: ago48h },
+                    "data.metadata.uidw": { $exists: true }
+                }
+            },
+            { $group: { _id: "$data.metadata.uidw" } },
+            {
+                $project:
+                {
+                    _id: false,
+                    pub: "$_id"
+                }
+            },
+        ];
+
+        const cursor = await db
+            .collection(config.table.discussions)
+            .aggregate(pipeline);
+
+        const items = [];
+        while (await cursor.hasNext()) {
+            const { pub } = await cursor.next();
+            items.push(pub);
+        }
+
+        return res.success(items);
+    }
+
+    @Api()
     @Get("/profile")
     async profile(req, res) {
         let { publicKey: pub, domain } = req.unpack();
@@ -120,7 +157,7 @@ export default @Controller('/data') class DataController {
         const db = await getDatabase();
 
         let followers = 0;
-        let lastPost = null
+        let lastPost = null;
         let threads = 0;
         let posts = 0;
 

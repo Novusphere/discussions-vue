@@ -11,24 +11,62 @@
       <v-tabs center-active show-arrows v-model="tab">
         <v-tab>Editor</v-tab>
         <v-tab>Preview</v-tab>
+        <v-tab :show="draft">Drafts</v-tab>
       </v-tabs>
       <v-tabs-items v-model="tab">
         <v-tab-item :transition="false" :reverse-transition="false">
-          <MarkdownEditor class="mt-1" :mention-suggester="mentionSuggester" ref="editor" />
+          <MarkdownEditor
+            class="mt-1"
+            :mention-suggester="mentionSuggester"
+            ref="editor"
+            @change="$forceUpdate()"
+          />
         </v-tab-item>
         <v-tab-item :transition="false" :reverse-transition="false">
           <div class="mt-1" v-if="preview">
             <PostCard v-if="preview" :post="preview" />
           </div>
         </v-tab-item>
+        <v-tab-item :transition="false" :reverse-transition="false">
+          <v-progress-linear class="mt-2" v-if="!drafts" indeterminate></v-progress-linear>
+          <v-list v-if="drafts">
+            <v-list-item v-for="(draft, i) in drafts" :key="i">
+              <v-list-item-content>
+                <v-list-item-title>
+                  <v-btn
+                    text
+                    @click="selectDraft(i)"
+                  >{{ draft.title ? draft.title : `Draft #${i+1} saved at ${new Date(draft.savedAt).toLocaleTimeString()}` }}</v-btn>
+                  <v-btn icon @click="deleteDraft(i)">
+                    <v-icon>delete</v-icon>
+                  </v-btn>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-tab-item>
       </v-tabs-items>
       <div class="mt-2 error--text text-center" v-show="submitError">{{ submitError }}</div>
-      <div class="mt-2">
-        <v-btn color="primary" @click="submitPost()" :disabled="disablePost">
+      <div class="mt-2 success--text text-center" v-show="submitPrompt">{{ submitPrompt }}</div>
+      <div class="mt-2" v-show="tab < 2">
+        <v-btn color="primary" small dense @click="submitPost()" :disabled="disablePost">
           <v-progress-circular class="mr-2" indeterminate v-if="disablePost"></v-progress-circular>
           <span>Submit</span>
         </v-btn>
-        <v-btn color="primary" class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
+        <v-btn color="primary" small dense class="ml-1" @click="cancel()" v-if="cancelable">Cancel</v-btn>
+        <v-btn
+          color="primary"
+          small
+          dense
+          absolute
+          right
+          :outlined="!hasUnsavedInput()"
+          @click="saveDraft()"
+          v-if="draft"
+        >
+          <v-progress-circular class="mr-2" indeterminate v-show="savingDrafts"></v-progress-circular>
+          <span v-show="!savingDrafts || !$vuetify.breakpoint.mobile">Save Draft</span>
+        </v-btn>
       </div>
       <div style="height: 5px"></div>
     </div>
@@ -51,6 +89,8 @@ import {
   Post,
   submitPost,
   getUserProfile,
+  getUserDrafts,
+  saveUserDrafts,
 } from "@/novusphere-js/discussions/api";
 import {
   createAsset,
@@ -68,7 +108,7 @@ export default {
     PostCard,
   },
   props: {
-    draft: String,
+    draft: Boolean,
     sub: String,
     parentPost: Object,
     cancelable: Boolean,
@@ -78,7 +118,6 @@ export default {
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      drafts: (state) => state.drafts,
       displayName: (state) => state.displayName,
       keys: (state) => state.keys,
       isTransferDialogOpen: (state) => state.isTransferDialogOpen,
@@ -89,48 +128,119 @@ export default {
     }),
   },
   data: () => ({
-    saveDraftInterval: null,
+    currentDraftIndex: -1,
+    savingDrafts: false,
+    drafts: null,
     preview: null,
     tab: 0,
     disablePost: false,
     title: "",
     submitError: "",
+    submitPrompt: "",
   }),
   watch: {
     async tab() {
       if (this.tab == 1) {
         const { artificalSubmission } = await this.generateSubmission();
         this.preview = artificalSubmission;
+      } else if (this.tab == 2) {
+        await this.loadDrafts();
       }
     },
   },
   async created() {},
-  mounted() {
-    if (this.draft) {
-      const html = this.drafts[this.draft];
-      if (html) {
-        //console.log(`restore draft`, html);
-        const editor = this.getEditor();
-        editor.setFromHtml(html);
-      }
-      this.saveDraftInterval = setInterval(() => this.saveDraft(), 1000);
-    }
-  },
-  beforeDestroy() {
-    if (this.saveDraftInterval) {
-      clearInterval(this.saveDraftInterval);
-    }
-  },
+  mounted() {},
+  beforeDestroy() {},
   methods: {
-    saveDraft() {
-      const editor = this.getEditor();
-      if (!editor) return;
-      if (!this.draft) return;
+    selectDraft(index) {
+      this.currentDraftIndex = index;
+      const { content, title } = this.drafts[index];
+      this.title = title;
+      this.getEditor().setFromHtml(content);
+      this.tab = 0;
+    },
+    async loadDrafts() {
+      if (this.drafts) return;
+      const drafts = await getUserDrafts(this.keys.identity.key);
+      //console.log(drafts);
 
-      const html = editor.getHTML();
-      if (html.length >= 8) {
-        //console.log(this.draft, html);
-        this.$store.commit("saveDraft", { draftType: this.draft, draft: html });
+      this.drafts = drafts;
+    },
+    async deleteDraft(index) {
+      let drafts = this.drafts;
+
+      try {
+        this.submitError = "";
+        this.submitPrompt = "";
+        this.savingDrafts = true;
+        this.drafts = null; // show the loader
+
+        drafts.splice(index, 1);
+        await saveUserDrafts(this.keys.identity.key, drafts);
+
+        if (this.currentDraftIndex == index) {
+          this.currentDraftIndex = -1;
+        } else if (this.currentDraftIndex > index) {
+          this.currentDraftIndex = this.currentDraftIndex - 1; // shift down
+        }
+
+        this.savingDrafts = false;
+        this.drafts = drafts;
+      } catch (ex) {
+        this.submitError = ex.message;
+        this.savingDrafts = false;
+        this.drafts = drafts;
+      }
+    },
+    async saveDraft() {
+      try {
+        this.submitError = "";
+        this.submitPrompt = "";
+        this.savingDrafts = true;
+
+        if (!this.draft) return;
+
+        const editor = this.getEditor();
+        if (!editor) return;
+
+        const html = editor.getHTML();
+        if (html.length >= 8) {
+          await this.loadDrafts();
+
+          // limit the amount of drafts...
+          if (this.drafts.length == 5 && this.currentDraftIndex == -1) {
+            throw new Error(
+              "You have too many saved drafts to create a new one."
+            );
+          }
+
+          let drafts = [...this.drafts];
+          let draftIndex = this.currentDraftIndex;
+          const newDraft = {
+            savedAt: Date.now(),
+            title: this.title,
+            content: html,
+          };
+
+          if (draftIndex == -1) {
+            drafts.push(newDraft);
+            draftIndex = drafts.length - 1;
+          } else {
+            drafts[draftIndex] = newDraft;
+          }
+
+          //console.log(`saving drafts...`);
+
+          await saveUserDrafts(this.keys.identity.key, drafts);
+
+          this.drafts = drafts;
+          this.currentDraftIndex = draftIndex;
+          this.savingDrafts = false;
+          this.submitPrompt = `Draft saved at ${new Date().toLocaleTimeString()}`;
+        }
+      } catch (ex) {
+        this.submitError = ex.message;
+        this.savingDrafts = false;
       }
     },
     clear() {
@@ -140,14 +250,24 @@ export default {
       this.getEditor().clear();
 
       if (!this.draft) return;
-      this.$store.commit("saveDraft", { draftType: this.draft, draft: "" });
     },
-    hasInput() {
+    hasUnsavedInput() {
       const editor = this.getEditor();
       if (!editor) return false;
 
       const html = editor.getHTML();
-      return html.length >= 8;
+      if (html.length >= 8) {
+        if (this.currentDraftIndex == -1) return true;
+        if (this.drafts) {
+          //console.log(this.currentDraftIndex);
+          // compare the current draft versus current content
+          const { content, title } = this.drafts[this.currentDraftIndex];
+          if (content != html || title != this.title) {
+            return true;
+          }
+        }
+      }
+      return false;
     },
     getEditor() {
       return this.$refs.editor;
@@ -394,6 +514,7 @@ export default {
       if (!this.isLoggedIn) return;
 
       this.submitError = "";
+      this.submitPrompt = "";
       this.disablePost = true;
 
       const { post, artificalSubmission } = await this.generateSubmission();

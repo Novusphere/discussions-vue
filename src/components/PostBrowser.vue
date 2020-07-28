@@ -9,6 +9,7 @@
       <slot name="body"></slot>
       <PostScroller
         ref="scroller"
+        :show-reply="showReply"
         :pinned="pinned"
         :posts="posts"
         :display="display"
@@ -29,25 +30,26 @@ export default {
   components: {
     PostSortSelect,
     PostDisplaySelect,
-    PostScroller
+    PostScroller,
   },
   props: {
     noSort: Boolean,
     noCursor: Boolean,
     cursor: Object,
-    pinned: Array
+    pinned: Array,
+    showReply: Boolean,
   },
   data: () => ({
     posts: [],
     display: "",
-    sort: ""
+    sort: "",
   }),
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      keys: state => state.keys,
-      delegatedMods: state => state.delegatedMods
-    })
+      keys: (state) => state.keys,
+      delegatedMods: (state) => state.delegatedMods,
+    }),
   },
   watch: {
     async isLoggedIn() {
@@ -56,7 +58,7 @@ export default {
     async sort() {
       this.cursor.sort = this.sort;
       this.reset();
-    }
+    },
   },
   async created() {
     if (this.noSort && this.cursor) {
@@ -76,7 +78,7 @@ export default {
       if (cursor) {
         cursor.moderatorKeys =
           this.delegatedMods.length > 0
-            ? this.delegatedMods.map(dm => dm.pub)
+            ? this.delegatedMods.map((dm) => dm.pub)
             : undefined;
         cursor.votePublicKey = this.isLoggedIn
           ? this.keys.arbitrary.pub
@@ -113,18 +115,18 @@ export default {
         if (this.pinned) {
           // prevent duplicates
           posts = posts.filter(
-            p => !this.pinned.some(p2 => p.transaction == p2.transaction)
+            (p) => !this.pinned.some((p2) => p.transaction == p2.transaction)
           );
         }
         this.posts.push(...posts);
 
         this.$store.commit(
           "updateDisplayNames",
-          posts.map(p => ({
+          posts.map((p) => ({
             pub: p.pub,
             uidw: p.uidw,
             displayName: p.displayName,
-            nameTime: p.createdAt
+            nameTime: p.createdAt,
           }))
         );
 
@@ -136,7 +138,7 @@ export default {
       } else {
         $state.complete();
       }
-    }
-  }
+    },
+  },
 };
 </script>

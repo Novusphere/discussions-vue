@@ -233,7 +233,9 @@ export default {
           pub: this.post.pub,
           uidw: this.post.uidw,
           displayName: this.post.displayName,
-          memo: `tip to ${this.post.displayName} for ${this.post.getRelativeUrl(false)}`,
+          memo: `tip to ${this.post.displayName} for ${this.post.getRelativeUrl(
+            false
+          )}`,
           uuid: this.post.uuid,
           callback: ({ transaction, transferActions }) =>
             this.$emit("tip", {
@@ -268,6 +270,7 @@ export default {
       const trxid = await submitVote(this.keys.arbitrary.key, {
         value: value,
         uuid: this.post.uuid,
+        uidw: this.keys.wallet.pub,
       });
 
       console.log(`vote trxid: ${trxid}`);
