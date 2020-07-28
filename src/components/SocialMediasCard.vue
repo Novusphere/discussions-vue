@@ -15,7 +15,13 @@
         </v-col>
         <v-col v-else-if="isMyProfile">
           <v-icon>mdi-twitter</v-icon>
-          <v-btn class="ml-1" color="primary" dense small @click="connectOAuth('twitter')">Connect</v-btn>
+          <v-btn
+            class="ml-1"
+            color="primary"
+            dense
+            small
+            @click="connectOAuth('twitter')"
+          >Authenticate</v-btn>
         </v-col>
       </v-row>
     </v-card-text>

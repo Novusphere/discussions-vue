@@ -1,6 +1,6 @@
 <template>
   <div v-if="showReply && opening">
-    <PostReplyCard ref="reply" :reply="opening" @submit-post="submitPost" />
+    <PostReplyCard ref="reply" :clickable="true" :reply="opening" @submit-post="submitPost" />
   </div>
   <div v-else-if="post.op && post.uuid != post.op.uuid">
     <PostCard :clickable="true" :display="'compact'" :post="post.op">

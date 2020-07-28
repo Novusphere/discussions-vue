@@ -2,6 +2,7 @@
   <div>
     <PostCard
       ref="postCard"
+      :clickable="clickable"
       :post="reply.post"
       :display="display"
       :editing="editing"
@@ -41,6 +42,7 @@
         <PostReplyCard
           ref="replies"
           v-for="(r) in reply.replies"
+          :clickable="clickable"
           :key="r.post.transaction"
           :reply="r"
           @submit-post="submitPost"
@@ -64,19 +66,20 @@ export default {
   components: {
     PostCard,
     PostSubmitter,
-    PostCardActions
+    PostCardActions,
   },
   props: {
+    clickable: Boolean,
     reply: Object,
-    display: { type: String, default: "comment" }
+    display: { type: String, default: "comment" },
   },
   computed: {
-    ...mapGetters(["isLoggedIn"])
+    ...mapGetters(["isLoggedIn"]),
   },
   data() {
     return {
       showSubmitter: false,
-      editing: false
+      editing: false,
     };
   },
   methods: {
@@ -90,14 +93,15 @@ export default {
     hasUnsavedInput() {
       return (
         (this.$refs.submitter && this.$refs.submitter.hasUnsavedInput()) ||
-        (this.$refs.replies && this.$refs.replies.some(r => r.hasUnsavedInput()))
+        (this.$refs.replies &&
+          this.$refs.replies.some((r) => r.hasUnsavedInput()))
       );
     },
     submitPost({ post, transferActions }) {
       this.showSubmitter = false;
       this.editing = false;
       this.$emit("submit-post", { post, transferActions });
-    }
-  }
+    },
+  },
 };
 </script>
