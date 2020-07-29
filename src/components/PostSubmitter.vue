@@ -11,7 +11,7 @@
       <v-tabs center-active show-arrows v-model="tab">
         <v-tab>Editor</v-tab>
         <v-tab>Preview</v-tab>
-        <v-tab :show="draft">Drafts</v-tab>
+        <v-tab v-show="draft">Drafts</v-tab>
       </v-tabs>
       <v-tabs-items v-model="tab">
         <v-tab-item :transition="false" :reverse-transition="false">
