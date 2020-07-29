@@ -1,5 +1,5 @@
 <template>
-  <PostBrowser no-sort :cursor="cursor" />
+  <PostBrowser :show-reply="true" no-sort :cursor="cursor" />
 </template>
 
 <script>
