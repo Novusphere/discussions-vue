@@ -233,7 +233,7 @@ export default {
         }
         // enable this since we might not be dealing with only top level posts, we need the op to determine the link to the post
         cursor.includeOpeningPost = true;
-        cursor.votePublicKey = this.keys.arbitrary.pub;
+        if (this.isLoggedIn) cursor.votePublicKey = this.keys.arbitrary.pub;
         cursor.sort = "recent";
 
         this.cursor = cursor;
