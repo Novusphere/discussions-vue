@@ -1,11 +1,16 @@
 <template>
-  <div v-if="showReply && opening">
-    <PostReplyCard ref="reply" :clickable="true" :reply="opening" @submit-post="submitPost" />
-  </div>
-  <div v-else-if="post.op && post.uuid != post.op.uuid">
+  <div v-if="post.op && post.uuid != post.op.uuid">
     <PostCard :clickable="true" :display="'compact'" :post="post.op">
       <template v-slot:replies>
-        <PostCard :clickable="true" :display="display" :post="post">
+        <PostReplyCard
+          v-if="showReply"
+          ref="reply"
+          :display="display"
+          :clickable="true"
+          :reply="comment"
+          @submit-post="submitPost"
+        />
+        <PostCard v-else :clickable="true" :display="display" :post="post">
           <template v-slot:actions>
             <PostCardActions no-edit :post="post" :isCommentDisplay="false" />
           </template>
@@ -14,7 +19,15 @@
     </PostCard>
   </div>
   <div v-else>
-    <PostCard :clickable="true" :display="display" :post="post">
+    <PostReplyCard
+      v-if="showReply"
+      ref="reply"
+      :clickable="true"
+      :display="display"
+      :reply="comment"
+      @submit-post="submitPost"
+    />
+    <PostCard v-else :clickable="true" :display="display" :post="post">
       <template v-slot:actions>
         <PostCardActions no-edit :post="post" :isCommentDisplay="false" />
       </template>
@@ -48,7 +61,7 @@ export default {
     }),
   },
   data: () => ({
-    opening: null,
+    comment: null,
   }),
   created() {
     if (this.showReply) {
@@ -65,7 +78,7 @@ export default {
       }
 
       // basically, we need to create a pseudo thread the way ThreadBrowser does
-      this.opening = reply;
+      this.comment = threadTree[this.post.uuid];
       this.tree = threadTree;
     }
   },

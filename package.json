@@ -9,6 +9,7 @@
     "server-beta": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=server-beta",
     "server-alpha": "babel-node --config-file ./src/server/babel.config.json ./src/server/ --config=server-alpha",
     "sitemap": "babel-node --config-file ./src/server/babel.config.json ./src/server/sitemap.js --config=server-alpha",
+    "staking1-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/staking1.js",
     "discord-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/discord.js",
     "twitter-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/twitter.js",
     "watcher": "babel-node --config-file ./src/server/babel.config.json ./src/watcher/"

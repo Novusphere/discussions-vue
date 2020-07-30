@@ -66,6 +66,7 @@
               <v-card flat @click.native="cardClicked()" :color="contentBackgroundColor">
                 <div
                   :class="{ 
+                    'dark': $vuetify.theme.dark,
                     'content-fade': isPreviewDisplay && !isCompactContent, 
                     'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
                 >
@@ -332,6 +333,12 @@ export default {
   background-image: linear-gradient(
     rgba(255, 255, 255, 0) 50%,
     rgba(255, 255, 255, 1) 100%
+  );
+}
+.dark.content-fade::after {
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0) 50%,
+    rgba(30, 30, 30, 1) 100%
   );
 }
 </style>

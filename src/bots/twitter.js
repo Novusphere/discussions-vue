@@ -34,6 +34,7 @@ const Twitter = require('twitter');
                 if (since_time && (Date.now() - since_time) < TWEET_DURATION) {
                     const remMin = (Date.now() - since_time) / 60 * 1000;
                     console.log(`Skipped ${w.screen_name}... ${remMin} until it can post again`);
+                    continue;
                 }
 
                 const tweets = await client.get('statuses/user_timeline', {
