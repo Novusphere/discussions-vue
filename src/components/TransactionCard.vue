@@ -8,7 +8,7 @@
         <v-col :cols="2">
           <span class="d-block">{{ time.toLocaleDateString() }}</span>
           <span class="d-block">{{ time.toLocaleTimeString() }}</span>
-          <span class="d-block">{{ isReceived ? 'Received' : 'Sent' }}</span>
+          <span class="d-block">{{ isReceived ? 'Receive' : 'Sent' }}</span>
         </v-col>
         <v-col :cols="7">
           <strong class="d-block">Memo</strong>
@@ -27,8 +27,8 @@
         <v-col :cols="3">
           <TokenIcon v-if="token" :size="64" :symbol="token.symbol" />
           <p class="text-center">
-            <span class="d-block">{{ shortTime() }}</span>
-            <span class="d-block">{{ isReceived ? 'Received' : 'Sent' }}</span>
+            <span class="d-block">{{ shortTime(time) }}</span>
+            <span class="d-block">{{ isReceived ? 'Recevie' : 'Sent' }}</span>
           </p>
         </v-col>
         <v-col :cols="4">
@@ -51,11 +51,15 @@
 import { mapState } from "vuex";
 import { sanitize } from "@/novusphere-js/utility";
 import { getToken, getTokenForChain, sumAsset } from "@/novusphere-js/uid";
+
+import { shortTimeMixin } from "@/mixins/shortTime";
+
 import TokenIcon from "@/components/TokenIcon";
 import TransactionLink from "@/components/TransactionLink";
 
 export default {
   name: "TransactionCard",
+  mixins: [shortTimeMixin],
   components: {
     TokenIcon,
     TransactionLink,
