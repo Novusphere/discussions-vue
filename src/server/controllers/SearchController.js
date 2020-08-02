@@ -66,7 +66,10 @@ export default @Controller('/search') class SearchController {
         let cursor = undefined;
         ({ id, cursor } = await this.getCursorById(id, async () => {
             const db = await getDatabase();
-            return await db.collection(config.table.posts).aggregate(pipeline);
+            const cursor = await db
+                .collection(config.table.posts)
+                .aggregate(pipeline);
+            return cursor;
         }));
 
         let items = [];
@@ -120,7 +123,10 @@ export default @Controller('/search') class SearchController {
 
         if (id) {
             const obj = this.cursors[id];
-            cursor = obj ? obj.cursor : undefined;
+            if (obj) {
+                cursor = obj.cursor;
+                obj.time = Date.now(); // refresh the time
+            }
         }
 
         if (!cursor) {
