@@ -100,7 +100,8 @@ export default @Controller('/search') class SearchController {
     cleanCursors() {
         const now = Date.now();
         for (const { id, time } of Object.values(this.cursors)) {
-            if (now - time >= 60000) {
+            // after 10 mins, retire this cursor
+            if (now - time >= 10 * 60000) {
                 this.removeCursorById(id);
             }
         }
