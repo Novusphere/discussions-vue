@@ -22,6 +22,78 @@ export default @Controller('/data') class DataController {
     }
 
     @Api()
+    @Get("/popularusers")
+    async popularUsers(req, res) {
+
+        let { publicKey: pub, domain } = req.unpack();
+
+        const pipeline = [
+            { $match: { domain: domain } },
+            {
+                $project: {
+                    pub: "$data.publicKeys.arbitrary",
+                    uidw: "$data.publicKeys.wallet",
+                    arbitraryWalletProof: "$data.publicKeyProofs.arbitraryWallet",
+                    displayName: "$data.displayName",
+                    auth: "$auth"
+                }
+            },
+            {
+                $lookup: {
+                    from: config.table.accounts,
+                    let: { pub: "$pub" },
+                    pipeline: [
+                        //{
+                        // $project: { test: "$$pub" }
+                        // $project: { test: "$data.followingUsers.pub" }
+                        //},
+                        {
+                            $match: {
+                                $expr: {
+                                    $in: ["$$pub", "$data.followingUsers.pub"]
+                                }
+                            }
+                        },
+                        {
+                            $count: "n"
+                        }
+                    ],
+                    as: "followers"
+                }
+            },
+            {
+                $addFields: {
+                    "followers": { $arrayElemAt: ["$followers", 0] }
+                }
+            },
+            {
+                $sort: {
+                    "followers.n": -1
+                }
+            },
+            {
+                $limit: 50
+            }
+        ];
+
+        const db = await getDatabase();
+        const users = (await db
+            .collection(config.table.accounts)
+            .aggregate(pipeline)
+            .toArray())
+            .map(u => ({
+                ...u,
+                followers: u.followers ? u.followers.n : 0,
+                auth: !u.auth ? [] : Object.keys(u.auth).map(name => ({
+                    name: name,
+                    username: u.auth[name].username
+                }))
+            }))
+
+        res.success(users);
+    }
+
+    @Api()
     @Get("/communities")
     async communities(req, res) {
         const { data, domain } = await axios.get(`https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/community.json`);

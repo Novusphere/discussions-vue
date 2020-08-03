@@ -1,5 +1,5 @@
 <template>
-  <div>      
+  <div>
     <v-row no-gutters v-for="(comm, i) in communities" :key="i" class="mb-2">
       <v-col cols="12">
         <CommunityCard :community="comm" />
@@ -13,20 +13,20 @@ import CommunityCard from "@/components/CommunityCard";
 import { getCommunities } from "@/novusphere-js/discussions/api";
 
 export default {
-  name: "BrowseHotPostsPage",
+  name: "DiscoverCommunityPage",
   components: {
-    CommunityCard
+    CommunityCard,
   },
   props: {},
   data: () => ({
-    communities: []
+    communities: [],
   }),
   async created() {
     this.communities = (await getCommunities())
-      .map(comm => ({ ...comm }))
-      .filter(comm => comm.tag != "test" && comm.desc);
+      .map((comm) => ({ ...comm }))
+      .filter((comm) => comm.tag != "test" && comm.desc);
   },
-  methods: {}
+  methods: {},
 };
 </script>
 

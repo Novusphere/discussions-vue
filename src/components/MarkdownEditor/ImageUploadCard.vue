@@ -18,28 +18,28 @@ import { mapState } from "vuex";
 import { uploadImage } from "@/novusphere-js/discussions/api";
 //import { sleep } from "@/novusphere-js/utility";
 
+import { safariMixin } from "@/mixins/safari";
+
 export default {
   name: "ImageUploadCard",
+  mixins: [safariMixin],
   components: {},
   props: {},
   data: () => ({
     files: null,
     error: "",
-    disabled: false
+    disabled: false,
   }),
   computed: {
     ...mapState({
-      onImageUpload: state => state.onImageUpload
-    })
+      onImageUpload: (state) => state.onImageUpload,
+    }),
   },
   mounted() {
-    if (
-      navigator.userAgent.match(/safari/i) &&
-      !navigator.userAgent.match(/chrome/i)
-    ) {
+    if (this.isSafari) {
       console.log(`Using safari v-file-input fix...`);
       let inputs = document.querySelectorAll(".v-file-input input");
-      [...inputs].forEach(input => {
+      [...inputs].forEach((input) => {
         input.remove();
       });
     }
@@ -64,7 +64,7 @@ export default {
           this.disabled = false;
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>

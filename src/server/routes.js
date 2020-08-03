@@ -52,7 +52,6 @@ const routes = [
                     }
                 }
             },
-            { path: 'community', component: `CommunityPage`, meta: { head: async () => ({ title: `Discussions - Discover Communities`, description: `Discover communities on Discussions.app` }) } },
             {
                 path: 'u/:who/:tab?',
                 component: `UserProfilePage`,
@@ -81,6 +80,15 @@ const routes = [
                 children: [
                     { path: 'posts', component: `BrowsePostNotificationsPage`, meta: { head: async () => ({ title: `Discussions - Notifications - Posts` }) } },
                     { path: 'trx', component: `BrowseTrxNotificationsPage`, meta: { head: async () => ({ title: `Discussions - Notifications - Transactions` }) } },
+                ]
+            },
+            {
+                path: 'discover',
+                component: `DiscoverPage`,
+                redirect: `/discover/community`,
+                children: [
+                    { path: 'community', component: `DiscoverCommunityPage`, meta: { head: async () => ({ title: `Discussions - Discover Communities`, description: `Discover communities on Discussions.app` }) } },
+                    { path: 'user', component: `DiscoverUserPage`, meta: { head: async () => ({ title: `Discussions - Discover Users`, description: `Discover users on Discussions.app` }) } },
                 ]
             },
             {

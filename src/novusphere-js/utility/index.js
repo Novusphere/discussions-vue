@@ -275,6 +275,9 @@ function getOEmbedHtml(href) {
         //const [user, id] = href.substring(href.indexOf('v/') + 2).split('/');
         //insertHTML = `<iframe width="560" height="315" src="https://emb.d.tube/#!/${user}/${id}" autoplay="0" frameborder="0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     }
+    else if (/https?:\/\/siasky.net\/[a-zA-Z0-9-_]+/.test(href)) {
+        insertHTML = `<video controls name="media"><source src="${href}" type="video/mp4"></video>`;
+    }
     else if ((/t.me\/([a-zA-Z0-9_!@+]+)\/([a-zA-Z0-9]+)/gi).test(href)) {
         // Telegram
         const [, ids] = href.split('t.me/')

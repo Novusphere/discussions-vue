@@ -35,6 +35,7 @@ const getDefaultState = () => ({
     isSendTipDialogOpen: false,
     sendTipRecipient: null, // { pub, uidw, displayName, uuid?, callback? }
     //
+    alwaysUseThreadDialog: false,
     isThreadDialogOpen: false,
     threadDialogRef1: '',
     threadDialogRef2: '',
@@ -78,7 +79,8 @@ async function saveAccount(state, external = true, callback = undefined) {
             encryptedBrainKey: state.encryptedBrainKey,
             displayName: state.displayName,
             keys: state.keys,
-            darkMode: state.darkMode
+            darkMode: state.darkMode,
+            alwaysUseThreadDialog: state.alwaysUseThreadDialog
         }
 
         window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
@@ -245,6 +247,10 @@ export default new Vuex.Store({
         },
         setDarkMode(state, value) {
             state.darkMode = value;
+            saveAccount(state);
+        },
+        setAlwaysUseThreadDialog(state, value) {
+            state.alwaysUseThreadDialog = value;
             saveAccount(state);
         },
         addModerator(state, { displayName, pub, tag, nameTime }) {

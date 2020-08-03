@@ -9,12 +9,15 @@ import HomePage from "@/pages/HomePage";
 
 import SubmitPostPage from "@/pages/SubmitPostPage";
 import UserProfilePage from "@/pages/UserProfilePage";
-import CommunityPage from "@/pages/CommunityPage";
 import BrowseSearchPage from "@/pages/BrowseSearchPage";
 import BrowseFeedPage from "@/pages/BrowseFeedPage";
 import BrowseThreadPage from "@/pages/BrowseThreadPage";
 import BrowseTrendingPostsPage from "@/pages/BrowseTrendingPostsPage";
 import BrowseTagPostsPage from "@/pages/BrowseTagPostsPage";
+
+import DiscoverPage from "@/pages/discover/DiscoverPage";
+import DiscoverUserPage from "@/pages/discover/DiscoverUserPage";
+import DiscoverCommunityPage from "@/pages/discover/DiscoverCommunityPage";
 
 import NotificationsPage from "@/pages/notifications/NotificationsPage";
 import BrowsePostNotificationsPage from "@/pages/notifications/BrowsePostNotificationsPage";
@@ -44,12 +47,14 @@ let components = {
     HomePage,
     SubmitPostPage,
     UserProfilePage,
-    CommunityPage,
     BrowseSearchPage,
     BrowseFeedPage,
     BrowseThreadPage,
     BrowseTrendingPostsPage,
     BrowseTagPostsPage,
+    DiscoverPage,
+    DiscoverUserPage,
+    DiscoverCommunityPage,
     NotificationsPage,
     BrowsePostNotificationsPage,
     BrowseTrxNotificationsPage,

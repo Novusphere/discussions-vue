@@ -14,7 +14,13 @@
 
         <v-text-field readonly v-model="fee" label="Fee" required disabled></v-text-field>
 
-        <v-text-field v-model="account" hint="Your new account name" label="EOS Account" required></v-text-field>
+        <v-text-field
+          v-model="account"
+          :rules="accountNameRules"
+          hint="Your new account name"
+          label="EOS Account"
+          required
+        ></v-text-field>
 
         <v-text-field
           v-model="publicKey"
@@ -68,7 +74,7 @@ import {
   decrypt,
   transfer,
   withdrawAction,
-  brainKeyToKeys
+  brainKeyToKeys,
 } from "@/novusphere-js/uid";
 
 import UserAssetSelect from "@/components/UserAssetSelect";
@@ -78,17 +84,32 @@ export default {
   name: "EOSAccountCreatePage",
   components: {
     UserAssetSelect,
-    TransactionSubmitText
+    TransactionSubmitText,
   },
   props: {},
   computed: {
     ...passwordTesterRules("password", "encryptedTest"),
+    accountNameRules() {
+      const rules = [];
+      if (this.account.length != 12) {
+        rules.push("Account must be exactly 12 characters long");
+      } else {
+        const validNameRegex = /[a-z0-5]+/g;
+        const match = this.account.match(validNameRegex);
+        if (!match || match[0] != this.account) {
+          rules.push(
+            `Account must only use lowercase letters (a-z) or numbers 1-5`
+          );
+        }
+      }
+      return rules;
+    },
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      encryptedBrainKey: state => state.encryptedBrainKey,
-      encryptedTest: state => state.encryptedTest,
-      keys: state => state.keys
-    })
+      encryptedBrainKey: (state) => state.encryptedBrainKey,
+      encryptedTest: (state) => state.encryptedTest,
+      keys: (state) => state.keys,
+    }),
   },
   data: () => ({
     disableSubmit: false,
@@ -100,7 +121,7 @@ export default {
     account: "",
     publicKey: "",
     transactionLink: "",
-    transactionError: ""
+    transactionError: "",
   }),
   async created() {
     this.symbol = "EOS";
@@ -131,6 +152,7 @@ export default {
       this.transactionError = "";
 
       if (this.passwordTesterRules.length) return;
+      if (this.accountNameRules.length) return;
 
       const brainKey = decrypt(this.encryptedBrainKey, this.password);
       const keys = await brainKeyToKeys(brainKey);
@@ -144,7 +166,7 @@ export default {
         amount: await createAsset(this.amount, token.symbol),
         fee: await createAsset(this.fee, token.symbol),
         nonce: Date.now(),
-        memo: `${this.account}-${this.publicKey}`
+        memo: `${this.account}-${this.publicKey}`,
       });
 
       this.disableSubmit = true;
@@ -165,7 +187,7 @@ export default {
 
       this.disableSubmit = false;
       this.password = "";
-    }
-  }
+    },
+  },
 };
 </script>

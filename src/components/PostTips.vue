@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-for="(tip, i) in tips" :key="i" class="d-inline-block mr-1">
-      <v-chip small outlined color="primary">
+      <v-chip small outlined color="primary" @click="openCommunity(tip.symbol)">
         <TokenIcon class="mr-1" :symbol="tip.symbol" />
         <span
           :class="{ 'tip-text': true, 'mobile-tip-text': $vuetify.breakpoint.mobile }"
@@ -14,14 +14,16 @@
 
 <script>
 import TokenIcon from "@/components/TokenIcon";
+import { getCommunities } from "@/novusphere-js/discussions/api";
+import { sleep } from "@/novusphere-js/utility";
 
 export default {
   name: "PostTips",
   components: {
-    TokenIcon
+    TokenIcon,
   },
   props: {
-    post: Object
+    post: Object,
   },
   computed: {
     tips() {
@@ -42,18 +44,35 @@ export default {
         summary[symbol] =
           (summary[symbol] || 0) + (Number(amount) + Number(fee));
       }
-      return Object.keys(summary).map(k => ({ symbol: k, amount: summary[k] }));
-    }
+      return Object.keys(summary).map((k) => ({
+        symbol: k,
+        amount: summary[k],
+      }));
+    },
   },
   data: () => ({
     //
   }),
   methods: {
+    async openCommunity(symbol) {
+      const rect = this.$el.getBoundingClientRect();
+      const communities = await getCommunities();
+      const community = communities.find((c) => c.symbol == symbol);
+      if (community) {
+        await sleep(100); // incase there's another popover open
+        this.$store.commit("setPopoverOpen", {
+          value: true,
+          type: "tag",
+          rect,
+          community,
+        });
+      }
+    },
     formatTip(tip) {
       const formatted = Number(tip.amount.toFixed(4)).toString();
       return formatted;
-    }
-  }
+    },
+  },
 };
 </script>
 

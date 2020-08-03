@@ -98,11 +98,14 @@ import {
 import { sleep } from "@/novusphere-js/utility";
 import config from "@/server/site";
 
+import { threadLinkMixin } from "@/mixins/threadLink";
+
 import PostThreadLink from "@/components/PostThreadLink";
 import TransactionLink from "@/components/TransactionLink";
 
 export default {
   name: "PostCardActions",
+  mixins: [threadLinkMixin],
   components: {
     //PublicKeyIcon
     PostThreadLink,
@@ -126,15 +129,7 @@ export default {
   }),
   methods: {
     async share(where) {
-      let link = `/tag/${this.post.sub}`;
-      if (this.post.op && this.post.transaction != this.post.op.transaction) {
-        link += `/${this.post.op.getEncodedId()}/${this.post.op.getSnakeCaseTitle()}/${this.post.getEncodedId()}`;
-      } else {
-        link += `/${this.post.getEncodedId()}/${this.post.getSnakeCaseTitle()}`;
-      }
-
-      link = config.url + link;
-
+      const link = config.url + this.link;
       const tags = this.post.tags.filter((t) => !["all"].some((t2) => t2 == t));
 
       let url = undefined;
@@ -146,16 +141,19 @@ export default {
         const by = authorTwitter ? authorTwitter.username : "";
         const mentions = [];
 
-        for (const mentionedPub of this.post.mentions) {
-          const { auth } = await getUserAuth(mentionedPub);
-          const twitter = auth.find((a) => a.name == "twitter");
-          if (twitter) {
-            console.log(`Found ${mentionedPub} -> @${twitter.username}`);
-            mentions.push(twitter.username);
+        // Make it so only OP tweet sharing notifies twitter mentions, #154
+        if (this.isLoggedIn && this.keys.arbitrary.pub == this.post.pub) {
+          for (const mentionedPub of this.post.mentions) {
+            const { auth } = await getUserAuth(mentionedPub);
+            const twitter = auth.find((a) => a.name == "twitter");
+            if (twitter) {
+              console.log(`Found ${mentionedPub} -> @${twitter.username}`);
+              mentions.push(twitter.username);
+            }
           }
         }
 
-        let tweet = `A `;
+        let tweet = this.post.title ? `${this.post.title} a ` : `A `;
         if (this.post.uuid == this.post.threadUuid && this.post.sub == "blog")
           tweet += `blog `;
         else tweet += `post `;

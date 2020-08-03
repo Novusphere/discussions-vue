@@ -190,6 +190,14 @@ async function getCommunities(domain) {
 }
 
 //
+// Retrieves popular users (by followers)
+//
+async function getPopularUsers(domain) {
+    return await apiRequest(`/v1/api/data/popularusers?domain=${domain || windowHost()}`);
+}
+
+
+//
 // Get Community by tag
 // if [artifical] is enabled, if the community doesn't exist it'll borrow from the artifical community
 //
@@ -762,6 +770,7 @@ export {
     getUserProfile,
     getUserAuth,
     getTrendingTags,
+    getPopularUsers,
     getCommunities,
     getCommunityByTag,
     getTokens,

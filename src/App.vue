@@ -16,6 +16,7 @@
           :uidw="popover.profile.uidw"
           :extended-info="popover.profile.profileInfo"
           small
+          show-social
         />
       </v-menu>
 

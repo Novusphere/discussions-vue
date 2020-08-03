@@ -6,11 +6,22 @@
           <PublicKeyIcon :size="80" :publicKey="publicKey" />
           <div class="d-inline-block ml-2">
             <router-link style="text-decoration: none;" :to="link">
-              <h2 class="d-inline">{{ displayName }}</h2>
+              <h2 class="d-inline text-center">{{ displayName }}</h2>
               <div v-if="extendedInfo">
-                <span class="d-block text-center">{{ extendedInfo.followers }} followers</span>
+                <span class="d-block">{{ extendedInfo.followers }} followers</span>
               </div>
             </router-link>
+            <template v-if="showSocial && extendedInfo.auth">
+              <div class="d-inline-block" v-if="twitter">
+                <v-icon>mdi-twitter</v-icon>
+                <a
+                  :href="`https://twitter.com/${twitter}`"
+                  class="text-decoration-none ml-1"
+                  target="_blank"
+                  v-if="twitter"
+                >@{{ twitter }}</a>
+              </div>
+            </template>
           </div>
           <v-spacer />
         </v-col>
@@ -64,6 +75,7 @@ export default {
     uidw: String,
     flat: Boolean,
     small: Boolean,
+    showSocial: Boolean,
   },
   computed: {
     ...mapGetters(["isLoggedIn", "isFollowing"]),
@@ -72,6 +84,10 @@ export default {
     }),
     link() {
       return `/u/${this.displayName}-${this.publicKey}`;
+    },
+    twitter() {
+      const auth = this.extendedInfo.auth.find((a) => a.name == "twitter");
+      return auth ? auth.username : undefined;
     },
   },
   data: () => ({}),

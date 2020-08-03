@@ -63,7 +63,7 @@
         <v-expansion-panels class="mt-2" flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content>
-              <v-card flat @click.native="cardClicked()" :color="contentBackgroundColor">
+              <v-card flat @click="cardClicked" :color="contentBackgroundColor">
                 <div
                   :class="{ 
                     'dark': $vuetify.theme.dark,
@@ -112,7 +112,7 @@ import PostThreadLink from "@/components/PostThreadLink";
 
 export default {
   name: "BrowsePostCard",
-  mixins: [ shortTimeMixin ],
+  mixins: [shortTimeMixin],
   components: {
     UserProfileLink,
     TagLink,
@@ -252,13 +252,6 @@ export default {
         title,
         referenceId2,
       });
-
-      /*let link = `/tag/${this.post.sub}`;
-      if (this.post.op && this.post.transaction != this.post.op.transaction) {
-        link += `/${this.post.op.getEncodedId()}`;
-      }
-      link += `/${this.post.getEncodedId()}`;
-      this.$router.push(link);*/
     },
   },
 };
@@ -266,7 +259,8 @@ export default {
 
 <style>
 .post-html img,
-.post-html iframe {
+.post-html iframe,
+.post-html video {
   min-width: 0px !important; /* instagram override */
   max-width: min(100%, 512px) !important;
   display: block;
@@ -297,6 +291,7 @@ export default {
 }
 .nsfw-blur {
   filter: blur(20px);
+  pointer-events: none;
 }
 .content-fade {
   position: relative;

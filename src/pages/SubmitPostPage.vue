@@ -28,6 +28,8 @@ import {
 } from "@/novusphere-js/discussions/api";
 import { waitFor, sleep } from "@/novusphere-js/utility";
 
+import { threadLinkMixin } from "@/mixins/threadLink";
+
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import CommunityCard from "@/components/CommunityCard";
 //import UserProfileCard from "@/components/UserProfileCard";
@@ -35,6 +37,7 @@ import PostSubmitter from "@/components/PostSubmitter";
 
 export default {
   name: "SubmitPostPage",
+  mixins: [threadLinkMixin],
   components: {
     BrowsePageLayout,
     //UserProfileCard,
@@ -123,9 +126,8 @@ export default {
         );
 
         if (p) {
-          this.$router.push(
-            `/tag/${p.sub}/${p.getEncodedId()}/${p.getSnakeCaseTitle()}`
-          );
+          const link = this.getThreadLink(p);
+          this.$router.push(link);
         } else {
           console.log(`Thread couldnt be found... ${transaction}`);
         }

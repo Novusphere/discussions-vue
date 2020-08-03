@@ -15,6 +15,9 @@
               <v-col cols="12">
                 <v-switch v-model="darkModeProxy" :label="`Dark mode`"></v-switch>
               </v-col>
+              <v-col cols="12">
+                <v-switch v-model="alwaysUseThreadDialogProxy" :label="`Always thread dialog`"></v-switch>
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -94,17 +97,25 @@ export default {
   components: {
     TagLink,
     PublicKeyIcon,
-    UserProfileLink
+    UserProfileLink,
   },
   props: {},
   computed: {
+    alwaysUseThreadDialogProxy: {
+      get() {
+        return this.alwaysUseThreadDialog;
+      },
+      set(value) {
+        this.$store.commit("setAlwaysUseThreadDialog", value);
+      },
+    },
     darkModeProxy: {
       get() {
         return this.darkMode;
       },
       set(value) {
         this.$store.commit("setDarkMode", value);
-      }
+      },
     },
     hideSpamProxy: {
       get() {
@@ -112,7 +123,7 @@ export default {
       },
       set(value) {
         this.$store.commit("set", ["hideSpam", value]);
-      }
+      },
     },
     blurNSFWProxy: {
       get() {
@@ -120,25 +131,26 @@ export default {
       },
       set(value) {
         this.$store.commit("set", ["blurNSFW", value]);
-      }
+      },
     },
     ...mapState({
-      followingUsers: state => state.followingUsers,
-      delegatedMods: state => state.delegatedMods,
-      hideSpam: state => state.hideSpam,
-      blurNSFW: state => state.blurNSFW,
-      darkMode: state => state.darkMode
-    })
+      alwaysUseThreadDialog: (state) => state.alwaysUseThreadDialog,
+      followingUsers: (state) => state.followingUsers,
+      delegatedMods: (state) => state.delegatedMods,
+      hideSpam: (state) => state.hideSpam,
+      blurNSFW: (state) => state.blurNSFW,
+      darkMode: (state) => state.darkMode,
+    }),
   },
   data: () => ({
     valid: false,
     addModPublicKey: "",
-    addModTag: ""
+    addModTag: "",
   }),
   async created() {},
   methods: {
     addModerator() {
-      let user = this.followingUsers.find(u => u.pub == this.addModPublicKey);
+      let user = this.followingUsers.find((u) => u.pub == this.addModPublicKey);
       if (!user) return;
 
       let tag = this.addModTag;
@@ -149,12 +161,12 @@ export default {
         displayName: user.displayName,
         pub: user.pub,
         tag,
-        nameTime: Date.now()
+        nameTime: Date.now(),
       });
     },
     removeModerator(dm) {
       this.$store.commit("removeModerator", dm);
-    }
-  }
+    },
+  },
 };
 </script>

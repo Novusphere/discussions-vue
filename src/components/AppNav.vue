@@ -52,7 +52,7 @@
       </v-btn>
     </v-list-item>
     <v-list-item>
-      <v-btn class="justify-start" block text left :to="'/community'">
+      <v-btn class="justify-start" block text left :to="'/discover'">
         <v-icon>group</v-icon>
         <span>Community</span>
       </v-btn>

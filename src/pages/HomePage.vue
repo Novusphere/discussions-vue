@@ -13,11 +13,11 @@ export default {
     ...mapGetters(["isLoggedIn"]),
   },
   created() {
-    //if (this.isLoggedIn) {
-    //  this.$router.push(`/feed`);
-    //} else {
-    this.$router.push(`/tag/all`);
-    //}
+    if (this.isLoggedIn) {
+      this.$router.push(`/feed`);
+    } else {
+      this.$router.push(`/tag/all`);
+    }
   },
 };
 </script>
