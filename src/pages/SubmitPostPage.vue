@@ -8,7 +8,7 @@
       <v-card v-else>
         <v-card-text>
           <PostSubmitter
-            :draft="true"
+            :draft="'thread'"
             :sub="tag"
             ref="submitter"
             :title-field="true"

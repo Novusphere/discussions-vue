@@ -59,6 +59,10 @@ const getDefaultState = () => ({
     notificationCount: 0,
     // --- saved ---
     postViewType: "",
+    localDrafts: {
+        thread: "",
+        blog: ""
+    },
     lastSeenNotificationsTime: 0,
     subscribedTags: [],
     followingUsers: [], // { displayName, pub, uidw, nameTime }
@@ -73,7 +77,7 @@ const getDefaultState = () => ({
 async function saveAccount(state, external = true, callback = undefined) {
     await saver.lock(async () => {
         const local = {
-            drafts: state.drafts,
+            localDrafts: state.localDrafts,
             postViewType: state.postViewType,
             encryptedTest: state.encryptedTest,
             encryptedBrainKey: state.encryptedBrainKey,
@@ -201,6 +205,7 @@ export default new Vuex.Store({
                     state.keys = local.keys;
                     state.darkMode = local.darkMode;
                     state.postViewType = local.postViewType;
+                    state.localDrafts = local.localDrafts || state.localDrafts;
 
                     // if false, they have a session -- but are not logged in.
                     if (state.keys.arbitrary.key)
@@ -243,6 +248,10 @@ export default new Vuex.Store({
         },
         setPostViewType(state, type) {
             state.postViewType = type;
+            saveAccount(state, false);
+        },
+        saveLocalDraft(state, { draftType, draft }) {
+            state.localDrafts[draftType] = draft;
             saveAccount(state, false);
         },
         setDarkMode(state, value) {

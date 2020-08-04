@@ -108,7 +108,7 @@ export default {
     PostCard,
   },
   props: {
-    draft: Boolean,
+    draft: String,
     sub: String,
     parentPost: Object,
     cancelable: Boolean,
@@ -118,6 +118,7 @@ export default {
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
+      localDrafts: (state) => state.localDrafts,
       displayName: (state) => state.displayName,
       keys: (state) => state.keys,
       isTransferDialogOpen: (state) => state.isTransferDialogOpen,
@@ -128,6 +129,7 @@ export default {
     }),
   },
   data: () => ({
+    saveDraftInterval: null,
     currentDraftIndex: -1,
     savingDrafts: false,
     drafts: null,
@@ -149,9 +151,32 @@ export default {
     },
   },
   async created() {},
-  mounted() {},
+  mounted() {
+    if (this.draft) {
+      const html = this.localDrafts[this.draft];
+      if (html) {
+        //console.log(`restore draft`, html);
+        const editor = this.getEditor();
+        editor.setFromHtml(html);
+      }
+      this.saveDraftInterval = setInterval(() => this.saveLocalDraft(), 1000);
+    }
+  },
   beforeDestroy() {},
   methods: {
+    saveLocalDraft() {
+      const editor = this.getEditor();
+      if (!editor) return;
+      if (!this.draft) return;
+      const html = editor.getHTML();
+      if (html.length >= 8) {
+        //console.log(this.draft, html);
+        this.$store.commit("saveLocalDraft", {
+          draftType: this.draft,
+          draft: html,
+        });
+      }
+    },
     selectDraft(index) {
       this.currentDraftIndex = index;
       const { content, title } = this.drafts[index];
@@ -250,6 +275,10 @@ export default {
       this.getEditor().clear();
 
       if (!this.draft) return;
+      this.$store.commit("saveLocalDraft", {
+        draftType: this.draft,
+        draft: "",
+      });
     },
     hasUnsavedInput() {
       const editor = this.getEditor();

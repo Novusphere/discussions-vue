@@ -41,7 +41,7 @@
           <v-card-text>
             <PostSubmitter
               cancelable
-              :draft="true"
+              :draft="'blog'"
               :sub="'blog'"
               ref="submitter"
               :title-field="true"

@@ -14,9 +14,8 @@
 
 <script>
 import BrowsePageLayout from "@/components/BrowsePageLayout";
-import { requireLoggedIn } from "@/utility";
 
-export default requireLoggedIn({
+export default {
   name: "DiscoverPage",
   components: {
     BrowsePageLayout,
@@ -24,5 +23,5 @@ export default requireLoggedIn({
   props: {},
   computed: {},
   data: () => ({}),
-});
+};
 </script>
