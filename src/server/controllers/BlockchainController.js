@@ -23,7 +23,6 @@ async function dfuseFetch(input, init) {
     headers["Authorization"] = `Bearer ${apiTokenInfo.token}`;
     headers["X-Eos-Push-Guarantee"] = 'in-block';
 
-    const fetch = require('node-fetch');
     return global.fetch(input, init);
 }
 

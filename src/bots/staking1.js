@@ -1,5 +1,5 @@
-import { getConfig, saveConfig, sleep } from "@/novusphere-js/utility";
-import { setAPIHost } from "@/novusphere-js/discussions/api";
+import { getConfig, sleep } from "@/novusphere-js/utility";
+//import { setAPIHost } from "@/novusphere-js/discussions/api";
 import { getActiveWallets, getAsset } from "@/novusphere-js/uid";
 import eos from "@/novusphere-js/uid/eos";
 
@@ -8,9 +8,9 @@ global.fetch = fetch;
 
 (async function () {
     try {
-        setAPIHost("http://localhost:8008");
+        //setAPIHost("http://localhost:8008");
 
-        const SLEEP_DURATION = 24 * 60 * 60 * 1000; // 24h how often we do our process loop
+        const ONE_HOUR = 1 * 60 * 60 * 1000;
 
         const config = await getConfig('staking1', {
             key: ''
@@ -63,10 +63,10 @@ global.fetch = fetch;
             console.log(actions.length);
             console.log(tx);
 
-            break;
-
-            console.log(`Resting... ${new Date()}`);
-            await sleep(SLEEP_DURATION);
+            for (let n = 0; n < 24; n++) {
+                console.log(`Resting... ${new Date()}`);
+                await sleep(ONE_HOUR);
+            }
         }
     }
     catch (ex) {

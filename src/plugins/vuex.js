@@ -402,7 +402,7 @@ export default new Vuex.Store({
         updateDisplayNames(state, users) {
             let save = false;
 
-            function update({ pub, uidw, displayName, nameTime }, collection, name) {
+            function update({ pub, uidw, displayName, nameTime }, collection) {
                 const eu = collection.find(i => i.pub == pub);
                 if (!eu) return;
 
@@ -411,7 +411,7 @@ export default new Vuex.Store({
                     eu.uidw = uidw;
                     save = true;
 
-                    console.log(name + ` ` + JSON.stringify(eu));
+                    //console.log(name + ` ` + JSON.stringify(eu));
                 }
 
                 if ((!eu.nameTime || nameTime > eu.nameTime) && eu.displayName != displayName) {
@@ -419,7 +419,7 @@ export default new Vuex.Store({
                     eu.nameTime = nameTime;
                     save = true;
 
-                    console.log(name + ` ` + JSON.stringify(eu));
+                    //console.log(name + ` ` + JSON.stringify(eu));
                 }
             }
 

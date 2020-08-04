@@ -25,7 +25,7 @@ export default @Controller('/data') class DataController {
     @Get("/popularusers")
     async popularUsers(req, res) {
 
-        let { publicKey: pub, domain } = req.unpack();
+        let { domain } = req.unpack();
 
         const pipeline = [
             { $match: { domain: domain } },

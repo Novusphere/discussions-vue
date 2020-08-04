@@ -73,7 +73,7 @@ export default @Controller('/account') class AccountController {
     @Api()
     @Post('/passport/:what/remove')
     async passportRemove(req, res) {
-        const { pub, domain, data } = req.unpackAuthenticated();
+        const { pub, domain } = req.unpackAuthenticated();
         const { what } = req.params;
 
         const field = {};

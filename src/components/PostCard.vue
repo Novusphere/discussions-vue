@@ -220,15 +220,19 @@ export default {
     submitPost({ post, transferActions }) {
       this.$emit("submit-post", { post, transferActions });
     },
-    cardClicked() {
+    cardClicked(event) {
+
       // reveal the blur if clicked on
       if (this.post.isNSFW && !this.removeNSFWOverlay) {
         this.removeNSFWOverlay = true;
+        event.preventDefault();
         return;
       }
 
       // other...
       if (!this.clickable) return;
+
+      event.preventDefault();
 
       let referenceId = undefined;
       let referenceId2 = undefined;

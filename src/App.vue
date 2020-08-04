@@ -76,7 +76,7 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <v-dialog v-model="isThreadDialogOpenProxy" fullscreen scrollable eager>
+      <v-dialog v-model="isThreadDialogOpenProxy" fullscreen scrollable eager persistent no-click-animation>
         <v-card v-if="isThreadDialogOpen">
           <v-card-title class="justify-end">
             <v-btn
@@ -281,6 +281,7 @@ export default {
         return this.isThreadDialogOpen;
       },
       set(value) {
+        console.log(`isThreadDialogOpenProxy - ${value}`);
         if (value) return;
         this.$store.commit("setThreadDialogOpen", {
           value: false,
