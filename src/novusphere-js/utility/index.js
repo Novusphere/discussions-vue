@@ -129,9 +129,10 @@ let _oembedNextAttempt = 0;
 
                     if (href.indexOf('/u/') == 0) {
                         const user = href.split('/').filter(s => s)[1];
+
                         if (user) {
                             let [displayName, publicKey] = user.split('-');
-                            const info = await getUserProfile(this.publicKey);
+                            const info = await getUserProfile(publicKey);
                             const rect = this.getBoundingClientRect();
 
                             return $vue.$store.commit("setPopoverOpen", {

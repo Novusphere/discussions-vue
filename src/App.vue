@@ -76,13 +76,7 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <v-dialog
-        v-model="isThreadDialogOpen"
-        fullscreen
-        scrollable
-        eager
-        @click:outside="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
-      >
+      <v-dialog v-model="isThreadDialogOpenProxy" fullscreen scrollable eager>
         <v-card v-if="isThreadDialogOpen">
           <v-card-title class="justify-end">
             <v-btn
@@ -281,6 +275,18 @@ export default {
     },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
+    },
+    isThreadDialogOpenProxy: {
+      get() {
+        return this.isThreadDialogOpen;
+      },
+      set(value) {
+        if (value) return;
+        this.$store.commit("setThreadDialogOpen", {
+          value: false,
+          path: this.$route.path,
+        });
+      },
     },
     ...mapGetters(["isPopoverOpen"]),
     ...mapState({

@@ -203,9 +203,10 @@ export default new Vuex.Store({
                     state.encryptedTest = local.encryptedTest;
                     state.displayName = local.displayName;
                     state.keys = local.keys;
-                    state.darkMode = local.darkMode;
-                    state.postViewType = local.postViewType;
+                    state.darkMode = local.darkMode || state.darkMode;
+                    state.postViewType = local.postViewType || state.postViewType;
                     state.localDrafts = local.localDrafts || state.localDrafts;
+                    state.alwaysUseThreadDialog = local.alwaysUseThreadDialog || state.alwaysUseThreadDialog;
 
                     // if false, they have a session -- but are not logged in.
                     if (state.keys.arbitrary.key)
