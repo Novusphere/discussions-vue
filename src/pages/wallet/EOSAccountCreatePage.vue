@@ -187,6 +187,7 @@ export default {
 
       this.disableSubmit = false;
       this.password = "";
+      this.$refs.form.resetValidation();
     },
   },
 };

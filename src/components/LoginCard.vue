@@ -94,7 +94,7 @@ import {
   displayNameRules,
   passwordRules,
   passwordTesterRules,
-  brainKeyRules
+  brainKeyRules,
 } from "@/utility";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
@@ -103,7 +103,7 @@ import {
   decrypt,
   brainKeyFromHash,
   isValidBrainKey,
-  brainKeyToKeys
+  brainKeyToKeys,
 } from "@/novusphere-js/uid";
 import { sleep, waitFor } from "@/novusphere-js/utility";
 
@@ -111,7 +111,7 @@ export default {
   name: "LoginCard",
   components: {
     PublicKeyIcon,
-    ConnectWalletBtn
+    ConnectWalletBtn,
   },
   props: {},
   data: () => ({
@@ -122,7 +122,7 @@ export default {
     displayName: "",
     password: "",
     waiting: false,
-    validForm: false
+    validForm: false,
   }),
   computed: {
     ...brainKeyRules("brainKey"),
@@ -140,12 +140,12 @@ export default {
     },
     ...mapGetters(["hasLoginSession"]),
     ...mapState({
-      oldEncryptedTest: state => state.encryptedTest,
-      oldDisplayName: state => state.displayName,
-      oldPublicKey: state => state.keys.arbitrary.pub,
-      oldEncryptedBrainKey: state => state.encryptedBrainKey,
-      needSyncAccount: state => state.needSyncAccount
-    })
+      oldEncryptedTest: (state) => state.encryptedTest,
+      oldDisplayName: (state) => state.displayName,
+      oldPublicKey: (state) => state.keys.arbitrary.pub,
+      oldEncryptedBrainKey: (state) => state.encryptedBrainKey,
+      needSyncAccount: (state) => state.needSyncAccount,
+    }),
   },
   watch: {
     async brainKey() {
@@ -157,7 +157,7 @@ export default {
           this.displayName = profile.displayName;
         }
       }
-    }
+    },
   },
   methods: {
     async reset() {
@@ -166,6 +166,7 @@ export default {
       this.password = "";
       this.brainKey = "";
       this.waiting = false;
+      this.$refs.form.resetValidation();
     },
     async walletConnected({ connector, auth }) {
       this.walletError = "";
@@ -193,7 +194,7 @@ export default {
         login = await createLoginObject({
           brainKey: this.brainKey,
           password: this.password,
-          displayName: this.displayName
+          displayName: this.displayName,
         });
       } else {
         if (this.passwordTesterRules.length) return;
@@ -201,7 +202,7 @@ export default {
         login = await createLoginObject({
           brainKey: decrypt(this.oldEncryptedBrainKey, this.password),
           password: this.password,
-          displayName: this.oldDisplayName
+          displayName: this.oldDisplayName,
         });
       }
 
@@ -211,7 +212,7 @@ export default {
       await waitFor(async () => !this.needSyncAccount);
       this.$store.commit("setLoginDialogOpen", false);
       await this.reset();
-    }
-  }
+    },
+  },
 };
 </script>

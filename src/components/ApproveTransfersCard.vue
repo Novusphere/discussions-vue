@@ -23,14 +23,16 @@
 
         <v-row v-show="!disableSubmit">
           <v-col cols="12">
-            <v-text-field
-              v-model="password"
-              :rules="passwordTesterRules"
-              label="Password"
-              type="password"
-              required
-              @keydown.enter="submit()"
-            ></v-text-field>
+            <v-form ref="form" lazy-validation>
+              <v-text-field
+                v-model="password"
+                :rules="passwordTesterRules"
+                label="Password"
+                type="password"
+                required
+                @keydown.enter="submit()"
+              ></v-text-field>
+            </v-form>
           </v-col>
         </v-row>
 
@@ -57,25 +59,25 @@ export default {
   name: "ApproveTransfersCard",
   components: {
     TokenIcon,
-    UserProfileLink
+    UserProfileLink,
   },
   props: {
     disableSubmit: Boolean,
     pendingTransfers: Array,
     closable: Boolean,
     flat: Boolean,
-    closeText: { type: String, default: "Close" }
+    closeText: { type: String, default: "Close" },
   },
   data: () => ({
-    password: ""
+    password: "",
   }),
   computed: {
     ...passwordTesterRules("password", "encryptedTest"),
     ...mapState({
-      keys: state => state.keys,
-      displayName: state => state.displayName,
-      encryptedTest: state => state.encryptedTest
-    })
+      keys: (state) => state.keys,
+      displayName: (state) => state.displayName,
+      encryptedTest: (state) => state.encryptedTest,
+    }),
   },
   methods: {
     async close() {
@@ -88,10 +90,11 @@ export default {
 
       const password = this.password;
       this.password = "";
+      this.$refs.form.resetValidation();
 
       this.$emit("submit", password);
-    }
-  }
+    },
+  },
 };
 </script>
 

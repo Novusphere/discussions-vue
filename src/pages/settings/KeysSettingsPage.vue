@@ -25,14 +25,16 @@
 
         <v-row>
           <v-col :cols="12">
-            <v-text-field
-              v-model="password"
-              :rules="passwordTesterRules"
-              label="Password"
-              type="password"
-              required
-              @keydown.enter="reveal()"
-            ></v-text-field>
+            <v-form ref="form" lazy-validation>
+              <v-text-field
+                v-model="password"
+                :rules="passwordTesterRules"
+                label="Password"
+                type="password"
+                required
+                @keydown.enter="reveal()"
+              ></v-text-field>
+            </v-form>
           </v-col>
           <v-col :cols="12">
             <v-btn color="primary" @click="reveal()">Reveal Private Keys</v-btn>
@@ -61,15 +63,15 @@ export default {
   computed: {
     ...passwordTesterRules("password", "encryptedTest"),
     ...mapState({
-      keys: state => state.keys,
-      encryptedBrainKey: state => state.encryptedBrainKey,
-      encryptedTest: state => state.encryptedTest
-    })
+      keys: (state) => state.keys,
+      encryptedBrainKey: (state) => state.encryptedBrainKey,
+      encryptedTest: (state) => state.encryptedTest,
+    }),
   },
   data: () => ({
     brainKey: "",
     password: "",
-    textFields: []
+    textFields: [],
   }),
   created() {
     this.reveal();
@@ -93,11 +95,12 @@ export default {
         { name: "Wallet Key", value: this.keys.wallet.pub },
         { name: "", value: privateKeys[1] },
         { name: "Identity Key", value: this.keys.identity.pub },
-        { name: "", value: privateKeys[2] }
+        { name: "", value: privateKeys[2] },
       ];
 
       this.password = "";
-    }
-  }
+      this.$refs.form.resetValidation();
+    },
+  },
 };
 </script>

@@ -14,11 +14,25 @@
 
         <v-text-field v-model="memo" label="Memo"></v-text-field>
 
-        <v-text-field type="password" v-model="password" :rules="passwordTesterRules" label="Password" @keydown.enter="submitWithdraw()"></v-text-field>
+        <v-text-field
+          type="password"
+          v-model="password"
+          :rules="passwordTesterRules"
+          label="Password"
+          @keydown.enter="submitWithdraw()"
+        ></v-text-field>
 
-        <TransactionSubmitText :link="transactionLink" :error="transactionError">Your withdrawal has been successfully submitted to the network.</TransactionSubmitText>
+        <TransactionSubmitText
+          :link="transactionLink"
+          :error="transactionError"
+        >Your withdrawal has been successfully submitted to the network.</TransactionSubmitText>
 
-        <v-btn :block="$vuetify.breakpoint.mobile" color="primary" @click="submitWithdraw()" :disabled="!valid || disableSubmit">
+        <v-btn
+          :block="$vuetify.breakpoint.mobile"
+          color="primary"
+          @click="submitWithdraw()"
+          :disabled="!valid || disableSubmit"
+        >
           <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
           <span>Withdraw</span>
         </v-btn>
@@ -41,9 +55,8 @@ import {
   decrypt,
   transfer,
   withdrawAction,
-  brainKeyToKeys
+  brainKeyToKeys,
 } from "@/novusphere-js/uid";
-
 
 import UserAssetSelect from "@/components/UserAssetSelect";
 import TransactionSubmitText from "@/components/TransactionSubmitText";
@@ -52,17 +65,17 @@ export default {
   name: "WalletAssetsPage",
   components: {
     UserAssetSelect,
-    TransactionSubmitText
+    TransactionSubmitText,
   },
   props: {},
   computed: {
     ...passwordTesterRules("password", "encryptedTest"),
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
-      encryptedBrainKey: state => state.encryptedBrainKey,
-      encryptedTest: state => state.encryptedTest,
-      keys: state => state.keys
-    })
+      encryptedBrainKey: (state) => state.encryptedBrainKey,
+      encryptedTest: (state) => state.encryptedTest,
+      keys: (state) => state.keys,
+    }),
   },
   data: () => ({
     disableSubmit: false,
@@ -75,12 +88,12 @@ export default {
     account: "",
     memo: "",
     transactionLink: "",
-    transactionError: ""
+    transactionError: "",
   }),
   watch: {
     async symbol() {
       await this.totalChange();
-    }
+    },
   },
   async created() {},
   methods: {
@@ -89,7 +102,7 @@ export default {
       const {
         amountAsset,
         feeAsset,
-        totalAsset
+        totalAsset,
       } = await getAmountFeeAssetsForTotal(
         await createAsset(this.total, this.symbol)
       );
@@ -126,7 +139,7 @@ export default {
         amount: await createAsset(this.amount, token.symbol),
         fee: await createAsset(this.fee, token.symbol),
         nonce: Date.now(),
-        memo: this.memo
+        memo: this.memo,
       });
 
       this.disableSubmit = true;
@@ -147,7 +160,8 @@ export default {
 
       this.disableSubmit = false;
       this.password = "";
-    }
-  }
+      this.$refs.form.resetValidation();
+    },
+  },
 };
 </script>

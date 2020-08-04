@@ -11,6 +11,10 @@
             <v-icon :class="{ 'is-active': isActive.bullet_list() }">format_list_bulleted</v-icon>
           </v-btn>
 
+          <v-btn icon @click="commands.ordered_list">
+            <v-icon :class="{ 'is-active': isActive.ordered_list() }">format_list_numbered</v-icon>
+          </v-btn>
+
           <v-btn icon @click="commands.bold">
             <v-icon :class="{ 'is-active': isActive.bold() }">format_bold</v-icon>
           </v-btn>
@@ -21,6 +25,10 @@
 
           <v-btn icon @click="commands.blockquote">
             <v-icon :class="{ 'is-active': isActive.blockquote() }">format_quote</v-icon>
+          </v-btn>
+
+          <v-btn icon @click="commands.code_block">
+            <v-icon :class="{ 'is-active': isActive.code_block() }">code</v-icon>
           </v-btn>
 
           <v-btn icon @click="insertLink(commands.link)">
@@ -65,10 +73,10 @@ import PublicKeyIcon from "@/components/PublicKeyIcon";
 import { Editor, EditorContent, EditorMenuBar } from "tiptap";
 import {
   Blockquote,
-  //CodeBlock,
+  CodeBlock,
   //HardBreak,
   Heading,
-  //OrderedList,
+  OrderedList,
   BulletList,
   ListItem,
   //TodoItem,
@@ -244,9 +252,11 @@ export default {
           }),
 
           new Blockquote(),
+          new CodeBlock(),
           new Heading({ levels: [1, 2, 3] }),
           new ListItem(),
           new BulletList(),
+          new OrderedList(),
           new Bold(),
           new Image(),
           new Link2(),
