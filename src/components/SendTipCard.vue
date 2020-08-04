@@ -5,7 +5,7 @@
         <span class="headline">Transfer</span>
       </v-card-title>
       <v-card-text>
-        <v-form ref="form" v-model="valid">
+        <v-form ref="form" v-model="valid" @submit.prevent>
           <UserAssetSelect ref="assets" v-model="symbol" required></UserAssetSelect>
 
           <v-text-field v-model="amount" label="Amount" required></v-text-field>

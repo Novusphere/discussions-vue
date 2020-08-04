@@ -26,7 +26,7 @@
         <v-card>
           <v-card-title>Moderation Settings</v-card-title>
           <v-card-text>
-            <v-form ref="form" v-model="valid">
+            <v-form ref="form" v-model="valid" @submit.prevent>
               <v-row>
                 <v-col>
                   <v-select

@@ -1,6 +1,6 @@
 <template>
   <v-card flat tile>
-    <v-form ref="form" lazy-validation>
+    <v-form ref="form" lazy-validation @submit.prevent>
       <v-expansion-panels class="mt-2" flat tile v-model="panel">
         <v-expansion-panel>
           <v-expansion-panel-header>1. Set up display name and password</v-expansion-panel-header>

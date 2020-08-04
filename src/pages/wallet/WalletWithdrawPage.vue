@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-text>
-      <v-form ref="form" v-model="valid">
+      <v-form ref="form" v-model="valid" @submit.prevent>
         <UserAssetSelect v-model="symbol" required></UserAssetSelect>
 
         <v-text-field v-model="amount" label="Amount" required @change="amountChange()"></v-text-field>

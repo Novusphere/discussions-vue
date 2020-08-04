@@ -25,7 +25,7 @@
 
         <v-row>
           <v-col :cols="12">
-            <v-form ref="form" lazy-validation>
+            <v-form ref="form" lazy-validation @submit.prevent>
               <v-text-field
                 v-model="password"
                 :rules="passwordTesterRules"
