@@ -76,7 +76,14 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <v-dialog v-model="isThreadDialogOpenProxy" fullscreen scrollable eager persistent no-click-animation>
+      <v-dialog
+        v-model="isThreadDialogOpenProxy"
+        fullscreen
+        scrollable
+        eager
+        persistent
+        no-click-animation
+      >
         <v-card v-if="isThreadDialogOpen">
           <v-card-title class="justify-end">
             <v-btn
@@ -157,6 +164,7 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import { getUserAccountObject } from "@/novusphere-js/discussions/api";
+import { subscribeAccount } from "@/novusphere-js/discussions/gateway";
 
 import AppBar from "@/components/AppBar";
 import AppNav from "@/components/AppNav";
@@ -242,6 +250,7 @@ export default {
         }
       }
 
+      subscribeAccount(this.keys.identity.key);
       this.$store.commit("syncAccount", account);
     },
   },
@@ -292,6 +301,7 @@ export default {
     ...mapGetters(["isPopoverOpen"]),
     ...mapState({
       darkMode: (state) => state.darkMode,
+      syncTime: (state) => state.syncTime,
       needSyncAccount: (state) => state.needSyncAccount,
       popover: (state) => state.popover,
       isLoginDialogOpen: (state) => state.isLoginDialogOpen,
@@ -312,6 +322,14 @@ export default {
   }),
   created() {
     this.$store.commit("init");
+    window.addEventListener(
+      "accountChange",
+      ({ detail: { payload: account } }) => {
+        if (!this.syncTime || account.data.syncTime > this.syncTime) {
+          this.$store.commit("syncAccount", account.data);
+        }
+      }
+    );
     //this.keepSyncAccount();
   },
   beforeDestroy() {},

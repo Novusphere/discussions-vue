@@ -53,6 +53,20 @@ async function getAPIHost() {
     });
 }
 
+async function createSignedBody(key, domain, body) {
+    const signData = JSON.stringify({
+        ...body,
+        pub: ecc.privateToPublic(key),
+        time: Date.now(),
+        domain: domain || windowHost()
+    });
+
+    const sig = await signText(signData, key);
+
+    body = { sig, data: signData };
+    return body;
+}
+
 async function apiRequest(endpoint, body = undefined, { key, domain, redirect } = {}) {
     const host = await getAPIHost();
     const url = `${host}${endpoint}`;
@@ -61,16 +75,7 @@ async function apiRequest(endpoint, body = undefined, { key, domain, redirect } 
     if (body) {
 
         if (key) {
-            const signData = JSON.stringify({
-                ...body,
-                pub: ecc.privateToPublic(key),
-                time: Date.now(),
-                domain: domain || windowHost()
-            });
-
-            const sig = await signText(signData, key);
-
-            body = { sig, data: signData };
+            body = await createSignedBody(key, domain, body);
         }
 
         if (redirect) {
@@ -748,8 +753,10 @@ function moderators(key, mods) {
 export {
     Post,
     PostSearchQuery,
+    windowHost,
     getAPIHost,
     setAPIHost,
+    createSignedBody,
     apiRequest,
     oembed,
     uploadImage,

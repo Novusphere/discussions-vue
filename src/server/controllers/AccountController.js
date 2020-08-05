@@ -7,6 +7,7 @@ import ecc from 'eosjs-ecc';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 import siteConfig from "../site";
+import { accountEvent } from "../events";
 
 export default @Controller('/account') class AccountController {
     constructor() {
@@ -139,7 +140,7 @@ export default @Controller('/account') class AccountController {
     @Post('/savedrafts')
     async saveDrafts(req, res) {
         let { pub, domain, data: { drafts }, _data } = req.unpackAuthenticated();
-        
+
         if (_data.length >= 256 * 1024) throw new Error(`Data must be less than 256kb`);
         if (!drafts || !Array.isArray(drafts)) throw new Error(`Expected drafts to be an array`);
 
@@ -209,6 +210,14 @@ export default @Controller('/account') class AccountController {
 
         let db = await getDatabase();
 
+        /*let document = await db.collection(config.table.accounts)
+            .find({
+                pub: pub,
+                domain: domain
+            })
+            .limit(1)
+            .next();*/
+
         await db.collection(config.table.accounts)
             .updateOne(
                 {
@@ -228,6 +237,8 @@ export default @Controller('/account') class AccountController {
                     }
                 },
                 { upsert: true });
+
+        accountEvent.emit('change', { pub, domain, sig, time, data });
 
         return res.success();
     }

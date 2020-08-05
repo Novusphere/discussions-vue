@@ -12,6 +12,7 @@ import createRoutes from "./routes";
 import siteConfig from "./site";
 import { connectDatabase } from "./mongo";
 import services from "./services";
+import gateways from "./gateways";
 
 import AccountController from "./controllers/AccountController";
 import BlockchainController from "./controllers/BlockchainController";
@@ -105,7 +106,7 @@ import UploadController from "./controllers/UploadController";
         res.redirect(`/404?path=${req.path}`);
     });
 
-    app.listen(siteConfig.port, () => console.log(`Server is listening at port ${siteConfig.port}`));
+    //app.listen(siteConfig.port, () => console.log(`Server is listening at port ${siteConfig.port}`));
+    gateways.start(app, siteConfig.port, () => console.log(`Gateway is listening at port ${siteConfig.port}`));
     services.start();
-
 })();

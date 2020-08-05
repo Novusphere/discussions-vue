@@ -72,7 +72,7 @@ function Api() {
             }
 
             try {
-                await fn.apply(target, arguments);
+                await fn.apply(this, arguments);
             }
             catch (ex) {
                 console.log(ex);

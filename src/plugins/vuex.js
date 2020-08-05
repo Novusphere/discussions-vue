@@ -85,14 +85,16 @@ async function saveAccount(state, external = true, callback = undefined) {
             keys: state.keys,
             darkMode: state.darkMode,
             alwaysUseThreadDialog: state.alwaysUseThreadDialog
-        }
+        };
 
         window.localStorage[LOCAL_STORAGE_KEY] = JSON.stringify(local);
 
         if (state.keys && state.keys.identity.key && external) {
+            const oldSyncTime = state.syncTime;
             state.syncTime = Date.now();
 
             const account = {
+                oldSyncTime: oldSyncTime,
                 syncTime: state.syncTime,
                 lastSeenNotificationsTime: state.lastSeenNotificationsTime,
                 displayName: state.displayName,
@@ -116,7 +118,9 @@ async function saveAccount(state, external = true, callback = undefined) {
             };
 
             if (account && saveUserAccountObject) {
-                await saveUserAccountObject(state.keys.identity.key, account, window.location.host);
+                if (await saveUserAccountObject(state.keys.identity.key, account, window.location.host)) {
+                    console.log(`Account saved to external storage`);
+                }
             }
         }
     });
