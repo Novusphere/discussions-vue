@@ -13,10 +13,11 @@ export default class DfuseWatcher {
         try {
             for (; ;) {
                 const operation = `
-                subscription {
+                subscription($cursor: String!) {
                     searchTransactionsForward(
                         query: "(auth:${account} OR receiver:${account})"
                         lowBlockNum:${previousAction ? previousAction.block + 1 : 0}
+                        cursor: $cursor
                     ) {
                         cursor
                         trace {

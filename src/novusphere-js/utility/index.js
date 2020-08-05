@@ -263,7 +263,7 @@ function getOEmbedHtml(href) {
         // Trading view chart image
         insertHTML = `<img src="${href}" alt="${href}" />`;
     }
-    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/@[A-Za-z0-9]+:[a-z0-9]+\/[A-Za-z0-9]+:[a-z0-9]+/gi.test(href)) {
+    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/@[A-Za-z0-9]+:[a-z0-9]+\/[A-Za-z0-9-]+:[a-z0-9]+/gi.test(href)) {
         const [, id] = href.substring(href.indexOf('/@') + 2).split('/');
         const colon = id.indexOf(':');
         const id2 = colon > -1 ? id.substring(0, colon) : id;
