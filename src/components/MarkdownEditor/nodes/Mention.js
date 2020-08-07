@@ -36,6 +36,7 @@ export default class Mention extends Node {
         'a',
         {
           href: `${node.attrs.href}`,
+          target: `_blank`,
           rel: 'noopener noreferrer nofollow',
           class: this.options.mentionClass,
         },
