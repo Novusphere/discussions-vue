@@ -273,6 +273,10 @@ function getOEmbedHtml(href) {
         const lbryId = vid.split(':')[0];
         insertHTML = `<iframe class="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${lbryId}" allowfullscreen></iframe>`;
     }
+    else if (/https?:\/\/(www.)?bitchute.com\/video\/[a-zA-Z0-9_-]+/ig.test(href)) {
+        const vid = href.split('/')[4];
+        insertHTML = `<iframe width="640" height="360" scrolling="no" frameborder="0" style="border: none;" src="https://www.bitchute.com/embed/${vid}/"></iframe>`;
+    }
     else if (/http(s)?:\/\/d.tube\/(#!\/)?v\//gi.test(href)) {
         //
         // Cannot disable autoplay: https://github.com/dtube/embed/issues/37
