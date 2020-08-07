@@ -263,14 +263,18 @@ function getOEmbedHtml(href) {
         // Trading view chart image
         insertHTML = `<img src="${href}" alt="${href}" />`;
     }
-    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/@[A-Za-z0-9]+:[a-z0-9]+\/[A-Za-z0-9-]+:[a-z0-9]+/gi.test(href)) {
-        const [, id] = href.substring(href.indexOf('/@') + 2).split('/');
-        const colon = id.indexOf(':');
-        const id2 = colon > -1 ? id.substring(0, colon) : id;
-
-        insertHTML = `<iframe id="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${id2}" allowfullscreen></iframe>`;
+    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/(@[A-Za-z0-9]+:[a-z0-9]+\/)?[A-Za-z0-9-]+:[a-z0-9]+/gi.test(href)) {
+        //
+        // Example links:
+        // https://open.lbry.com/@ZombieDoll:7/ZombieDoll-2019-Highlights--Part-1:9?r=1Z8k5wHyemxALZDWqZzCbxcHavTnTfay
+        // https://lbry.tv/Cat-on-High:e
+        //
+        const vid = href.split('/')[href.indexOf('/@') > -1 ? 4 : 3];
+        const lbryId = vid.split(':')[0];
+        insertHTML = `<iframe class="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${lbryId}" allowfullscreen></iframe>`;
     }
     else if (/http(s)?:\/\/d.tube\/(#!\/)?v\//gi.test(href)) {
+        //
         // Cannot disable autoplay: https://github.com/dtube/embed/issues/37
         //
         //const [user, id] = href.substring(href.indexOf('v/') + 2).split('/');
@@ -297,8 +301,7 @@ function getOEmbedHtml(href) {
         // Youtube
         oembed = `https://www.youtube.com/oembed?format=json&url=${href.replace(/feature=(.*?)&/, '')}`;
     }
-    else if ((/https?:\/\/www.instagr.am(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href) ||
-        (/https?:\/\/www.instagram.com(\/[a-zA-Z0-9-_]+)?\/p\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href)) {
+    else if ((/https?:\/\/www.instagr(am.com|.am)(\/[a-zA-Z0-9-_]+)?\/(p|reel)\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href)) {
         // Instagram
         oembed = `https://api.instagram.com/oembed/?url=${href}`;
     }

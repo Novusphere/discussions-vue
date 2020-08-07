@@ -269,7 +269,9 @@ export class Post {
             }
         }
 
-        const resultHtml = doc.body.innerHTML;
+        let resultHtml = doc.body.innerHTML;
+        resultHtml = resultHtml.replace(/&nbsp;/g, " ");
+
         return resultHtml;
     }
 

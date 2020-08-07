@@ -206,6 +206,7 @@ export default {
     else this.expanded = 0;
 
     this.postHTML = await this.post.getContentHTML();
+
     refreshOEmbed();
   },
   methods: {
