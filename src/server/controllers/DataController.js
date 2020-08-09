@@ -96,13 +96,14 @@ export default @Controller('/data') class DataController {
     @Api()
     @Get("/communities")
     async communities(req, res) {
-        const { data, domain } = await axios.get(`https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/community.json`);
+        let { domain } = req.unpack();
+        let { data } = await axios.get(`https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/community.json`);
+
         const tags = Object.keys(data);
         const pipeline = [
-            { $match: { domain: domain } },
-            { $unwind: "$data.tags" },
-            { $match: { "data.tags": { $in: tags } } },
-            { $group: { _id: "$data.tags", count: { $sum: 1 } } },
+            { $match: { domain: domain, "data.subscribedTags": { $in: tags } } },
+            { $unwind: "$data.subscribedTags" },
+            { $group: { _id: "$data.subscribedTags", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             {
                 $project:
@@ -115,11 +116,14 @@ export default @Controller('/data') class DataController {
         ];
 
         const db = await getDatabase();
-        const members = (await db
+        let members = (await db
             .collection(config.table.accounts)
             .aggregate(pipeline)
             .toArray())
-            .reduce((obj, { tag, count }) => obj[tag] = count || 0, {});
+            .reduce((obj, { tag, count }) => {
+                obj[tag] = count || 0;
+                return obj;
+            }, {});
 
         const result = tags.map(t => {
             const community = data[t];
