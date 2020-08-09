@@ -33,7 +33,7 @@ const getDefaultState = () => ({
     tempPassword: '', // used to temporarily store the result of a user inputting their password, setTempPassword() should IMMEDIATELY be called after consumption to clear
     //
     isSendTipDialogOpen: false,
-    sendTipRecipient: null, // { pub, uidw, displayName, uuid?, callback? }
+    sendTipRecipient: [], // [{ pub, uidw, displayName, uuid?, callback? }]
     //
     alwaysUseThreadDialog: false,
     isThreadDialogOpen: false,
@@ -327,14 +327,14 @@ export default new Vuex.Store({
                 state.popover[type] = { open: false };
             }
         },
-        setSendTipDialogOpen(state, { value, recipient }) {
+        setSendTipDialogOpen(state, { value, recipients }) {
             if (value) {
                 state.isSendTipDialogOpen = true;
-                state.sendTipRecipient = recipient;
+                state.sendTipRecipient = recipients;
             }
             else {
                 state.isSendTipDialogOpen = false;
-                state.sendTipRecipient = null;
+                state.sendTipRecipient = [];
             }
         },
         setTempPassword(state, password) {

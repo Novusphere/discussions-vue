@@ -65,7 +65,7 @@ export default {
   }),
   created() {
     if (this.showReply) {
-      let threadTree = {};
+      let threadTree = { artificial: true };
 
       let reply = { post: this.post, replies: [] };
       threadTree[this.post.uuid] = reply;

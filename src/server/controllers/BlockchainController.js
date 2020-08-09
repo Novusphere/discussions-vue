@@ -220,9 +220,15 @@ export default @Controller('/blockchain') class BlockchainController {
         if (!transfers || !Array.isArray(transfers)) throw new Error(`Expected actions to be of type Array`);
 
         let actions = await this.makeTransferActions(transfers);
-        if (notify) actions.push(this.makeNotifiyAction(notify));
+        if (notify) {
+            if (Array.isArray(notify))
+                actions.push(...notify.map(n => this.makeNotifiyAction(n)));
+            else
+                actions.push(this.makeNotifiyAction(notify));
+        }
         actions = this.addAuthorizationToActions(actions);
 
+        //const trx = { transaction_id: "5f2f829d6a35279ed7cf373f8ee3667bbc86cec39375a4b3b5cc86b1a9c233b7" }; 
         const trx = await this.transact(actions);
 
         return res.success(trx);

@@ -210,19 +210,32 @@ export default {
     refreshOEmbed();
   },
   methods: {
-    async tip({ transaction, transferActions }) {
+    async tip({ uuid, transaction, transferActions }) {
+      let post = this.post;
+      if (uuid != post.uuid) {
+        if (!post.threadTree) return;
+        const reply = post.threadTree[uuid];
+        if (!reply) return;
+        post = reply.post;
+      }
+
+      const filteredTransferActions = transferActions.filter(
+        (ta) => ta.recipientPublicKey == post.uidw
+      );
+
+      if (filteredTransferActions.length == 0) return;
+
       let artificalTips = await createArtificalTips(
         this.keys.wallet.pub,
         transaction,
-        transferActions
+        filteredTransferActions
       );
-      this.post.tips.push(...artificalTips);
+      post.tips.push(...artificalTips);
     },
     submitPost({ post, transferActions }) {
       this.$emit("submit-post", { post, transferActions });
     },
     cardClicked(event) {
-
       // reveal the blur if clicked on
       if (this.post.isNSFW && !this.removeNSFWOverlay) {
         this.removeNSFWOverlay = true;

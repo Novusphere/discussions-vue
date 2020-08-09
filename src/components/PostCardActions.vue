@@ -83,6 +83,14 @@
             <span>Share</span>
           </v-btn>
         </v-list-item>
+        <v-list-item
+          v-if="post.threadUuid == post.uuid && post.threadTree && !post.threadTree.artificial"
+        >
+          <v-btn text @click="raindrop()">
+            <v-icon>mdi-weather-pouring</v-icon>
+            <span>Raindrop</span>
+          </v-btn>
+        </v-list-item>
       </v-list>
     </v-menu>
   </v-card-actions>
@@ -128,6 +136,39 @@ export default {
     //
   }),
   methods: {
+    async raindrop() {
+      if (!this.isLoggedIn) {
+        this.$store.commit("setLoginDialogOpen", true);
+        return;
+      }
+
+      const recipients = [];
+      for (const r of Object.values(this.post.threadTree)) {
+        if (r.post.pub == this.keys.arbitrary.pub) continue; // don't tip self
+        if (recipients.find((rc) => rc.pub == r.post.pub)) continue; // already in recipients
+
+        recipients.push({
+          pub: r.post.pub,
+          uidw: r.post.uidw,
+          displayName: r.post.displayName,
+          memo: `raindrop to ${
+            r.post.displayName
+          } for ${this.post.getRelativeUrl(false)}`,
+          uuid: r.post.uuid,
+          callback: ({ transaction, transferActions }) =>
+            this.$emit("tip", {
+              uuid: r.post.uuid,
+              transaction,
+              transferActions,
+            }),
+        });
+      }
+
+      this.$store.commit("setSendTipDialogOpen", {
+        value: true,
+        recipients: recipients,
+      });
+    },
     async share(where) {
       const link = config.url + this.link;
       const tags = this.post.tags.filter((t) => !["all"].some((t2) => t2 == t));
@@ -227,21 +268,23 @@ export default {
       }
       this.$store.commit("setSendTipDialogOpen", {
         value: true,
-        recipient: {
-          pub: this.post.pub,
-          uidw: this.post.uidw,
-          displayName: this.post.displayName,
-          memo: `tip to ${this.post.displayName} for ${this.post.getRelativeUrl(
-            false
-          )}`,
-          uuid: this.post.uuid,
-          callback: ({ transaction, transferActions }) =>
-            this.$emit("tip", {
-              uuid: this.post.uuid,
-              transaction,
-              transferActions,
-            }),
-        },
+        recipients: [
+          {
+            pub: this.post.pub,
+            uidw: this.post.uidw,
+            displayName: this.post.displayName,
+            memo: `tip to ${
+              this.post.displayName
+            } for ${this.post.getRelativeUrl(false)}`,
+            uuid: this.post.uuid,
+            callback: ({ transaction, transferActions }) =>
+              this.$emit("tip", {
+                uuid: this.post.uuid,
+                transaction,
+                transferActions,
+              }),
+          },
+        ],
       });
     },
     async vote(value) {

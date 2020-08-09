@@ -101,12 +101,12 @@ export default {
       }
       this.$store.commit("setSendTipDialogOpen", {
         value: true,
-        recipient: {
+        recipients: [{
           pub: this.publicKey,
           uidw: this.uidw,
           displayName: this.displayName,
           memo: `tip to ${this.displayName}`,
-        },
+        }],
       });
     },
   },

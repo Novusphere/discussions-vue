@@ -289,7 +289,7 @@ async function createArtificalTips(from, transaction, transferActions) {
 //
 // Create transfer actions
 //
-async function createTransferActions(actions) {
+async function createTransferActions(actions, progressCallback) {
     const schema = Joi.object(
         {
             actions: Joi.array().items(Joi.object({
@@ -307,6 +307,8 @@ async function createTransferActions(actions) {
     schema.validate({ actions });
 
     let transfers = [];
+    const nonce = Date.now();
+    let nTx = 0;
 
     for (const {
         chain,
@@ -314,7 +316,7 @@ async function createTransferActions(actions) {
         recipientPublicKey,
         amount,
         fee,
-        nonce,
+        //nonce,
         memo
     } of actions) {
 
@@ -326,7 +328,7 @@ async function createTransferActions(actions) {
         body.writePublicKey(recipientPublicKey, 'EOS');
         body.writeAsset(amount);
         body.writeAsset(fee);
-        body.writeUInt64(nonce);
+        body.writeUInt64(nonce + nTx);
         body.writeString(memo);
 
         const bodyBuffer = body.toBuffer();
@@ -350,12 +352,19 @@ async function createTransferActions(actions) {
             chain: chain,
             from: senderPublicKey,
             to: recipientPublicKey,
-            nonce: nonce,
+            nonce: nonce + nTx,
             memo: memo,
             sig: signature
         };
 
         transfers.push(transfer);
+        nTx += 1;
+
+        if (progressCallback) {
+            await progressCallback(nTx, actions.length);
+        }
+
+        console.log(`Signed transaction ${nTx} of ${actions.length}`);
     }
 
     return transfers;
@@ -364,9 +373,9 @@ async function createTransferActions(actions) {
 //
 //  Transfers a Unified ID asset
 //
-async function transfer(actions, notify) {
+async function transfer(actions, notify, progressCallback) {
 
-    const transfers = await createTransferActions(actions);
+    const transfers = await createTransferActions(actions, progressCallback);
     const trx = await apiRequest(`/v1/api/blockchain/transfer`, {
         transfers,
         notify

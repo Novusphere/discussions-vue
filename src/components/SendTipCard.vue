@@ -16,6 +16,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
+
         <v-btn color="primary" @click="close()" v-show="closable">Close</v-btn>
         <v-btn color="primary" @click="showSummary()" :disabled="!valid || disableSubmit">
           <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
@@ -32,6 +33,12 @@
       @submit="submitTransfer"
       v-else
     >
+      <v-progress-linear
+        v-show="disableSubmit"
+        v-model="progress"
+        color="primary"
+        class="mb-2 mt-2"
+      ></v-progress-linear>
       <TransactionSubmitText :error="transactionError" />
     </ApproveTransfersCard>
   </div>
@@ -63,9 +70,10 @@ export default {
   },
   props: {
     closable: Boolean,
-    recipient: Object, // { pub, uidw, displayName, uuid?, callback? }
+    recipient: Array, // [{ pub, uidw, displayName, uuid?, callback? }]
   },
   data: () => ({
+    progress: 0,
     disableSubmit: false,
     valid: false,
     symbol: "",
@@ -102,22 +110,25 @@ export default {
       );
 
       let transferActions = [];
-      transferActions.push({
-        chain: await getChainForSymbol(this.symbol),
-        senderPrivateKey: "",
-        recipientPublicKey: this.recipient.uidw,
-        amount: amountAsset,
-        fee: feeAsset,
-        nonce: Date.now(),
-        memo: this.recipient.memo || `tip`,
-        // non-standard transfer action data (used in transfer dialog)
-        recipient: {
-          pub: this.recipient.pub, // their posting (arbitrary) key
-          displayName: this.recipient.displayName,
-        },
-        symbol: this.symbol,
-        total: await sumAsset(amountAsset, feeAsset),
-      });
+
+      for (const recipient of this.recipient) {
+        transferActions.push({
+          chain: await getChainForSymbol(this.symbol),
+          senderPrivateKey: "",
+          recipientPublicKey: recipient.uidw,
+          amount: amountAsset,
+          fee: feeAsset,
+          nonce: Date.now(),
+          memo: recipient.memo || `tip`,
+          // non-standard transfer action data (used in transfer dialog)
+          recipient: {
+            pub: recipient.pub, // their posting (arbitrary) key
+            displayName: recipient.displayName,
+          },
+          symbol: this.symbol,
+          total: await sumAsset(amountAsset, feeAsset),
+        });
+      }
 
       this.transfers = transferActions;
     },
@@ -139,16 +150,23 @@ export default {
         senderPrivateKey: keys.wallet.key,
       }));
 
-      let notify = undefined;
-      if (this.recipient.uuid) {
-        // there's a post uuid associated with this tip
-        notify = { name: "tip", data: { parentUuid: this.recipient.uuid } };
-      }
+      let notify = this.recipient.map((r) => ({
+        name: "tip",
+        data: { parentUuid: r.uuid },
+      }));
 
       try {
         this.disableSubmit = true;
+        this.progress = 0;
 
-        const receipt = await transfer(transferActions, notify);
+        const receipt = await transfer(
+          transferActions,
+          notify,
+          async (current, max) => {
+            this.progress = (max > 0 ? current / max : 1) * 100;
+          }
+        );
+
         this.disableSubmit = false;
 
         if (receipt.transaction_id) {
@@ -160,14 +178,18 @@ export default {
           //console.log(transactionLink);
           this.transactionLink = transactionLink;
 
-          if (this.recipient.callback) {
-            this.recipient.callback({
-              transaction: receipt.transaction_id,
-              transferActions: transferActions.map((ta) => ({
-                ...ta,
-                senderPrivateKey: "",
-              })),
-            });
+          const strippedTransferActions = transferActions.map((ta) => ({
+            ...ta,
+            senderPrivateKey: "",
+          }));
+
+          for (const recipient of this.recipient) {
+            if (recipient.callback) {
+              recipient.callback({
+                transaction: receipt.transaction_id,
+                transferActions: strippedTransferActions,
+              });
+            }
           }
         } else {
           if (receipt.error && receipt.message) {
