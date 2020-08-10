@@ -161,8 +161,8 @@ Example:
 	"channel": "discussions"
 }
 ```
-Execute
 
+Execute:
 ```
 
 npm run discord-bot
@@ -195,6 +195,14 @@ Example:
         { "screen_name": "decryptmedia", "tags": [ "crypto" ] }
     ]
 }
+```
+
+
+Execute:
+```
+
+npm run twitter-bot
+
 ```
 
 
