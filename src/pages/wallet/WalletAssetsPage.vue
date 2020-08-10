@@ -1,12 +1,12 @@
 <template>
   <v-row>
     <v-col
-      :cols="$vuetify.breakpoint.mobile ? 12 : 3"
       v-for="(s, i) in symbols"
       :key="i"
+      :cols="$vuetify.breakpoint.mobile ? 12 : 3"
       v-show="show[i]"
     >
-      <AssetCard ref="assets" hide-zero :symbol="s" @data="({zero}) => show[i] = !zero" />
+      <AssetCard ref="assets" hide-zero :symbol="s" @data="({zero}) => updateShow(i, !zero)" />
     </v-col>
     <v-col :cols="12">
       <TransactionBrowser
@@ -36,6 +36,9 @@ export default {
     ...mapState({
       keys: (state) => state.keys,
     }),
+    showSymbols() {
+      return this.symbols.filter((s, i) => this.show[i]);
+    },
   },
   data: () => ({
     symbols: [],
@@ -44,12 +47,15 @@ export default {
     trxFilter: "all",
   }),
   async created() {
-    console.log(`created`);
     this.symbols = await getSymbols();
-    this.show = this.symbols.map(() => true);
+    this.show = this.symbols.map(() => false);
     this.cursor = searchTransactions(this.keys.wallet.pub);
   },
   methods: {
+    updateShow(i, value) {
+      this.show[i] = value;
+      this.$forceUpdate();
+    },
     changeFilter(v) {
       this.trxFilter = v;
       this.cursor = searchTransactions(this.keys.wallet.pub, v);
