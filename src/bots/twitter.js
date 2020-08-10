@@ -60,7 +60,7 @@ const Twitter = require('twitter');
                         if (retweeted_status) continue; // ignore retweets
 
                         const url = `https://twitter.com/${screen_name}/status/${id_str}`;
-                        const tags = Array.from(new Set([PRIMARY_TAG, "twitter", ...hashtags.map(({ text }) => text), ...(w.tags || [])])).map(t => t.toLowerCase());
+                        const tags = Array.from(new Set([PRIMARY_TAG, "twitter", "bot", ...hashtags.map(({ text }) => text), ...(w.tags || [])])).map(t => t.toLowerCase());
                         //const screen_names = user_mentions.map(({ screen_name }) => screen_name);
 
                         const uuid = generateUuid();

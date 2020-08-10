@@ -147,19 +147,25 @@ let _oembedNextAttempt = 0;
                         }
                     }
                     else if (href.indexOf('/tag/') == 0) {
-                        const tags = href.split('/').filter(s => s)[1].split(',');
-                        if (tags.length == 1) {
-                            const rect = this.getBoundingClientRect();
-                            const community = await getCommunityByTag(tags[0]);
+                        const [, tagGroup, threadRefId] = href.split('/').filter(s => s);
+                        if (!threadRefId) {
+                            const tags = tagGroup.split(',');
+                            if (tags.length == 1) {
+                                const rect = this.getBoundingClientRect();
+                                const community = await getCommunityByTag(tags[0]);
 
-                            await sleep(100); // incase there's another popover open
+                                await sleep(100); // incase there's another popover open
 
-                            return $vue.$store.commit("setPopoverOpen", {
-                                value: true,
-                                type: "tag",
-                                rect,
-                                community,
-                            });
+                                return $vue.$store.commit("setPopoverOpen", {
+                                    value: true,
+                                    type: "tag",
+                                    rect,
+                                    community,
+                                });
+                            }
+                        }
+                        else {
+                            // open is popover dialog?
                         }
                     }
 

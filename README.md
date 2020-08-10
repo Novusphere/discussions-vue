@@ -173,7 +173,7 @@ npm run discord-bot
 
 Create `./config/twitter.json`
 - **Note:** See [https://developer.twitter.com/en/apps](https://developer.twitter.com/en/apps) for the Twitter developer API
-- `options.consumer_key`, `options.consumer_secret`, `options.access_token_key`, `options_access_token_secret` are all fields from the Twitter apps API
+- `options.consumer_key`, `options.consumer_secret`, `options.access_token_key`, `options.access_token_secret` are all fields from the Twitter apps API
 - `key` is the brain key your bot will be posting from. This can be a newly generated brain key specifically for the bot or your own existing brain key
 - `watch.screen_name` is the Twitter handle to watch
 - `watch.tags` is an array of tags to include in the Discussions post, on top of any tags used in the Tweet

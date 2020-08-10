@@ -63,7 +63,7 @@
         <v-expansion-panels class="mt-2" flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content>
-              <v-card flat @click="cardClicked" :color="contentBackgroundColor">
+              <v-card flat @click.native="cardClicked" :color="contentBackgroundColor">
                 <div
                   :class="{ 
                     'dark': $vuetify.theme.dark,
