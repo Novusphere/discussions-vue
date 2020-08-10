@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url> <loc>https://discussions.app/home</loc> </url>
 <url> <loc>https://discussions.app/404</loc> </url>
 <url> <loc>https://discussions.app/submit</loc> </url>
 <url> <loc>https://discussions.app/logout</loc> </url>
 <url> <loc>https://discussions.app/feed</loc> </url>
 <url> <loc>https://discussions.app/search</loc> </url>
-<url> <loc>https://discussions.app/notifications</loc> </url>
 <url> <loc>https://discussions.app/tag/all</loc> </url>
-<url> <loc>https://discussions.app/community</loc> </url>
+<url> <loc>https://discussions.app/notifications/posts</loc> </url>
+<url> <loc>https://discussions.app/notifications/trx</loc> </url>
+<url> <loc>https://discussions.app/discover/community</loc> </url>
+<url> <loc>https://discussions.app/discover/user</loc> </url>
 <url> <loc>https://discussions.app/wallet/assets</loc> </url>
 <url> <loc>https://discussions.app/wallet/withdraw</loc> </url>
 <url> <loc>https://discussions.app/wallet/deposit</loc> </url>
@@ -46,4 +49,20 @@
 <url> <loc>https://discussions.app/tag/wax</loc> </url>
 <url> <loc>https://discussions.app/tag/hongkong</loc> </url>
 <url> <loc>https://discussions.app/tag/defi</loc> </url>
+<url> <loc>https://discussions.app/tag/eu</loc> </url>
+<url> <loc>https://discussions.app/tag/china</loc> </url>
+<url> <loc>https://discussions.app/tag/bitcoin</loc> </url>
+<url> <loc>https://discussions.app/tag/eth</loc> </url>
+<url> <loc>https://discussions.app/tag/ethereum</loc> </url>
+<url> <loc>https://discussions.app/tag/coinbase</loc> </url>
+<url> <loc>https://discussions.app/tag/telos</loc> </url>
+<url> <loc>https://discussions.app/tag/sec</loc> </url>
+<url> <loc>https://discussions.app/tag/instagram</loc> </url>
+<url> <loc>https://discussions.app/tag/facebook</loc> </url>
+<url> <loc>https://discussions.app/tag/fio</loc> </url>
+<url> <loc>https://discussions.app/tag/anchor</loc> </url>
+<url> <loc>https://discussions.app/tag/tiktok</loc> </url>
+<url> <loc>https://discussions.app/tag/youtube</loc> </url>
+<url> <loc>https://discussions.app/tag/dapp</loc> </url>
+<url> <loc>https://discussions.app/tag/ultra</loc> </url>
 </urlset>
