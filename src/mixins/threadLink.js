@@ -11,12 +11,12 @@ export const threadLinkMixin = {
             let title = undefined, referenceId = undefined, referenceId2 = undefined;
 
             if (post.op) {
-                title = post.op.title;
+                title = post.op.getSnakeCaseTitle();
                 referenceId = post.op.getEncodedId();
                 referenceId2 = post.getEncodedId();
             }
             else {
-                title = post.title;
+                title = post.getSnakeCaseTitle();
                 referenceId = post.getEncodedId();
                 referenceId2 = undefined;
             }
