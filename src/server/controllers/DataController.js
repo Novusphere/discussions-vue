@@ -49,6 +49,7 @@ export default @Controller('/data') class DataController {
                         //},
                         {
                             $match: {
+                                "data.followingUsers.pub": { $exists: true },
                                 $expr: {
                                     $in: ["$$pub", "$data.followingUsers.pub"]
                                 }

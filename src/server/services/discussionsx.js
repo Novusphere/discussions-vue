@@ -342,6 +342,7 @@ class discussionsx {
     }
 
     async start() {
+
         const dispatch = {
             "post": this.post,
             "vote": this.vote,
