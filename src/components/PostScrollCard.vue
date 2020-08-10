@@ -11,8 +11,8 @@
           @submit-post="submitPost"
         />
         <PostCard v-else :clickable="true" :display="display" :post="post">
-          <template v-slot:actions>
-            <PostCardActions no-edit :post="post" :isCommentDisplay="false" />
+          <template v-slot:actions="{ tip }">
+            <PostCardActions no-edit :post="post" :isCommentDisplay="false" @tip="tip" />
           </template>
         </PostCard>
       </template>
@@ -28,8 +28,8 @@
       @submit-post="submitPost"
     />
     <PostCard v-else :clickable="true" :display="display" :post="post">
-      <template v-slot:actions>
-        <PostCardActions no-edit :post="post" :isCommentDisplay="false" />
+      <template v-slot:actions="{ tip }">
+        <PostCardActions no-edit :post="post" :isCommentDisplay="false" @tip="tip" />
       </template>
     </PostCard>
   </div>

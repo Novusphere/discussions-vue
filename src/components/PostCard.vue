@@ -212,6 +212,9 @@ export default {
   methods: {
     async tip({ uuid, transaction, transferActions }) {
       let post = this.post;
+      console.log(uuid);
+      console.log(this.post.uuid);
+
       if (uuid != post.uuid) {
         if (!post.threadTree) return;
         const reply = post.threadTree[uuid];
