@@ -253,6 +253,23 @@ export default {
       subscribeAccount(this.keys.identity.key);
       this.$store.commit("syncAccount", account);
     },
+    isThreadDialogOpenProxy(open) {
+      //
+      // https://github.com/vuetifyjs/vuetify/issues/3875
+      // https://github.com/Novusphere/discussions-vue/issues/158 
+      //
+      if (open) {
+        console.log(`applying scroll fix`);
+        document.body.style.top = `-${window.scrollY}px`;
+        document.body.style.position = "fixed";
+      } else {
+        console.log(`removing scroll fix`);
+        const scrollY = document.body.style.top;
+        document.body.style.position = "";
+        document.body.style.top = "";
+        window.scrollTo({ top: parseInt(scrollY || "0") * -1 });
+      }
+    },
   },
   computed: {
     profilePopover: {
