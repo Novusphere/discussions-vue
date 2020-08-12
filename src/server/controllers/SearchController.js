@@ -326,7 +326,7 @@ export default @Controller('/search') class SearchController {
                 }
             });
         }
-        else if (sort == 'recent reply') {
+        else if (sort == 'recent-reply') {
             // score = T
             pipeline.push({
                 $sort: {

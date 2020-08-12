@@ -8,6 +8,7 @@
     </template>
     <template v-slot:right>
       <AssetCard class="mb-2" :symbol="community.symbol" v-if="community && community.symbol" />
+      <RecentPostsCard :tags="tags" class="mb-2" />
     </template>
   </BrowsePageLayout>
 </template>
@@ -17,11 +18,12 @@ import { mapState, mapGetters } from "vuex";
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import CommunityCard from "@/components/CommunityCard";
 import AssetCard from "@/components/AssetCard";
+import RecentPostsCard from "@/components/RecentPostsCard";
 import PostBrowser from "@/components/PostBrowser";
 import {
   getPinnedPosts,
   searchPostsByTags,
-  getCommunityByTag
+  getCommunityByTag,
 } from "@/novusphere-js/discussions/api";
 
 export default {
@@ -30,28 +32,29 @@ export default {
     BrowsePageLayout,
     PostBrowser,
     CommunityCard,
-    AssetCard
+    AssetCard,
+    RecentPostsCard,
   },
   props: {},
   computed: {
     ...mapGetters(["isLoggedIn", "getModeratorKeys"]),
     ...mapState({
-      keys: state => state.keys
-    })
+      keys: (state) => state.keys,
+    }),
   },
   watch: {
-    "$route.params.tags": function() {
+    "$route.params.tags": function () {
       this.load();
     },
     isLoggedIn() {
       if (this.isLoggedIn) this.load();
-    }
+    },
   },
   data: () => ({
     tags: [],
     pinned: [],
     cursor: null,
-    community: null
+    community: null,
   }),
   async created() {
     await this.load();
@@ -91,7 +94,7 @@ export default {
 
       const community = await getCommunityByTag(this.tags[0]);
       this.community = community ? community : null;
-    }
-  }
+    },
+  },
 };
 </script>

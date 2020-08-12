@@ -52,7 +52,7 @@ export default {
   },
   data: function() {
     return {
-      items: ["popular", "recent", "recent reply", "controversial"]
+      items: ["popular", "recent", "recent-reply", "controversial"]
     };
   },
   created() {
