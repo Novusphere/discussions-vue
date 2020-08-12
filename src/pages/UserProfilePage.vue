@@ -188,6 +188,8 @@ export default {
 
       const recipients = [];
       for (const { pub, uidw, displayName } of this.followerUsers) {
+        if (!pub || !uidw || !displayName) continue; // legacy may not have uidw
+
         recipients.push({
           pub: pub,
           uidw: uidw,
