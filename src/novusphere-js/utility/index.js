@@ -147,7 +147,7 @@ let _oembedNextAttempt = 0;
                         }
                     }
                     else if (href.indexOf('/tag/') == 0) {
-                        const [, tagGroup, threadRefId] = href.split('/').filter(s => s);
+                        const [, tagGroup, threadRefId, title, threadRefId2] = href.split('/').filter(s => s);
                         if (!threadRefId) {
                             const tags = tagGroup.split(',');
                             if (tags.length == 1) {
@@ -165,7 +165,16 @@ let _oembedNextAttempt = 0;
                             }
                         }
                         else {
-                            // open is popover dialog?
+                            const { isThreadDialogOpen, alwaysUseThreadDialog } = $vue.$store.state;
+                            if (isThreadDialogOpen || alwaysUseThreadDialog) {
+                                return $vue.$store.commit("setThreadDialogOpen", {
+                                    value: true,
+                                    sub: tagGroup,
+                                    referenceId: threadRefId,
+                                    title: title,
+                                    referenceId2: threadRefId2,
+                                });
+                            }
                         }
                     }
 

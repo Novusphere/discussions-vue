@@ -259,11 +259,9 @@ export default {
       // https://github.com/Novusphere/discussions-vue/issues/158 
       //
       if (open) {
-        console.log(`applying scroll fix`);
         document.body.style.top = `-${window.scrollY}px`;
         document.body.style.position = "fixed";
       } else {
-        console.log(`removing scroll fix`);
         const scrollY = document.body.style.top;
         document.body.style.position = "";
         document.body.style.top = "";
@@ -338,6 +336,8 @@ export default {
     loginTab: null,
   }),
   created() {
+    window.$app = this;
+
     this.$store.commit("init");
     window.addEventListener(
       "accountChange",
