@@ -91,8 +91,8 @@ import {
 } from "tiptap-extensions";
 
 import Link2 from "./nodes/Link2";
-import Mention from "./nodes/Mention";
-import Hashtag from "./nodes/Hashtag";
+import { Mention, MentionPaste } from "./nodes/Mention";
+import { Hashtag, HashtagPaste } from "./nodes/Hashtag";
 
 import { htmlToMarkdown, markdownToHTML } from "@/novusphere-js/utility";
 
@@ -109,6 +109,8 @@ export default {
   },
   data() {
     return {
+      hasMounted: false,
+      //
       popoverX: 0,
       popoverY: 0,
       // mention suggestion
@@ -124,6 +126,10 @@ export default {
       editor: new Editor({
         onUpdate: () => this.$emit("change"),
         extensions: [
+          new HashtagPaste(),
+          new MentionPaste({
+            onFilter: (_, query) => this.getMentionSuggestions(query),
+          }),
           new Hashtag({
             // is called when a suggestion starts
             onEnter: ({ query, range, command }) => {
@@ -148,19 +154,19 @@ export default {
                 }
               };
 
-              console.proxyLog(`hash enter: ${this.tag}`);
+              console.log(`hash enter: ${this.tag}`);
             },
             // is called when a suggestion has changed
             onChange: ({ query, range }) => {
               this.tag = query;
               this.tagRange = range;
 
-              console.proxyLog(`hash change: ${this.tag}`);
+              console.log(`hash change: ${this.tag}`);
             },
             // is called when a suggestion is cancelled
             onExit: () => {
               if (this.tag) {
-                console.proxyLog(`hash exit: ${this.tag}`);
+                console.log(`hash exit: ${this.tag}`);
                 // this is pretty much a hack
                 const android = /Android \d/.test(navigator.userAgent);
                 if (android) {
@@ -184,7 +190,7 @@ export default {
                 event.key == "Tab" ||
                 event.key == " "
               ) {
-                console.proxyLog(`hash keydown: ${this.tag}`);
+                console.log(`hash keydown: ${this.tag}`);
 
                 this.insertTag({ range: this.tagRange });
 
@@ -246,9 +252,7 @@ export default {
               return false;
             },
             // is called when a suggestion has changed
-            onFilter: (_, query) => {
-              return this.getMentionSuggestions(query);
-            },
+            onFilter: (_, query) => this.getMentionSuggestions(query),
           }),
 
           new Blockquote(),
@@ -267,7 +271,6 @@ export default {
       }),
     };
   },
-
   computed: {
     hasResults() {
       return this.filteredUsers.length;
@@ -276,7 +279,9 @@ export default {
       return this.query || this.hasResults;
     },
   },
-
+  mounted() {
+    this.hasMounted = true;
+  },
   methods: {
     async insertLink(command) {
       const state = this.editor.state;

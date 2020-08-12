@@ -37,6 +37,7 @@ let config = {
         },
         "accounts": {
             "pub": 1,
+            "domain": 1,
             "data.publicKeys.arbitrary": 1,
             "data.publicKeys.wallet": 1,
             "data.subscribedTags": 1,

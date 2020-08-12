@@ -1,11 +1,50 @@
 // Modified from: https://github.com/scrumpy/tiptap/blob/a6f4e896dc5723cb807e213966d137e487240631/packages/tiptap-extensions/src/nodes/Mention.js
 
-import { Node } from 'tiptap'
-import { replaceText } from 'tiptap-commands'
+import { Node, Mark } from 'tiptap'
+import { replaceText, pasteRule } from 'tiptap-commands'
 import { Suggestions } from "tiptap-extensions";
 
-export default class Mention extends Node {
+export class MentionPaste extends Mark {
+  constructor(options) {
+    super(options);
 
+    this.allSuggestions = this.options.onFilter(undefined, '');
+    this.pasteRegex = new RegExp(`@(${this.allSuggestions.map(s => s.displayName).join('|')})`, 'gi');
+  }
+
+  get name() {
+    return 'mentionpaste'
+  }
+
+  get schema() {
+    return {
+      attrs: {
+        href: {}
+      },
+      group: 'inline',
+      inline: true,
+      selectable: false,
+      atom: true,
+      toDOM: node => ['a', { href: `${node.attrs.href}`, target: `_blank` }, ``,],
+      parseDOM: [],
+    }
+  }
+
+  pasteRules({ type }) {
+    return this.allSuggestions.length == 0 ? [] : [
+      pasteRule(
+        this.pasteRegex,
+        type,
+        (match) => {
+          const [{ pub, displayName }] = this.options.onFilter(undefined, match.substring(1));
+          return ({ href: `/u/${encodeURIComponent(displayName)}-${pub}` });
+        },
+      ),
+    ]
+  }
+}
+
+export class Mention extends Node {
   get name() {
     return 'mention'
   }
@@ -16,9 +55,7 @@ export default class Mention extends Node {
         char: '@',
         allowSpaces: false,
         startOfLine: false,
-      },
-      mentionClass: 'mention',
-      suggestionClass: 'mention-suggestion',
+      }
     }
   }
 
@@ -32,19 +69,8 @@ export default class Mention extends Node {
       inline: true,
       selectable: false,
       atom: true,
-      toDOM: node => [
-        'a',
-        {
-          href: `${node.attrs.href}`,
-          target: `_blank`,
-          rel: 'noopener noreferrer nofollow',
-          class: this.options.mentionClass,
-        },
-        `${this.options.matcher.char}${node.attrs.name}`,
-      ],
-      parseDOM: [
-        // they will be parsed as a link, which is ok
-      ],
+      toDOM: node => ['a', { href: `${node.attrs.href}`, target: `_blank` }, `${this.options.matcher.char}${node.attrs.name}`],
+      parseDOM: [], // they will be parsed as a link, which is ok
     }
   }
 
@@ -63,10 +89,8 @@ export default class Mention extends Node {
         onChange: this.options.onChange,
         onExit: this.options.onExit,
         onKeyDown: this.options.onKeyDown,
-        onFilter: this.options.onFilter,
-        suggestionClass: this.options.suggestionClass,
+        onFilter: this.options.onFilter
       }),
     ]
   }
-
 }

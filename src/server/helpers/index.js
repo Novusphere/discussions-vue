@@ -52,8 +52,9 @@ function Api() {
                     throw new Error(`Recovered key ${recoveredKey} does not match supplied key ${pub}`);
                 }
 
-                if (Math.abs(Date.now() - time) > 30000) {
-                    throw new Error(`Signature must be within a 30 second threshold, it's possible your system clock is out of sync`);
+                const clockDelta = Date.now() - time;
+                if (Math.abs(clockDelta) > 30000) {
+                    throw new Error(`Signature must be within a 30 second threshold, it's possible your system clock is out of sync, clock delta=${clockDelta}`);
                 }
 
                 if (!domain || domain.length > 32) {

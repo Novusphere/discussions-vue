@@ -210,6 +210,14 @@ export class Post {
     async getContentHTML() {
         let doc = await this.getContentDocument();
 
+        function linkEquals(l1, l2) {
+            if (l1.lastIndexOf('/') != l1.length - 1)
+                l1 += '/';
+            if (l2.lastIndexOf('/') != l2.length - 1)
+                l2 += '/';
+            return (l1 == l2);
+        }
+
         // transform text that is a link into an actual anchor link
         (function recursiveLinkify(node) {
             for (const child of node.childNodes)
@@ -238,6 +246,13 @@ export class Post {
             for (const node of Array.from(doc.links)) {
 
                 const { href, innerText } = node;
+
+                //
+                // guard against hyperlinks
+                // https://github.com/Novusphere/discussions-vue/issues/179
+                //
+                if (!linkEquals(href, innerText)) continue;
+
                 let innerHTML = undefined;
 
                 try {

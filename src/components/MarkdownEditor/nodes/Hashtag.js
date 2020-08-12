@@ -1,11 +1,40 @@
 // Modified from: https://github.com/scrumpy/tiptap/blob/a6f4e896dc5723cb807e213966d137e487240631/packages/tiptap-extensions/src/nodes/Mention.js
 
-import { Node } from 'tiptap'
-import { replaceText } from 'tiptap-commands'
+import { Node, Mark } from 'tiptap';
+import { replaceText, pasteRule } from 'tiptap-commands';
 import { Suggestions } from "tiptap-extensions";
 
-export default class Hashtag extends Node {
+export class HashtagPaste extends Mark {
+  get name() {
+    return 'hashtagpaste'
+  }
 
+  get schema() {
+    return {
+      attrs: {
+        href: {}
+      },
+      group: 'inline',
+      inline: true,
+      selectable: false,
+      atom: true,
+      toDOM: node => ['a', { href: `${node.attrs.href}`, target: `_blank` }, ``,],
+      parseDOM: [],
+    }
+  }
+
+  pasteRules({ type }) {
+    return [
+      pasteRule(
+        /#[a-zA-Z0-9]+/gi,
+        type,
+        (match) => ({ href: `/tag/${match.substring(1)}`, tag: '' }),
+      ),
+    ]
+  }
+}
+
+export class Hashtag extends Node {
   get name() {
     return 'hashtag'
   }
@@ -16,9 +45,7 @@ export default class Hashtag extends Node {
         char: '#',
         allowSpaces: false,
         startOfLine: false,
-      },
-      hashtagClass: 'hashtag',
-      suggestionClass: 'hashtag-suggestion',
+      }
     }
   }
 
@@ -32,19 +59,8 @@ export default class Hashtag extends Node {
       inline: true,
       selectable: false,
       atom: true,
-      toDOM: node => [
-        'a',
-        {
-          href: `${node.attrs.href}`,
-          target: `_blank`,
-          rel: 'noopener noreferrer nofollow',
-          class: this.options.hashtagClass,
-        },
-        `${this.options.matcher.char}${node.attrs.tag}`,
-      ],
-      parseDOM: [
-        // they will be parsed as a link, which is ok
-      ],
+      toDOM: node => ['a', { href: `${node.attrs.href}`, target: `_blank`, }, `${this.options.matcher.char}${node.attrs.tag}`],
+      parseDOM: [], // they will be parsed as a link, which is ok
     }
   }
 
@@ -63,10 +79,8 @@ export default class Hashtag extends Node {
         onChange: this.options.onChange,
         onExit: this.options.onExit,
         onKeyDown: this.options.onKeyDown,
-        onFilter: this.options.onFilter,
-        suggestionClass: this.options.suggestionClass,
+        onFilter: this.options.onFilter
       }),
     ]
   }
-
 }

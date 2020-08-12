@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import expressSession from 'express-session';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -66,14 +66,15 @@ import UploadController from "./controllers/UploadController";
     }
 
     function addRoute(route, path = '') {
-        if (!route.children) {
+        if (!route.children || route.redirect) {
             const fullPath = path + route.path;
             console.log(`Added route for ${fullPath}`);
             app.get(fullPath, async (req, res, next) => {
                 serve(req, res, next);
             });
         }
-        else {
+        
+        if (route.children) {
             for (const child of route.children) {
                 let fullPath = path + route.path;
                 if (fullPath[fullPath.length - 1] != '/') {

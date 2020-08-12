@@ -33,6 +33,9 @@
         <v-tab :to="`/u/${$route.params.who}/following`">
           <span>Following</span>
         </v-tab>
+        <v-tab :to="`/u/${$route.params.who}/followers`">
+          <span>Followers</span>
+        </v-tab>
       </v-tabs>
     </template>
     <template v-slot:content>
@@ -56,6 +59,11 @@
       </div>
       <div v-else-if="isViewFollowing">
         <div v-for="(fu, i) in followingUsers" :key="i">
+          <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
+        </div>
+      </div>
+      <div v-else-if="isViewFollowers">
+        <div v-for="(fu, i) in followerUsers" :key="i">
           <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
         </div>
       </div>
@@ -130,7 +138,7 @@ export default {
     displayName: "",
     publicKey: "",
     cursor: null,
-    followers: 0,
+    followers: [],
     following: [],
     posts: 0,
     threads: 0,
@@ -138,6 +146,9 @@ export default {
     auth: [],
   }),
   computed: {
+    isViewFollowers() {
+      return this.$route.params.tab == "followers";
+    },
     isViewFollowing() {
       return this.$route.params.tab == "following";
     },
@@ -203,22 +214,20 @@ export default {
       this.uidw = info.uidw;
       this.publicKey = info.pub;
       this.displayName = info.displayName;
-      this.followers = info.followers;
       this.posts = info.posts;
       this.threads = info.threads;
+      this.followerUsers = info.followerUsers || [];
       this.followingUsers = info.followingUsers || [];
       this.auth = info.auth;
 
       const shortPublicKey = getShortPublicKey(info.pub);
       if (info.displayName && publicKey != shortPublicKey) {
-        //console.log(info);
-
         const tab = this.$route.params.tab || "";
         const path = `/u/${info.displayName}-${shortPublicKey}/${tab}`;
         window.history.replaceState({}, null, path);
       }
 
-      if (this.isViewFollowing) {
+      if (this.isViewFollowing || this.isViewFollowers) {
         this.cursor = null;
       } else {
         let cursor = undefined;

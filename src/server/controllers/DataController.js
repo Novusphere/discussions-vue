@@ -27,7 +27,7 @@ export default @Controller('/data') class DataController {
         const { domain } = req.unpack();
         const result = {};
         const db = await getDatabase();
-        
+
         result.allEosAccounts = await db.collection(config.table.uid).countDocuments({
             name: "transfer",
             account: "nsuidcntract",
@@ -281,9 +281,18 @@ export default @Controller('/data') class DataController {
         const db = await getDatabase();
 
         let followers = 0;
+        let followerUsers = [];
         let lastPost = null;
         let threads = 0;
         let posts = 0;
+
+        function stripAuth(auth) {
+            if (!auth) return undefined;
+            return Object.keys(auth).map(name => ({
+                name: name,
+                username: auth[name].username
+            }));
+        }
 
         let user = await db.collection(config.table.accounts)
             .find({
@@ -300,13 +309,7 @@ export default @Controller('/data') class DataController {
             if (user.data && user.data.publicKeys) {
                 pub = user.data.publicKeys.arbitrary;
             }
-
-            if (user.auth) {
-                auth = Object.keys(user.auth).map(name => ({
-                    name: name,
-                    username: user.auth[name].username
-                }));
-            }
+            auth = stripAuth(user.auth);
         }
 
         if (pub && pub.length >= 50) {
@@ -315,6 +318,24 @@ export default @Controller('/data') class DataController {
                     "domain": domain,
                     "data.followingUsers.pub": pub
                 });
+
+            // TO-DO: limit 100... cross this bridge later
+            followerUsers = (await db.collection(config.table.accounts)
+                .aggregate([{
+                    $match: {
+                        "domain": domain,
+                        "data.followingUsers.pub": pub
+                    }
+                }, {
+                    $project: {
+                        "displayName": "$data.displayName",
+                        "pub": "$data.publicKeys.arbitrary",
+                        "uidw": "$data.publicKeys.wallet"
+                    }
+                }, {
+                    $limit: 100
+                }])
+                .toArray());
 
             lastPost = await db.collection(config.table.posts)
                 .find({ "pub": pub })
@@ -334,11 +355,12 @@ export default @Controller('/data') class DataController {
 
         return res.success({
             pub,
-            followers,
             posts,
             threads,
             uidw: lastPost ? lastPost.uidw : undefined,
             displayName: lastPost ? lastPost.displayName : undefined,
+            followers,
+            followerUsers,
             followingUsers: user ? user.data.followingUsers : [],
             auth: auth
         });
@@ -388,25 +410,29 @@ export default @Controller('/data') class DataController {
     async publicKeyIcon(req, res) {
         let { publicKey } = req.unpack();
         const dot = publicKey.indexOf('.');
+        let svg = false;
         if (dot > -1) {
             // remove the .svg / .png
+            svg = publicKey.lastIndexOf('.svg') == publicKey.length - 4;
             publicKey = publicKey.substring(0, dot);
         }
 
-        const icon = await getFromCache(keyIconCache, publicKey, async () => {
+        const icon = await getFromCache(keyIconCache, `${publicKey}_${svg ? 'svg' : 'png'}`, async () => {
             const options = {
                 //foreground: [0, 0, 0, 255],  // rgba black
                 //background: dark ? [0, 0, 0, 255] : [255, 255, 255, 255],
                 background: [0, 0, 0, 0],
                 //margin: 0.2,  // 20% margin
                 size: 420, // 420px square
-                format: 'svg' // use SVG instead of PNG
+                format: svg ? 'svg' : 'png' // use SVG instead of PNG
             };
 
-            return new Identicon(PublicKey.fromString(publicKey).toHex(), options).toString(true);
+            const icon = new Identicon(PublicKey.fromString(publicKey).toHex(), options).toString(true);
+            const iconBuffer = Buffer.from(icon, 'binary');
+            return iconBuffer;
         });
 
-        return res.success(icon, { contentType: 'image/svg+xml', cacheControl: 'public, max-age=604800, immutable' });
+        return res.success(icon, { contentType: svg ? 'image/svg+xml' : 'image/png', cacheControl: 'public, max-age=604800, immutable' });
     }
 
     @Api()

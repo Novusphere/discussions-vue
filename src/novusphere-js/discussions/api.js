@@ -5,6 +5,7 @@ import { PostSearchQuery } from "./PostSearchQuery";
 import { getFromCache } from "@/novusphere-js/utility";
 import { Post } from './Post';
 import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
+import { AccountSearchQuery } from './AccountSearchQuery';
 
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
@@ -222,7 +223,26 @@ async function getCommunityByTag(tag, artifical = 'atmos') {
 
 //
 // General Search Query
-// See [SearchQuery] object for documentation
+// see [AccountSearchQuery] object for documentation
+//
+/*function searchAccounts(searchQuery) {
+    return new AccountSearchQuery(searchQuery);
+}
+
+function searchFollowers(pub, domain) {
+    return searchAccounts({
+        pipeline: [{
+            $match: {
+                "domain": domain || windowHost(),
+                "data.followingUsers.pub": pub
+            }
+        }]
+    });
+}*/
+
+//
+// General Search Query
+// See [PostSearchQuery] object for documentation
 //
 function searchPosts(searchQuery) {
     return new PostSearchQuery(searchQuery);
@@ -762,6 +782,8 @@ export {
     uploadImage,
     submitPost,
     submitVote,
+    //searchAccounts,
+    //searchFollowers,
     searchPosts,
     searchPostsByAll,
     searchPostsByTags,

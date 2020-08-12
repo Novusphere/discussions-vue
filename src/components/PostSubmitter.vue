@@ -307,7 +307,8 @@ export default {
       this.$emit("cancel");
     },
     mentionSuggester(query) {
-      console.proxyLog(`mentionsSuggester: ${query}`);
+      //console.proxyLog(`mentionsSuggester: ${query}`);
+
       // include people who the user is following
       let items = this.followingUsers.map((u) => ({
         pub: u.pub,
@@ -317,6 +318,10 @@ export default {
       // include people who have participated in current thread
       if (this.parentPost && this.parentPost.threadTree) {
         for (const { post } of Object.values(this.parentPost.threadTree)) {
+
+          if (!post) continue;
+          if (!post.pub) continue; // "real thread tree" field
+
           const existing = items.find((i) => i.pub == post.pub);
           if (existing) {
             if (!existing.displayName.some((dn) => dn == post.displayName)) {
@@ -328,7 +333,7 @@ export default {
         }
       }
 
-      console.proxyLog(`mentions pre-filter: ${JSON.stringify(items)}`);
+      //console.proxyLog(`mentions pre-filter: ${JSON.stringify(items)}`);
 
       if (!query) {
         return items;
@@ -338,7 +343,7 @@ export default {
         i.displayName.some((dn) => regex.test(dn))
       );
 
-      console.proxyLog(`mentions after filter: ${JSON.stringify(filtered)}`);
+      //console.proxyLog(`mentions after filter: ${JSON.stringify(filtered)}`);
 
       return filtered;
     },

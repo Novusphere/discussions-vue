@@ -6,6 +6,45 @@ export default @Controller('/search') class SearchController {
     constructor() {
     }
 
+    /*@Api()
+    @All("/accounts")
+    async searchUsers(req, res) {
+        let { id, pipeline, count, limit } = req.unpack();
+
+        if (!pipeline || !Array.isArray(pipeline)) throw new Error(`Pipeline must be specified and of type Array`);
+
+        id = id || 0;
+        count = count || 0;
+        limit = Math.max(Math.min(Number(limit || 20), 100), 1);
+
+        // forcefully restrict output
+        if (!pipeline[pipeline.length - 1].$count) {
+            pipeline.push({
+                $project: {
+                    "displayName": "$data.displayName",
+                    "publicKeys": "$data.publicKeys",
+                    "publicKeyProofs": "$data.publicKeyProofs",
+                }
+            });
+        }
+
+        let cursor = undefined;
+        ({ id, cursor } = await this.getCursorById(id, async () => {
+            const db = await getDatabase();
+            return await db.collection(config.table.accounts).aggregate(pipeline);
+        }));
+
+        let items = [];
+        ({ id, cursor, count, limit, items } = await this.consumeCursor(id, cursor, count, limit));
+
+        return res.success({
+            accounts: items,
+            id,
+            count,
+            limit
+        });
+    }*/
+
     @Api()
     @All("/uid")
     async searchUnifiedIdTrx(req, res) {
@@ -284,6 +323,14 @@ export default @Controller('/search') class SearchController {
             pipeline.push({
                 $sort: {
                     createdAt: -1,
+                }
+            });
+        }
+        else if (sort == 'recent reply') {
+            // score = T
+            pipeline.push({
+                $sort: {
+                    lastReplyAt: -1,
                 }
             });
         }

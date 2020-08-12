@@ -161,6 +161,7 @@ class discussionsx {
                         sub: action.data.tags[0]
                     },
                     u: {
+                        $set: { lastReplyAt: action.time },
                         $inc: { totalReplies: 1 }
                     },
                 });
@@ -178,6 +179,7 @@ class discussionsx {
                 id: action.id,
                 createdAt: action.time,
                 editedAt: 0,
+                lastReplyAt: action.time,
                 transaction: action.transaction,
                 blockApprox: action.block,
                 uuid: action.data.uuid,
