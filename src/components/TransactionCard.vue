@@ -107,9 +107,17 @@ export default {
 
       const memo = this.trx.data.memo;
       let memoHtml = sanitize(memo);
+      
       memoHtml = memoHtml.replace(/\/tag\/[a-zA-Z0-9/_-]+/, function (url) {
         return `<a target="_blank" href="${url}">${url}</a>`;
       });
+
+      memoHtml = memoHtml.replace(
+        /\/u\/[a-zA-Z0-9/_-]+-[a-zA-Z0-9]+/,
+        function (url) {
+          return `<a target="_blank" href="${url}">${url}</a>`;
+        }
+      );
 
       this.memoHtml = memoHtml;
     }

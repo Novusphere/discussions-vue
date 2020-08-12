@@ -5,7 +5,7 @@ import { PostSearchQuery } from "./PostSearchQuery";
 import { getFromCache } from "@/novusphere-js/utility";
 import { Post } from './Post';
 import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
-import { AccountSearchQuery } from './AccountSearchQuery';
+//import { AccountSearchQuery } from './AccountSearchQuery';
 
 let cache = {
     communities: undefined, // { tag, desc, icon }[]

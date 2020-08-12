@@ -63,6 +63,9 @@
         </div>
       </div>
       <div v-else-if="isViewFollowers">
+        <v-row align="start" justify="end" class="mb-2" no-gutters>
+          <v-btn color="primary" @click="followersRaindrop()">Raindrop</v-btn>
+        </v-row>
         <div v-for="(fu, i) in followerUsers" :key="i">
           <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
         </div>
@@ -177,6 +180,27 @@ export default {
     await this.load();
   },
   methods: {
+    async followersRaindrop() {
+      if (!this.isLoggedIn) {
+        this.$store.commit("setLoginDialogOpen", true);
+        return;
+      }
+
+      const recipients = [];
+      for (const { pub, uidw, displayName } of this.followerUsers) {
+        recipients.push({
+          pub: pub,
+          uidw: uidw,
+          displayName: displayName,
+          memo: `raindrop to ${displayName} from following /u/${this.$route.params.who}`,
+        });
+      }
+
+      this.$store.commit("setSendTipDialogOpen", {
+        value: true,
+        recipients: recipients,
+      });
+    },
     async submitPost({ post }) {
       this.waitSubmit = true;
 
