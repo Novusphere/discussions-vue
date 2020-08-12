@@ -189,6 +189,7 @@ export default {
       const recipients = [];
       for (const { pub, uidw, displayName } of this.followerUsers) {
         if (!pub || !uidw || !displayName) continue; // legacy may not have uidw
+        if (pub == this.keys.arbitrary.pub) continue; // self
 
         recipients.push({
           pub: pub,
