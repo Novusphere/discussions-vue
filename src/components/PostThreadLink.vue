@@ -3,7 +3,7 @@
     <v-btn text v-if="btn" @click="copy ? copyLink() : goToLink()">
       <slot></slot>
     </v-btn>
-    <a class="thread-link" :href="this.link" @click.prevent="goToLink" v-else>
+    <a class="text-decoration-none" :href="this.link" @click.prevent="goToLink" v-else>
       <slot></slot>
     </a>
   </div>
@@ -51,9 +51,3 @@ export default {
   },
 };
 </script>
-
-<style>
-.thread-link {
-  text-decoration: none;
-}
-</style>

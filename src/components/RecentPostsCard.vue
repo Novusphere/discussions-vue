@@ -8,7 +8,7 @@
         </span>
       </v-list-item>
       <v-list-item v-for="(p, i) in posts" :key="i">
-        <span class="recent-post">
+        <span class="text-decoration-ellipsis">
           <PostThreadLink :post="p">
             <PublicKeyIcon :publicKey="p.pub" />
             {{ p.title }}
@@ -56,13 +56,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.recent-post {
-  text-overflow: ellipsis;
-
-  /* Required for text-overflow to do anything */
-  white-space: nowrap;
-  overflow: hidden;
-}
-</style>

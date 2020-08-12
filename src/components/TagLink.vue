@@ -1,13 +1,13 @@
 <template>
-  <div class="d-inline-block tag-link">
+  <div class="d-inline-block">
     <v-btn :to="link" v-if="btn">
       <slot></slot>
     </v-btn>
-    <a @click="clicked" v-else>
+    <a class="text-decoration-none" @click="clicked" v-else>
       <div class="d-inline" v-if="useSlot">
         <slot></slot>
       </div>
-      <div v-else-if="big" class="tag-link-content">
+      <div v-else-if="big" class="text-decoration-ellipsis">
         <TagIcon v-show="!noIcon" :size="80" :tag="tag" />
         <div class="d-inline-block ml-2">
           <h1>#{{ tag }}</h1>
@@ -16,7 +16,7 @@
       </div>
       <div
         v-else
-        class="tag-link-content"
+        class="text-decoration-ellipsis"
         :class="{ 'd-inline': inline }"
         :style="{'max-width': tagWidth }"
       >
@@ -85,17 +85,3 @@ export default {
   },
 };
 </script>
-
-<style>
-.tag-link a {
-  text-decoration: none;
-}
-
-.tag-link-content {
-  text-overflow: ellipsis;
-
-  /* Required for text-overflow to do anything */
-  white-space: nowrap;
-  overflow: hidden;
-}
-</style>

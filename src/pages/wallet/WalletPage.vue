@@ -7,7 +7,7 @@
             <v-col :cols="12">
               <PublicKeyIcon :size="80" class="d-inline" :publicKey="keys.wallet.pub" />
               <div class="d-inline-block ml-2">
-                <div :class="{ 'wallet-pub-mobile': $vuetify.breakpoint.mobile }">
+                <div :class="{ 'wallet-pub-mobile': $vuetify.breakpoint.mobile, 'text-decoration-ellipsis': $vuetify.breakpoint.mobile }">
                   <span class="text-h5 primary--text">{{ keys.wallet.pub }}</span>
                 </div>
               </div>
@@ -58,9 +58,5 @@ export default requireLoggedIn({
 <style scoped>
 .wallet-pub-mobile {
   max-width: 130px;
-  text-overflow: ellipsis;
-  /* Required for text-overflow to do anything */
-  white-space: nowrap;
-  overflow: hidden;
 }
 </style>

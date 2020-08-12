@@ -16,11 +16,11 @@
         v-if="$vuetify.breakpoint.mobile"
         :isMyProfile="isMyProfile"
         :auth="auth"
-        class="no-underline mt-1"
+        class="text-decoration-none mt-1"
         @remove="(name) => auth = auth.filter((a) => a.name != name)"
       />
 
-      <v-tabs center-active show-arrows v-model="tab" class="no-underline mt-1">
+      <v-tabs center-active show-arrows v-model="tab" class="text-decoration-none mt-1">
         <v-tab :to="`/u/${$route.params.who}/blog`">
           <span>Blog</span>
         </v-tab>
@@ -80,7 +80,7 @@
       <SocialMediasCard
         :isMyProfile="isMyProfile"
         :auth="auth"
-        class="no-underline mt-1"
+        class="text-decoration-none mt-1"
         @remove="(name) => auth = auth.filter((a) => a.name != name)"
       />
     </template>
@@ -281,9 +281,3 @@ export default {
   },
 };
 </script>
-
-<style>
-.no-underline a {
-  text-decoration: none;
-}
-</style>

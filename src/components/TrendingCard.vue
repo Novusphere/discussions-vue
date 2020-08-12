@@ -7,7 +7,7 @@
         </span>
       </v-list-item>
       <v-list-item v-for="(tag, i) in tags" :key="i">
-        <span class="trending-tag">
+        <span class="text-decoration-ellipsis">
           <TagLink :tag="tag" />
         </span>
       </v-list-item>
@@ -32,13 +32,3 @@ export default {
   })
 };
 </script>
-
-<style scoped>
-.trending-tag {
-  text-overflow: ellipsis;
-
-  /* Required for text-overflow to do anything */
-  white-space: nowrap;
-  overflow: hidden;
-}
-</style>

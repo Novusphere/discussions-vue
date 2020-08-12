@@ -109,7 +109,7 @@
       ></v-text-field>
     </v-list-item>
     <v-list-item v-for="(tag) in subscribedTags" :key="tag">
-      <span class="nav-tag">
+      <span class="text-decoration-ellipsis">
         <TagLink :tag="tag" />
       </span>
       <v-btn absolute right icon color="error" @click="removeTag(tag)" v-show="false">
@@ -198,13 +198,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.nav-tag {
-  text-overflow: ellipsis;
-
-  /* Required for text-overflow to do anything */
-  white-space: nowrap;
-  overflow: hidden;
-}
-</style>

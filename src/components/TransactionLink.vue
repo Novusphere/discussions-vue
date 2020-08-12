@@ -3,7 +3,7 @@
     <v-btn text :href="link" target="_blank" v-if="btn">
       <slot></slot>
     </v-btn>
-    <a class="transaction-link" target="_blank" :href="link" v-else>
+    <a class="text-decoration-none" target="_blank" :href="link" v-else>
       <slot></slot>
     </a>
   </div>
@@ -30,9 +30,3 @@ export default {
   }
 };
 </script>
-
-<style>
-.transaction-link {
-  text-decoration: none;
-}
-</style>

@@ -2,6 +2,8 @@
   <v-app>
     <AppBar />
     <v-main :style="{background: $vuetify.theme.themes[theme].background}">
+      <AppAlertBar />
+
       <v-menu
         v-if="popover.profile.open"
         max-width="400"
@@ -94,7 +96,7 @@
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <v-card-text>
+          <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
             <v-row>
               <v-col :cols="12">
                 <ThreadBrowser
@@ -167,6 +169,7 @@ import { getUserAccountObject } from "@/novusphere-js/discussions/api";
 import { subscribeAccount } from "@/novusphere-js/discussions/gateway";
 
 import AppBar from "@/components/AppBar";
+import AppAlertBar from "@/components/AppAlertBar";
 import AppNav from "@/components/AppNav";
 import LoginCard from "@/components/LoginCard";
 import SignupCard from "@/components/SignupCard";
@@ -182,6 +185,7 @@ export default {
   name: "App",
   components: {
     AppBar,
+    AppAlertBar,
     AppNav,
     LoginCard,
     SignupCard,
@@ -196,6 +200,7 @@ export default {
   watch: {
     darkMode() {
       this.$vuetify.theme.dark = this.darkMode;
+      this.setThemeClass();
     },
     async isSendTipDialogOpen() {
       const sendTip = this.$refs.sendTip;
@@ -256,7 +261,7 @@ export default {
     isThreadDialogOpenProxy(open) {
       //
       // https://github.com/vuetifyjs/vuetify/issues/3875
-      // https://github.com/Novusphere/discussions-vue/issues/158 
+      // https://github.com/Novusphere/discussions-vue/issues/158
       //
       if (open) {
         document.body.style.top = `-${window.scrollY}px`;
@@ -337,6 +342,7 @@ export default {
   }),
   created() {
     window.$app = this;
+    this.setThemeClass();
 
     this.$store.commit("init");
     window.addEventListener(
@@ -347,20 +353,18 @@ export default {
         }
       }
     );
-    //this.keepSyncAccount();
   },
   beforeDestroy() {},
   methods: {
-    /*async keepSyncAccount() {
-      if (this.isLoggedIn && !this.needSyncAccount) {
-        console.log(`keepaccountsync`);
-        let account = await getUserAccountObject(this.keys.identity.key);
-        if (account && account.data) {
-          this.$store.commit("syncAccount", account.data);
-        }
+    setThemeClass() {
+      const nodes = [document.body];
+      for (const node of nodes) {
+        const classes = node.className
+          .split(" ")
+          .filter((cn) => cn != "dark" && cn != "light");
+        node.className = classes.join(" ") + (this.darkMode ? "dark" : "light");
       }
-      setTimeout(() => this.keepSyncAccount(), 2000);
-    },*/
+    },
     async closeTip() {
       this.$store.commit("setSendTipDialogOpen", { value: false });
     },
@@ -382,12 +386,11 @@ export default {
 }
 </style>
 
-<style>
+<style lang="scss">
 html {
   margin-right: calc(-1 * (100vw - 100%));
   overflow-x: hidden;
 }
-
 body {
   position: relative;
 }
@@ -397,10 +400,67 @@ body {
   overflow-x: hidden;
 }
 
+.text-decoration-ellipsis {
+  text-overflow: ellipsis;
+
+  /* Required for text-overflow to do anything */
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 blockquote {
   border-left: 4px solid #ccc;
   margin-bottom: 5px;
   margin-top: 5px;
   padding-left: 16px;
+}
+
+@mixin light-scrollbar {
+  &::-webkit-scrollbar {
+    width: 15px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #e6e6e6;
+    border-left: 1px solid #dadada;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #b0b0b0;
+    border: solid 3px #e6e6e6;
+    border-radius: 7px;
+    &:hover {
+      background: black;
+    }
+  }
+}
+
+@mixin dark-scrollbar {
+  &::-webkit-scrollbar {
+    width: 15px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #202020;
+    border-left: 1px solid #2c2c2c;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #3e3e3e;
+    border: solid 3px #202020;
+    border-radius: 7px;
+    &:hover {
+      background: white;
+    }
+  }
+}
+
+.light {
+  @include light-scrollbar();
+  .v-dialog {
+    @include light-scrollbar();
+  }
+}
+.dark {
+  @include dark-scrollbar();
+  .v-dialog {
+    @include dark-scrollbar();
+  }
 }
 </style>

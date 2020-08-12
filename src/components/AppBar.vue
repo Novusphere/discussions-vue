@@ -15,7 +15,7 @@
       </v-btn>
     </div>
 
-    <v-spacer></v-spacer>
+    <v-spacer />
 
     <v-btn v-if="!$vuetify.breakpoint.mobile" text @click="$store.commit('setDarkMode', !darkMode)">
       <v-icon>brightness_4</v-icon>

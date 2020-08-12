@@ -5,7 +5,7 @@
         <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 5">
           <PublicKeyIcon :size="80" :publicKey="publicKey" />
           <div class="d-inline-block ml-2">
-            <router-link style="text-decoration: none;" :to="link">
+            <router-link class="text-decoration-none" :to="link">
               <h2 class="d-inline text-center">{{ displayName }}</h2>
               <div v-if="extendedInfo">
                 <span class="d-block">{{ extendedInfo.followers }} followers</span>

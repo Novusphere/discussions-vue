@@ -20,6 +20,8 @@ const testerPublicKeys = [
 const getDefaultState = () => ({
     syncTime: 0,
     //
+    showWelcomeMessage: true,
+    //
     //
     popover: {
         tag: { value: false },
@@ -77,6 +79,7 @@ const getDefaultState = () => ({
 async function saveAccount(state, external = true, callback = undefined) {
     await saver.lock(async () => {
         const local = {
+            showWelcomeMessage: state.showWelcomeMessage,
             localDrafts: state.localDrafts,
             postViewType: state.postViewType,
             encryptedTest: state.encryptedTest,
@@ -211,6 +214,7 @@ export default new Vuex.Store({
                     state.postViewType = local.postViewType || state.postViewType;
                     state.localDrafts = local.localDrafts || state.localDrafts;
                     state.alwaysUseThreadDialog = local.alwaysUseThreadDialog || state.alwaysUseThreadDialog;
+                    state.showWelcomeMessage = local.showWelcomeMessage || state.showWelcomeMessage;
 
                     // if false, they have a session -- but are not logged in.
                     if (state.keys.arbitrary.key)
@@ -250,6 +254,10 @@ export default new Vuex.Store({
                 // ---
                 return;
             }
+        },
+        setShowWelcomeMessage(state, value) {
+            state.showWelcomeMessage = value;
+            saveAccount(state, false);
         },
         setPostViewType(state, type) {
             state.postViewType = type;
