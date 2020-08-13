@@ -278,7 +278,7 @@ function getOEmbedHtml(href) {
         // Trading view chart image
         insertHTML = `<img src="${href}" alt="${href}" />`;
     }
-    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/(@[A-Za-z0-9]+:[a-z0-9]+\/)?[A-Za-z0-9-]+:[a-z0-9]+/gi.test(href)) {
+    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/(@[A-Za-z0-9]+:[a-z0-9]+\/)?[A-Za-z0-9-_]+:[a-z0-9]+/gi.test(href)) {
         //
         // Example links:
         // https://open.lbry.com/@ZombieDoll:7/ZombieDoll-2019-Highlights--Part-1:9?r=1Z8k5wHyemxALZDWqZzCbxcHavTnTfay
