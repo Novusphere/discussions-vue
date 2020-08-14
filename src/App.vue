@@ -415,10 +415,19 @@ blockquote {
   padding-left: 16px;
 }
 
-@mixin light-scrollbar {
+@mixin width-scrollbar {
   &::-webkit-scrollbar {
     width: 15px;
   }
+  @media only screen and (max-width: 1264px) {
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+  }
+}
+
+@mixin light-scrollbar {
+  @include width-scrollbar();
   &::-webkit-scrollbar-track {
     background: #e6e6e6;
     border-left: 1px solid #dadada;
@@ -434,9 +443,7 @@ blockquote {
 }
 
 @mixin dark-scrollbar {
-  &::-webkit-scrollbar {
-    width: 15px;
-  }
+  @include width-scrollbar();
   &::-webkit-scrollbar-track {
     background: #202020;
     border-left: 1px solid #2c2c2c;
