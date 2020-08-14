@@ -268,12 +268,12 @@ export default {
         window.scrollTo({ top: parseInt(scrollY || "0") * -1 });
       }*/
 
-      if (open) {
+      /*if (open) {
         this.saveScrollY = window.pageYOffset;
       } else {
         setTimeout(() => window.scrollTo({ top: this.saveScrollY }), 100);
         console.log(this.saveScrollY);
-      }
+      }*/
     },
   },
   computed: {
