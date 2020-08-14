@@ -78,30 +78,32 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <v-dialog v-model="isThreadDialogOpenProxy" scrollable eager persistent no-click-animation>
-        <v-card v-if="isThreadDialogOpen">
-          <v-card-title class="justify-end">
-            <v-btn
-              class="mr-4"
-              icon
-              @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
-            >
-              <v-icon>close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
-            <v-row>
-              <v-col :cols="12">
-                <ThreadBrowser
-                  class="mt-3"
-                  :referenceId="threadDialogRef1"
-                  :referenceId2="threadDialogRef2"
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
+      <div id="threadDialog" class="overlay">
+        <div class="overlay-content">
+          <v-card v-if="isThreadDialogOpen">
+            <v-card-title class="justify-end">
+              <v-btn
+                class="mr-4"
+                icon
+                @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
+              >
+                <v-icon>close</v-icon>
+              </v-btn>
+            </v-card-title>
+            <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
+              <v-row>
+                <v-col :cols="12">
+                  <ThreadBrowser
+                    class="mt-3"
+                    :referenceId="threadDialogRef1"
+                    :referenceId2="threadDialogRef2"
+                  />
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </div>
+      </div>
 
       <v-dialog
         v-model="isImageUploadDialogOpen"
@@ -268,6 +270,12 @@ export default {
         window.scrollTo({ top: parseInt(scrollY || "0") * -1 });
       }*/
 
+      if (open) {
+        document.getElementById("threadDialog").style.width = "100%";
+      } else {
+        document.getElementById("threadDialog").style.width = "0%";
+      }
+
       /*if (open) {
         this.saveScrollY = window.pageYOffset;
       } else {
@@ -394,6 +402,7 @@ html {
   margin-right: calc(-1 * (100vw - 100%));
   overflow-x: hidden;
 }
+
 body {
   position: relative;
 }
@@ -416,6 +425,21 @@ blockquote {
   margin-bottom: 5px;
   margin-top: 5px;
   padding-left: 16px;
+}
+
+.overlay {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 200;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+}
+
+.overlay-content {
+  position: relative;
+  width: 100%;
 }
 
 @mixin width-scrollbar {
