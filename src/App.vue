@@ -440,9 +440,11 @@ blockquote {
       flex: 0 0 auto;
     }
     > .v-card__text {
+      -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       flex: 1 1 auto;
-      overflow-y: auto;
+      overflow-y: scroll; /* has to be scroll, not auto */
+      -webkit-overflow-scrolling: touch;
     }
   }
 }
