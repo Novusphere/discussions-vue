@@ -78,31 +78,29 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <div id="threadDialog" class="overlay">
-        <div class="overlay-content">
-          <v-card v-if="isThreadDialogOpen">
-            <v-card-title class="justify-end">
-              <v-btn
-                class="mr-4"
-                icon
-                @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
-              >
-                <v-icon>close</v-icon>
-              </v-btn>
-            </v-card-title>
-            <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
-              <v-row>
-                <v-col :cols="12">
-                  <ThreadBrowser
-                    class="mt-3"
-                    :referenceId="threadDialogRef1"
-                    :referenceId2="threadDialogRef2"
-                  />
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </div>
+      <div id="threadDialog" class="v-dialog2">
+        <v-card v-if="isThreadDialogOpen">
+          <v-card-title class="justify-end">
+            <v-btn
+              class="mr-4"
+              icon
+              @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
+            <v-row>
+              <v-col :cols="12">
+                <ThreadBrowser
+                  class="mt-3"
+                  :referenceId="threadDialogRef1"
+                  :referenceId2="threadDialogRef2"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </div>
 
       <v-dialog
@@ -407,11 +405,6 @@ body {
   position: relative;
 }
 
-.v-dialog--fullscreen {
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-
 .text-decoration-ellipsis {
   text-overflow: ellipsis;
 
@@ -427,7 +420,7 @@ blockquote {
   padding-left: 16px;
 }
 
-.overlay {
+.v-dialog2 {
   height: 100%;
   width: 0;
   position: fixed;
@@ -435,11 +428,29 @@ blockquote {
   top: 0;
   left: 0;
   overflow-x: hidden;
-}
 
-.overlay-content {
-  position: relative;
-  width: 100%;
+  > .v-card {
+    position: relative;
+    min-width: 100%;
+    min-height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* scrollable */
+    display: flex;
+    flex: 1 1 100%;
+    flex-direction: column;
+    max-height: 100%;
+    max-width: 100%;
+
+    > .v-card__title {
+      flex: 0 0 auto;
+    }
+    > .v-card__text {
+      backface-visibility: hidden;
+      flex: 1 1 auto;
+      overflow-y: auto;
+    }
+  }
 }
 
 @mixin width-scrollbar {
