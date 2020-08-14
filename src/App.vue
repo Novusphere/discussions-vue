@@ -78,8 +78,29 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <v-dialog fullscreen scrollable eager persistent no-click-animation>
-        <!-- old thread dialog -->
+      <v-dialog v-model="isThreadDialogOpenProxy" scrollable eager persistent no-click-animation>
+        <v-card v-if="isThreadDialogOpen">
+          <v-card-title class="justify-end">
+            <v-btn
+              class="mr-4"
+              icon
+              @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
+            >
+              <v-icon>close</v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
+            <v-row>
+              <v-col :cols="12">
+                <ThreadBrowser
+                  class="mt-3"
+                  :referenceId="threadDialogRef1"
+                  :referenceId2="threadDialogRef2"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-dialog>
 
       <v-dialog
@@ -98,43 +119,14 @@
         <InsertLinkCard />
       </v-dialog>
 
-      <v-container v-if="isThreadDialogOpenProxy">
-        <v-row>
-          <v-col :cols="12">
-            <v-card v-if="isThreadDialogOpen">
-              <v-card-title class="justify-end">
-                <v-btn
-                  class="mr-4"
-                  icon
-                  @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
-                >
-                  <v-icon>close</v-icon>
-                </v-btn>
-              </v-card-title>
-              <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
-                <v-row>
-                  <v-col :cols="12">
-                    <ThreadBrowser
-                      class="mt-3"
-                      :referenceId="threadDialogRef1"
-                      :referenceId2="threadDialogRef2"
-                    />
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-
-      <v-container v-show="!isThreadDialogOpenProxy" v-if="$vuetify.breakpoint.mobile">
+      <v-container v-if="$vuetify.breakpoint.mobile">
         <v-row no-gutters>
           <v-col cols="12">
             <router-view></router-view>
           </v-col>
         </v-row>
       </v-container>
-      <v-container v-show="!isThreadDialogOpenProxy" fluid v-else-if="$vuetify.breakpoint.xl">
+      <v-container fluid v-else-if="$vuetify.breakpoint.xl">
         <v-row>
           <v-col cols="2"></v-col>
           <v-col cols="2">
@@ -148,7 +140,7 @@
           <v-col cols="2"></v-col>
         </v-row>
       </v-container>
-      <v-container v-show="!isThreadDialogOpenProxy" fluid v-else>
+      <v-container fluid v-else>
         <v-row>
           <v-col cols="2">
             <v-card>
@@ -260,6 +252,8 @@ export default {
       this.$store.commit("syncAccount", account);
     },
     isThreadDialogOpenProxy(open) {
+      open;
+
       //
       // https://github.com/vuetifyjs/vuetify/issues/3875
       // https://github.com/Novusphere/discussions-vue/issues/158
