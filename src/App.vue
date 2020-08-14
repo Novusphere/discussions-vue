@@ -78,7 +78,7 @@
         <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
       </v-dialog>
 
-      <div id="threadDialog" class="v-dialog2">
+      <FullScreenDialog v-model="isThreadDialogOpenProxy">
         <v-card v-if="isThreadDialogOpen">
           <v-card-title class="justify-end">
             <v-btn
@@ -101,7 +101,7 @@
             </v-row>
           </v-card-text>
         </v-card>
-      </div>
+      </FullScreenDialog>
 
       <v-dialog
         v-model="isImageUploadDialogOpen"
@@ -173,6 +173,7 @@ import SendTipCard from "@/components/SendTipCard";
 import ThreadBrowser from "@/components/ThreadBrowser";
 import UserProfileCard from "@/components/UserProfileCard";
 import CommunityCard from "@/components/CommunityCard";
+import FullScreenDialog from "@/components/FullScreenDialog";
 
 export default {
   name: "App",
@@ -189,6 +190,7 @@ export default {
     ThreadBrowser,
     UserProfileCard,
     CommunityCard,
+    FullScreenDialog
   },
   watch: {
     darkMode() {
@@ -250,30 +252,6 @@ export default {
 
       subscribeAccount(this.keys.identity.key);
       this.$store.commit("syncAccount", account);
-    },
-    isThreadDialogOpenProxy(open) {
-      //
-      // https://github.com/vuetifyjs/vuetify/issues/3875
-      // https://github.com/Novusphere/discussions-vue/issues/158
-      //
-      if (open) {
-        document.body.style.top = `-${window.scrollY}px`;
-        document.body.style.position = "fixed";
-      } else {
-        const scrollY = document.body.style.top;
-        document.body.style.position = "";
-        document.body.style.top = "";
-        window.scrollTo({ top: parseInt(scrollY || "0") * -1 });
-      }
-
-      //
-      //  v-dialog2
-      //
-      if (open) {
-        document.getElementById("threadDialog").style.width = "100%";
-      } else {
-        document.getElementById("threadDialog").style.width = "0%";
-      }
     },
   },
   computed: {
@@ -411,42 +389,6 @@ blockquote {
   margin-bottom: 5px;
   margin-top: 5px;
   padding-left: 16px;
-}
-
-.v-dialog2 {
-  height: 100%;
-  width: 0;
-  position: fixed;
-  z-index: 200;
-  top: 0;
-  left: 0;
-  overflow-x: hidden;
-
-  > .v-card {
-    position: relative;
-    min-width: 100%;
-    min-height: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-
-    /* scrollable */
-    display: flex;
-    flex: 1 1 100%;
-    flex-direction: column;
-    max-height: 100%;
-    max-width: 100%;
-
-    > .v-card__title {
-      flex: 0 0 auto;
-    }
-    > .v-card__text {
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      flex: 1 1 auto;
-      overflow-y: scroll; /* has to be scroll, not auto */
-      -webkit-overflow-scrolling: touch;
-    }
-  }
 }
 
 @mixin width-scrollbar {
