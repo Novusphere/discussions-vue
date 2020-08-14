@@ -1,8 +1,16 @@
 <template>
-  <v-dialog v-if="!useDialog2" v-model="valueProxy" scrollable fullscreen eager persistent no-click-animation>
+  <v-dialog
+    v-if="!useDialog2"
+    v-model="valueProxy"
+    scrollable
+    fullscreen
+    eager
+    persistent
+    no-click-animation
+  >
     <slot></slot>
   </v-dialog>
-  <div v-else role="document" tabindex="0" class="v-dialog2">
+  <div v-else class="v-dialog2">
     <slot></slot>
   </div>
 </template>
@@ -57,22 +65,32 @@ export default {
 
 <style lang="scss">
 .v-dialog2 {
-  height: 100%;
   width: 0;
-  position: fixed;
   z-index: 200;
-  top: 0;
-  left: 0;
   overflow-x: hidden;
 
+  /* taken from v-dialog--scrollable */
+  display: flex;
+
+  /* taken from v-dialog--fullscreen */
+  border-radius: 0;
+  margin: 0;
+  height: 100%;
+  position: fixed;
+  overflow-y: auto;
+  top: 0;
+  left: 0;
+
   > .v-card {
-    position: relative;
-    min-width: 100%;
+    /* taken from v-dialog--fullscreen */
     min-height: 100%;
+    min-width: 100%;
     margin: 0 !important;
     padding: 0 !important;
 
-    /* scrollable */
+    position: relative;
+
+    /* taken from v-dialog--fullscreen */
     display: flex;
     flex: 1 1 100%;
     flex-direction: column;
@@ -80,14 +98,15 @@ export default {
     max-width: 100%;
 
     > .v-card__title {
+      /* taken from v-dialog--fullscreen */
       flex: 0 0 auto;
     }
     > .v-card__text {
+      /* taken from v-dialog--fullscreen */
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       flex: 1 1 auto;
-      overflow-y: scroll; /* has to be scroll, not auto */
-      -webkit-overflow-scrolling: touch;
+      overflow-y: auto;
     }
   }
 }
