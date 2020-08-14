@@ -252,13 +252,11 @@ export default {
       this.$store.commit("syncAccount", account);
     },
     isThreadDialogOpenProxy(open) {
-      open;
-
       //
       // https://github.com/vuetifyjs/vuetify/issues/3875
       // https://github.com/Novusphere/discussions-vue/issues/158
       //
-      /*if (open) {
+      if (open) {
         document.body.style.top = `-${window.scrollY}px`;
         document.body.style.position = "fixed";
       } else {
@@ -266,20 +264,16 @@ export default {
         document.body.style.position = "";
         document.body.style.top = "";
         window.scrollTo({ top: parseInt(scrollY || "0") * -1 });
-      }*/
+      }
 
+      //
+      //  v-dialog2
+      //
       if (open) {
         document.getElementById("threadDialog").style.width = "100%";
       } else {
         document.getElementById("threadDialog").style.width = "0%";
       }
-
-      /*if (open) {
-        this.saveScrollY = window.pageYOffset;
-      } else {
-        setTimeout(() => window.scrollTo({ top: this.saveScrollY }), 100);
-        console.log(this.saveScrollY);
-      }*/
     },
   },
   computed: {
@@ -347,7 +341,6 @@ export default {
   },
   data: () => ({
     loginTab: null,
-    saveScrollY: 0,
   }),
   created() {
     window.$app = this;
@@ -435,6 +428,7 @@ blockquote {
     min-height: 100%;
     margin: 0 !important;
     padding: 0 !important;
+
     /* scrollable */
     display: flex;
     flex: 1 1 100%;
