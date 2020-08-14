@@ -93,22 +93,155 @@
 </template>
 
 <script>
+import loadTelegram from "../assets/telegram";
+
 import { mapState, mapGetters } from "vuex";
+import {
+  getCommunityByTag,
+  getUserProfile,
+} from "@/novusphere-js/discussions/api";
 import { createArtificalTips } from "@/novusphere-js/uid";
-import { refreshOEmbed } from "@/novusphere-js/utility";
+import { sleep } from "@/novusphere-js/utility";
 
 import { shortTimeMixin } from "@/mixins/shortTime";
 
 import UserProfileLink from "@/components/UserProfileLink";
 import TagLink from "@/components/TagLink";
-//import TagIcon from "@/components/TagIcon";
-//import PublicKeyIcon from "@/components/PublicKeyIcon";
-//import PostCardActions from "@/components/PostCardActions";
 import PostTips from "@/components/PostTips";
 import PostThreadLink from "@/components/PostThreadLink";
-//import PostSubmitter from "@/components/PostSubmitter";
-//import CommunityCard from "@/components/CommunityCard";
-//import { getCommunityByTag } from "@/novusphere-js/discussions/api";
+
+function hookRelativeAnchors($vue, document) {
+  if (!$vue) return;
+
+  const relativeAnchors = Array.from(
+    document.querySelectorAll(`a:not([class])`)
+  )
+    .map((a) => ({ a, href: a.getAttribute("href") }))
+    .filter(
+      ({ href }) =>
+        href &&
+        (href.indexOf("/") == 0 || href.indexOf("discussions.app/") > -1)
+    );
+
+  relativeAnchors.forEach(async ({ a, href }) => {
+    if (a.getAttribute("target")) return;
+
+    // turn into relative
+    if (href.indexOf("/") != 0) {
+      href = href.substring(href.indexOf("/", href.indexOf("//") + 2));
+      a.setAttribute("href", href);
+    }
+
+    a.setAttribute("class", "_");
+    a.addEventListener("click", async function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (href.indexOf("/u/") == 0) {
+        const user = href.split("/").filter((s) => s)[1];
+
+        if (user) {
+          let [displayName, publicKey] = user.split("-");
+          const info = await getUserProfile(publicKey);
+          const rect = this.getBoundingClientRect();
+
+          return $vue.$store.commit("setPopoverOpen", {
+            value: true,
+            type: "profile",
+            rect,
+            uidw: info.uidw,
+            displayName: displayName,
+            publicKey: publicKey,
+            profileInfo: info,
+          });
+        }
+      } else if (href.indexOf("/tag/") == 0) {
+        const [, tagGroup, threadRefId, title, threadRefId2] = href
+          .split("/")
+          .filter((s) => s);
+        if (!threadRefId) {
+          const tags = tagGroup.split(",");
+          if (tags.length == 1) {
+            const rect = this.getBoundingClientRect();
+            const community = await getCommunityByTag(tags[0]);
+
+            await sleep(100); // incase there's another popover open
+
+            return $vue.$store.commit("setPopoverOpen", {
+              value: true,
+              type: "tag",
+              rect,
+              community,
+            });
+          }
+        } else {
+          const {
+            isThreadDialogOpen,
+            alwaysUseThreadDialog,
+          } = $vue.$store.state;
+          if (isThreadDialogOpen || alwaysUseThreadDialog) {
+            return $vue.$store.commit("setThreadDialogOpen", {
+              value: true,
+              sub: tagGroup,
+              referenceId: threadRefId,
+              title: title,
+              referenceId2: threadRefId2,
+            });
+          }
+        }
+      }
+
+      return $vue.$router.push(href);
+    });
+  });
+}
+
+function hookPostImages($vue, document) {
+  if (!$vue) return;
+  const postImages = Array.from(document.querySelectorAll(".post-html img"));
+  for (const img of postImages) {
+    img.style = img.onclick = function () {
+      const src = img.getAttribute("src");
+      window.open(src);
+    };
+  }
+}
+
+// kind of hacky, but... such is life
+const _oembedMaxAttempt = 10;
+let _oembedAttempts = _oembedMaxAttempt;
+let _oembedNextAttempt = 0;
+(async function _refreshOEmbed() {
+  for (;;) {
+    const now = Date.now();
+    if (_oembedAttempts < _oembedMaxAttempt && now >= _oembedNextAttempt) {
+      _oembedNextAttempt = now + 1000;
+      _oembedAttempts++;
+
+      if (window.FB) {
+        window.FB.XFBML.parse();
+      }
+
+      if (window.twttr) {
+        window.twttr.widgets.load();
+      }
+
+      if (window.instgrm) {
+        window.instgrm.Embeds.process();
+      }
+
+      loadTelegram(window);
+      hookRelativeAnchors(window.$vue, document);
+      hookPostImages(window.$vue, document);
+    }
+    await sleep(100);
+  }
+})();
+
+function refreshOEmbed() {
+  _oembedAttempts = 0; // reset
+  _oembedNextAttempt = 0; // schedule immediately
+}
 
 export default {
   name: "BrowsePostCard",
@@ -285,6 +418,10 @@ export default {
   min-width: 0px !important; /* instagram override */
   max-width: min(100%, 512px) !important;
   display: block;
+}
+
+.post-html img {
+  cursor: pointer;
 }
 
 .post-html a {
