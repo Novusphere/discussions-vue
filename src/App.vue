@@ -82,6 +82,7 @@
         v-model="isThreadDialogOpenProxy"
         fullscreen
         scrollable
+        eager
         persistent
         no-click-animation
       >

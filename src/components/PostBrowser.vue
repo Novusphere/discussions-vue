@@ -49,6 +49,7 @@ export default {
     ...mapState({
       keys: (state) => state.keys,
       delegatedMods: (state) => state.delegatedMods,
+      postSort: (state) => state.postSort,
     }),
   },
   watch: {
@@ -61,6 +62,8 @@ export default {
     },
   },
   async created() {
+    this.sort = this.postSort || "";
+
     if (this.noSort && this.cursor) {
       // sort should already be set in the cursor if no-sort is being specified
       this.sort = this.cursor.sort;

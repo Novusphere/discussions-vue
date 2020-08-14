@@ -17,14 +17,17 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
   name: "PostSortSelect",
   components: {},
   props: {
-    value: String
+    value: String,
+    noQuery: Boolean,
   },
   watch: {
-    "$route.query.sort": function() {
+    "$route.query.sort": function () {
       this.valueProxy = this.$route.query.sort || "popular";
     },
     async valueProxy(nv, ov) {
@@ -32,13 +35,15 @@ export default {
       if (!ov && nv == "popular") return;
 
       try {
-        await this.$router.push({
-          query: { ...this.$route.query, sort: this.valueProxy }
-        });
+        if (!this.noQuery) {
+          await this.$router.push({
+            query: { ...this.$route.query, sort: this.valueProxy },
+          });
+        }
       } catch (ex) {
         return; // Avoided redundant navigation
       }
-    }
+    },
   },
   computed: {
     valueProxy: {
@@ -47,12 +52,15 @@ export default {
       },
       set(value) {
         this.$emit("input", value);
-      }
-    }
+      },
+    },
+    ...mapState({
+      postSort: (state) => state.postSort,
+    }),
   },
-  data: function() {
+  data: function () {
     return {
-      items: ["popular", "recent", "recent-reply", "controversial"]
+      items: ["popular", "recent", "recent-reply", "controversial"],
     };
   },
   created() {
@@ -63,7 +71,7 @@ export default {
   methods: {
     change(value) {
       this.valueProxy = value;
-    }
-  }
+    },
+  },
 };
 </script>

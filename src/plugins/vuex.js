@@ -60,6 +60,7 @@ const getDefaultState = () => ({
     needSyncAccount: false,
     notificationCount: 0,
     // --- saved ---
+    postSort: 'popular', // any valid sort option
     postViewType: "",
     localDrafts: {
         thread: "",
@@ -82,6 +83,7 @@ async function saveAccount(state, external = true, callback = undefined) {
             showWelcomeMessage: state.showWelcomeMessage,
             localDrafts: state.localDrafts,
             postViewType: state.postViewType,
+            postSort: state.postSort,
             encryptedTest: state.encryptedTest,
             encryptedBrainKey: state.encryptedBrainKey,
             displayName: state.displayName,
@@ -212,6 +214,7 @@ export default new Vuex.Store({
                     state.keys = local.keys;
                     state.darkMode = local.darkMode || state.darkMode;
                     state.postViewType = local.postViewType || state.postViewType;
+                    state.postSort = local.postSort || state.postSort;
                     state.localDrafts = local.localDrafts || state.localDrafts;
                     state.alwaysUseThreadDialog = local.alwaysUseThreadDialog || state.alwaysUseThreadDialog;
                     state.showWelcomeMessage = local.showWelcomeMessage || state.showWelcomeMessage;
@@ -265,6 +268,10 @@ export default new Vuex.Store({
         },
         saveLocalDraft(state, { draftType, draft }) {
             state.localDrafts[draftType] = draft;
+            saveAccount(state, false);
+        },
+        setPostSort(state, value) {
+            state.postSort = value;
             saveAccount(state, false);
         },
         setDarkMode(state, value) {

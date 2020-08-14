@@ -2,7 +2,7 @@
   <div>
     <v-row>
       <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 3">
-        <v-card>
+        <v-card class="mb-2">
           <v-card-title>General Settings</v-card-title>
           <v-card-text>
             <v-row>
@@ -21,8 +21,18 @@
             </v-row>
           </v-card-text>
         </v-card>
+        <v-card class="mb-2">
+          <v-card-title>Default Sort</v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                  <PostSortSelect no-query v-model="postSortProxy" />
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
       </v-col>
-      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 9">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 8">
         <v-card>
           <v-card-title>Moderation Settings</v-card-title>
           <v-card-text>
@@ -90,6 +100,7 @@
 import TagLink from "@/components/TagLink";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import UserProfileLink from "@/components/UserProfileLink";
+import PostSortSelect from "@/components/PostSortSelect";
 
 import { mapState } from "vuex";
 export default {
@@ -98,6 +109,7 @@ export default {
     TagLink,
     PublicKeyIcon,
     UserProfileLink,
+    PostSortSelect,
   },
   props: {},
   computed: {
@@ -107,6 +119,15 @@ export default {
       },
       set(value) {
         this.$store.commit("setAlwaysUseThreadDialog", value);
+      },
+    },
+    postSortProxy: {
+      get() {
+        return this.postSort;
+      },
+      set(value) {
+        console.log(value);
+        this.$store.commit("setPostSort", value);
       },
     },
     darkModeProxy: {
@@ -135,6 +156,7 @@ export default {
     },
     ...mapState({
       alwaysUseThreadDialog: (state) => state.alwaysUseThreadDialog,
+      postSort: (state) => state.postSort,
       followingUsers: (state) => state.followingUsers,
       delegatedMods: (state) => state.delegatedMods,
       hideSpam: (state) => state.hideSpam,
