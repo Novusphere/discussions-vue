@@ -47,8 +47,13 @@ function Api() {
                 let { sig, data } = req.unpack();
                 let { pub, time, domain, ...rest } = JSON.parse(data);
 
+                let realData = {};
+                Object.assign(realData, defaultObject);
+                Object.assign(realData, rest);
+
                 const recoveredKey = ecc.recover(sig, data);
                 if (recoveredKey != pub) {
+                    console.log(realData);
                     throw new Error(`Recovered key ${recoveredKey} does not match supplied key ${pub}`);
                 }
 
@@ -60,10 +65,6 @@ function Api() {
                 if (!domain || domain.length > 32) {
                     throw new Error(`Invalid domain ${domain}`);
                 }
-
-                let realData = {};
-                Object.assign(realData, defaultObject);
-                Object.assign(realData, rest);
 
                 return {
                     pub, sig, time, domain,
