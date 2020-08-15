@@ -108,6 +108,10 @@ router.afterEach(async (to) => {
         image: `${site.url}${site.image}`
     };
 
+    function stripUndefined(obj) {
+        Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
+    }
+
     const meta = to.meta;
     if (meta) {
         try {
@@ -117,7 +121,7 @@ router.afterEach(async (to) => {
                 let _head = await meta.head(context);
                 if (_head) {
                     // removed undefined
-                    Object.keys(_head).forEach(key => _head[key] === undefined && delete _head[key]);
+                    stripUndefined(_head);
                     Object.assign(head, _head);
                 }
             }
@@ -126,6 +130,9 @@ router.afterEach(async (to) => {
             console.log(ex);
         }
     }
+
+
+    console.log(head);
 
     document.title = head.title;
     setMeta("og:title", head.title);
@@ -137,6 +144,17 @@ router.afterEach(async (to) => {
 
     setMeta("og:image", head.image);
     setMeta("twitter:image", head.image);
+
+    if (head.meta) {
+        stripUndefined(head.meta);
+
+        console.log(head.meta);
+
+        for (const name in head.meta) {
+            const content = head.meta[name];
+            setMeta(name, content);
+        }
+    }
 });
 
 function setMeta(name, content) {

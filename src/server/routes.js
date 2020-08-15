@@ -26,7 +26,8 @@ const routes = [
                         return ({
                             title: `Discussions - ${post.title ? post.title : 'Viewing Thread'}`,
                             description: await post.getContentText({ removeImages: true }),
-                            image: await post.getContentImage()
+                            image: await post.getContentImage(),
+                            meta: post.getMeta()
                         });
                     }
                 }

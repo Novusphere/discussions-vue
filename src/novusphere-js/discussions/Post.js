@@ -1,5 +1,5 @@
 import bigInt from 'big-integer';
-import { markdownToHTML, getOEmbedHtml, IMAGE_REGEX, LINK_REGEX, TIME_ENCODE_GENESIS } from "@/novusphere-js/utility";
+import { markdownToHTML, getOEmbedHtml, getOEmbedMeta, IMAGE_REGEX, LINK_REGEX, TIME_ENCODE_GENESIS } from "@/novusphere-js/utility";
 import { oembed } from "@/novusphere-js/discussions/api";
 import { createDOMParser } from "@/novusphere-js/utility";
 import siteConfig from "@/server/site";
@@ -168,6 +168,27 @@ export class Post {
         return doc;
     }
 
+    getMeta() {
+        //if (typeof window != 'undefined') return {}; // client side
+
+        const result = {};
+        this.getContentHTML((type, data) => {
+            if (type == 'oembed') {
+                console.log(data);
+                
+                const meta = getOEmbedMeta(data);
+
+                for (const key in meta) {
+                    if (!result[key] && meta[key]) {
+                        result[key] = meta[key];
+                    }
+                }
+            }
+        });
+
+        return result;
+    }
+
     async getContentImage() {
         let doc = await this.getContentDocument();
 
@@ -207,7 +228,7 @@ export class Post {
         return text;
     }
 
-    async getContentHTML() {
+    async getContentHTML(emit) {
         let doc = await this.getContentDocument();
 
         function linkEquals(l1, l2) {
@@ -257,12 +278,20 @@ export class Post {
 
                 try {
                     const { insertHTML, oembed: cors } = getOEmbedHtml(href);
-                    if (insertHTML)
-                        innerHTML = insertHTML;
-                    else if (cors) {
-                        const { html } = await oembed(href);
-                        if (html) {
-                            innerHTML = html;
+
+                    if (emit) {
+                        if ((insertHTML || cors)) {
+                            emit('oembed', href);
+                        }
+                    }
+                    else {
+                        if (insertHTML)
+                            innerHTML = insertHTML;
+                        else if (cors) {
+                            const { html } = await oembed(href);
+                            if (html) {
+                                innerHTML = html;
+                            }
                         }
                     }
                 }

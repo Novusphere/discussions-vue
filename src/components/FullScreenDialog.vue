@@ -65,8 +65,12 @@ export default {
 
 <style lang="scss">
 .v-dialog2 {
+  height: 100%;
+  position: fixed;
   width: 0;
   z-index: 200;
+  top: 0;
+  left: 0;
   overflow-x: hidden;
 
   /* taken from v-dialog--scrollable */
@@ -75,20 +79,17 @@ export default {
   /* taken from v-dialog--fullscreen */
   border-radius: 0;
   margin: 0;
-  height: 100%;
-  position: fixed;
   overflow-y: auto;
-  top: 0;
-  left: 0;
 
   > .v-card {
+    position: relative;
+    width: 100%;
+
     /* taken from v-dialog--fullscreen */
     min-height: 100%;
     min-width: 100%;
     margin: 0 !important;
     padding: 0 !important;
-
-    position: relative;
 
     /* taken from v-dialog--fullscreen */
     display: flex;

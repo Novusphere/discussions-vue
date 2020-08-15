@@ -440,10 +440,13 @@ export default @Controller('/data') class DataController {
     async oembed(req, res) {
         let { url: href } = req.unpack();
         let { insertHTML, oembed } = getOEmbedHtml(href);
+        let raw = undefined;
 
         if (oembed) {
             try {
                 const { data: oembedResult } = await axios.get(oembed);
+                raw = oembedResult;
+
                 if (oembedResult.html) {
                     insertHTML = oembedResult.html;
                 }
@@ -455,7 +458,10 @@ export default @Controller('/data') class DataController {
 
         return res.success({
             oembedUrl: oembed,
-            html: insertHTML
+            html: raw.html,
+            image: raw.thumbnail_url,
+            type: raw.type,
+            raw: raw
         });
     }
 }

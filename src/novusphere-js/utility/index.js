@@ -10,6 +10,11 @@ const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
 const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
 const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=!]*)/gi);
 
+const LBRY_REGEX = /http(s)?:\/\/(open.lbry.com|lbry.tv)\/(@[A-Za-z0-9]+:[a-z0-9]+\/)?[A-Za-z0-9-_]+:[a-z0-9]+/gi;
+const YOUTUBE_REGEX = /https?:\/\/(www.|m.)?youtube.com\/watch/gi;
+const YOUTUBE_SHORT_REGEX = /https?:\/\/youtu.be\/[a-zA-Z0-9-_]+/gi;
+
+
 const turndownService = new Turndown();
 const showdownService = new Showdown.Converter({
     smartIndentationFix: true,
@@ -154,6 +159,41 @@ function getShortPublicKey(publicKey) {
     return publicKey.substring(publicKey.length - 4);
 }
 
+function getOEmbedMeta(href) {
+
+    function youtubeMeta(vid) {
+        const url = `https://www.youtube.com/embed/${vid}`;
+        return {
+            'og:image': `https://i.ytimg.com/vi/${vid}/maxresdefault.jpg`,
+            'og:type': 'video.other',
+            'og:video:url': url,
+            'og:video:type': 'text/html',
+            'og:video:width': 960,
+            'og:video:height': 760,
+            'twitter:card': 'player',
+            'twitter:player': url,
+            'twitter:player:width': 960,
+            'twitter:player:height': 720
+        }
+    }
+
+    try {
+        if (new RegExp(YOUTUBE_REGEX).test(href)) {
+            const vid = href.substring(href.indexOf('v=') + 2).split('&')[0];
+            return youtubeMeta(vid);
+        }
+        else if (new RegExp(YOUTUBE_SHORT_REGEX).test(href)) {
+            const vid = href.split('/')[3].split('?')[0];
+            return youtubeMeta(vid);
+        }
+    }
+    catch (ex) {
+        console.log(ex);
+    }
+
+    return {};
+}
+
 function getOEmbedHtml(href) {
     let insertHTML = undefined;
     let oembed = undefined;
@@ -164,7 +204,7 @@ function getOEmbedHtml(href) {
         // Trading view chart image
         insertHTML = `<img src="${href}" alt="${href}" />`;
     }
-    else if (/http(s)?:\/\/(open.lbry.com|lbry.tv)\/(@[A-Za-z0-9]+:[a-z0-9]+\/)?[A-Za-z0-9-_]+:[a-z0-9]+/gi.test(href)) {
+    else if (new RegExp(LBRY_REGEX).test(href)) {
         //
         // Example links:
         // https://open.lbry.com/@ZombieDoll:7/ZombieDoll-2019-Highlights--Part-1:9?r=1Z8k5wHyemxALZDWqZzCbxcHavTnTfay
@@ -199,10 +239,7 @@ function getOEmbedHtml(href) {
         // Twitter
         oembed = `https://publish.twitter.com/oembed?url=${href}`;
     }
-    else if ((/https?:\/\/www.youtube.com\/watch\?feature=(.*?)&v=[a-zA-Z0-9-_]+/).test(href) ||
-        (/https?:\/\/www.youtube.com\/watch\?t=[0-9]+/).test(href) ||
-        (/https?:\/\/(www|m)?.youtube.com\/watch\?v=[a-zA-Z0-9-_]+/).test(href) ||
-        (/https?:\/\/youtu.be\/[a-zA-Z0-9-_]+/).test(href)) {
+    else if (new RegExp(YOUTUBE_REGEX).test(href) || new RegExp(YOUTUBE_SHORT_REGEX).test(href)) {
         // Youtube
         oembed = `https://www.youtube.com/oembed?format=json&url=${href.replace(/feature=(.*?)&/, '')}`;
     }
@@ -263,5 +300,6 @@ export {
     getFromCache,
     createDOMParser,
     getOEmbedHtml,
+    getOEmbedMeta,
     getShortPublicKey
 }
