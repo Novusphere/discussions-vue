@@ -159,22 +159,27 @@ function getShortPublicKey(publicKey) {
     return publicKey.substring(publicKey.length - 4);
 }
 
-function getOEmbedMeta(href) {
+async function getOEmbedMeta(href) {
 
-    function youtubeMeta(vid) {
-        const url = `https://www.youtube.com/embed/${vid}`;
+    function ogVideo(preview, w, h, url) {
         return {
-            'og:image': `https://i.ytimg.com/vi/${vid}/maxresdefault.jpg`,
+            'og:image': preview,
             'og:type': 'video.other',
             'og:video:url': url,
             'og:video:type': 'text/html',
-            'og:video:width': 960,
-            'og:video:height': 760,
+            'og:video:width': w,
+            'og:video:height': h,
             'twitter:card': 'player',
             'twitter:player': url,
-            'twitter:player:width': 960,
-            'twitter:player:height': 720
+            'twitter:player:width': w,
+            'twitter:player:height': h
         }
+    }
+
+    function youtubeMeta(vid) {
+        const url = `https://www.youtube.com/embed/${vid}`;
+        const purl = `https://i.ytimg.com/vi/${vid}/maxresdefault.jpg`;
+        return ogVideo(purl, 960, 760, url);
     }
 
     try {
@@ -185,6 +190,12 @@ function getOEmbedMeta(href) {
         else if (new RegExp(YOUTUBE_SHORT_REGEX).test(href)) {
             const vid = href.split('/')[3].split('?')[0];
             return youtubeMeta(vid);
+        }
+        else if (new RegExp(LBRY_REGEX).test(href)) {
+            const vid = href.split('/')[href.indexOf('/@') > -1 ? 4 : 3];
+            const lbryId = vid.split(':')[0];
+            const url = `https://lbry.tv/$/embed/${lbryId}`;
+            return ogVideo(undefined, 560, 315, url);
         }
     }
     catch (ex) {

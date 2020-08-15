@@ -168,15 +168,15 @@ export class Post {
         return doc;
     }
 
-    getMeta() {
+    async getMeta() {
         //if (typeof window != 'undefined') return {}; // client side
 
         const result = {};
-        this.getContentHTML((type, data) => {
+        await this.getContentHTML(async (type, data) => {
             if (type == 'oembed') {
                 console.log(data);
-                
-                const meta = getOEmbedMeta(data);
+
+                const meta = await getOEmbedMeta(data);
 
                 for (const key in meta) {
                     if (!result[key] && meta[key]) {
@@ -281,7 +281,7 @@ export class Post {
 
                     if (emit) {
                         if ((insertHTML || cors)) {
-                            emit('oembed', href);
+                            await emit('oembed', href);
                         }
                     }
                     else {
