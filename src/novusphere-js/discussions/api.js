@@ -7,6 +7,11 @@ import { Post } from './Post';
 import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
 //import { AccountSearchQuery } from './AccountSearchQuery';
 
+
+if (typeof window != 'undefined') {
+    window.$axios = axios;
+}
+
 let cache = {
     communities: undefined, // { tag, desc, icon }[]
 };

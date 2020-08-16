@@ -174,8 +174,6 @@ export class Post {
         const result = {};
         await this.getContentHTML(async (type, data) => {
             if (type == 'oembed') {
-                console.log(data);
-
                 const meta = await getOEmbedMeta(data);
 
                 for (const key in meta) {

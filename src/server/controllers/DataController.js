@@ -1,10 +1,11 @@
 import * as axios from 'axios';
-import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml } from "@/novusphere-js/utility";
+import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml, LBRY_REGEX, createDOMParser } from "@/novusphere-js/utility";
 import { Controller, Get, All } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 import Identicon from 'identicon.js';
 import { PublicKey } from 'eosjs-ecc';
+import { regex } from 'uuidv4';
 
 let keyIconCache = {};
 
@@ -440,25 +441,38 @@ export default @Controller('/data') class DataController {
     async oembed(req, res) {
         let { url: href } = req.unpack();
         let { insertHTML, oembed } = getOEmbedHtml(href);
-        let raw = undefined;
+        let raw = {};
 
         if (oembed) {
             try {
                 const { data: oembedResult } = await axios.get(oembed);
-                raw = oembedResult;
+                if (new RegExp(LBRY_REGEX).test(href)) {
+                    //
+                    // Doing LBRYs job of having an oembed API...
+                    //
+                    let domParser = createDOMParser();
+                    let document = domParser.parseFromString(oembedResult, 'text/html');
+                    const ogImage = document.querySelector('meta[property="og:image"]');
 
-                if (oembedResult.html) {
+                    raw = {
+                        html: insertHTML,
+                        thumbnail_url: ogImage ? ogImage.getAttribute('content') : undefined
+                    }
+                }
+                else if (oembedResult.html) {                
+                    raw = oembedResult;
                     insertHTML = oembedResult.html;
                 }
             }
             catch (ex) {
+                //console.log(ex);
                 // failed...
             }
         }
 
         return res.success({
             oembedUrl: oembed,
-            html: raw.html,
+            html: raw.html || insertHTML,
             image: raw.thumbnail_url,
             type: raw.type,
             raw: raw

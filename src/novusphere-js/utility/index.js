@@ -4,6 +4,7 @@ import sanitizeHTML from "sanitize-html";
 import fs from 'fs';
 import { uuid } from "uuidv4";
 import Lock from "./lock";
+import { oembed } from "../discussions/api";
 
 // Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
 const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
@@ -161,6 +162,8 @@ function getShortPublicKey(publicKey) {
 
 async function getOEmbedMeta(href) {
 
+    //console.log(`getOEmbedMeta ${href}`);
+
     function ogVideo(preview, w, h, url) {
         return {
             'og:image': preview,
@@ -169,6 +172,7 @@ async function getOEmbedMeta(href) {
             'og:video:type': 'text/html',
             'og:video:width': w,
             'og:video:height': h,
+            'twitter:image': preview,
             'twitter:card': 'player',
             'twitter:player': url,
             'twitter:player:width': w,
@@ -195,7 +199,8 @@ async function getOEmbedMeta(href) {
             const vid = href.split('/')[href.indexOf('/@') > -1 ? 4 : 3];
             const lbryId = vid.split(':')[0];
             const url = `https://lbry.tv/$/embed/${lbryId}`;
-            return ogVideo(undefined, 560, 315, url);
+            const { image } = await oembed(href);
+            return ogVideo(image, 560, 315, url);
         }
     }
     catch (ex) {
@@ -224,6 +229,7 @@ function getOEmbedHtml(href) {
         const vid = href.split('/')[href.indexOf('/@') > -1 ? 4 : 3];
         const lbryId = vid.split(':')[0];
         insertHTML = `<iframe class="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${lbryId}" allowfullscreen></iframe>`;
+        oembed = `https://lbry.tv/$/embed/${lbryId}`;
     }
     else if (/https?:\/\/(www.)?bitchute.com\/video\/[a-zA-Z0-9_-]+/ig.test(href)) {
         const vid = href.split('/')[4];
@@ -298,6 +304,9 @@ export {
     TIME_ENCODE_GENESIS,
     LINK_REGEX,
     IMAGE_REGEX,
+    LBRY_REGEX,
+    YOUTUBE_REGEX,
+    YOUTUBE_SHORT_REGEX,
     Lock,
     getConfig,
     saveConfig,
