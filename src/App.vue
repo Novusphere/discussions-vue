@@ -80,13 +80,13 @@
 
       <FullScreenDialog v-model="isThreadDialogOpenProxy">
         <v-card v-if="isThreadDialogOpen">
-          <v-card-title class="justify-end">
+          <v-card-title class="justify-end align-end text-right">
             <v-btn
+              text
               class="mr-4"
-              icon
               @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
             >
-              <v-icon>close</v-icon>
+              <v-icon>close</v-icon> Close 
             </v-btn>
           </v-card-title>
           <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
@@ -190,7 +190,7 @@ export default {
     ThreadBrowser,
     UserProfileCard,
     CommunityCard,
-    FullScreenDialog
+    FullScreenDialog,
   },
   watch: {
     darkMode() {
@@ -374,6 +374,27 @@ html {
 
 body {
   position: relative;
+  overflow-x: hidden;
+}
+
+/* I LOVE IOS AND SAFARI IT'S MY FAVORITE BROWSER */
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
+  only screen and (-o-min-device-pixel-ratio: 3/2),
+  only screen and (min--moz-device-pixel-ratio: 1.5),
+  only screen and (min-device-pixel-ratio: 1.5) {
+  html,
+  body {
+    background-color: #ecf0f1;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+
+    .dark {
+      background: #000000;
+    }
+  }
 }
 
 .text-decoration-ellipsis {

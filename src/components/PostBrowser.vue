@@ -57,7 +57,9 @@ export default {
       await this.reset();
     },
     async sort() {
-      this.cursor.sort = this.sort;
+      if (this.cursor) {
+        this.cursor.sort = this.sort;
+      }
       this.reset();
     },
   },

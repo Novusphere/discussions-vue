@@ -73,6 +73,8 @@ export default {
   left: 0;
   overflow-x: hidden;
 
+  -webkit-overflow-scrolling: touch;
+
   /* taken from v-dialog--scrollable */
   display: flex;
 

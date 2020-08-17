@@ -9,7 +9,7 @@
     >
       <v-col></v-col>
       <v-col align="center">
-        <v-btn text small dense class="white--text">Need help getting started?</v-btn>
+        <v-btn text small dense class="white--text" :to="'/landing'">Need help getting started?</v-btn>
       </v-col>
       <v-col align="end">
         <v-btn icon @click="dismissWelcome()" class="mr-4 white--text">

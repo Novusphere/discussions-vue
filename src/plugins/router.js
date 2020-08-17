@@ -6,6 +6,7 @@ Vue.use(VueRouter);
 import BlankPage from '@/pages/BlankPage';
 import LogOutPage from "@/pages/LogOutPage";
 import HomePage from "@/pages/HomePage";
+import LandingPage from "@/pages/LandingPage";
 
 import SubmitPostPage from "@/pages/SubmitPostPage";
 import UserProfilePage from "@/pages/UserProfilePage";
@@ -45,6 +46,7 @@ let components = {
     BlankPage,
     LogOutPage,
     HomePage,
+    LandingPage,
     SubmitPostPage,
     UserProfilePage,
     BrowseSearchPage,

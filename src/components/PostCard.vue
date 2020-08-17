@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card-${this.post.transaction}`">
+  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card post-card-${this.post.transaction}`">
     <v-row no-gutters class="overline">
       <div class="pl-3 mt-1">
         <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || post.threadTree">
@@ -66,7 +66,7 @@
               <v-card flat @click.native="cardClicked" :color="contentBackgroundColor">
                 <div
                   :class="{ 
-                    'dark': $vuetify.theme.dark,
+                    'dark-fade': $vuetify.theme.dark,
                     'content-fade': isPreviewDisplay && !isCompactContent, 
                     'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
                 >
@@ -411,7 +411,12 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+.post-card {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
 .post-html img,
 .post-html iframe,
 .post-html video {
@@ -469,7 +474,7 @@ export default {
     rgba(255, 255, 255, 1) 100%
   );
 }
-.dark.content-fade::after {
+.dark-fade::after {
   background-image: linear-gradient(
     rgba(255, 255, 255, 0) 50%,
     rgba(30, 30, 30, 1) 100%
