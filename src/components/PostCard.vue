@@ -455,6 +455,7 @@ export default {
     position: relative;
     max-height: 320px;
     overflow: hidden;
+    pointer-events: none;
 
     &:after {
       pointer-events: none;
