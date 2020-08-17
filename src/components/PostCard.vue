@@ -244,7 +244,7 @@ function refreshOEmbed() {
 }
 
 export default {
-  name: "BrowsePostCard",
+  name: "PostCard",
   mixins: [shortTimeMixin],
   components: {
     UserProfileLink,
@@ -415,69 +415,65 @@ export default {
 .post-card {
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
-}
 
-.post-html img,
-.post-html iframe,
-.post-html video {
-  min-width: 0px !important; /* instagram override */
-  max-width: min(100%, 512px) !important;
-  display: block;
-}
+  .moderator .user-link {
+    color: red;
+  }
 
-.post-html img {
-  cursor: pointer;
-}
+  .post-html {
+    img,
+    iframe,
+    video {
+      min-width: 0px !important; /* instagram override */
+      max-width: min(100%, 512px) !important;
+      display: block;
+      padding-bottom: 10px;
+    }
 
-.post-html a {
-  text-decoration: none;
-}
+    img {
+      cursor: pointer;
+      image-orientation: from-image;
+    }
 
-.moderator .user-link {
-  color: red;
-}
+    a {
+      text-decoration: none;
+    }
+  }
 
-/*.post-embed-content {
-  margin-right: 10px;
-  float: left;
-}*/
-</style>
+  .nsfw-blur {
+    filter: blur(20px);
+    pointer-events: none;
+  }
 
-<style scoped>
-.accent--border {
-  border: solid #ffc;
-  padding: 5px;
-}
+  .post-replies {
+    border-left: 2px solid lightgray;
+  }
 
-.post-replies {
-  border-left: 2px solid lightgray;
-}
-.nsfw-blur {
-  filter: blur(20px);
-  pointer-events: none;
-}
-.content-fade {
-  position: relative;
-  max-height: 320px;
-  overflow: hidden;
-}
-.content-fade:after {
-  pointer-events: none;
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-image: linear-gradient(
-    rgba(255, 255, 255, 0) 50%,
-    rgba(255, 255, 255, 1) 100%
-  );
-}
-.dark-fade::after {
-  background-image: linear-gradient(
-    rgba(255, 255, 255, 0) 50%,
-    rgba(30, 30, 30, 1) 100%
-  );
+  .content-fade {
+    position: relative;
+    max-height: 320px;
+    overflow: hidden;
+
+    &:after {
+      pointer-events: none;
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-image: linear-gradient(
+        rgba(255, 255, 255, 0) 50%,
+        rgba(255, 255, 255, 1) 100%
+      );
+    }
+  }
+
+  .dark-fade::after {
+    background-image: linear-gradient(
+      rgba(255, 255, 255, 0) 50%,
+      rgba(30, 30, 30, 1) 100%
+    );
+  }
 }
 </style>
