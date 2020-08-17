@@ -84,7 +84,7 @@ export default {
   overflow-y: auto;
 
   > .v-card {
-    position: relative;
+    //position: relative;
     width: 100%;
 
     /* taken from v-dialog--fullscreen */

@@ -373,7 +373,7 @@ html {
 }
 
 body {
-  position: relative;
+  //position: relative;
   overflow-x: hidden;
 }
 

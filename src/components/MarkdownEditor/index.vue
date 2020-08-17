@@ -45,6 +45,7 @@
     </div>
 
     <v-menu
+      style="z-index: 300"
       :value="showSuggestions"
       :close-on-content-click="false"
       :position-x="popoverX"

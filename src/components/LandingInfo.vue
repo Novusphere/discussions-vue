@@ -4,7 +4,7 @@
       <v-card color="primary" flat class="rounded-0">
         <v-row no-gutters>
           <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
-            <v-card color="gray" flat v-if="reveal && $vuetify.breakpoint.mobile">
+            <v-card color="gray" flat v-if="reveal && $vuetify.breakpoint.mobile" class="rounded-0">
               <v-card-text>
                 <slot name="info" v-bind:reveal="reveal"></slot>
                 <v-spacer />
