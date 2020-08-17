@@ -260,7 +260,7 @@ function getOEmbedHtml(href) {
         // Youtube
         oembed = `https://www.youtube.com/oembed?format=json&url=${href.replace(/feature=(.*?)&/, '')}`;
     }
-    else if ((/https?:\/\/www.instagr(am.com|.am)(\/[a-zA-Z0-9-_]+)?\/(p|reel)\/[a-zA-Z0-9-_]+(\/?.+)?/i).test(href)) {
+    else if ((/https?:\/\/www.instagr(am.com|.am)(\/[a-zA-Z0-9-_]+)?\/(p|tv|reel)\/[a-zA-Z0-9-_]+(\/?.+)?/gi).test(href)) {
         // Instagram
         oembed = `https://api.instagram.com/oembed/?url=${href}`;
     }
