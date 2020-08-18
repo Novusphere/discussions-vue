@@ -2,7 +2,7 @@
   <v-app>
     <AppBar />
     <v-main :style="{background: $vuetify.theme.themes[theme].background}">
-      <AppAlertBar />
+      <AppAlertBar v-if="false" />
 
       <v-menu
         v-if="popover.profile.open"
