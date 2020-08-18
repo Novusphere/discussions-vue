@@ -200,11 +200,11 @@ function hookPostImages($vue, document) {
   if (!$vue) return;
   const postImages = Array.from(document.querySelectorAll(".post-html img"));
   for (const img of postImages) {
-    img.style = img.onclick = function (e) {
-      const src = img.getAttribute("src");
-      window.open(src);
-
-      return e.stopPropagation();
+    img.onclick = function (e) {
+      e;
+      //const src = img.getAttribute("src");
+      //window.open(src);
+      //return e.stopPropagation();
     };
   }
 }
