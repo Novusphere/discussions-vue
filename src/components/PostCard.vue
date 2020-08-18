@@ -198,13 +198,22 @@ function hookRelativeAnchors($vue, document) {
 
 function hookPostImages($vue, document) {
   if (!$vue) return;
+  
   const postImages = Array.from(document.querySelectorAll(".post-html img"));
+
   for (const img of postImages) {
     img.onclick = function (e) {
-      e;
-      //const src = img.getAttribute("src");
-      //window.open(src);
-      //return e.stopPropagation();
+      const srcs = Array.from(img
+        .closest(".post-html")
+        .querySelectorAll("img"))
+        .map((img) => img.getAttribute("src"))
+        .filter((s) => s);
+
+      if (srcs.length > 0) {
+        $vue.$store.commit("setImageViewer", srcs);
+      }
+
+      return e.stopPropagation();
     };
   }
 }

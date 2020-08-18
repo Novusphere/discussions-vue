@@ -22,6 +22,7 @@ const getDefaultState = () => ({
     //
     showWelcomeMessage: true,
     //
+    imgViewerSrcs: [], // image links
     //
     popover: {
         tag: { value: false },
@@ -269,6 +270,9 @@ export default new Vuex.Store({
         saveLocalDraft(state, { draftType, draft }) {
             state.localDrafts[draftType] = draft;
             saveAccount(state, false);
+        },
+        setImageViewer(state, imgs) {
+            state.imgViewerSrcs = imgs;
         },
         setPostSort(state, value) {
             state.postSort = value;

@@ -55,6 +55,7 @@
     "turndown": "^6.0.0",
     "twitter": "^1.7.1",
     "uuidv4": "^6.1.0",
+    "v-viewer": "^1.5.1",
     "vue": "^2.6.11",
     "vue-clipboard2": "^0.3.1",
     "vue-infinite-loading": "^2.4.5",

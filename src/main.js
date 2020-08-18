@@ -15,6 +15,17 @@ Vue.use(VueClipboard);
 import InfiniteLoading from 'vue-infinite-loading';
 Vue.use(InfiniteLoading, { /* options */ });
 
+import 'viewerjs/dist/viewer.css';
+import Viewer from 'v-viewer';
+Vue.use(Viewer, {
+  defaultOptions: {
+    "title": false,
+    "movable": false,
+    "rotatable": false, 
+    "scalable": false
+  }
+})
+
 Vue.config.productionTip = false;
 
 window.$vue = new Vue({

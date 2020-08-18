@@ -86,7 +86,7 @@
               class="mr-4"
               @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
             >
-              <v-icon>close</v-icon> Close 
+              <v-icon>close</v-icon>Close
             </v-btn>
           </v-card-title>
           <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
@@ -118,6 +118,14 @@
       >
         <InsertLinkCard />
       </v-dialog>
+
+      <viewer
+        class="d-none"
+        :images="imgViewerSrcs"
+        @inited="(viewer) => this.$viewer = viewer"
+      >
+        <img v-for="src in imgViewerSrcs" :src="src" :key="src" />
+      </viewer>
 
       <v-container v-if="$vuetify.breakpoint.mobile">
         <v-row no-gutters>
@@ -193,6 +201,12 @@ export default {
     FullScreenDialog,
   },
   watch: {
+    imgViewerSrcs() {
+      if (this.imgViewerSrcs.length > 0) {
+        console.log(`show`);
+        this.$viewer.show();
+      }
+    },
     darkMode() {
       this.$vuetify.theme.dark = this.darkMode;
       this.setThemeClass();
@@ -300,6 +314,7 @@ export default {
     },
     ...mapGetters(["isPopoverOpen"]),
     ...mapState({
+      imgViewerSrcs: (state) => state.imgViewerSrcs,
       darkMode: (state) => state.darkMode,
       syncTime: (state) => state.syncTime,
       needSyncAccount: (state) => state.needSyncAccount,
