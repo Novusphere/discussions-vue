@@ -16,8 +16,8 @@
             class="viewe"
             v-for="(src, i) in images"
             :key="i"
-            reverse-transition="fade-transition"
-            transition="fade-transition"
+            reverse-transition="slide-x-transition"
+            transition="slide-x-transition"
           >
             <v-row class="fill-height" align="center" justify="center">
               <img class="viewer-item" :src="src" />
