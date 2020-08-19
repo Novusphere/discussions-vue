@@ -22,7 +22,7 @@
       <span>Reply</span>
     </v-btn>
 
-    <v-btn text @click="mediaViewer()">
+    <v-btn text @click="mediaViewer()" v-show="false">
       <v-icon>photo_album</v-icon>
     </v-btn>
 

@@ -239,7 +239,7 @@ function searchFollowers(pub, domain) {
         pipeline: [{
             $match: {
                 "domain": domain || windowHost(),
-                "data.followingUsers.pub": pub
+                "followingUsers.pub": pub
             }
         }]
     });
@@ -703,6 +703,24 @@ async function saveUserDrafts(identityKey, drafts, domain) {
     return await apiRequest(`/v1/api/account/savedrafts`, { drafts }, { key: identityKey, domain });
 }
 
+async function followUser(identityKey, { displayName, pub, uidw, nameTime }, domain) {
+    // pub is renamed to user here so it doesn't overlap with the pub field from key (signed req)
+    return await apiRequest(`/v1/api/account/follow`, { value: true, displayName, user: pub, uidw, nameTime }, { key: identityKey, domain });
+}
+
+async function unfollowUser(identityKey, pub, domain) {
+    // pub is renamed to user here so it doesn't overlap with the pub field from key (signed req)
+    return await apiRequest(`/v1/api/account/follow`, { value: false, user: pub }, { key: identityKey, domain });
+}
+
+async function subscribeTag(identityKey, tag, domain) {
+    return await apiRequest(`/v1/api/account/subscribe`, { value: true, tag }, { key: identityKey, domain });
+}
+
+async function unsubscribeTag(identityKey, tag, domain) {
+    return await apiRequest(`/v1/api/account/subscribe`, { value: false, tag }, { key: identityKey, domain });
+}
+
 
 //
 // Get user account object
@@ -816,6 +834,10 @@ export {
     saveUserAccountObject,
     getUserDrafts,
     saveUserDrafts,
+    followUser,
+    unfollowUser,
+    subscribeTag,
+    unsubscribeTag,
     connectOAuth,
     removeOAuth
 }

@@ -1,5 +1,5 @@
 <template>
-  <v-btn text :to="`/notifications`">
+  <v-btn :small="small" :dense="dense" text :to="`/notifications`">
     <v-badge v-if="notificationCount > 0 && !chip" color="red" overlap>
       <template v-slot:badge>
         <span>{{ notificationCount }}</span>
@@ -32,6 +32,8 @@ export default {
   components: {},
   props: {
     chip: Boolean,
+    small: Boolean,
+    dense: Boolean
   },
   computed: {
     ...mapGetters(["isLoggedIn"]),

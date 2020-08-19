@@ -78,7 +78,7 @@ const getDefaultState = () => ({
     ]
 });
 
-async function saveAccount(state, external = true, callback = undefined) {
+async function saveAccount(state, external = true, callback = undefined, beforeSaveCallback = undefined) {
     await saver.lock(async () => {
         const local = {
             showWelcomeMessage: state.showWelcomeMessage,
@@ -114,8 +114,8 @@ async function saveAccount(state, external = true, callback = undefined) {
                     identityArbitrary: await signText(state.keys.arbitrary.pub, state.keys.identity.key),
                     arbitraryWallet: await signText(state.keys.wallet.pub, state.keys.arbitrary.key)
                 },
-                subscribedTags: state.subscribedTags,
-                followingUsers: state.followingUsers,
+                //subscribedTags: state.subscribedTags,
+                //followingUsers: state.followingUsers,
                 watchedThreads: state.watchThreads,
                 delegatedMods: state.delegatedMods,
                 hideSpam: state.hideSpam,
@@ -124,6 +124,10 @@ async function saveAccount(state, external = true, callback = undefined) {
             };
 
             if (account && saveUserAccountObject) {
+                if (beforeSaveCallback) {
+                    await beforeSaveCallback();
+                }
+
                 if (await saveUserAccountObject(state.keys.identity.key, account, window.location.host)) {
                     console.log(`Account saved to external storage`);
                 }
@@ -311,26 +315,24 @@ export default new Vuex.Store({
         setNotificationCount(state, count) {
             state.notificationCount = count;
         },
-        followUser(state, { displayName, pub, uidw, nameTime }) {
+        followUser(state, { displayName, pub, uidw, nameTime, beforeSaveCallback }) {
             if (pub == state.keys.arbitrary.pub) return; // self follow disallowed
             if (state.followingUsers.find(u => u.pub == pub)) return;
             state.followingUsers.push({ displayName, pub, uidw, nameTime });
-            saveAccount(state);
+            saveAccount(state, true, undefined, beforeSaveCallback);
         },
-        unfollowUser(state, pub) {
+        unfollowUser(state, { pub, beforeSaveCallback }) {
             state.followingUsers = state.followingUsers.filter(u => u.pub != pub);
-            saveAccount(state);
+            saveAccount(state, true, undefined, beforeSaveCallback);
         },
-        subscribeTag(state, tag) {
-            tag = tag.toLowerCase();
+        subscribeTag(state, { tag, beforeSaveCallback}) {
             if (state.subscribedTags.find(t => t == tag)) return;
             state.subscribedTags.push(tag);
-            saveAccount(state);
+            saveAccount(state, true, undefined, beforeSaveCallback);
         },
-        unsubscribeTag(state, tag) {
-            tag = tag.toLowerCase();
+        unsubscribeTag(state, { tag, beforeSaveCallback}) {
             state.subscribedTags = state.subscribedTags.filter(t => t != tag);
-            saveAccount(state);
+            saveAccount(state, true, undefined, beforeSaveCallback);
         },
         setPopoverOpen(state, { value, type, rect, ...rest }) {
             if (value) {
@@ -459,19 +461,22 @@ export default new Vuex.Store({
         },
         syncAccount(state, account) {
             state.needSyncAccount = false;
-            if (!account) return;
-            if (state.syncTime && account.syncTime <= state.syncTime) {
+            if (!account || !account.data) return;
+            if (state.syncTime && account.data.syncTime <= state.syncTime) {
                 console.log(`state sync=${state.syncTime}, account sync=${account.syncTime}`);
             }
             console.log(`syncAccount()`);
 
-            state.syncTime = account.syncTime || 0;
-            state.lastSeenNotificationsTime = account.lastSeenNotificationsTime;
-            state.subscribedTags = [...account.subscribedTags];
-            state.followingUsers = [...account.followingUsers];
+            state.syncTime = account.data.syncTime || 0;
+            state.lastSeenNotificationsTime = account.data.lastSeenNotificationsTime;
+
+            state.subscribedTags = [...(account.subscribedTags || [])];
+            state.followingUsers = [...(account.followingUsers || [])];
 
             const fixedMods = getDefaultState().delegatedMods;
-            state.delegatedMods = [...account.delegatedMods, ...fixedMods.filter(dm => !account.delegatedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag))];
+            state.delegatedMods = [...account.data.delegatedMods, ...fixedMods.filter(dm => !account.data.delegatedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag))];
+
+            //saveAccount(state);
         },
         forgetLoginSession(state) {
             const defaultState = getDefaultState();

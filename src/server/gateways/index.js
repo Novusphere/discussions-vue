@@ -73,7 +73,9 @@ class SocketClient {
         });
     }
 
-    onAccountChange({ pub, domain, sig, time, data }) {
+    onAccountChange(document) {
+        const { pub, domain, time, data, followingUsers, subscribedTags } = document;
+
         if (this.$state.account.pub != pub) return;
         if (this.$state.account.domain != domain) return;
 
@@ -81,9 +83,10 @@ class SocketClient {
             payload: {
                 pub,
                 domain,
-                sig,
                 time,
-                data
+                data,
+                followingUsers,
+                subscribedTags
             }
         });
     }

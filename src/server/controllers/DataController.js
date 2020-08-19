@@ -91,15 +91,11 @@ export default @Controller('/data') class DataController {
                     from: config.table.accounts,
                     let: { pub: "$pub" },
                     pipeline: [
-                        //{
-                        // $project: { test: "$$pub" }
-                        // $project: { test: "$data.followingUsers.pub" }
-                        //},
                         {
                             $match: {
-                                "data.followingUsers.pub": { $exists: true },
+                                "followingUsers.pub": { $exists: true },
                                 $expr: {
-                                    $in: ["$$pub", "$data.followingUsers.pub"]
+                                    $in: ["$$pub", "$followingUsers.pub"]
                                 }
                             }
                         },
@@ -150,9 +146,9 @@ export default @Controller('/data') class DataController {
 
         const tags = Object.keys(data);
         const pipeline = [
-            { $match: { domain: domain, "data.subscribedTags": { $in: tags } } },
-            { $unwind: "$data.subscribedTags" },
-            { $group: { _id: "$data.subscribedTags", count: { $sum: 1 } } },
+            { $match: { domain: domain, "subscribedTags": { $in: tags } } },
+            { $unwind: "$subscribedTags" },
+            { $group: { _id: "$subscribedTags", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             {
                 $project:
@@ -317,7 +313,7 @@ export default @Controller('/data') class DataController {
             followers = await db.collection(config.table.accounts)
                 .countDocuments({
                     "domain": domain,
-                    "data.followingUsers.pub": pub
+                    "followingUsers.pub": pub
                 });
 
             // TO-DO: limit 100... cross this bridge later
@@ -325,7 +321,7 @@ export default @Controller('/data') class DataController {
                 .aggregate([{
                     $match: {
                         "domain": domain,
-                        "data.followingUsers.pub": pub
+                        "followingUsers.pub": pub
                     }
                 }, {
                     $project: {
@@ -362,7 +358,7 @@ export default @Controller('/data') class DataController {
             displayName: lastPost ? lastPost.displayName : undefined,
             followers,
             followerUsers,
-            followingUsers: user ? user.data.followingUsers : [],
+            followingUsers: (user ? user.followingUsers : undefined) || [],
             auth: auth
         });
     }
@@ -459,7 +455,7 @@ export default @Controller('/data') class DataController {
                         thumbnail_url: ogImage ? ogImage.getAttribute('content') : undefined
                     }
                 }
-                else if (oembedResult.html) {                
+                else if (oembedResult.html) {
                     raw = oembedResult;
                     insertHTML = oembedResult.html;
                 }

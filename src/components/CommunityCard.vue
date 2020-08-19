@@ -18,10 +18,14 @@
           ></div>
         </v-col>
         <v-col :cols="dense || $vuetify.breakpoint.mobile ? 12 : 2">
-          <v-btn v-if="!isSubscribed(community.tag)" color="primary" @click="subscribeTag()">
+          <v-btn
+            v-if="!isSubscribed(community.tag)"
+            color="primary"
+            @click="subscribeTag(community.tag)"
+          >
             <v-icon>person_add</v-icon>Join
           </v-btn>
-          <v-btn v-else color="primary" @click="$store.commit('unsubscribeTag', community.tag)">
+          <v-btn v-else color="primary" @click="unsubscribeTag(community.tag)">
             <v-icon>person_remove</v-icon>
             <span>Leave</span>
           </v-btn>
@@ -39,32 +43,26 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { userActionsMixin } from "@/mixins/userActions";
 import TagLink from "@/components/TagLink";
 
 export default {
   name: "CommunityCard",
+  mixins: [userActionsMixin],
   components: {
-    TagLink
+    TagLink,
   },
   props: {
     dense: Boolean,
     community: Object,
     flat: Boolean,
-    noView: Boolean
+    noView: Boolean,
   },
   computed: {
-    ...mapGetters(["isLoggedIn", "isSubscribed"])
+    ...mapGetters(["isLoggedIn", "isSubscribed"]),
   },
   data: () => ({}),
-  methods: {
-    subscribeTag() {
-      if (!this.isLoggedIn) {
-        this.$store.commit("setLoginDialogOpen", true);
-        return;
-      }
-      this.$store.commit("subscribeTag", this.community.tag);
-    }
-  }
+  methods: {},
 };
 </script>
 

@@ -116,6 +116,60 @@ export default @Controller('/account') class AccountController {
     }
 
     @Api()
+    @Post('/follow')
+    async followUser(req, res) {
+        const { pub, domain, data } = req.unpackAuthenticated();
+        const { displayName, user, uidw, nameTime, value } = data;
+
+        let db = await getDatabase();
+
+        await db.collection(config.table.accounts)
+            .updateOne({ pub: pub, domain: domain },
+                {
+                    $pull: { followingUsers: { pub: user } },
+                    //$push: { followingUsers: { displayName, pub: user, uidw, nameTime } },
+                });
+
+        if (value) {
+            // follow
+            await db.collection(config.table.accounts)
+                .updateOne({ pub: pub, domain: domain },
+                    {
+                        //$pull: { followingUsers: { pub: user } },
+                        $push: { followingUsers: { displayName, pub: user, uidw, nameTime } },
+                    });
+        }
+
+        return res.success();
+    }
+
+    @Api()
+    @Post('/subscribe')
+    async subscribeTag(req, res) {
+        const { pub, time, domain, data: { tag, value } } = req.unpackAuthenticated();
+        const db = await getDatabase();
+
+        await db.collection(config.table.accounts)
+            .updateOne({ pub: pub, domain: domain },
+                {
+                    $pull: { subscribedTags: tag },
+                    //$push: { subscribedTags: tag },
+                });
+
+        if (value) {
+            // subscribe
+            document = await db.collection(config.table.accounts)
+                .updateOne({ pub: pub, domain: domain },
+                    {
+                        //$pull: { subscribedTags: tag },
+                        $push: { subscribedTags: tag },
+                    });
+        }
+
+        return res.success();
+    }
+
+    @Api()
     @Post('/getdrafts')
     async getDrafts(req, res) {
         let { pub, domain } = req.unpackAuthenticated();
@@ -191,7 +245,7 @@ export default @Controller('/account') class AccountController {
     @Api()
     @Post('/save')
     async saveUser(req, res) {
-        let { pub, sig, domain, time, data, _data } = req.unpackAuthenticated();
+        let { pub, domain, time, data, _data } = req.unpackAuthenticated();
 
         if (_data.length >= 256 * 1024) throw new Error(`Data must be less than 256kb`);
 
@@ -208,18 +262,9 @@ export default @Controller('/account') class AccountController {
                 throw new Error(`Failed arbitraryWallet public key proof`);
         }
 
-        let db = await getDatabase();
-
-        /*let document = await db.collection(config.table.accounts)
-            .find({
-                pub: pub,
-                domain: domain
-            })
-            .limit(1)
-            .next();*/
-
-        await db.collection(config.table.accounts)
-            .updateOne(
+        const db = await getDatabase();
+        const document = await db.collection(config.table.accounts)
+            .findOneAndUpdate(
                 {
                     pub: pub,
                     domain: domain
@@ -227,18 +272,22 @@ export default @Controller('/account') class AccountController {
                 {
                     $setOnInsert: {
                         pub: pub,
-                        domain: domain
+                        domain: domain,
+                        drafts: [],
+                        followingUsers: [],
+                        subscribedTags: []
                     },
                     $set: {
-                        sig: sig,
                         time: time,
-                        _data: _data,
                         data: data
                     }
                 },
-                { upsert: true });
+                {
+                    upsert: true,
+                    returnOriginal: false
+                });
 
-        accountEvent.emit('change', { pub, domain, sig, time, data });
+        accountEvent.emit('change', document.value);
 
         return res.success();
     }

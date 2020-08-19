@@ -31,7 +31,7 @@
             v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"
             outlined
-            @click="isLoggedIn ? $store.commit('followUser', { displayName, pub: publicKey, uidw, nametime: Date.now() }) : $store.commit('setLoginDialogOpen', true)"
+            @click="followUser({ displayName, pub: publicKey, uidw })"
           >
             <v-icon>person_add</v-icon>
             <span>Follow</span>
@@ -39,7 +39,7 @@
           <v-btn
             v-else-if="(publicKey != myPublicKey)"
             color="primary"
-            @click="isLoggedIn ? $store.commit('unfollowUser', publicKey) : $store.commit('setLoginDialogOpen', true)"
+            @click="unfollowUser(publicKey)"
           >
             <v-icon>person_remove</v-icon>
             <span>Unfollow</span>
@@ -61,10 +61,12 @@
 
 <script>
 import { mapGetters, mapState } from "vuex";
+import { userActionsMixin } from "@/mixins/userActions";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 
 export default {
   name: "UserProfileCard",
+  mixins: [ userActionsMixin ],
   components: {
     PublicKeyIcon,
   },
@@ -101,12 +103,14 @@ export default {
       }
       this.$store.commit("setSendTipDialogOpen", {
         value: true,
-        recipients: [{
-          pub: this.publicKey,
-          uidw: this.uidw,
-          displayName: this.displayName,
-          memo: `tip to ${this.displayName}`,
-        }],
+        recipients: [
+          {
+            pub: this.publicKey,
+            uidw: this.uidw,
+            displayName: this.displayName,
+            memo: `tip to ${this.displayName}`,
+          },
+        ],
       });
     },
   },

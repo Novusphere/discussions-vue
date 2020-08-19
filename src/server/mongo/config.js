@@ -40,8 +40,8 @@ let config = {
             "domain": 1,
             "data.publicKeys.arbitrary": 1,
             "data.publicKeys.wallet": 1,
-            "data.subscribedTags": 1,
-            "data.followingUsers.pub": 1
+            "followingUsers.pub": 1,
+            "subscribedTags": 1
         },
         "state": {
             "name": 1

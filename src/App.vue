@@ -222,7 +222,6 @@ export default {
       let account = await getUserAccountObject(this.keys.identity.key);
 
       if (account && account.data) {
-        account = account.data;
         console.log(`Retrieved account successfully`);
       } else {
         console.log(`Did not find account... checking for legacy account...`);
@@ -241,16 +240,19 @@ export default {
           // upgrade to new object format
           const migrated = {
             // NOTE: we didn't bother migrating watched posts
-            lastSeenNotificationsTime: oldAccount.data.lastCheckedNotifications,
             subscribedTags: oldAccount.data.tags,
             followingUsers: oldAccount.data.following.map((fu) => ({
               pub: fu.pub,
               displayName: fu.name,
             })),
-            delegatedMods: oldAccount.data.moderation.delegated.map((m) => {
-              const [displayName, pub] = m[0].split(":");
-              return { displayName, pub, tag: m[1] };
-            }),
+            data: {
+              lastSeenNotificationsTime:
+                oldAccount.data.lastCheckedNotifications,
+              delegatedMods: oldAccount.data.moderation.delegated.map((m) => {
+                const [displayName, pub] = m[0].split(":");
+                return { displayName, pub, tag: m[1] };
+              }),
+            },
           };
 
           //console.log(migrated);
@@ -340,8 +342,12 @@ export default {
     window.addEventListener(
       "accountChange",
       ({ detail: { payload: account } }) => {
+        console.log(
+          `Remote sync, local=${this.syncTime}, remote=${account.data.syncTime}`
+        );
+
         if (!this.syncTime || account.data.syncTime > this.syncTime) {
-          this.$store.commit("syncAccount", account.data);
+          this.$store.commit("syncAccount", account);
         }
       }
     );

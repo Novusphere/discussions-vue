@@ -40,16 +40,17 @@
     <div v-if="$vuetify.breakpoint.mobile">
       <v-btn
         text
+        small dense
         @click="$router.push('/tag/all')"
         v-if="isLoggedIn && $vuetify.breakpoint.mobile"
         color="red"
       >
         <v-icon>whatshot</v-icon>
       </v-btn>
-      <v-btn v-if="isLoggedIn" text @click="createPost()">
+      <v-btn small dense v-if="isLoggedIn" text @click="createPost()">
         <v-icon>create</v-icon>
       </v-btn>
-      <NotificationsButton v-if="isLoggedIn" />
+      <NotificationsButton small dense v-if="isLoggedIn" />
       <v-menu
         offset-y
         v-model="menu"
@@ -57,7 +58,7 @@
         :max-height="$vuetify.breakpoint.height * 0.9"
       >
         <template v-slot:activator="{ on, attrs }">
-          <v-btn text v-bind="attrs" v-on="on">
+          <v-btn small dense text v-bind="attrs" v-on="on">
             <v-icon>more_vert</v-icon>
           </v-btn>
         </template>
