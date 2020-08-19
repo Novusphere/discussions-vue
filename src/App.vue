@@ -5,6 +5,7 @@
       <AppAlertBar v-if="false" />
 
       <v-menu
+        z-index="9999"
         v-if="popover.profile.open"
         max-width="400"
         v-model="profilePopover"
@@ -23,6 +24,7 @@
       </v-menu>
 
       <v-menu
+        z-index="9999"
         v-if="popover.tag.open"
         max-width="400"
         v-model="tagPopover"
@@ -194,7 +196,7 @@ export default {
     UserProfileCard,
     CommunityCard,
     FullScreenDialog,
-    ImageViewer
+    ImageViewer,
   },
   watch: {
     imgViewerSrcs() {

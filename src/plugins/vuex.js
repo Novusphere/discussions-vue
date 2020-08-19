@@ -383,18 +383,20 @@ export default new Vuex.Store({
         },
         setThreadDialogOpen(state, { value, sub, referenceId, title, referenceId2, path }) {
             if (value) {
+                if (state.isThreadDialogOpen != value || state.threadDialogRef1 != referenceId) {
+                    window.history.pushState({}, null, `/tag/${sub}/${referenceId}/${title}/${referenceId2 || ''}`);
+                }
                 state.isThreadDialogOpen = true;
                 state.threadDialogRef1 = referenceId;
                 state.threadDialogRef2 = referenceId2;
-
-                window.history.pushState({}, null, `/tag/${sub}/${referenceId}/${title}/${referenceId2 || ''}`);
             }
             else {
+                if (state.isThreadDialogOpen != value) {
+                    window.history.pushState({}, null, path);
+                }
                 state.isThreadDialogOpen = false;
                 state.threadDialogRef2 = '';
                 state.threadDialogRef2 = '';
-
-                window.history.pushState({}, null, path);
             }
         },
         setTransferDialogOpen(state, { value, transfers }) {

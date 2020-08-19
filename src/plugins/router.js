@@ -94,14 +94,9 @@ router.afterEach(async (to) => {
 
     const $vue = window.$vue;
     if ($vue && $vue.$store) {
-        $vue.$store.commit("setPopoverOpen", {
-            value: false,
-            type: "profile",
-        });
-        $vue.$store.commit("setPopoverOpen", {
-            value: false,
-            type: "tag",
-        });
+        $vue.$store.commit("setPopoverOpen", { value: false, type: "profile", });
+        $vue.$store.commit("setPopoverOpen", { value: false, type: "tag", });
+        $vue.$store.commit('setThreadDialogOpen', { value: false, path: $vue.$route.path });
     }
 
     let head = {
