@@ -187,22 +187,27 @@ export class Post {
         return result;
     }
 
-    async getContentImage() {
+    async getAllContentImages() {
         let doc = await this.getContentDocument();
+        let imgs = [];
 
         for (const { src } of Array.from(doc.images)) {
             if (src) {
-                return src;
+                imgs.push(src);
             }
         }
 
         for (const { href } of Array.from(doc.links)) {
             if (new RegExp(IMAGE_REGEX).test(href)) {
-                return href;
+                imgs.push(href);
             }
         }
 
-        return undefined;
+        return imgs;
+    }
+
+    async getContentImage() {
+        return (await this.getAllContentImages())[0];
     }
 
     getRelativeUrl(includeTitle = true) {

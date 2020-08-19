@@ -16,9 +16,14 @@
       <v-icon>comment</v-icon>
       <span>{{ post.totalReplies + ((!$vuetify.breakpoint.mobile) ? ' Comments' : '')}}</span>
     </PostThreadLink>
+
     <v-btn text v-else @click="$emit('reply')">
       <v-icon>comment</v-icon>
       <span>Reply</span>
+    </v-btn>
+
+    <v-btn text @click="mediaViewer()">
+      <v-icon>photo_album</v-icon>
     </v-btn>
 
     <v-spacer></v-spacer>
@@ -136,6 +141,12 @@ export default {
     //
   }),
   methods: {
+    async mediaViewer() {
+      const srcs = await this.post.getAllContentImages();
+      if (srcs.length > 0) {
+        this.$store.commit("setImageViewer", srcs);
+      }
+    },
     async raindrop() {
       if (!this.isLoggedIn) {
         this.$store.commit("setLoginDialogOpen", true);
