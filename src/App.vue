@@ -119,13 +119,7 @@
         <InsertLinkCard />
       </v-dialog>
 
-      <viewer
-        class="d-none"
-        :images="imgViewerSrcs"
-        @inited="(viewer) => this.$viewer = viewer"
-      >
-        <img v-for="src in imgViewerSrcs" :src="src" :key="src" />
-      </viewer>
+      <ImageViewer ref="imgViewer" :images="imgViewerSrcs" />
 
       <v-container v-if="$vuetify.breakpoint.mobile">
         <v-row no-gutters>
@@ -182,6 +176,7 @@ import ThreadBrowser from "@/components/ThreadBrowser";
 import UserProfileCard from "@/components/UserProfileCard";
 import CommunityCard from "@/components/CommunityCard";
 import FullScreenDialog from "@/components/FullScreenDialog";
+import ImageViewer from "@/components/ImageViewer";
 
 export default {
   name: "App",
@@ -199,12 +194,12 @@ export default {
     UserProfileCard,
     CommunityCard,
     FullScreenDialog,
+    ImageViewer
   },
   watch: {
     imgViewerSrcs() {
       if (this.imgViewerSrcs.length > 0) {
-        console.log(`show`);
-        this.$viewer.show();
+        this.$refs.imgViewer.show();
       }
     },
     darkMode() {
