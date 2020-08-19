@@ -4,14 +4,14 @@
       <v-btn text color="primary" :to="'/'">
         <v-img
           alt="Logo"
-          class="shrink mr-2"
+          class="shrink"
           contain
           src="/static/logo.svg"
           transition="scale-transition"
           width="40"
         />
 
-        <h3 v-if="!$vuetify.breakpoint.mobile">Discussions</h3>
+        <h3 class="ml-2" v-if="!$vuetify.breakpoint.mobile">Discussions</h3>
       </v-btn>
     </div>
 
@@ -38,6 +38,14 @@
     </div>
 
     <div v-if="$vuetify.breakpoint.mobile">
+      <v-btn
+        text
+        @click="$router.push('/tag/all')"
+        v-if="isLoggedIn && $vuetify.breakpoint.mobile"
+        color="red"
+      >
+        <v-icon>whatshot</v-icon>
+      </v-btn>
       <v-btn v-if="isLoggedIn" text @click="createPost()">
         <v-icon>create</v-icon>
       </v-btn>
