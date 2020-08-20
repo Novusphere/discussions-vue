@@ -39,12 +39,12 @@ export default {
       // https://github.com/Novusphere/discussions-vue/issues/158
       //
       if (open) {
-        document.body.style.top = `-${window.scrollY}px`;
+        //document.body.style.top = `-${window.scrollY}px`;
         document.body.style.position = "fixed";
       } else {
         const scrollY = document.body.style.top;
         document.body.style.position = "";
-        document.body.style.top = "";
+        //document.body.style.top = "";
         window.scrollTo({ top: parseInt(scrollY || "0") * -1 });
       }
 

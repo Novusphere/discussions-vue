@@ -45,7 +45,7 @@
     </div>
 
     <v-menu
-      style="z-index: 300"
+      z-index="9999"
       :value="showSuggestions"
       :close-on-content-click="false"
       :position-x="popoverX"
@@ -114,6 +114,7 @@ export default {
       //
       popoverX: 0,
       popoverY: 0,
+      //popoverNode: null,
       // mention suggestion
       query: null,
       suggestionRange: null,
