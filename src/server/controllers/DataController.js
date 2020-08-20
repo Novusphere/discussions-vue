@@ -449,10 +449,13 @@ export default @Controller('/data') class DataController {
                     let domParser = createDOMParser();
                     let document = domParser.parseFromString(oembedResult, 'text/html');
                     const ogImage = document.querySelector('meta[property="og:image"]');
+                    const embedUrl = oembedResult.match(/https:\/\/lbry.tv\/\$\/embed\/[a-zA-Z0-9_\-\/]+/);
 
-                    raw = {
-                        html: insertHTML,
-                        thumbnail_url: ogImage ? ogImage.getAttribute('content') : undefined
+                    if (embedUrl && embedUrl.length > 0) {
+                        raw = {
+                            html: `<iframe class="lbry-iframe" width="560" height="315" src="${embedUrl[0]}" allowfullscreen></iframe>`,
+                            thumbnail_url: ogImage ? ogImage.getAttribute('content') : undefined
+                        }
                     }
                 }
                 else if (oembedResult.html) {

@@ -226,10 +226,7 @@ function getOEmbedHtml(href) {
         // https://open.lbry.com/@ZombieDoll:7/ZombieDoll-2019-Highlights--Part-1:9?r=1Z8k5wHyemxALZDWqZzCbxcHavTnTfay
         // https://lbry.tv/Cat-on-High:e
         //
-        const vid = href.split('/')[href.indexOf('/@') > -1 ? 4 : 3];
-        const lbryId = vid.split(':')[0];
-        insertHTML = `<iframe class="lbry-iframe" width="560" height="315" src="https://lbry.tv/$/embed/${lbryId}" allowfullscreen></iframe>`;
-        oembed = `https://lbry.tv/$/embed/${lbryId}`;
+        oembed = href; // not a real OEMBED, special handled by server...
     }
     else if (/https?:\/\/(www.)?bitchute.com\/video\/[a-zA-Z0-9_-]+/ig.test(href)) {
         const vid = href.split('/')[4];
