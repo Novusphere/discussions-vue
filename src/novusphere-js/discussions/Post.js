@@ -235,6 +235,9 @@ export class Post {
         let doc = await this.getContentDocument();
 
         function linkEquals(l1, l2) {
+            l1 = decodeURI(l1);
+            l2 = decodeURI(l2);
+
             if (l1.lastIndexOf('/') != l1.length - 1)
                 l1 += '/';
             if (l2.lastIndexOf('/') != l2.length - 1)
@@ -269,13 +272,16 @@ export class Post {
         if (typeof navigator == "undefined" || !navigator.userAgent.match(botRegex)) {
             for (const node of Array.from(doc.links)) {
 
-                const { href, innerText } = node;
+                let href = node.href;
+                let innerText = node.innerText;
 
                 //
                 // guard against hyperlinks
                 // https://github.com/Novusphere/discussions-vue/issues/179
                 //
                 if (!linkEquals(href, innerText)) continue;
+
+                href = decodeURI(href);
 
                 let innerHTML = undefined;
 

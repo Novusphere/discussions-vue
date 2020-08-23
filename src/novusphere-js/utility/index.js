@@ -11,7 +11,7 @@ const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
 const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
 const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=!]*)/gi);
 
-const LBRY_REGEX = /http(s)?:\/\/(open.lbry.com|lbry.tv)\/(@[A-Za-z0-9]+:[a-z0-9]+\/)?[A-Za-z0-9-_]+:[a-z0-9]+/gi;
+const LBRY_REGEX = /http(s)?:\/\/(open.lbry.com|lbry.tv)\/(@[A-Za-z0-9]+:[a-z0-9]+\/)?[A-Za-z0-9-_()]+:[a-z0-9]+/gi;
 const YOUTUBE_REGEX = /https?:\/\/(www.|m.)?youtube.com\/watch/gi;
 const YOUTUBE_SHORT_REGEX = /https?:\/\/youtu.be\/[a-zA-Z0-9-_]+/gi;
 

@@ -6,6 +6,7 @@ const routes = [
         redirect: '/home',
         component: `BlankPage`,
         children: [
+            { path: `close`, component: `ClosePage` },
             { path: `landing`, component: `LandingPage` },
             { path: `home`, component: `HomePage` },
             { path: '404', component: 'MissingPage', meta: { head: async () => ({ title: `Discussions - 404` }) } },

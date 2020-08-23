@@ -201,6 +201,11 @@ export default new Vuex.Store({
                 const popover = state.popover[name];
                 return popover && popover.open;
             }
+        },
+        saveAccount: state => {
+            return async () => {
+                await saveAccount(state, true);
+            }
         }
     },
     mutations: {

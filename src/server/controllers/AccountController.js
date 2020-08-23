@@ -158,7 +158,7 @@ export default @Controller('/account') class AccountController {
 
         if (value) {
             // subscribe
-            document = await db.collection(config.table.accounts)
+            await db.collection(config.table.accounts)
                 .updateOne({ pub: pub, domain: domain },
                     {
                         //$pull: { subscribedTags: tag },

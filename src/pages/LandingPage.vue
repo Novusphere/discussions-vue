@@ -14,7 +14,7 @@
           </p>
         </div>
         <div v-else>
-          <img src="http://cdn.novusphere.io/static/atmos.png" />
+          <img src="https://cdn.novusphere.io/static/atmos.png" />
         </div>
       </template>
     </LandingInfo>

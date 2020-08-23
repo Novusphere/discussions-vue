@@ -7,6 +7,7 @@ import BlankPage from '@/pages/BlankPage';
 import LogOutPage from "@/pages/LogOutPage";
 import HomePage from "@/pages/HomePage";
 import LandingPage from "@/pages/LandingPage";
+import ClosePage from "@/pages/ClosePage";
 
 import SubmitPostPage from "@/pages/SubmitPostPage";
 import UserProfilePage from "@/pages/UserProfilePage";
@@ -47,6 +48,7 @@ let components = {
     LogOutPage,
     HomePage,
     LandingPage,
+    ClosePage,
     SubmitPostPage,
     UserProfilePage,
     BrowseSearchPage,

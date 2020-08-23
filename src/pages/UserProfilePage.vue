@@ -81,7 +81,7 @@
         :isMyProfile="isMyProfile"
         :auth="auth"
         class="text-decoration-none mt-1"
-        @remove="(name) => auth = auth.filter((a) => a.name != name)"
+        @update="(newAuth) => auth = newAuth"
       />
     </template>
   </BrowsePageLayout>

@@ -1,5 +1,5 @@
 <template>
-  <v-card v-show="auth.length > 0 || isMyProfile ">
+  <v-card :flat="flat" v-show="auth.length > 0 || isMyProfile ">
     <v-card-text>
       <v-row no-gutters>
         <v-col v-if="twitter">
@@ -29,21 +29,28 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
-import { connectOAuth, removeOAuth } from "@/novusphere-js/discussions/api";
+import { mapState } from "vuex";
+import {
+  connectOAuth,
+  removeOAuth,
+  getUserProfile,
+} from "@/novusphere-js/discussions/api";
+import { userActionsMixin } from "@/mixins/userActions";
 
 export default {
   name: "SocialMediasCard",
+  mixins: [userActionsMixin],
   components: {},
   props: {
     auth: { type: Array, default: () => [] },
     isMyProfile: Boolean,
+    flat: Boolean,
   },
   data: () => ({
     twitter: null,
+    _auth: [],
   }),
   computed: {
-    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       keys: (state) => state.keys,
     }),
@@ -54,15 +61,28 @@ export default {
     },
   },
   async created() {
+    this._auth = [...this.auth];
     await this.load();
   },
   methods: {
     async removeOAuth(name) {
-      this.$emit("remove", name);
+      this._auth = this._auth.filter((a) => a.name != name);
+      this.$emit("update", this._auth);
       await removeOAuth(this.keys.identity.key, name);
     },
     async connectOAuth(name) {
-      await connectOAuth(this.keys.identity.key, name);
+      if (!this.isLoggedIn) return this.openLoginDialog();
+
+      window.closePageCallback = async () => {
+        const profile = await getUserProfile(this.keys.arbitrary.pub);
+        console.log(profile);
+
+        this._auth = profile.auth;
+        this.$emit("update", this._auth);
+      };
+
+      const callback = `${window.location.protocol}//${window.location.host}/close`;
+      await connectOAuth(this.keys.identity.key, name, callback);
     },
     async load() {
       this.twitter = this.auth.find((a) => a.name == "twitter");

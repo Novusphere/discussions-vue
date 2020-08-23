@@ -475,13 +475,13 @@ blockquote {
 
 .light {
   @include light-scrollbar();
-  .v-dialog {
+  .v-dialog, .scrollable {
     @include light-scrollbar();
   }
 }
 .dark {
   @include dark-scrollbar();
-  .v-dialog {
+  .v-dialog, .scrollable {
     @include dark-scrollbar();
   }
 }

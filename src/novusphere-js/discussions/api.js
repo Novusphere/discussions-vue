@@ -73,7 +73,7 @@ async function createSignedBody(key, domain, body) {
     return body;
 }
 
-async function apiRequest(endpoint, body = undefined, { key, domain, redirect } = {}) {
+async function apiRequest(endpoint, body = undefined, { key, domain, redirect, newWindow } = {}) {
     const host = await getAPIHost();
     const url = `${host}${endpoint}`;
 
@@ -84,8 +84,14 @@ async function apiRequest(endpoint, body = undefined, { key, domain, redirect } 
             body = await createSignedBody(key, domain, body);
         }
 
-        if (redirect) {
-            window.location.href = url + `?sig=${body.sig}&data=${encodeURIComponent(body.data)}`;
+        if (redirect || newWindow) {
+            const fullUrl = url + `?sig=${body.sig}&data=${encodeURIComponent(body.data)}`;
+            if (redirect) { 
+                window.location.href = fullUrl;
+            }
+            else if (newWindow) {
+                window.open(fullUrl); // TO-DO: window sizes?   
+            }
             return;
         }
 
@@ -112,7 +118,7 @@ async function connectOAuth(identityKey, name, redirect, domain) {
     redirect = redirect || window.location.href;
     return await apiRequest(`/v1/api/account/passport/${name}`, { redirect }, {
         key: identityKey,
-        redirect: true,
+        newWindow: true,
         domain
     });
 }
