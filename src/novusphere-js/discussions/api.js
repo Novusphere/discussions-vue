@@ -86,7 +86,7 @@ async function apiRequest(endpoint, body = undefined, { key, domain, redirect, n
 
         if (redirect || newWindow) {
             const fullUrl = url + `?sig=${body.sig}&data=${encodeURIComponent(body.data)}`;
-            if (redirect) { 
+            if (redirect) {
                 window.location.href = fullUrl;
             }
             else if (newWindow) {
@@ -597,19 +597,21 @@ function searchPostsByNotifications(key, lastSeenTime, watchedThreads) {
                         {
                             pub: { $ne: key }, // ignore self posts
                             mentions: { $in: [key] },
-                            $or: [
+                            createdAt: { $gt: lastSeenTime },
+                            /*$or: [
                                 { createdAt: { $gt: lastSeenTime } },
                                 { editedAt: { $gt: lastSeenTime } }
-                            ]
+                            ]*/
                         },
                         ...(watchedThreads || []).map(wt => ({
                             pub: { $ne: key }, // ignore self posts
                             threadUuid: wt.uuid,
-                            $or: [
+                            createdAt: { $gt: lastSeenTime ? lastSeenTime : wt.watchedAt },
+                            /*$or: [
                                 // only include posts from when we started watching, or that we haven't seen yet
                                 { createdAt: { $gt: lastSeenTime ? lastSeenTime : wt.watchedAt } },
                                 { editedAt: { $gt: lastSeenTime ? lastSeenTime : wt.watchedAt } }
-                            ]
+                            ]*/
                         }))
                     ]
                 }

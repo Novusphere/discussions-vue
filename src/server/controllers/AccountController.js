@@ -262,6 +262,7 @@ export default @Controller('/account') class AccountController {
                 throw new Error(`Failed arbitraryWallet public key proof`);
         }
 
+        const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || '';
         const db = await getDatabase();
         const document = await db.collection(config.table.accounts)
             .findOneAndUpdate(
@@ -279,7 +280,8 @@ export default @Controller('/account') class AccountController {
                     },
                     $set: {
                         time: time,
-                        data: data
+                        data: data,
+                        ip: ip
                     }
                 },
                 {
