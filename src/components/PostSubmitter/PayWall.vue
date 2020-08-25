@@ -13,7 +13,7 @@
                 v-model="paywallAssetAmount"
               ></v-text-field>
             </v-col>
-            <v-col :cols="6">
+            <v-col :cols="6" v-if="false">
               <UserAssetSelect
                 no-amount
                 :item-text="`symbol`"
@@ -21,6 +21,9 @@
                 v-model="paywallAssetSymbol"
                 required
               ></UserAssetSelect>
+            </v-col>
+            <v-col :cols="6">
+              <v-text-field label="Asset" v-model="paywallAssetSymbol" readonly disabled></v-text-field>
             </v-col>
           </v-row>
           <v-row>
@@ -127,9 +130,11 @@ export default {
         return { $error: `Invalid asset or quantity selected` };
 
       if (!this.simpleExpiry)
-          return { $error: `You must select an expiration time` };
+        return { $error: `You must select an expiration time` };
 
-      const expire = new Date(Date.now() + (parseInt(this.simpleExpiry) * 60 * 60 * 1000));
+      const expire = new Date(
+        Date.now() + parseInt(this.simpleExpiry) * 60 * 60 * 1000
+      );
 
       /*if (!this.paywallExpireDate)
           return { $error: `You must select an expiry date or click clear` };
@@ -162,7 +167,7 @@ export default {
   data: () => ({
     paywallEnabled: false,
     paywallAssetAmount: null,
-    paywallAssetSymbol: null,
+    paywallAssetSymbol: 'ATMOS',
     paywallExpireDate: null,
     paywallExpireTime: null,
     simpleExpiry: null,
