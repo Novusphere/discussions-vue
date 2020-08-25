@@ -65,10 +65,15 @@
             <v-expansion-panel-content>
               <v-card flat :color="contentBackgroundColor" v-if="isPaidLockContent">
                 <div class="text-center">
-                  <p
-                    v-if="!isPaidLockForever"
-                  >Content will be available for free {{ shortTime(post.paywall.expire) }}</p>
-                  <v-btn color="primary" outlined @click="payForContent()">Unlock for {{ post.paywall.asset }}</v-btn>
+                  <p v-if="!isPaidLockForever">
+                    Content available for free in
+                    <Countdown :end="post.paywall.expire" @done="paywallExpire()" />
+                  </p>
+                  <v-btn
+                    color="primary"
+                    outlined
+                    @click="payForContent()"
+                  >Unlock for {{ post.paywall.asset }}</v-btn>
                 </div>
               </v-card>
               <v-card flat @click.native="cardClicked" :color="contentBackgroundColor" v-else>
@@ -120,6 +125,8 @@ import UserProfileLink from "@/components/UserProfileLink";
 import TagLink from "@/components/TagLink";
 import PostTips from "@/components/PostTips";
 import PostThreadLink from "@/components/PostThreadLink";
+
+import Countdown from "@/components/Countdown";
 
 function hookRelativeAnchors($vue, document) {
   if (!$vue) return;
@@ -275,7 +282,8 @@ export default {
     PostTips,
     PostThreadLink,
     //CommunityCard,
-    //PostSubmitter
+    //PostSubmitter,
+    Countdown,
   },
   props: {
     clickable: Boolean,
@@ -344,12 +352,14 @@ export default {
 
       if (!paywall) return false;
 
-      if (this.isLoggedIn && this.post.pub == this.keys.arbitrary.pub) return false; // this is our own post
+      if (this.isLoggedIn && this.post.pub == this.keys.arbitrary.pub)
+        return false; // this is our own post
 
       const expire = paywall.expire.getTime();
+      const now = Date.now();
 
-      if (expire != 0 && expire <= Date.now()) return false;
-      if (!isValidAsset(paywall.asset)) return false;
+      if (expire != 0 && (expire - now) <= 0) return false;
+      if (!isValidAsset(paywall.asset)) return false; 
 
       let [amount, symbol] = paywall.asset.split(" ");
       amount = parseFloat(amount);
@@ -399,6 +409,9 @@ export default {
     refreshOEmbed();
   },
   methods: {
+    paywallExpire() {
+      this.post.paywall = undefined;
+    },
     payForContent() {
       if (!this.isLoggedIn) return this.openLoginDialog();
 

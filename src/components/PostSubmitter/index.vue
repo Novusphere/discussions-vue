@@ -69,6 +69,7 @@
         </v-btn>
       </div>
       <div style="height: 5px"></div>
+      <PayWall ref="paywall" v-if="showPaywall" />
     </div>
     <div v-else>
       <v-btn
@@ -82,6 +83,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import PayWall from "./PayWall";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import PostCard from "@/components/PostCard";
 import { waitFor, generateUuid } from "@/novusphere-js/utility";
@@ -106,9 +108,10 @@ export default {
   components: {
     MarkdownEditor,
     PostCard,
+    PayWall
   },
   props: {
-    paywall: Object,
+    showPaywall: Boolean,
     draft: String,
     sub: String,
     parentPost: Object,
@@ -354,8 +357,10 @@ export default {
       this.getEditor().setFromMarkdown(value);
     },
     async generateSubmission() {
-      if (this.paywall && this.paywall.$error) {
-        throw new Error(this.paywall.$error);
+      const paywall = this.$refs.paywall.value;
+
+      if (paywall && paywall.$error) {
+        throw new Error(paywall.$error);
       }
 
       const content = this.$refs.editor.getMarkdown();
@@ -402,11 +407,11 @@ export default {
           ? tags[0]
           : "all",
         edit: this.edit,
-        paywall: this.paywall,
+        paywall: paywall,
       };
 
       let artificalSubmission = new Post();
-      artificalSubmission.paywall = this.paywall;
+      artificalSubmission.paywall = paywall;
       artificalSubmission.title = post.title;
       artificalSubmission.chain = "eos";
       artificalSubmission.parentUuid = post.parentUuid;

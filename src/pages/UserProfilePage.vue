@@ -43,6 +43,7 @@
         <v-card>
           <v-card-text>
             <PostSubmitter
+              show-paywall
               cancelable
               :draft="'blog'"
               :sub="'blog'"
