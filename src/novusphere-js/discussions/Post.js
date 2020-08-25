@@ -250,8 +250,14 @@ export class Post {
         let doc = await this.getContentDocument();
 
         function linkEquals(l1, l2) {
-            l1 = decodeURI(l1);
-            l2 = decodeURI(l2);
+            try { l1 = decodeURI(l1); } 
+            catch (ex1) {
+                // ...
+            }
+            try { l2 = decodeURI(l2); } 
+            catch (ex2) {
+                // ...
+            }
 
             if (l1.lastIndexOf('/') != l1.length - 1)
                 l1 += '/';

@@ -25,6 +25,16 @@
           </v-row>
           <v-row>
             <v-col :cols="6">
+              <v-select
+                prepend-icon="timer"
+                :items="['1 hour', ...Array.from(new Array(23)).map((_, i) => `${i+2} hours`)]"
+                v-model="simpleExpiry"
+                label="Expiration"
+              ></v-select>
+            </v-col>
+          </v-row>
+          <v-row v-if="false">
+            <v-col :cols="6">
               <v-menu
                 v-model="menu1"
                 ref="menu"
@@ -81,7 +91,7 @@
               </v-menu>
             </v-col>
           </v-row>
-          <v-row>
+          <v-row v-if="false">
             <v-col :cols="12">
               <v-btn :disabled="!paywallEnabled" color="primary" @click="clearPaywall()">Clear</v-btn>
             </v-col>
@@ -116,16 +126,22 @@ export default {
       if (!isValidAsset(asset))
         return { $error: `Invalid asset or quantity selected` };
 
-      if (!this.paywallExpireDate)
-        return { $error: `You must select an expiry date or click clear` };
-      if (!this.paywallExpireTime)
-        return { $error: `You must select an expiry time or click clear` };
+      if (!this.simpleExpiry)
+          return { $error: `You must select an expiration time` };
 
-      const expire = new Date(
-        `${this.paywallExpireDate} ${this.paywallExpireTime}`
-      );
+      const expire = new Date(Date.now() + (parseInt(this.simpleExpiry) * 60 * 60 * 1000));
 
-      if (isNaN(expire.getTime()))
+      /*if (!this.paywallExpireDate)
+          return { $error: `You must select an expiry date or click clear` };
+        if (!this.paywallExpireTime)
+          return { $error: `You must select an expiry time or click clear` };
+
+        expire = new Date(
+          `${this.paywallExpireDate} ${this.paywallExpireTime}`
+        );
+      */
+
+      if (!expire || isNaN(expire.getTime()))
         return {
           $error: `Invalid expiry date time selected, try clicking clear`,
         };
@@ -134,6 +150,8 @@ export default {
         return {
           $error: `This paywall will already have expired by posting it, if this is intentional, consider simply turning paywall off.`,
         };
+
+      //if (expire) return { $error: `stop` };
 
       return {
         asset,
@@ -147,6 +165,7 @@ export default {
     paywallAssetSymbol: null,
     paywallExpireDate: null,
     paywallExpireTime: null,
+    simpleExpiry: null,
     menu1: false,
     menu2: false,
   }),
@@ -155,6 +174,7 @@ export default {
     clearPaywall() {
       //this.paywallAssetAmount = null;
       //this.paywallAssetSymbol = null;
+      this.simpleExpiry = null;
       this.paywallExpireDate = null;
       this.paywallExpireTime = null;
       this.$refs.paywallForm.resetValidation();

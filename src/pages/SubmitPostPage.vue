@@ -11,7 +11,6 @@
             show-paywall
             :draft="'thread'"
             :sub="tag"
-            :paywall="paywall"
             ref="submitter"
             :title-field="true"
             @submit-post="submitPost"
