@@ -90,6 +90,21 @@ export default {
       tempPassword: (state) => state.tempPassword,
     }),
   },
+  watch: {
+    async recipient() {
+      if (!this.recipient) return;
+      if (this.recipient.length == 0) return;
+      const $asset = this.recipient[0].$asset;
+      if (!$asset) return;
+
+      if (this.recipient.every((r) => r.$asset == $asset)) {
+        const [amount, symbol] = $asset.split(" ");
+        this.amount = parseFloat(amount);
+        this.symbol = symbol;
+        await this.showSummary();
+      }
+    },
+  },
   methods: {
     async close() {
       this.$emit("close");

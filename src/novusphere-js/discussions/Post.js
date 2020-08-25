@@ -1,12 +1,19 @@
 import bigInt from 'big-integer';
 import { markdownToHTML, getOEmbedHtml, getOEmbedMeta, IMAGE_REGEX, LINK_REGEX, TIME_ENCODE_GENESIS } from "@/novusphere-js/utility";
 import { oembed } from "@/novusphere-js/discussions/api";
+import { isValidAsset } from "@/novusphere-js/uid";
 import { createDOMParser } from "@/novusphere-js/utility";
 import siteConfig from "@/server/site";
 
 export class Post {
-    isOpeningPost() {
-        return (this.parentUuid) == '' && (this.uuid == this.threadUuid);
+    static Paywall(asset, expiration) {
+        if (!isValidAsset(asset)) throw new Error(`${asset} is not a valid asset`);
+        if (isNaN(expiration)) throw new Error(`Expiration is not a number. Use 0 for indefinite.`);
+
+        return {
+            asset,
+            expiration
+        }
     }
 
     constructor(chain) {
@@ -41,6 +48,7 @@ export class Post {
         this.myVote = 0; // not voted (neutral)
         this.tips = [];
         this.modPolicy = []; // [{mod, tags}]
+        this.paywall = undefined;
 
         // if api specified [includeOpeningPost] this field will be populated with another Post object
         this.op = undefined;
@@ -97,6 +105,13 @@ export class Post {
         if (o.modPolicy) {
             const domain = window.location.host;
             p.modPolicy = o.modPolicy.filter(mp => mp.domain == domain);
+        }
+
+        if (o.paywall) {
+            p.paywall = {
+                asset: o.paywall.asset,
+                expire: new Date(o.paywall.expire)
+            }
         }
 
         return p;

@@ -63,7 +63,15 @@
         <v-expansion-panels class="mt-2" flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content>
-              <v-card flat @click.native="cardClicked" :color="contentBackgroundColor">
+              <v-card flat :color="contentBackgroundColor" v-if="isPaidLockContent">
+                <div class="text-center">
+                  <p
+                    v-if="!isPaidLockForever"
+                  >Content will be available for free {{ shortTime(post.paywall.expire) }}</p>
+                  <v-btn color="primary" outlined @click="payForContent()">Unlock for {{ post.paywall.asset }}</v-btn>
+                </div>
+              </v-card>
+              <v-card flat @click.native="cardClicked" :color="contentBackgroundColor" v-else>
                 <div
                   :class="{ 
                     'dark-fade': $vuetify.theme.dark,
@@ -96,11 +104,14 @@
 import loadTelegram from "../assets/telegram";
 
 import { mapState, mapGetters } from "vuex";
+
+import { userActionsMixin } from "@/mixins/userActions";
+
 import {
   getCommunityByTag,
   getUserProfile,
 } from "@/novusphere-js/discussions/api";
-import { createArtificalTips } from "@/novusphere-js/uid";
+import { createArtificalTips, isValidAsset } from "@/novusphere-js/uid";
 import { sleep } from "@/novusphere-js/utility";
 
 import { shortTimeMixin } from "@/mixins/shortTime";
@@ -198,14 +209,12 @@ function hookRelativeAnchors($vue, document) {
 
 function hookPostImages($vue, document) {
   if (!$vue) return;
-  
+
   const postImages = Array.from(document.querySelectorAll(".post-html img"));
 
   for (const img of postImages) {
     img.onclick = function (e) {
-      const srcs = Array.from(img
-        .closest(".post-html")
-        .querySelectorAll("img"))
+      const srcs = Array.from(img.closest(".post-html").querySelectorAll("img"))
         .map((img) => img.getAttribute("src"))
         .filter((s) => s);
 
@@ -256,7 +265,7 @@ function refreshOEmbed() {
 
 export default {
   name: "PostCard",
-  mixins: [shortTimeMixin],
+  mixins: [shortTimeMixin, userActionsMixin],
   components: {
     UserProfileLink,
     TagLink,
@@ -322,7 +331,43 @@ export default {
         this.isCompactDisplay || this.isPreviewDisplay || this.isFullDisplay
       );
     },
-    ...mapGetters(["isModerator"]),
+    isPaidLockForever() {
+      const paywall = this.post.paywall;
+
+      if (!paywall) return false;
+      if (paywall.expire.getTime() != 0) return false;
+
+      return true;
+    },
+    isPaidLockContent() {
+      const paywall = this.post.paywall;
+
+      if (!paywall) return false;
+
+      if (this.isLoggedIn && this.post.pub == this.keys.arbitrary.pub) return false; // this is our own post
+
+      const expire = paywall.expire.getTime();
+
+      if (expire != 0 && expire <= Date.now()) return false;
+      if (!isValidAsset(paywall.asset)) return false;
+
+      let [amount, symbol] = paywall.asset.split(" ");
+      amount = parseFloat(amount);
+
+      for (const tip of this.post.tips) {
+        if (!this.isLoggedIn || tip.data.from != this.keys.wallet.pub) continue; // it's not us who paid for it
+        const [amount2, symbol2] = tip.data.amount.split(" ");
+        if (symbol2 != symbol) continue;
+        amount -= parseFloat(amount2) + parseFloat(tip.data.fee);
+        if (amount <= 0) {
+          // we've paid enough for it
+          return false;
+        }
+      }
+
+      return true;
+    },
+    ...mapGetters(["isModerator", "isLoggedIn"]),
     ...mapState({
       hideSpam: (state) => state.hideSpam,
       blurNSFW: (state) => state.blurNSFW,
@@ -354,10 +399,29 @@ export default {
     refreshOEmbed();
   },
   methods: {
+    payForContent() {
+      if (!this.isLoggedIn) return this.openLoginDialog();
+
+      const recipients = [
+        {
+          $asset: this.post.paywall.asset,
+          pub: this.post.pub,
+          uidw: this.post.uidw,
+          displayName: this.post.displayName,
+          memo: `pay for content ${this.post.getRelativeUrl(false)}`,
+          uuid: this.post.uuid,
+          callback: ({ transaction, transferActions }) =>
+            this.tip({ uuid: this.post.uuid, transaction, transferActions }),
+        },
+      ];
+
+      this.$store.commit("setSendTipDialogOpen", {
+        value: true,
+        recipients: recipients,
+      });
+    },
     async tip({ uuid, transaction, transferActions }) {
       let post = this.post;
-      console.log(uuid);
-      console.log(this.post.uuid);
 
       if (uuid != post.uuid) {
         if (!post.threadTree) return;

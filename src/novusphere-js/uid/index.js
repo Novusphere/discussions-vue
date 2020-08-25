@@ -215,6 +215,16 @@ async function getSymbols() {
     return eosTokensInfo.map(t => t.symbol);
 }
 
+function isValidAsset(asset) {
+    if (!asset) return false;
+    const [amount, symbol] = asset.split(' ');
+    if (isNaN(amount)) return false;
+    if (!symbol) return false;
+    if (parseFloat(amount) < 0) return false;
+    
+    return true;
+}
+
 //
 // Gets an asset for an address (or public key depending on the asset type)
 // Returns a string with the balance followed by the symbol
@@ -472,6 +482,7 @@ export {
     getTokenAddress,
     getSymbols,
     getAsset,
+    isValidAsset,
     getChainForSymbol,
     getFeeForAmount,
     getAmountFeeAssetsForTotal,

@@ -128,7 +128,8 @@ class discussionsx {
                     edit: action.data.uuid,
                     pub: action.data.metadata.pub || '',
                     sig: action.data.metadata.sig || '',
-                    title: action.data.metadata.title || ''
+                    title: action.data.metadata.title || '',
+                    //paywall: action.data.metadata.paywall || undefined,
                 },
                 $push: {
                     searchMeta: this.createSearchMeta(action)
@@ -201,6 +202,7 @@ class discussionsx {
                 downvotes: 0,
                 tipscore: 0,
                 tips: [],
+                paywall: action.data.metadata.paywall || undefined,
                 searchMeta: [this.createSearchMeta(action)]
             }
         });

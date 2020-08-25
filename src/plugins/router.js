@@ -147,7 +147,7 @@ router.afterEach(async (to) => {
     if (head.meta) {
         stripUndefined(head.meta);
 
-        console.log(head.meta);
+        //console.log(head.meta);
 
         for (const name in head.meta) {
             const content = head.meta[name];

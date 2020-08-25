@@ -108,6 +108,7 @@ export default {
     PostCard,
   },
   props: {
+    paywall: Object,
     draft: String,
     sub: String,
     parentPost: Object,
@@ -318,7 +319,6 @@ export default {
       // include people who have participated in current thread
       if (this.parentPost && this.parentPost.threadTree) {
         for (const { post } of Object.values(this.parentPost.threadTree)) {
-
           if (!post) continue;
           if (!post.pub) continue; // "real thread tree" field
 
@@ -354,6 +354,10 @@ export default {
       this.getEditor().setFromMarkdown(value);
     },
     async generateSubmission() {
+      if (this.paywall && this.paywall.$error) {
+        throw new Error(this.paywall.$error);
+      }
+
       const content = this.$refs.editor.getMarkdown();
       const tags = this.$refs.editor.getTags();
       const mentions = this.$refs.editor.getMentions().map((m) => m.pub);
@@ -398,9 +402,11 @@ export default {
           ? tags[0]
           : "all",
         edit: this.edit,
+        paywall: this.paywall,
       };
 
       let artificalSubmission = new Post();
+      artificalSubmission.paywall = this.paywall;
       artificalSubmission.title = post.title;
       artificalSubmission.chain = "eos";
       artificalSubmission.parentUuid = post.parentUuid;
@@ -425,6 +431,8 @@ export default {
         artificalSubmission.op = this.parentPost.op;
         artificalSubmission.threadTree = this.parentPost.threadTree;
       }
+
+      //if (artificalSubmission) throw new Error(`stop`);
 
       return { post, artificalSubmission };
     },
@@ -551,12 +559,14 @@ export default {
       this.submitPrompt = "";
       this.disablePost = true;
 
-      const { post, artificalSubmission } = await this.generateSubmission();
+      let { post, artificalSubmission } = {};
 
       //await sleep(5000);
       let trxid = undefined;
       let transferActions = [];
       try {
+        ({ post, artificalSubmission } = await this.generateSubmission());
+
         if (!post.content || post.content.length < 5)
           throw new Error(`Content is too short`);
 

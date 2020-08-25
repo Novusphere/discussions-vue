@@ -650,8 +650,17 @@ async function submitPost(signKey, post, transferActions) {
     const pub = ecc.privateToPublic(signKey);
     const nonce = Date.now();
 
+    let paywall = undefined;
+    if (post.paywall) {
+        paywall = {
+            asset: post.paywall.asset,
+            expire: post.paywall.expire.getTime()
+        }
+    }
+
     let metadata = {
         displayName: post.displayName,
+        paywall: paywall,
         title: post.title || undefined,
         edit: post.edit ? true : undefined,
         uidw: post.uidw || undefined,
