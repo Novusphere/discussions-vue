@@ -239,7 +239,7 @@ let _oembedNextAttempt = 0;
       _oembedAttempts++;
 
       if (window.FB) {
-        window.FB.XFBML.parse();
+        //window.FB.XFBML.parse();
       }
 
       if (window.twttr) {

@@ -73,6 +73,7 @@
       </v-dialog>
 
       <v-dialog
+        eager
         max-width="600"
         v-model="isSendTipDialogOpen"
         @click:outside="$store.commit('setSendTipDialogOpen', { value: false })"
@@ -475,13 +476,15 @@ blockquote {
 
 .light {
   @include light-scrollbar();
-  .v-dialog, .scrollable {
+  .v-dialog,
+  .scrollable {
     @include light-scrollbar();
   }
 }
 .dark {
   @include dark-scrollbar();
-  .v-dialog, .scrollable {
+  .v-dialog,
+  .scrollable {
     @include dark-scrollbar();
   }
 }

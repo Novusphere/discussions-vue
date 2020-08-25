@@ -265,6 +265,9 @@ function getOEmbedHtml(href) {
         // Sound Cloud
         oembed = `https://soundcloud.com/oembed?format=json&url=${href}`;
     }
+    else if ((/facebook.com\/[0-9]+\/posts\/[0-9]+/gi).test(href)) {
+        //oembed = `https://www.facebook.com/plugins/post/oembed.json/?url=${href}`;
+    }
 
     return { insertHTML, oembed };
 }
