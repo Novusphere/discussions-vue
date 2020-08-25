@@ -30,7 +30,7 @@
             <v-col :cols="6">
               <v-select
                 prepend-icon="timer"
-                :items="['1 hour', ...Array.from(new Array(23)).map((_, i) => `${i+2} hours`)]"
+                :items="['1 hour', ...Array.from(new Array(11)).map((_, i) => `${i+2} hours`)]"
                 v-model="simpleExpiry"
                 label="Expiration"
               ></v-select>
