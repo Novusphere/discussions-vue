@@ -3,6 +3,7 @@ import { Api } from "../helpers";
 import { config } from "../mongo";
 import siteConfig from "../site";
 import eos from "@/novusphere-js/uid/eos";
+import { getXNationQuote } from "@/novusphere-js/uid/xnation";
 import axios from 'axios';
 import discussionsx from "../services/discussionsx";
 
@@ -210,6 +211,14 @@ export default @Controller('/blockchain') class BlockchainController {
     @Get('/p2k')
     async p2k(req, res) {
         return res.success(await this.getP2K());
+    }
+
+    @Api()
+    @Get('/xnationquote')
+    async xnationQuote(req, res) {
+        const { from, amount, fromId, toId } = req.unpack();
+        const quote = await getXNationQuote(from, amount, fromId, toId);
+        return res.success(quote);
     }
 
     @Api()
