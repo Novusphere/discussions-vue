@@ -347,9 +347,7 @@ class discussionsx {
 
     async migration() {
 
-        // TO-DO: remove only needs to be ran once...
-
-        const db = await getCollection(config.table.accounts);
+        /*const db = await getCollection(config.table.accounts);
         const res = await db.updateMany({
             "data.followingUsers": { $exists: true },
             "data.subscribedTags": { $exists: true }
@@ -361,7 +359,7 @@ class discussionsx {
         });
 
         console.log(`=== migration ===`);
-        console.log(res.modifiedCount);
+        console.log(res.modifiedCount);*/
 
     }
 

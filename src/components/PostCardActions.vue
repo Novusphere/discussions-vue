@@ -12,7 +12,7 @@
       <v-icon>attach_money</v-icon>Tip
     </v-btn>
 
-    <PostThreadLink btn class="ml-2" :post="post" v-if="!isCommentDisplay">
+    <PostThreadLink btn :post="post" v-if="!isCommentDisplay">
       <v-icon>comment</v-icon>
       <span>{{ post.totalReplies + ((!$vuetify.breakpoint.mobile) ? ' Comments' : '')}}</span>
     </PostThreadLink>

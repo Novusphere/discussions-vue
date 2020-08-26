@@ -108,7 +108,7 @@ export default {
   components: {
     MarkdownEditor,
     PostCard,
-    PayWall
+    PayWall,
   },
   props: {
     showPaywall: Boolean,
@@ -357,7 +357,7 @@ export default {
       this.getEditor().setFromMarkdown(value);
     },
     async generateSubmission() {
-      const paywall = this.$refs.paywall.value;
+      const paywall = this.$refs.paywall ? this.$refs.paywall.value : undefined;
 
       if (paywall && paywall.$error) {
         throw new Error(paywall.$error);

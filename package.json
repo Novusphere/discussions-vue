@@ -12,6 +12,7 @@
     "staking1-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/staking1.js",
     "discord-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/discord.js",
     "twitter-bot": "babel-node --config-file ./src/server/babel.config.json ./src/bots/twitter.js",
+    "test": "babel-node --config-file ./src/server/babel.config.json ./src/bots/test.js",
     "watcher": "babel-node --max-old-space-size=4096 --config-file ./src/server/babel.config.json ./src/watcher/"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "express-session": "^1.17.1",
     "identicon.js": "^2.3.3",
     "jsdom": "^16.2.2",
+    "lodash": "^4.17.20",
     "mongodb": "^3.5.9",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.1",
