@@ -1,3 +1,6 @@
+// Reference Implementation - https://github.com/Novusphere/xnation-ui
+// Special Thanks: John Williamson
+
 import _ from "lodash";
 import { eos } from "@/novusphere-js/uid";
 
@@ -9,7 +12,7 @@ function symToBaseSymbol(sym) {
 function assetStringtoBaseSymbol(assetString) {
     const [quantity, symbol] = assetString.split(' ');
     const precision = (quantity.length - 1) - quantity.indexOf('.');
-    return { symbol, precision };
+    return { quantity, symbol, precision };
 }
 
 function buildTokenId({ contract, symbol }) {
@@ -209,18 +212,18 @@ function relaysToConvertPaths(from, relays) {
 }
 
 function sortReservesByAsset(asset, reserves) {
-    const [ quantity, symbol ] = asset.split(' ');
+    const [quantity, symbol] = asset.split(' ');
 
-    if (!reserves.some(reserve => reserve.amount.split(' ')[1] == symbol))
+    if (!reserves.some(reserve => assetStringtoBaseSymbol(reserve.amount).symbol == symbol))
         throw new Error("Asset does not exist in these reserves");
 
     return reserves.sort((a, b) =>
-        a.amount.split(' ')[1] == symbol ? -1 : 1
+        assetStringtoBaseSymbol(a.amount).symbol == symbol ? -1 : 1
     );
 }
 
 function calculateReturn(balanceFrom, balanceTo, amount) {
-    if (balanceFrom.split(' ')[1] != amount.split(' ')[1])
+    if (assetStringtoBaseSymbol(balanceFrom).symbol != assetStringtoBaseSymbol(amount).symbol)
         throw new Error("From symbol does not match amount symbol");
     if (parseFloat(amount) >= parseFloat(balanceFrom))
         throw new Error("Impossible to buy the entire reserve or more");
@@ -383,21 +386,18 @@ function eosMultiToHydrated(relay) {
 
 async function getXNationQuote(from, swapAmount, swapFromId, swapToId) {
 
-    const [ amount, symbol ] = swapAmount.split(' ');
-    const precision = amount.length - 1 - amount.indexOf('.');
+    const { symbol, precision } = assetStringtoBaseSymbol(swapAmount);
     const swapAsset = { code: symbol, precision: precision };
 
     const estimate = await getReturn(swapAmount, swapFromId, swapToId);
     const path = await findPath(swapFromId, swapToId);
     const convertPath = relaysToConvertPaths(swapAsset, path);
 
-    const [ estimateAmount, estimateSym ] = estimate.amount.split(' ');
-    const estimatePrecision = estimateAmount.length - 1 - estimateAmount.indexOf('.');
-
+    const { symbol: estimateSymbol, precision: estimatePrecision } = assetStringtoBaseSymbol(estimate.amount);
     const minReturn = String((parseFloat(estimate.amount) * 0.96).toFixed(estimatePrecision));
 
-    const memo = composeMemo(convertPath, 
-        minReturn, 
+    const memo = composeMemo(convertPath,
+        minReturn,
         from);
 
     return {
@@ -406,11 +406,11 @@ async function getXNationQuote(from, swapAmount, swapFromId, swapToId) {
         from: swapFromId,
         to: swapToId,
         estimate,
-        minReturn: `${minReturn} ${estimateSym}`,
+        minReturn: `${minReturn} ${estimateSymbol}`,
         memo
     }
 }
 
 export {
-   getXNationQuote
+    getXNationQuote
 }

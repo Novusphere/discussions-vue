@@ -341,32 +341,37 @@ export default {
     getTips() {
       let tips = [];
 
+      //
+      // new implementation 8/27/2020, walk the document instead of regex
+      //
       const doc = this.getDocument();
-      const html = doc.body.innerHTML;
+      for (const node of Array.from(doc.links)) {
+        let href = node.href;
 
-      const tipMatch = /<a href="\/tag\/tip" .+?>#tip<\/a>\s[0-9.]+\s[A-Z]+(\s<a href="\/u\/.+?<\/a>)?/gi;
-      const matches = [...html.matchAll(tipMatch)].map((m) => m[0]);
+        if (!href.endsWith("/tag/tip")) continue;
 
-      for (const tipString of matches) {
-        const endATag = `</a>`;
-        const hrefField = `href="`;
+        const tipText = node.nextSibling;
+        if (!tipText) continue;
+        if (tipText.nodeName != "#text") continue;
 
-        let parsedString = tipString.substring(
-          tipString.indexOf(endATag) + endATag.length
-        );
+        let [quantity, symbol] = tipText.nodeValue.trim().split(" ");
+        if (isNaN(quantity)) continue;
 
-        let [quantity, symbol] = parsedString.split(" ").filter((s) => s);
+        quantity = parseFloat(quantity);
+        if (quantity <= 0) continue;
 
-        parsedString = parsedString.substring(
-          parsedString.indexOf(hrefField) + hrefField.length
-        );
-        parsedString = parsedString.substring(0, parsedString.indexOf(`"`));
+        let pub = undefined;
 
-        let urlFragment = parsedString.split("-");
+        const atUser = tipText.nextSibling;
+        if (atUser && atUser.nodeName == "A") {
+          if (atUser.href.indexOf("/u/") != -1) {
+            const userHrefFragment = atUser.href.split("-");
+            const userPub = userHrefFragment[userHrefFragment.length - 1];
+            pub = userPub;
+          }
+        }
 
-        let pub = urlFragment[urlFragment.length - 1];
-
-        tips.push({ quantity, symbol, pub }); // note the public key here is their arbitrary public key!
+        tips.push({ quantity, symbol, pub });
       }
 
       return tips;
