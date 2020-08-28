@@ -62,10 +62,10 @@
         <v-row>
           <v-col :cols="12">
             <v-row>
-              <v-col :cols="4">
+              <v-col cols="6">
                 <v-text-field v-model="fromAmount" label="Amount to swap"></v-text-field>
               </v-col>
-              <v-col :cols="4">
+              <v-col cols="6">
                 <UserAssetSelect
                   no-amount
                   :item-text="`symbol`"
@@ -76,10 +76,10 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col :cols="4">
-                <v-text-field v-model="toAmount" label="Quote (readonly)" readonly></v-text-field>
+              <v-col cols="6">
+                <v-text-field v-model="toAmount" label="Quote" readonly></v-text-field>
               </v-col>
-              <v-col :cols="4">
+              <v-col cols="6">
                 <UserAssetSelect
                   no-amount
                   :item-text="`symbol`"
@@ -95,12 +95,12 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col :cols="4">
+              <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
                 <v-btn :disabled="waiting" block color="primary" @click="getQuote">
                   <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>Get Quote
                 </v-btn>
               </v-col>
-              <v-col :cols="4">
+              <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
                 <v-btn :disabled="waiting" block color="primary" @click="swap">
                   <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>Swap
                 </v-btn>
@@ -232,7 +232,7 @@ export default {
     async getQuote() {
       this.toAmount = "";
       this.quoteError = "";
-      
+
       if (!this.fromAmount || isNaN(this.fromAmount)) return;
       if (!this.fromSymbol) return;
       if (!this.toSymbol) return;
