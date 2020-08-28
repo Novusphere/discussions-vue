@@ -89,6 +89,11 @@
                 ></UserAssetSelect>
               </v-col>
             </v-row>
+            <v-row v-if="quoteError">
+              <v-col :cols="8">
+                <p class="text-center error--text">{{ quoteError }}</p>
+              </v-col>
+            </v-row>
             <v-row>
               <v-col :cols="4">
                 <v-btn :disabled="waiting" block color="primary" @click="getQuote">
@@ -155,6 +160,7 @@ export default {
   data: () => ({
     transactionLink: "",
     transactionError: "",
+    quoteError: "",
     password: "",
     fromAmount: "",
     fromSymbol: "EOS",
@@ -167,7 +173,6 @@ export default {
   }),
   methods: {
     async submitSwap() {
-      
       const tempPassword = this.password;
       this.password = "";
       if (decrypt(this.encryptedTest, tempPassword) != "test")
@@ -226,6 +231,8 @@ export default {
     },
     async getQuote() {
       this.toAmount = "";
+      this.quoteError = "";
+      
       if (!this.fromAmount || isNaN(this.fromAmount)) return;
       if (!this.fromSymbol) return;
       if (!this.toSymbol) return;
@@ -233,16 +240,22 @@ export default {
 
       this.waiting = true;
 
-      const from = await createAsset(this.fromAmount, this.fromSymbol);
-      console.log(from);
+      try {
+        const from = await createAsset(this.fromAmount, this.fromSymbol);
+        console.log(from);
 
-      const hops = await newdexQuote(from, this.toSymbol);
-      console.log(hops);
+        const hops = await newdexQuote(from, this.toSymbol);
+        console.log(hops);
 
-      const lastHop = hops[hops.length - 1];
-      const [toAmount] = lastHop.expect.split(" ");
+        const lastHop = hops[hops.length - 1];
+        const [toAmount] = lastHop.expect.split(" ");
 
-      this.toAmount = toAmount;
+        this.toAmount = toAmount;
+      } catch (ex) {
+        this.quoteError = ex.message;
+        console.log(ex);
+      }
+
       this.waiting = false;
     },
   },
