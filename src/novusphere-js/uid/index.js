@@ -221,7 +221,7 @@ function isValidAsset(asset) {
     if (isNaN(amount)) return false;
     if (!symbol) return false;
     if (parseFloat(amount) < 0) return false;
-    
+
     return true;
 }
 
@@ -380,6 +380,23 @@ async function createTransferActions(actions, progressCallback) {
     return transfers;
 }
 
+async function newdexQuote(from, to) {
+    return await apiRequest(`/v1/api/blockchain/newdexquote`, {
+        from,
+        to
+    });
+}
+
+
+async function newdexSwap(withdrawAction, expect) {
+    const transfers = await createTransferActions([withdrawAction]);
+
+    return await apiRequest(`/v1/api/blockchain/newdexswap`, {
+        transfers,
+        expect
+    });
+}
+
 //
 //  Transfers a Unified ID asset
 //
@@ -493,6 +510,8 @@ export {
     createAsset,
     sumAsset,
     withdrawAction,
+    newdexQuote,
+    newdexSwap,
     transfer,
     createArtificalTips,
     createTransferActions,

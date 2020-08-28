@@ -105,21 +105,32 @@ export default {
       if (this.isReceived) this.total = this.trx.data.amount;
       else this.total = await sumAsset(this.trx.data.amount, this.trx.data.fee);
 
-      const memo = this.trx.data.memo;
-      let memoHtml = sanitize(memo);
-      
-      memoHtml = memoHtml.replace(/\/tag\/[a-zA-Z0-9/_-]+/, function (url) {
-        return `<a target="_blank" href="${url}">${url}</a>`;
-      });
-
-      memoHtml = memoHtml.replace(
-        /\/u\/[a-zA-Z0-9/_-]+-[a-zA-Z0-9]+/,
-        function (url) {
-          return `<a target="_blank" href="${url}">${url}</a>`;
+      if (this.trx.data.to == "EOS1111111111111111111111111111111114T1Anm") {
+        let to = this.trx.data.memo;
+        let colon = to.indexOf(":");
+        if (colon > -1) {
+          const message = to.substring(colon + 1);
+          this.memoHtml = `Withdraw to ${to.substring(0, colon)}` + (message ? ` - ${message}` : ``);      
+        } else {
+          this.memoHtml = `Withdraw to ${to}`;
         }
-      );
+      } else {
+        const memo = this.trx.data.memo;
+        let memoHtml = sanitize(memo);
 
-      this.memoHtml = memoHtml;
+        memoHtml = memoHtml.replace(/\/tag\/[a-zA-Z0-9/_-]+/, function (url) {
+          return `<a target="_blank" href="${url}">${url}</a>`;
+        });
+
+        memoHtml = memoHtml.replace(
+          /\/u\/[a-zA-Z0-9/_-]+-[a-zA-Z0-9]+/,
+          function (url) {
+            return `<a target="_blank" href="${url}">${url}</a>`;
+          }
+        );
+
+        this.memoHtml = memoHtml;
+      }
     }
   },
   methods: {},

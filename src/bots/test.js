@@ -1,14 +1,14 @@
-const fetch = require('node-fetch');
-global.fetch = fetch;
+//import fetch from 'node-fetch';
+//import crypto from 'crypto';
+//import axios from 'axios';
+import { getConfig } from "@/novusphere-js/utility";
+//import { eos, brainKeyToKeys, createTransferActions, withdrawAction, getChainForSymbol, createAsset } from "@/novusphere-js/uid";
+//import { NewDexAPI } from "@/novusphere-js/uid/newdex";
 
-import { getXNationQuote } from "@/novusphere-js/uid/xnation";
 
 (async function () {
-    const from = `asphyxiating`;
-    const to = `thisisbancor`;
-    const amount = `0.1000 EOS`;
-    const details = await getXNationQuote(from, amount, `eosio.token-EOS`, `novusphereio-ATMOS`);
-
-    console.log(details);
+    const config = await getConfig(`test`);
+    
+    return;
 
 })();

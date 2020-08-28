@@ -102,6 +102,7 @@ const routes = [
                     { path: 'assets', component: `WalletAssetsPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Assets` }) } },
                     { path: 'withdraw', component: `WalletWithdrawPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Withdraw` }) } },
                     { path: 'deposit', component: `WalletDepositPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Deposits` }) } },
+                    { path: 'swap', component: `WalletSwapPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Token Swap` }) } },
                     { path: 'eos-account', component: `EOSAccountCreatePage`, meta: { head: async () => ({ title: `Discussions - Wallet - EOS Account Creation` }) } }
                 ]
             },

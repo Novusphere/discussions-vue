@@ -35,6 +35,7 @@ import WalletPage from "@/pages/wallet/WalletPage";
 import WalletAssetsPage from "@/pages/wallet/WalletAssetsPage";
 import WalletWithdrawPage from "@/pages/wallet/WalletWithdrawPage";
 import WalletDepositPage from "@/pages/wallet/WalletDepositPage";
+import WalletSwapPage from "@/pages/wallet/WalletSwapPage";
 import EOSAccountCreatePage from "@/pages/wallet/EOSAccountCreatePage";
 
 import TestsPage from "@/pages/tests/TestsPage";
@@ -71,6 +72,7 @@ let components = {
     WalletAssetsPage,
     WalletWithdrawPage,
     WalletDepositPage,
+    WalletSwapPage,
     EOSAccountCreatePage,
     TestsPage,
     TestEditorPage,

@@ -1,9 +1,10 @@
-import { Controller, Post, Get } from '@decorators/express';
+import { Controller, Post, Get, All } from '@decorators/express';
 import { Api } from "../helpers";
 import { config } from "../mongo";
 import siteConfig from "../site";
 import eos from "@/novusphere-js/uid/eos";
 import { getXNationQuote } from "@/novusphere-js/uid/xnation";
+import { NewDexAPI } from "@/novusphere-js/uid/newdex";
 import axios from 'axios';
 import discussionsx from "../services/discussionsx";
 
@@ -214,7 +215,75 @@ export default @Controller('/blockchain') class BlockchainController {
     }
 
     @Api()
-    @Get('/xnationquote')
+    @Post('/newdexswap')
+    async newdexSwap(req, res) {
+        const { transfers, from, expect } = req.unpack();
+        const [, toAsset] = expect.split(' ');
+
+        if (!transfers || !Array.isArray(transfers)) throw new Error(`Expected actions to be of type Array`);
+
+        if (transfers.length != 1 || transfers[0].to != 'EOS1111111111111111111111111111111114T1Anm' || !transfers[0].memo.startsWith(siteConfig.relay.account))
+            throw new Error(`Expected one transfer action withdrawal to relay account`);
+
+        const newdex = new NewDexAPI(siteConfig.newdex.key, siteConfig.newdex.secret);
+        const hops = await newdex.swapDetails(transfers[0].amount, toAsset);
+        const lastHop = hops[hops.length - 1];
+
+        if (parseFloat(lastHop.expect) < parseFloat(expect)) {
+            throw new Error(`Last hop expect was ${lastHop.expect} under the quote ${expect}, try refreshing your quote and try again`);
+        }
+
+        let actions = await this.makeTransferActions(transfers);
+
+        // send the hops to newdex, these are effectively FILL-OR-KILL orders
+        for (const hop of hops) {
+            actions.push({
+                account: hop.type.startsWith('sell') ? hop.market.contract : 'eosio.token',
+                name: `transfer`,
+                data: {
+                    from: siteConfig.relay.account,
+                    to: `newdexpublic`,
+                    quantity: hop.quantity,
+                    memo: JSON.stringify({
+                        "type": hop.type,
+                        "symbol": hop.market.symbol,
+                        "price": hop.price,
+                        "channel": "API"
+                    })
+                }
+            });
+        }
+
+        actions.push({
+            account: lastHop.type.startsWith('buy') ? lastHop.market.contract : 'eosio.token',
+            name: `transfer`,
+            data: {
+                from: siteConfig.relay.account,
+                to: `nsuidcntract`,
+                quantity: expect, // the minimum
+                memo: transfers[0].from // redeposit back to this public key
+            }
+        });
+
+        actions = this.addAuthorizationToActions(actions);
+
+        //const trx = { transaction_id: "5f2f829d6a35279ed7cf373f8ee3667bbc86cec39375a4b3b5cc86b1a9c233b7" }; 
+        const trx = await this.transact(actions);
+
+        return res.success(trx);
+    }
+
+    @Api()
+    @All('/newdexquote')
+    async newdexQuote(req, res) {
+        const { from, to } = req.unpack();
+        const newdex = new NewDexAPI(siteConfig.newdex.key, siteConfig.newdex.secret);
+        const hops = await newdex.swapDetails(from, to);
+        return res.success(hops);
+    }
+
+    @Api()
+    @All('/xnationquote')
     async xnationQuote(req, res) {
         const { from, amount, fromId, toId } = req.unpack();
         const quote = await getXNationQuote(from, amount, fromId, toId);

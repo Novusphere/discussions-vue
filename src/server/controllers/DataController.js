@@ -1,11 +1,12 @@
 import * as axios from 'axios';
 import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml, LBRY_REGEX, createDOMParser } from "@/novusphere-js/utility";
+import { getTokensInfo, getAsset } from "@/novusphere-js/uid";
 import { Controller, Get, All } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
+import siteConfig from "../site";
 import Identicon from 'identicon.js';
 import { PublicKey } from 'eosjs-ecc';
-import { regex } from 'uuidv4';
 
 let keyIconCache = {};
 
@@ -66,6 +67,11 @@ export default @Controller('/data') class DataController {
             };
         }
 
+        result.fees = {};
+        for (const token of await getTokensInfo()) {
+            result.fees[token.symbol] = await getAsset(token.symbol, siteConfig.relay.pub);
+        }
+        
         return res.success(result);
     }
 
