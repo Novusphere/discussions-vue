@@ -39,31 +39,69 @@ class NewDexAPI {
         return await this.request(`/v1/common/symbols`);
     }
 
-    async swapDetails(start, targetSymbol, symbols = undefined) {
-        const SLIPPAGE_FACTOR = 0.995;
-        const [, startSymbol] = start.split(' ');
+    _consumeBook(units, isBaseUnit, book) {
+        let expect = 0;
+        for (const [p, q] of book) {
 
-        function consumeBook(units, isBaseUnit, book) {
-            let expect = 0;
-            for (const [p, q] of book) {
+            const consume = Math.min(q, isBaseUnit ? (units / p) : units);
+            units -= isBaseUnit ? (consume * p) : consume;
+            expect += isBaseUnit ? consume : (consume * p);
 
-                const consume = Math.min(q, isBaseUnit ? (units / p) : units);
-                units -= isBaseUnit ? (consume * p) : consume;
-                expect += isBaseUnit ? consume : (consume * p);
-
-                if (units <= 0) {
-                    return { expect, price: String(p) };
-                }
+            if (units <= 0) {
+                return { expect, price: String(p) };
             }
-            throw new Error(`Insufficient liquidity in orderbooks`); // more details?
         }
+        throw new Error(`Insufficient liquidity in orderbooks`); // more details?
+    }
+
+    async swapDetailsReverse(end, startSymbol, symbols = undefined) {
+        const SLIPPAGE_FACTOR = 1 / 0.98;
+        const [endAmount, endSymbol] = end.split(' ');
+
+        if (!symbols) symbols = await this.commonSymbols();
+        if (startSymbol == 'EOS') {
+            const market = symbols.find(m => m.currency == endSymbol);
+            const depth = await this.depth(market.symbol);
+
+            const { expect, price } = this._consumeBook(parseFloat(end) * SLIPPAGE_FACTOR, false, depth.asks.reverse());
+            return [{
+                type: `buy-limit`,
+                market,
+                price,
+                quantity: `${(expect).toFixed(market.currency_precision)} ${startSymbol}`,
+                expect: end
+            }];
+        }
+        else if (endSymbol == 'EOS') {
+            const market = symbols.find(m => m.currency == startSymbol);
+            const depth = await this.depth(market.symbol);
+
+            const { expect, price } = this._consumeBook(parseFloat(end) * SLIPPAGE_FACTOR, true, depth.bids);
+            return [{
+                type: `sell-limit`,
+                market,
+                price,
+                quantity: `${(expect).toFixed(market.currency_precision)} ${startSymbol}`,
+                expect: end
+            }];
+        }
+        else {
+            const [hop2] = await this.swapDetailsReverse(end, 'EOS', symbols);
+            const [hop1] = await this.swapDetailsReverse(hop2.quantity, startSymbol, symbols);
+            return [hop1, hop2];
+        }
+    }
+
+    async swapDetails(start, targetSymbol, symbols = undefined) {
+        const SLIPPAGE_FACTOR = 0.98;
+        const [, startSymbol] = start.split(' ');
 
         if (!symbols) symbols = await this.commonSymbols();
         if (startSymbol == 'EOS') {
             const market = symbols.find(m => m.currency == targetSymbol);
             const depth = await this.depth(market.symbol);
 
-            const { expect, price } = consumeBook(parseFloat(start), true, depth.asks.reverse());
+            const { expect, price } = this._consumeBook(parseFloat(start), true, depth.asks.reverse());
             return [{
                 type: `buy-limit`,
                 market,
@@ -76,7 +114,7 @@ class NewDexAPI {
             const market = symbols.find(m => m.currency == startSymbol);
             const depth = await this.depth(market.symbol);
 
-            const { expect, price } = consumeBook(parseFloat(start), false, depth.bids);
+            const { expect, price } = this._consumeBook(parseFloat(start), false, depth.bids);
             return [{
                 type: `sell-limit`,
                 market,

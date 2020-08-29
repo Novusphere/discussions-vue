@@ -77,7 +77,7 @@
             </v-row>
             <v-row>
               <v-col cols="6">
-                <v-text-field v-model="toAmount" label="Quote" readonly></v-text-field>
+                <v-text-field v-model="toAmount" label="Quote"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <UserAssetSelect
@@ -116,6 +116,7 @@
 <script>
 import { mapState } from "vuex";
 import { passwordTesterRules } from "@/utility";
+import { waitFor } from "@/novusphere-js/utility";
 import UserAssetSelect from "@/components/UserAssetSelect";
 import TransactionSubmitText from "@/components/TransactionSubmitText";
 import TokenIcon from "@/components/TokenIcon";
@@ -141,12 +142,25 @@ export default {
   watch: {
     toSymbol() {
       this.toAmount = "";
+      this.fromAmount = "";
+      this.quoteTo = "";
+      this.quoteFrom = "";
     },
     fromSymbol() {
       this.toAmount = "";
+      this.fromAmount = "";
+      this.quoteTo = "";
+      this.quoteFrom = "";
     },
-    fromAmount() {
-      this.toAmount = "";
+    async fromAmount() {
+      if (parseFloat(this.fromAmount) && this.fromAmount != this.quoteFrom) {
+        await this.getQuote();
+      }
+    },
+    async toAmount() {
+      if (parseFloat(this.toAmount) && this.toAmount != this.quoteTo) {
+        await this.getQuote();
+      }
     },
   },
   computed: {
@@ -162,6 +176,8 @@ export default {
     transactionError: "",
     quoteError: "",
     password: "",
+    quoteFrom: "",
+    quoteTo: "",
     fromAmount: "",
     fromSymbol: "EOS",
     fromAsset: "",
@@ -226,31 +242,51 @@ export default {
 
       this.fromAsset = fromAsset;
       this.toAsset = toAsset;
-
+      
+      this.transactionLink = "";
+      this.transactionError = "";
       this.isSwapDialogOpen = true;
     },
     async getQuote() {
-      this.toAmount = "";
+      await waitFor(async () => !this.waiting);
+
       this.quoteError = "";
 
-      if (!this.fromAmount || isNaN(this.fromAmount)) return;
       if (!this.fromSymbol) return;
       if (!this.toSymbol) return;
       if (this.fromSymbol == this.toSymbol) return;
+      if (
+        (!this.fromAmount || isNaN(this.fromAmount)) &&
+        (!this.toAmount || isNaN(this.toAmount))
+      )
+        return;
 
       this.waiting = true;
 
       try {
-        const from = await createAsset(this.fromAmount, this.fromSymbol);
-        console.log(from);
+        if (this.fromAmount != this.quoteFrom) {
+          const from = await createAsset(this.fromAmount, this.fromSymbol);
+          const hops = await newdexQuote(from, this.toSymbol);
 
-        const hops = await newdexQuote(from, this.toSymbol);
-        console.log(hops);
+          const lastHop = hops[hops.length - 1];
+          const [toAmount] = lastHop.expect.split(" ");
 
-        const lastHop = hops[hops.length - 1];
-        const [toAmount] = lastHop.expect.split(" ");
+          this.quoteFrom = this.fromAmount;
+          this.quoteTo = toAmount;
 
-        this.toAmount = toAmount;
+          this.toAmount = toAmount;
+        } else {
+          const to = await createAsset(this.toAmount, this.toSymbol);
+          const hops = await newdexQuote(this.fromSymbol, to, true);
+
+          const firstHop = hops[0];
+          const [fromAmount] = firstHop.quantity.split(" ");
+
+          this.quoteFrom = fromAmount;
+          this.quoteTo = this.toAmount;
+
+          this.fromAmount = fromAmount;
+        }
       } catch (ex) {
         this.quoteError = ex.message;
         console.log(ex);

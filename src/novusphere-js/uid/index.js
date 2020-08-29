@@ -380,13 +380,13 @@ async function createTransferActions(actions, progressCallback) {
     return transfers;
 }
 
-async function newdexQuote(from, to) {
+async function newdexQuote(from, to, reverse = false) {
     return await apiRequest(`/v1/api/blockchain/newdexquote`, {
         from,
-        to
+        to,
+        reverse
     });
 }
-
 
 async function newdexSwap(withdrawAction, expect) {
     const transfers = await createTransferActions([withdrawAction]);

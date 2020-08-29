@@ -229,6 +229,9 @@ export default @Controller('/blockchain') class BlockchainController {
         const hops = await newdex.swapDetails(transfers[0].amount, toAsset);
         const lastHop = hops[hops.length - 1];
 
+        //console.log(transfers[0]);
+        //console.log(hops);
+
         if (parseFloat(lastHop.expect) < parseFloat(expect)) {
             throw new Error(`Last hop expect was ${lastHop.expect} under the quote ${expect}, try refreshing your quote and try again`);
         }
@@ -276,9 +279,9 @@ export default @Controller('/blockchain') class BlockchainController {
     @Api()
     @All('/newdexquote')
     async newdexQuote(req, res) {
-        const { from, to } = req.unpack();
+        const { from, to, reverse } = req.unpack();
         const newdex = new NewDexAPI(siteConfig.newdex.key, siteConfig.newdex.secret);
-        const hops = await newdex.swapDetails(from, to);
+        const hops = reverse ? await newdex.swapDetailsReverse(to, from) : await newdex.swapDetails(from, to);
         return res.success(hops);
     }
 
