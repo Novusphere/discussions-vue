@@ -242,7 +242,7 @@ export default {
 
       this.fromAsset = fromAsset;
       this.toAsset = toAsset;
-      
+
       this.transactionLink = "";
       this.transactionError = "";
       this.isSwapDialogOpen = true;
@@ -252,38 +252,44 @@ export default {
 
       this.quoteError = "";
 
+      let fromAmount = this.fromAmount;
+      let toAmount = this.toAmount;
+
       if (!this.fromSymbol) return;
       if (!this.toSymbol) return;
       if (this.fromSymbol == this.toSymbol) return;
       if (
-        (!this.fromAmount || isNaN(this.fromAmount)) &&
-        (!this.toAmount || isNaN(this.toAmount))
+        (!fromAmount || isNaN(fromAmount)) &&
+        (!toAmount || isNaN(toAmount))
       )
         return;
 
       this.waiting = true;
 
       try {
-        if (this.fromAmount != this.quoteFrom) {
-          const from = await createAsset(this.fromAmount, this.fromSymbol);
+        //console.log(fromAmount, this.quoteFrom);
+        //console.log(toAmount, this.quoteTo);
+
+        if (fromAmount != this.quoteFrom) {
+          const from = await createAsset(fromAmount, this.fromSymbol);
           const hops = await newdexQuote(from, this.toSymbol);
 
           const lastHop = hops[hops.length - 1];
-          const [toAmount] = lastHop.expect.split(" ");
+          toAmount = lastHop.expect.split(" ")[0];
 
-          this.quoteFrom = this.fromAmount;
+          this.quoteFrom = fromAmount;
           this.quoteTo = toAmount;
 
           this.toAmount = toAmount;
-        } else {
-          const to = await createAsset(this.toAmount, this.toSymbol);
+        } else if (toAmount != this.quoteTo) {
+          const to = await createAsset(toAmount, this.toSymbol);
           const hops = await newdexQuote(this.fromSymbol, to, true);
 
           const firstHop = hops[0];
-          const [fromAmount] = firstHop.quantity.split(" ");
+          fromAmount = firstHop.quantity.split(" ")[0];
 
           this.quoteFrom = fromAmount;
-          this.quoteTo = this.toAmount;
+          this.quoteTo = toAmount;
 
           this.fromAmount = fromAmount;
         }
