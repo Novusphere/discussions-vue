@@ -45,6 +45,8 @@
     </div>
 
     <v-menu
+      :content-class="darkMode ? 'dark' : 'light'"
+      max-height="50vh"
       z-index="9999"
       :value="showSuggestions"
       :close-on-content-click="false"
@@ -53,15 +55,17 @@
     >
       <div ref="suggestions">
         <v-card>
-          <template v-if="hasResults">
-            <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
-              <PublicKeyIcon class="mr-2" :publicKey="user.pub" />
-              {{ user.displayName[0] }}
-            </v-list-item>
-          </template>
-          <div v-else>
-            <v-card-text>No users found</v-card-text>
-          </div>
+          <v-card-text>
+            <template v-if="hasResults">
+              <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
+                <PublicKeyIcon class="mr-2" :publicKey="user.pub" />
+                {{ user.displayName[0] }}
+              </v-list-item>
+            </template>
+            <div v-else>
+              <v-card-text>No users found</v-card-text>
+            </div>
+          </v-card-text>
         </v-card>
       </div>
     </v-menu>
@@ -69,7 +73,7 @@
 </template>
 
 <script>
-//import tippy, { sticky } from "tippy.js";
+import { mapState } from "vuex";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import { Editor, EditorContent, EditorMenuBar } from "tiptap";
 import {
@@ -280,6 +284,9 @@ export default {
     showSuggestions() {
       return this.query || this.hasResults;
     },
+    ...mapState({
+      darkMode: (state) => state.darkMode,
+    }),
   },
   mounted() {
     this.hasMounted = true;

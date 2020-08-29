@@ -28,8 +28,10 @@
         <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 3"></v-col>
         <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 4">
           <v-btn
+            :block="$vuetify.breakpoint.mobile"
             v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
             color="primary"
+            :class="{ 'mt-2': $vuetify.breakpoint.mobile }"
             outlined
             @click="followUser({ displayName, pub: publicKey, uidw })"
           >
@@ -37,17 +39,20 @@
             <span>Follow</span>
           </v-btn>
           <v-btn
+            :block="$vuetify.breakpoint.mobile"
             v-else-if="(publicKey != myPublicKey)"
             color="primary"
+            :class="{ 'mt-2': $vuetify.breakpoint.mobile }"
             @click="unfollowUser(publicKey)"
           >
             <v-icon>person_remove</v-icon>
             <span>Unfollow</span>
           </v-btn>
           <v-btn
+            :block="$vuetify.breakpoint.mobile"
             v-if="uidw && (publicKey != myPublicKey)"
             color="primary"
-            class="ml-1"
+            :class="{ 'mt-2': $vuetify.breakpoint.mobile, 'ml-2': !$vuetify.breakpoint.mobile }"
             @click="sendTip()"
           >
             <v-icon>attach_money</v-icon>
@@ -66,7 +71,7 @@ import PublicKeyIcon from "@/components/PublicKeyIcon";
 
 export default {
   name: "UserProfileCard",
-  mixins: [ userActionsMixin ],
+  mixins: [userActionsMixin],
   components: {
     PublicKeyIcon,
   },
