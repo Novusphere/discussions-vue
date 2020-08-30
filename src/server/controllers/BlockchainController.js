@@ -217,7 +217,7 @@ export default @Controller('/blockchain') class BlockchainController {
     @Api()
     @Post('/newdexswap')
     async newdexSwap(req, res) {
-        const { transfers, from, expect } = req.unpack();
+        const { transfers, from, expect, createAccount } = req.unpack();
         const [, toAsset] = expect.split(' ');
 
         if (!transfers || !Array.isArray(transfers)) throw new Error(`Expected actions to be of type Array`);
@@ -257,18 +257,38 @@ export default @Controller('/blockchain') class BlockchainController {
             });
         }
 
-        actions.push({
-            account: lastHop.type.startsWith('buy') ? lastHop.market.contract : 'eosio.token',
-            name: `transfer`,
-            data: {
-                from: siteConfig.relay.account,
-                to: `nsuidcntract`,
-                quantity: expect, // the minimum
-                memo: transfers[0].from // redeposit back to this public key
-            }
-        });
+        if (createAccount) {
+            if (lastHop.type.startsWith('buy'))
+                throw new Error(`Account creation is specified but last hop is a buy`);
+
+            actions.push({
+                account: 'eosio.token',
+                name: `transfer`,
+                data: {
+                    from: siteConfig.relay.account,
+                    to: 'signupeoseos', 
+                    quantity: expect, // the minimum
+                    memo: createAccount
+                }
+            });
+        }
+        else {
+            actions.push({
+                account: lastHop.type.startsWith('buy') ? lastHop.market.contract : 'eosio.token',
+                name: `transfer`,
+                data: {
+                    from: siteConfig.relay.account,
+                    to: actions[0].account, // nsuidcntract
+                    quantity: expect, // the minimum
+                    memo: transfers[0].from // redeposit back to this public key
+                }
+            });
+        }
 
         actions = this.addAuthorizationToActions(actions);
+
+        //console.log(createAccount);
+        //console.log(actions);
 
         //const trx = { transaction_id: "5f2f829d6a35279ed7cf373f8ee3667bbc86cec39375a4b3b5cc86b1a9c233b7" }; 
         const trx = await this.transact(actions);

@@ -2,17 +2,9 @@
   <v-card>
     <v-card-text>
       <v-form ref="form" v-model="valid" @submit.prevent>
-        <UserAssetSelect
-          :label="'Pay with Asset'"
-          :item-text="`symbol`"
-          v-model="symbol"
-          required
-          disabled
-        ></UserAssetSelect>
+        <UserAssetSelect :label="'Pay with Asset'" :item-text="`symbol`" v-model="symbol" required></UserAssetSelect>
 
-        <v-text-field v-model="amount" label="Amount" required disabled></v-text-field>
-
-        <v-text-field readonly v-model="fee" label="Fee" required disabled></v-text-field>
+        <v-text-field v-model="total" label="Amount" required disabled></v-text-field>
 
         <v-text-field
           v-model="account"
@@ -67,6 +59,7 @@ import { passwordTesterRules } from "@/utility";
 import { mapState, mapGetters } from "vuex";
 import { sleep } from "@/novusphere-js/utility";
 import {
+  sumAsset,
   getToken,
   getTransactionLink,
   getFeeForAmount,
@@ -75,6 +68,8 @@ import {
   transfer,
   withdrawAction,
   brainKeyToKeys,
+  newdexQuote,
+  newdexSwap,
 } from "@/novusphere-js/uid";
 
 import UserAssetSelect from "@/components/UserAssetSelect";
@@ -116,6 +111,7 @@ export default {
     password: "",
     valid: false,
     symbol: "",
+    total: 0,
     amount: 0,
     fee: 0,
     account: "",
@@ -123,17 +119,37 @@ export default {
     transactionLink: "",
     transactionError: "",
   }),
+  watch: {
+    async symbol() {
+      await this.refreshQuote();
+    },
+  },
   async created() {
-    this.symbol = "EOS";
-    this.amount = `0.5000`;
+    this.symbol = "EOS"; // will trigger watch.symbol
     this.publicKey = this.keys.wallet.pub;
-
-    const feeAsset = await getFeeForAmount(
-      await createAsset(this.amount, this.symbol)
-    );
-    this.fee = feeAsset.split(" ")[0];
   },
   methods: {
+    async refreshQuote() {
+      if (this.symbol == "EOS") {
+        this.amount = "0.5000 EOS";
+        this.fee = await getFeeForAmount(this.amount);
+        this.total = await sumAsset(this.amount, this.fee);
+      } else {
+        this.disableSubmit = true;
+
+        try {
+          const hops = await newdexQuote(this.symbol, "1.000 EOS", true);
+          const firstHop = hops[0];
+          this.amount = firstHop.quantity;
+          this.fee = await createAsset(0, this.symbol);
+          this.total = this.amount;
+        } catch (ex) {
+          this.transactionError = ex.message;
+        }
+
+        this.disableSubmit = false;
+      }
+    },
     async showPrivateKey() {
       if (this.publicKey != this.keys.wallet.pub)
         this.transactionError = "Can only reveal private key for wallet key";
@@ -153,41 +169,77 @@ export default {
 
       if (this.passwordTesterRules.length) return;
       if (this.accountNameRules.length) return;
+      if (!this.total || this.total.split(" ")[1] != this.symbol) return;
 
       const brainKey = decrypt(this.encryptedBrainKey, this.password);
       const keys = await brainKeyToKeys(brainKey);
       const walletPrivateKey = keys.wallet.key;
 
       const token = await getToken(this.symbol);
-      const request = withdrawAction({
-        chain: token.p2k.chain,
-        senderPrivateKey: walletPrivateKey,
-        account: `signupeoseos`,
-        amount: await createAsset(this.amount, token.symbol),
-        fee: await createAsset(this.fee, token.symbol),
-        nonce: Date.now(),
-        memo: `${this.account}-${this.publicKey}`,
-      });
 
-      this.disableSubmit = true;
-      await sleep(200);
+      let receipt = undefined;
 
-      const receipt = await transfer([request]);
-      if (receipt.transaction_id) {
-        this.transactionLink = await getTransactionLink(
-          token.symbol,
-          receipt.transaction_id
-        );
-      } else {
-        if (receipt.error && receipt.message) {
-          this.transactionError = receipt.message;
+      const accountCreationMemo = `${this.account}-${this.publicKey}`;
+
+      try {
+        if (this.symbol == "EOS") {
+          const request = withdrawAction({
+            chain: token.p2k.chain,
+            senderPrivateKey: walletPrivateKey,
+            account: `signupeoseos`,
+            amount: await createAsset(this.amount, token.symbol),
+            fee: await createAsset(this.fee, token.symbol),
+            nonce: Date.now(),
+            memo: accountCreationMemo,
+          });
+
+          this.disableSubmit = true;
+          await sleep(200);
+
+          receipt = await transfer([request]);
+        } else {
+          const fromAsset = await createAsset(this.amount, token.symbol);
+          const withdraw = withdrawAction({
+            chain: token.p2k.chain,
+            senderPrivateKey: walletPrivateKey,
+            account: `eosforumanon`,
+            amount: fromAsset,
+            fee: await createAsset(0, token.symbol),
+            nonce: Date.now(),
+            memo: `Token swap ${this.fromAsset} to ${this.toAsset} for account creation`,
+          });
+
+          this.disableSubmit = true;
+          await sleep(200);
+
+          receipt = await newdexSwap(
+            withdraw,
+            "1.0000 EOS",
+            accountCreationMemo
+          );
         }
-        console.log(receipt);
+
+        if (receipt.transaction_id) {
+          this.transactionLink = await getTransactionLink(
+            token.symbol,
+            receipt.transaction_id
+          );
+        } else {
+          if (receipt.error && receipt.message) {
+            this.transactionError = receipt.message;
+          }
+          console.log(receipt);
+        }
+      } catch (ex) {
+        this.transactionError = ex.message;
+        console.log(ex);
       }
 
       this.disableSubmit = false;
       this.password = "";
       this.$refs.form.resetValidation();
+
+      await this.refreshQuote();
     },
   },
 };

@@ -388,12 +388,13 @@ async function newdexQuote(from, to, reverse = false) {
     });
 }
 
-async function newdexSwap(withdrawAction, expect) {
+async function newdexSwap(withdrawAction, expect, createAccount) {
     const transfers = await createTransferActions([withdrawAction]);
 
     return await apiRequest(`/v1/api/blockchain/newdexswap`, {
         transfers,
-        expect
+        expect,
+        createAccount
     });
 }
 
