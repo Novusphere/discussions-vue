@@ -67,6 +67,7 @@
               </v-col>
               <v-col cols="6">
                 <UserAssetSelect
+                  :exclude="['EOSDT']"
                   no-amount
                   :item-text="`symbol`"
                   allow-zero
@@ -81,6 +82,7 @@
               </v-col>
               <v-col cols="6">
                 <UserAssetSelect
+                  :exclude="['EOSDT']"
                   no-amount
                   :item-text="`symbol`"
                   allow-zero

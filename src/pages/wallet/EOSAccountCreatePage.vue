@@ -2,7 +2,13 @@
   <v-card>
     <v-card-text>
       <v-form ref="form" v-model="valid" @submit.prevent>
-        <UserAssetSelect :label="'Pay with Asset'" :item-text="`symbol`" v-model="symbol" required></UserAssetSelect>
+        <UserAssetSelect
+          :exclude="['EOSDT']"
+          :label="'Pay with Asset'"
+          :item-text="`symbol`"
+          v-model="symbol"
+          required
+        ></UserAssetSelect>
 
         <v-text-field v-model="total" label="Amount" required disabled></v-text-field>
 

@@ -26,16 +26,17 @@ import TokenIcon from "@/components/TokenIcon";
 export default {
   name: "UserAssetSelect",
   components: {
-    TokenIcon
+    TokenIcon,
   },
   props: {
     label: { type: String, default: "Asset" },
     disabled: Boolean,
+    exclude: Array,
     value: String,
     required: Boolean,
     allowZero: Boolean,
     noAmount: Boolean,
-    itemText: { type: String, default: "asset" }
+    itemText: { type: String, default: "asset" },
   },
   computed: {
     rules() {
@@ -51,14 +52,14 @@ export default {
       },
       set(value) {
         this.$emit("input", value);
-      }
+      },
     },
     ...mapState({
-      keys: state => state.keys
-    })
+      keys: (state) => state.keys,
+    }),
   },
   data: () => ({
-    assets: []
+    assets: [],
   }),
   async created() {
     await this.refresh();
@@ -68,6 +69,8 @@ export default {
       this.assets = [];
       const symbols = await getSymbols();
       for (const symbol of symbols) {
+        if (this.exclude && this.exclude.some((s) => s == symbol)) continue;
+
         try {
           const asset = await getAsset(symbol, this.keys.wallet.pub);
           const [quantity] = asset.split(" ");
@@ -82,7 +85,7 @@ export default {
 
         await sleep(100);
       }
-    }
-  }
+    },
+  },
 };
 </script>

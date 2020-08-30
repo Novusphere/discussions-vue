@@ -71,7 +71,10 @@ export default @Controller('/blockchain') class BlockchainController {
 
     async getP2K() {
         const { data: { p2k } } = await axios.get('https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/p2k.json');
-        return p2k;
+        // sort alphabetically
+        const tokens = p2k.sort((p1, p2) => p1.symbol.localeCompare(p2.symbol));
+        return tokens;
+
     }
 
     async makeTransferActions(transferActions) {
@@ -266,7 +269,7 @@ export default @Controller('/blockchain') class BlockchainController {
                 name: `transfer`,
                 data: {
                     from: siteConfig.relay.account,
-                    to: 'signupeoseos', 
+                    to: 'signupeoseos',
                     quantity: expect, // the minimum
                     memo: createAccount
                 }
