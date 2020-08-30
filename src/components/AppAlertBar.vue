@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row
-      v-if="showWelcomeMessage && !isLoggedIn"
+      v-if="false && showWelcomeMessage && !isLoggedIn"
       no-gutters
       :class="`primary darken-2`"
       justify="center"
@@ -27,6 +27,7 @@
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import { apiRequest } from "@/novusphere-js/discussions/api";
 
 export default {
   name: "AppAlertBar",
@@ -47,6 +48,19 @@ export default {
     window.enableWelcomeMessage = () => {
       this.$store.commit("setShowWelcomeMessage", true);
     };
+  },
+  async created() {
+    const pong = await apiRequest(`/v1/api/data/test?ping=pong`);
+    if (!pong) return;
+
+    const time = pong.time;
+
+    let delta = Math.abs(Date.now() - time);
+    console.log(`Server time delta: ${delta}`);
+
+    if (delta > 29000) {
+      this.errorText = `We've detected your system clock may be out of sync. Please enable auto sync for your device or certain functions on Discussions may not work as intended.`
+    }
   },
   methods: {
     dismissWelcome() {

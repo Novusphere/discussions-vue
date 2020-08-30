@@ -2,7 +2,7 @@
   <v-app>
     <AppBar />
     <v-main :style="{background: $vuetify.theme.themes[theme].background}">
-      <AppAlertBar v-if="false" />
+      <AppAlertBar />
 
       <v-menu
         z-index="9999"
