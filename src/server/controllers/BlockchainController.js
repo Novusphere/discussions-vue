@@ -32,9 +32,9 @@ export default @Controller('/blockchain') class BlockchainController {
     constructor() {
     }
 
-    async transact(actions) {
+    async getEosAPI() {
         if (!siteConfig.relay.key) throw new Error(`Relay key has not been configured`);
-
+        
         let api = undefined;
         if (siteConfig.relay.dfuse) {
             if (!dfuseClient) {
@@ -49,6 +49,12 @@ export default @Controller('/blockchain') class BlockchainController {
         else {
             api = await eos.getAPI(eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch });
         }
+        return api;
+    }
+
+    async transact(actions) {
+
+        let api = await this.getEosAPI();
 
         const trx = await api.transact({ actions: actions },
             {
@@ -217,6 +223,32 @@ export default @Controller('/blockchain') class BlockchainController {
         return res.success(await this.getP2K());
     }
 
+    async _sweepRelay(tokens) {
+        const api = await this.getEosAPI();
+        let actions = [];
+
+        for (const { contract, symbol } of tokens) {
+            const [balance] = await api.rpc.get_currency_balance(contract, siteConfig.relay.account, symbol);
+            if (!balance) continue;
+            if (!parseFloat(balance)) continue;
+
+            actions.push({
+                account: contract,
+                name: `transfer`,
+                data: {
+                    from: siteConfig.relay.account,
+                    to: `nsuidcntract`, // TO-DO: don't hard code? do p2k lookup
+                    quantity: balance,
+                    memo: siteConfig.relay.pub // deposit for our relay pub
+                }
+            });
+        }
+
+        actions = this.addAuthorizationToActions(actions);
+
+        await this.transact(actions);
+    }
+
     @Api()
     @Post('/newdexswap')
     async newdexSwap(req, res) {
@@ -240,9 +272,15 @@ export default @Controller('/blockchain') class BlockchainController {
         }
 
         let actions = await this.makeTransferActions(transfers);
+        let tokens = [{ contract: 'eosio.token', symbol: 'EOS' }];
 
         // send the hops to newdex, these are effectively FILL-OR-KILL orders
         for (const hop of hops) {
+            tokens.push({
+                contract: hop.market.contract,
+                symbol: hop.market.symbol.split('-')[1].toUpperCase()
+            });
+
             actions.push({
                 account: hop.type.startsWith('sell') ? hop.market.contract : 'eosio.token',
                 name: `transfer`,
@@ -295,6 +333,9 @@ export default @Controller('/blockchain') class BlockchainController {
 
         //const trx = { transaction_id: "5f2f829d6a35279ed7cf373f8ee3667bbc86cec39375a4b3b5cc86b1a9c233b7" }; 
         const trx = await this.transact(actions);
+
+        // don't await this
+        this._sweepRelay(tokens);
 
         return res.success(trx);
     }
