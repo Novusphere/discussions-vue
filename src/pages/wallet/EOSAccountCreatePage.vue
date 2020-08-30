@@ -8,6 +8,7 @@
           :item-text="`symbol`"
           v-model="symbol"
           required
+          disabled
         ></UserAssetSelect>
 
         <v-text-field v-model="total" label="Amount" required disabled></v-text-field>

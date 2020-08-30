@@ -151,6 +151,7 @@ export default @Controller('/data') class DataController {
         let { data } = await axios.get(`https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/community.json`);
 
         const tags = Object.keys(data);
+
         const pipeline = [
             { $match: { domain: domain, "subscribedTags": { $in: tags } } },
             { $unwind: "$subscribedTags" },
