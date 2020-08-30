@@ -427,7 +427,8 @@ async function createAsset(quantity, symbol) {
     const eosTokensInfo = await getTokensInfo();
     const token = eosTokensInfo.find(t => t.symbol == symbol);
     if (token) {
-        const quantityString = parseFloat(quantity).toFixed(8);
+        const p = Math.max(8, token.precision);
+        const quantityString = parseFloat(quantity).toFixed(p);
         const decimal = quantityString.indexOf('.');
         const preciseQuantity = quantityString.substring(0, decimal + 1 + token.precision);
 
