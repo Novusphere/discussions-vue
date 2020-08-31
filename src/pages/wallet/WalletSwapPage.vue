@@ -97,12 +97,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
-                <v-btn :disabled="waiting" block color="primary" @click="getQuote">
-                  <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>Get Quote
-                </v-btn>
-              </v-col>
-              <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
+              <v-col :cols="12">
                 <v-btn :disabled="waiting" block color="primary" @click="swap">
                   <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>Swap
                 </v-btn>

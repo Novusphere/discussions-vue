@@ -1,7 +1,7 @@
 <template>
   <v-expansion-panels class="mt-2" flat tile :value="false">
     <v-expansion-panel>
-      <v-expansion-panel-header style="padding-left: 0px !important">Paywall Options</v-expansion-panel-header>
+      <v-expansion-panel-header style="padding-left: 0px !important">Timelock Content</v-expansion-panel-header>
       <v-expansion-panel-content>
         <v-switch v-model="paywallEnabled" label="Enabled"></v-switch>
         <v-form ref="paywallForm" :disabled="!paywallEnabled">
@@ -129,6 +129,11 @@ export default {
       if (!isValidAsset(asset))
         return { $error: `Invalid asset or quantity selected` };
 
+      if (this.paywallAssetSymbol == "ATMOS") {
+        if (parseFloat(asset) < 1)
+          return { $error: `Minimum is 1.000 ${this.paywallAssetSymbol} for time lock content` };
+      }
+
       if (!this.simpleExpiry)
         return { $error: `You must select an expiration time` };
 
@@ -156,7 +161,7 @@ export default {
           $error: `This paywall will already have expired by posting it, if this is intentional, consider simply turning paywall off.`,
         };
 
-      //if (expire) return { $error: `stop` };
+      if (expire) return { $error: `stop` };
 
       return {
         asset,
@@ -167,7 +172,7 @@ export default {
   data: () => ({
     paywallEnabled: false,
     paywallAssetAmount: null,
-    paywallAssetSymbol: 'ATMOS',
+    paywallAssetSymbol: "ATMOS",
     paywallExpireDate: null,
     paywallExpireTime: null,
     simpleExpiry: null,
