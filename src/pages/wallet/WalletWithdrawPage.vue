@@ -127,40 +127,48 @@ export default {
 
       if (this.passwordTesterRules.length) return;
 
-      const brainKey = decrypt(this.encryptedBrainKey, this.password);
+      const password = this.password;
+      this.password = "";
+      this.$refs.form.resetValidation();
+
+      const brainKey = decrypt(this.encryptedBrainKey, password);
       const keys = await brainKeyToKeys(brainKey);
       const walletPrivateKey = keys.wallet.key;
 
-      const token = await getToken(this.symbol);
-      const request = withdrawAction({
-        chain: token.p2k.chain,
-        senderPrivateKey: walletPrivateKey,
-        account: this.account,
-        amount: await createAsset(this.amount, token.symbol),
-        fee: await createAsset(this.fee, token.symbol),
-        nonce: Date.now(),
-        memo: this.memo,
-      });
+      try {
+        this.disableSubmit = true;
 
-      this.disableSubmit = true;
-      await sleep(200);
+        const token = await getToken(this.symbol);
+        const request = withdrawAction({
+          chain: token.p2k.chain,
+          senderPrivateKey: walletPrivateKey,
+          account: this.account,
+          amount: await createAsset(this.amount, token.symbol),
+          fee: await createAsset(this.fee, token.symbol),
+          nonce: Date.now(),
+          memo: this.memo,
+        });
 
-      const receipt = await transfer([request]);
-      if (receipt.transaction_id) {
-        this.transactionLink = await getTransactionLink(
-          token.symbol,
-          receipt.transaction_id
-        );
-      } else {
-        if (receipt.error && receipt.message) {
-          this.transactionError = receipt.message;
+        await sleep(200);
+
+        const receipt = await transfer([request]);
+        if (receipt.transaction_id) {
+          this.transactionLink = await getTransactionLink(
+            token.symbol,
+            receipt.transaction_id
+          );
+        } else {
+          if (receipt.error && receipt.message) {
+            this.transactionError = receipt.message;
+          }
+          console.log(receipt);
         }
-        console.log(receipt);
-      }
 
-      this.disableSubmit = false;
-      this.password = "";
-      this.$refs.form.resetValidation();
+        this.disableSubmit = false;
+      } catch (ex) {
+        this.transactionError = ex.message;
+        this.disableSubmit = false;
+      }
     },
   },
 };
