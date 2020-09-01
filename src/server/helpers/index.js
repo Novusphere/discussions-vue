@@ -58,9 +58,9 @@ function Api() {
                 }
 
                 const clockDelta = Date.now() - time;
-                if (Math.abs(clockDelta) > 30000) {
+                if (Math.abs(clockDelta) > 60000) {
                     console.log(realData);
-                    throw new Error(`Signature must be within a 30 second threshold, it's possible your system clock is out of sync, clock delta=${clockDelta}`);
+                    throw new Error(`Signature must be within a 60 second threshold, it's possible your system clock is out of sync, clock delta=${clockDelta}`);
                 }
 
                 if (!domain || domain.length > 32) {

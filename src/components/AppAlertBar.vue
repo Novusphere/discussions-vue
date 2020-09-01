@@ -58,7 +58,7 @@ export default {
     let delta = Math.abs(Date.now() - time);
     console.log(`Server time delta: ${delta}`);
 
-    if (delta > 29000) {
+    if (delta > 59000) {
       this.errorText = `We've detected your system clock may be out of sync. Please enable auto sync for your device or certain functions on Discussions may not work as intended.`
     }
   },
