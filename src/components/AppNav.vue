@@ -42,14 +42,36 @@
     <v-list-item>
       <v-btn
         class="justify-start"
-        block
         text
+        style="width: 90%"
         left
         @click="isLoggedIn ? $router.push(`/wallet`) : $store.commit('setLoginDialogOpen', true)"
       >
         <v-icon>account_balance_wallet</v-icon>
         <span>Wallet</span>
       </v-btn>
+      <v-btn icon v-if="isLoggedIn" @click="walletMore = !walletMore">
+        <v-icon>{{ walletMore ? 'expand_less' : 'expand_more' }}</v-icon>
+      </v-btn>
+    </v-list-item>
+    <v-list-item v-if="walletMore">
+      <v-list>
+        <v-list-item>
+          <v-btn class="justify-start" text block left @click="$router.push(`/wallet/deposit`)">
+            <span>Deposit</span>
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn class="justify-start" text block left @click="$router.push(`/wallet/withdraw`)">
+            <span>Withdraw</span>
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn class="justify-start" text block left @click="$router.push(`/wallet/swap`)">
+            <span>Swap</span>
+          </v-btn>
+        </v-list-item>
+      </v-list>
     </v-list-item>
     <v-list-item>
       <v-btn class="justify-start" block text left :to="'/discover'">
@@ -135,6 +157,7 @@ export default {
       search: this.$route.query.q || "",
       subscribeTag: "",
       searchReadonly: true,
+      walletMore: false,
     };
   },
   watch: {

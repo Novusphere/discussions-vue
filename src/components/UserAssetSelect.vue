@@ -9,6 +9,9 @@
     :required="required"
     :disabled="disabled"
   >
+    <template v-slot:prepend>
+      <TokenIcon v-if="valueProxy" :symbol="valueProxy" />
+    </template>
     <template v-slot:item="{ item }">
       <TokenIcon :symbol="item.symbol" />
       {{ !noAmount ? item.asset : (item.asset.split(' ')[1]) }}

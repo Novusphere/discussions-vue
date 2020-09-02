@@ -77,8 +77,13 @@
               </v-col>
             </v-row>
             <v-row>
+              <v-col :cols="12" class="text-center">
+                <v-btn icon outlined @click="switchQuote"><v-icon>swap_vert</v-icon></v-btn>
+              </v-col>
+            </v-row>
+            <v-row>
               <v-col cols="6">
-                <v-text-field v-model="toAmount" label="Quote"></v-text-field>
+                <v-text-field v-model="toAmount" label="Amount to receive"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <UserAssetSelect
@@ -89,6 +94,11 @@
                   v-model="toSymbol"
                   required
                 ></UserAssetSelect>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col :cols="12">
+                <v-text-field v-model="rateText" label="Swap Rate"></v-text-field>
               </v-col>
             </v-row>
             <v-row v-if="quoteError">
@@ -175,6 +185,7 @@ export default {
     password: "",
     quoteFrom: "",
     quoteTo: "",
+    rateText: "",
     fromAmount: "",
     fromSymbol: "EOS",
     fromAsset: "",
@@ -185,6 +196,15 @@ export default {
     isSwapDialogOpen: false,
   }),
   methods: {
+    async switchQuote() {
+      const toAmount = this.toAmount;
+      const toSymbol = this.toSymbol;
+
+      this.toSymbol = this.fromSymbol;
+      this.fromSymbol = toSymbol;
+
+      setTimeout(() => this.fromAmount = toAmount, 100);
+    },
     async submitSwap() {
       const tempPassword = this.password;
       this.password = "";
@@ -255,10 +275,7 @@ export default {
       if (!this.fromSymbol) return;
       if (!this.toSymbol) return;
       if (this.fromSymbol == this.toSymbol) return;
-      if (
-        (!fromAmount || isNaN(fromAmount)) &&
-        (!toAmount || isNaN(toAmount))
-      )
+      if ((!fromAmount || isNaN(fromAmount)) && (!toAmount || isNaN(toAmount)))
         return;
 
       this.waiting = true;
@@ -295,6 +312,14 @@ export default {
       } catch (ex) {
         this.quoteError = ex.message;
         console.log(ex);
+      }
+
+      if (!this.quoteError) {
+        const denom = parseFloat(this.fromAmount);
+        const num = parseFloat(this.toAmount);
+        if (denom > 0 && !isNaN(denom)) {
+          this.rateText = `1 ${this.fromSymbol} ≈ ${(num/denom).toFixed(8)} ${this.toSymbol}`;
+        }
       }
 
       this.waiting = false;
