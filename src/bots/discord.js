@@ -84,7 +84,7 @@ import { getConfig, saveConfig, sleep } from "@/novusphere-js/utility";
 
                         let url = `https://discussions.app/tag/${p.sub}/${p.getEncodedId()}/${p.getSnakeCaseTitle()}`;
                         let message = undefined;
-                        if (links && links.length > 0 && content.length < 300) {
+                        if (links && links.length > 0 && content.length < 300 && !p.paywall) {
                             // let discord embed/preview the link, instead of our post
                             message = `**${p.displayName}**: <${url}>\n${tags}\n\n${content}`;
                         }
