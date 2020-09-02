@@ -25,12 +25,20 @@ const routes = [
                         return post;
                     },
                     head: async (post) => {
-                        return ({
+                        let result = {
                             title: `Discussions - ${post.title ? post.title : 'Viewing Thread'}`,
                             description: await post.getContentText({ removeImages: true }),
                             image: await post.getContentImage(),
                             meta: await post.getMeta()
-                        });
+                        };
+
+                        // special handling for if a TLC is still in effect
+                        if (post.paywall && post.paywall.expire.getTime() > Date.now()) {
+                            result.description = 'Time locked content is yet to expire';
+                            result.meta = undefined;
+                        }
+
+                        return result;
                     }
                 }
             },
