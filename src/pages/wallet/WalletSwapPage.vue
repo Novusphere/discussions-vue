@@ -270,6 +270,7 @@ export default {
         if (fromAmount != this.quoteFrom) {
           const from = await createAsset(fromAmount, this.fromSymbol);
           const hops = await newdexQuote(from, this.toSymbol);
+          //console.log(hops);
 
           const lastHop = hops[hops.length - 1];
           toAmount = lastHop.expect.split(" ")[0];
@@ -281,6 +282,7 @@ export default {
         } else if (toAmount != this.quoteTo) {
           const to = await createAsset(toAmount, this.toSymbol);
           const hops = await newdexQuote(this.fromSymbol, to, true);
+          //console.log(hops);
 
           const firstHop = hops[0];
           fromAmount = firstHop.quantity.split(" ")[0];

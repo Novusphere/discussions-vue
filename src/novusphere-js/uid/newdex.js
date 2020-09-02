@@ -65,7 +65,8 @@ class NewDexAPI {
 
             const { expect, price } = this._consumeBook(parseFloat(end) * SLIPPAGE_FACTOR, false, depth.asks.reverse());
             return [{
-                type: `buy-limit`,
+                //type: `buy-limit`,
+                type: `buy-market`,
                 market,
                 price,
                 quantity: `${(expect).toFixed(market.currency_precision)} ${startSymbol}`,
@@ -78,7 +79,8 @@ class NewDexAPI {
 
             const { expect, price } = this._consumeBook(parseFloat(end) * SLIPPAGE_FACTOR, true, depth.bids);
             return [{
-                type: `sell-limit`,
+                //type: `sell-limit`,
+                type: `sell-market`,
                 market,
                 price,
                 quantity: `${(expect).toFixed(market.currency_precision)} ${startSymbol}`,
@@ -103,7 +105,8 @@ class NewDexAPI {
 
             const { expect, price } = this._consumeBook(parseFloat(start), true, depth.asks.reverse());
             return [{
-                type: `buy-limit`,
+                //type: `buy-limit`,
+                type: `buy-market`,
                 market,
                 price,
                 quantity: start,
@@ -116,7 +119,8 @@ class NewDexAPI {
 
             const { expect, price } = this._consumeBook(parseFloat(start), false, depth.bids);
             return [{
-                type: `sell-limit`,
+                //type: `sell-limit`,
+                type: `sell-market`,
                 market,
                 price,
                 quantity: start,
