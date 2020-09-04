@@ -101,7 +101,7 @@
       <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)">Close</v-btn>
       <v-btn :disabled="waiting || !nextStepOK" color="primary" @click="nextStep()">
         <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>
-        <span>{{ ((panel != 4) ? 'Next' : 'Finish') }}</span>
+        <span>{{ nextText }}</span>
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -169,6 +169,11 @@ export default {
       }
       return false;
     },
+    nextText() {
+      if (this.panel == 4) return 'Finish';
+      else if (this.panel > 2) return 'Next / Skip';
+      else return 'Next';
+    }
   },
   data: () => ({
     auth: [],
