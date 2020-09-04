@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 import { getSymbols, getAsset } from "@/novusphere-js/uid";
 import { sleep } from "@/novusphere-js/utility";
 
@@ -57,6 +57,7 @@ export default {
         this.$emit("input", value);
       },
     },
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       keys: (state) => state.keys,
     }),
@@ -70,6 +71,9 @@ export default {
   methods: {
     async refresh() {
       this.assets = [];
+      
+      if (!this.isLoggedIn) return;
+
       const symbols = await getSymbols();
       for (const symbol of symbols) {
         if (this.exclude && this.exclude.some((s) => s == symbol)) continue;

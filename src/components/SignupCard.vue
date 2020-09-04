@@ -2,7 +2,7 @@
   <v-card flat tile>
     <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
       <v-form ref="form" lazy-validation @submit.prevent class="signup scrollable">
-        <v-expansion-panels class="mt-2" flat tile v-model="panel">
+        <v-expansion-panels class="mt-2" flat tile readonly v-model="panel">
           <v-expansion-panel>
             <v-expansion-panel-header>1. Set up display name and password</v-expansion-panel-header>
             <v-expansion-panel-content>

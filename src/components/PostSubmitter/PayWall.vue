@@ -161,7 +161,7 @@ export default {
           $error: `This paywall will already have expired by posting it, if this is intentional, consider simply turning paywall off.`,
         };
 
-      if (expire) return { $error: `stop` };
+      //if (expire) return { $error: `stop` };
 
       return {
         asset,
