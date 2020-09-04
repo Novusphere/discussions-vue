@@ -71,7 +71,7 @@ export default @Controller('/data') class DataController {
         for (const token of await getTokensInfo()) {
             result.fees[token.symbol] = await getAsset(token.symbol, siteConfig.relay.pub);
         }
-        
+
         return res.success(result);
     }
 
@@ -177,20 +177,22 @@ export default @Controller('/data') class DataController {
                 return obj;
             }, {});
 
-        const result = tags.map(t => {
-            const community = data[t];
-            const html = markdownToHTML(community.desc);
-            const textDesc = htmlToText(html);
-            return {
-                tag: t,
-                desc: community.desc,
-                icon: community.icon,
-                members: members[t] || 0,
-                html: html,
-                description: textDesc,
-                symbol: community.symbol
-            };
-        });
+        const result = tags
+            .map(t => {
+                const community = data[t];
+                const html = markdownToHTML(community.desc);
+                const textDesc = htmlToText(html);
+                return {
+                    tag: t,
+                    desc: community.desc,
+                    icon: community.icon,
+                    members: members[t] || 0,
+                    html: html,
+                    description: textDesc,
+                    symbol: community.symbol
+                };
+            })
+            .sort((a, b) => b.members - a.members);
 
         return res.success(result);
     }
