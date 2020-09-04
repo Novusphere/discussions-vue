@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col :cols="12">
-      <TransactionBrowser :cursor="cursor" />
+      <TransactionBrowser ref="browser" :cursor="cursor" />
     </v-col>
   </v-row>
 </template>
@@ -14,7 +14,7 @@ import TransactionBrowser from "@/components/TransactionBrowser";
 export default {
   name: "BrowseTrxNotificationsPage",
   components: {
-    TransactionBrowser
+    TransactionBrowser,
   },
   props: {},
   computed: {
@@ -25,8 +25,19 @@ export default {
   data: () => ({
     cursor: null,
   }),
+  watch: {
+    "$route.query.t": async function () {
+      await this.load();
+    },
+  },
   async created() {
-    this.cursor = searchTransactions(this.keys.wallet.pub);
+    await this.load();
+  },
+  methods: {
+    async load() {
+      if (this.$refs.browser) this.$refs.browser.reset();
+      this.cursor = searchTransactions(this.keys.wallet.pub);
+    },
   },
 };
 </script>

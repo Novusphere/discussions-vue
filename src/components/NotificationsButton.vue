@@ -1,5 +1,5 @@
 <template>
-  <v-btn :small="small" :dense="dense" text :to="`/notifications`">
+  <v-btn :small="small" :dense="dense" text @click="$router.push(`/notifications?t=${Date.now()}`)">
     <v-badge v-if="notificationCount > 0 && !chip" color="red" overlap>
       <template v-slot:badge>
         <span>{{ notificationCount }}</span>

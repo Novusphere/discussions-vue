@@ -1,5 +1,5 @@
 <template>
-  <PostBrowser :show-reply="true" no-sort :cursor="cursor" />
+  <PostBrowser ref="browser" :show-reply="true" no-sort :cursor="cursor" />
 </template>
 
 <script>
@@ -22,14 +22,24 @@ export default {
       watchedThreads: (state) => state.watchedThreads,
     }),
   },
-  async created() {
-    this.cursor = searchPostsByNotifications(
-      this.keys.arbitrary.pub,
-      0,
-      this.watchedThreads
-    );
-    this.$store.commit("seenNotifications");
+  watch: {
+    "$route.query.t": async function () {
+      await this.load();
+    },
   },
-  methods: {},
+  async created() {
+    await this.load();
+  },
+  methods: {
+    async load() {
+      if (this.$refs.browser) this.$refs.browser.reset();
+
+      this.cursor = searchPostsByNotifications(
+        this.keys.arbitrary.pub,
+        0,
+        this.watchedThreads
+      );
+    },
+  },
 };
 </script>

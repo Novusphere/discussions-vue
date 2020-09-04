@@ -24,5 +24,18 @@ export default requireLoggedIn({
   props: {},
   computed: {},
   data: () => ({}),
+  watch: {
+    "$route.query.t": async function () {
+      await this.load();
+    },
+  },
+  async created() {
+    await this.load();
+  },
+  methods: {
+    async load() {
+      this.$store.commit("seenNotifications");
+    },
+  },
 });
 </script>
