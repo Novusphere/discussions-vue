@@ -22,7 +22,6 @@
 <script>
 import { mapGetters, mapState } from "vuex";
 import { getSymbols, getAsset } from "@/novusphere-js/uid";
-import { sleep } from "@/novusphere-js/utility";
 
 import TokenIcon from "@/components/TokenIcon";
 
@@ -71,26 +70,22 @@ export default {
   methods: {
     async refresh() {
       this.assets = [];
-      
+
       if (!this.isLoggedIn) return;
 
-      const symbols = await getSymbols();
-      for (const symbol of symbols) {
-        if (this.exclude && this.exclude.some((s) => s == symbol)) continue;
+      let symbols = await getSymbols();
+      if (this.exclude) {
+        symbols = symbols.filter((s) => !this.exclude.some((s2) => s2 == s));
+      }
 
-        try {
-          const asset = await getAsset(symbol, this.keys.wallet.pub);
-          const [quantity] = asset.split(" ");
+      const assets = await Promise.all(
+        symbols.map((s) => getAsset(s, this.keys.wallet.pub))
+      );
 
-          if (!this.allowZero && Number(quantity) <= 0) continue; // ignore assets with no balance
-
-          this.assets.push({ symbol, quantity, asset });
-        } catch (ex) {
-          console.log(`Could not load user asset ${symbol}`);
-          console.error(ex);
-        }
-
-        await sleep(100);
+      for (const asset of assets) {
+        const [quantity, symbol] = asset.split(" ");
+        if (!this.allowZero && Number(quantity) <= 0) continue; // ignore assets with no balance
+        this.assets.push({ symbol, quantity, asset });
       }
     },
   },

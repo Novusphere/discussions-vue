@@ -6,6 +6,8 @@ import axios from 'axios';
 import fs from 'fs';
 import { argv } from 'yargs';
 import { attachControllers } from '@decorators/express';
+
+import { setAPIHost } from "@/novusphere-js/discussions/api";
 import { getConfig } from "@/novusphere-js/utility";
 
 import createRoutes from "./routes";
@@ -23,6 +25,8 @@ import UploadController from "./controllers/UploadController";
 
 
 (async function () {
+    setAPIHost(`http://localhost:${siteConfig.port}`);
+
     if (!await connectDatabase()) return;
 
     // update our config
