@@ -1,4 +1,5 @@
 import { Controller, Post, Get, All } from '@decorators/express';
+import ecc from 'eosjs-ecc';
 import { Api } from "../helpers";
 import { config } from "../mongo";
 import siteConfig from "../site";
@@ -7,6 +8,9 @@ import { getXNationQuote } from "@/novusphere-js/uid/xnation";
 import { NewDexAPI } from "@/novusphere-js/uid/newdex";
 import axios from 'axios';
 import discussionsx from "../services/discussionsx";
+import { getFromCache } from '@/novusphere-js/utility';
+
+const cache = {};
 
 // https://docs.dfuse.io/guides/eosio/tutorials/write-chain/
 let dfuseClient = undefined;
@@ -34,7 +38,7 @@ export default @Controller('/blockchain') class BlockchainController {
 
     async getEosAPI() {
         if (!siteConfig.relay.key) throw new Error(`Relay key has not been configured`);
-        
+
         let api = undefined;
         if (siteConfig.relay.dfuse) {
             if (!dfuseClient) {
@@ -76,11 +80,12 @@ export default @Controller('/blockchain') class BlockchainController {
     }
 
     async getP2K() {
-        const { data: { p2k } } = await axios.get('https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/p2k.json');
-        // sort alphabetically
-        const tokens = p2k.sort((p1, p2) => p1.symbol.localeCompare(p2.symbol));
-        return tokens;
-
+        return await getFromCache(cache, 'p2k', async () => {
+            const { data: { p2k } } = await axios.get('https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/p2k.json');
+            // sort alphabetically
+            const tokens = p2k.sort((p1, p2) => p1.symbol.localeCompare(p2.symbol));
+            return tokens;
+        });
     }
 
     async makeTransferActions(transferActions) {
@@ -215,6 +220,49 @@ export default @Controller('/blockchain') class BlockchainController {
         const trx = await this.transact(actions);
 
         return res.success(trx);
+    }
+
+    @Api()
+    @Post('/getasset')
+    async getAsset(req, res) {
+        const { symbol, address, zero } = req.unpack();
+        let balance = undefined;
+
+        try {
+
+            const p2k = await this.getP2K();
+            const token = p2k.find(t => t.symbol == symbol);
+            if (token) {
+                const api = await this.getEosAPI();
+                const bound = `0x${ecc.sha256(ecc.PublicKey.fromString(address).toBuffer(), 'hex')}`;
+                const balances = await api.rpc.get_table_rows({
+                    json: true,
+                    code: token.p2k.contract,
+                    scope: token.p2k.chain,
+                    table: 'accounts',
+                    limit: 100,
+                    key_type: 'i256',
+                    lower_bound: bound,
+                    upper_bound: bound,
+                    index_position: 2,
+                });
+
+                if (balances.rows && balances.rows.length > 0) {
+                    balance = balances.rows[0].balance;
+                    cache[`${address}::${symbol}`] = balance;
+                }
+            }
+
+        }
+        catch (ex) {
+            console.log(ex);
+            // fall back to our cache if the BP endpoint fails...
+            balance = cache[`${address}::${symbol}`];
+        }
+
+        //console.log(symbol, address, zero, balance);
+
+        return res.success(balance || zero);
     }
 
     @Api()

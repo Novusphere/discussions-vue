@@ -229,8 +229,17 @@ function isValidAsset(asset) {
 // Gets an asset for an address (or public key depending on the asset type)
 // Returns a string with the balance followed by the symbol
 //
-async function getAsset(symbol, address, rpc) {
-    let balance = await createAsset(0, symbol);
+async function getAsset(symbol, address) {
+
+    // 9/5/2020 -- use server side endpoint since BP endpoint is unreliable
+
+    return await apiRequest('/v1/api/blockchain/getasset', {
+        symbol,
+        address,
+        zero: await createAsset(0, symbol)
+    });
+
+    /*let balance = await createAsset(0, symbol);
     const eosTokensInfo = await getTokensInfo();
 
     const eosToken = eosTokensInfo.find(t => t.symbol == symbol);
@@ -255,7 +264,7 @@ async function getAsset(symbol, address, rpc) {
         }
     }
 
-    return balance;
+    return balance;*/
 }
 
 //
