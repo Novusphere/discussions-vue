@@ -3,19 +3,13 @@ import Vuex from 'vuex';
 import { saveUserAccountObject } from "@/novusphere-js/discussions/api";
 import { signText } from "@/novusphere-js/uid";
 import { Lock } from "@/novusphere-js/utility";
+import siteConfig from "@/server/site";
 
+const testerPublicKeys = siteConfig.testerPublicKeys;
 const LOCAL_STORAGE_KEY = 'vuexStore';
 const saver = new Lock();
 
 Vue.use(Vuex);
-
-const testerPublicKeys = [
-    'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', // xia256
-    'EOS66mZsNtdEVeFfxrxkZ9sZ5snwTPYmtRnEtHWhpyFovfnvDnCM5', // xia512
-    'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', // jacques
-    'EOS6sYMyMHzHhGtfwjCcZkRaw3YK5ws8xoD6ke2DNUmnHT3j1cpjV', // brain
-    'EOS7RWM4YvxcUEhZfHozf8XVajgvfh8wvohoJS9vx8Hg1K12PDx5o', // paul
-];
 
 const getDefaultState = () => ({
     syncTime: 0,

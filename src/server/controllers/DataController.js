@@ -1,7 +1,7 @@
 import * as axios from 'axios';
 import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml, LBRY_REGEX, createDOMParser } from "@/novusphere-js/utility";
 import { getTokensInfo, getAsset } from "@/novusphere-js/uid";
-import { Controller, Get, All } from '@decorators/express';
+import { Controller, Get, All, Post } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 import siteConfig from "../site";
@@ -23,6 +23,26 @@ export default @Controller('/data') class DataController {
         })
     }
 
+    @Api()
+    @Post("/analytics")
+    async analytics(req, res) {
+        const { pub } = req.unpackAuthenticated();
+
+        if (!siteConfig.testerPublicKeys.some(pk => pub == pk)) {
+            throw new Error(`Unauthorized tester public key`);
+        }
+
+        const LAST_YEAR = Date.now() - (365 * 24 * 60 * 60 * 1000);
+
+        const db = await getDatabase();
+        const analytics = await db.collection(config.table.analytics)
+            .find({ time: { $gte: LAST_YEAR } })
+            .toArray();
+
+        return res.success(analytics);
+    }
+
+    // TO-DO: deprecate and remove
     @Api()
     @Get("/stats")
     async stats(req, res) {

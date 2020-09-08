@@ -131,14 +131,9 @@ const routes = [
         path: '/tests',
         component: `BlankPage`,
         children: [
-            {
-                path: '',
-                component: `TestsPage`,
-            },
-            {
-                path: 'editor',
-                component: `TestEditorPage`
-            },
+            { path: '', component: `TestsPage`,  },
+            { path: 'editor', component: `TestEditorPage`  },
+            { path: 'analytics', component: 'AnalyticsPage' },
             {
                 path: 'posts',
                 component: `BlankPage`,

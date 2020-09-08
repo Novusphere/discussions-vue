@@ -40,6 +40,7 @@ import EOSAccountCreatePage from "@/pages/wallet/EOSAccountCreatePage";
 
 import TestsPage from "@/pages/tests/TestsPage";
 import TestEditorPage from '@/pages/tests/TestEditorPage';
+import AnalyticsPage from "@/pages/tests/AnalyticsPage";
 import TestBrowsePostsPage from '@/pages/tests/posts/TestBrowsePostsPage';
 
 import MissingPage from "@/pages/MissingPage";
@@ -76,6 +77,7 @@ let components = {
     EOSAccountCreatePage,
     TestsPage,
     TestEditorPage,
+    AnalyticsPage,
     TestBrowsePostsPage,
     MissingPage
 }

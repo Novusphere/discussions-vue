@@ -15,6 +15,7 @@ let config = {
     "table": {
         "discussions": "discussionsx",
         "uid": "nsuidcntract",
+        "analytics": "analytics",
         "state": "state",
         "posts": "posts",
         "votes": "votes",
@@ -22,6 +23,10 @@ let config = {
         "moderation": "moderation"
     },
     "index": {
+        "analytics": {
+            "type": 1,
+            "time": 1
+        },
         "discussionsx": {
             "transaction": 1,
             "name": 1,

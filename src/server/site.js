@@ -5,6 +5,13 @@ export default {
     "description": "An open forum for discussions built on blockchain. Supporting and nurturing token communities of all kind",
     "image": "/static/banner.png",
     "url": "https://discussions.app",
+    "testerPublicKeys": [
+        'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', // xia256
+        'EOS66mZsNtdEVeFfxrxkZ9sZ5snwTPYmtRnEtHWhpyFovfnvDnCM5', // xia512
+        'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', // jacques
+        'EOS6sYMyMHzHhGtfwjCcZkRaw3YK5ws8xoD6ke2DNUmnHT3j1cpjV', // brain
+        'EOS7RWM4YvxcUEhZfHozf8XVajgvfh8wvohoJS9vx8Hg1K12PDx5o', // paul
+    ],
     "relay": {
         "account": "",
         "key": "",

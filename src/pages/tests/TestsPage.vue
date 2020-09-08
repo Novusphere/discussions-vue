@@ -40,6 +40,9 @@
           </v-toolbar>
           <v-list>
             <v-list-item>
+              <v-btn text :to="'/tests/analytics'">Analytics</v-btn>
+            </v-list-item>
+            <v-list-item>
               <v-btn text :to="'/tests/editor'">Editor</v-btn>
             </v-list-item>
             <v-list-item>
@@ -47,13 +50,6 @@
             </v-list-item>
             <v-list-item>
               <v-btn text @click="trxTest()">Test Trx</v-btn>
-            </v-list-item>
-            <v-list-item>
-              <ConnectWalletBtn ref="connector" text>
-                <template v-slot:action>
-                  <v-btn text @click="trxTest()">Test Trx</v-btn>
-                </template>
-              </ConnectWalletBtn>
             </v-list-item>
           </v-list>
         </v-card>
@@ -64,18 +60,13 @@
 
 <script>
 import { getBuildVersion } from "@/utility";
-import { connectOAuth } from "@/novusphere-js/discussions/api";
 import { testPosts } from "./posts/posts";
 
-import ConnectWalletBtn from "@/components/ConnectWalletBtn";
-
-//import eth from "@/novusphere-js/uid/eth";
-import { mapState } from 'vuex';
+import { mapState } from "vuex";
 
 export default {
   name: "TestsPage",
   components: {
-    ConnectWalletBtn
   },
   props: {},
   computed: {
@@ -85,7 +76,7 @@ export default {
       },
       set(value) {
         window._consoleProxy = value;
-      }
+      },
     },
     enableConsoleProxy: {
       get() {
@@ -93,16 +84,16 @@ export default {
       },
       set(value) {
         console.enableProxyLog(value);
-      }
+      },
     },
     ...mapState({
-      keys: (state) => state.keys
-    })
+      keys: (state) => state.keys,
+    }),
   },
   data: () => ({
     posts: [...testPosts],
     build: "",
-    consoleText: ""
+    consoleText: "",
   }),
   created() {
     this.build = getBuildVersion();
@@ -116,8 +107,6 @@ export default {
   },
   methods: {
     async trxTest() {
-      await connectOAuth(this.keys.identity.key, 'twitter');
-
       /*const actions = [
         {
           account: `novusphereio`,
@@ -155,9 +144,9 @@ export default {
       this.$store.commit("setThreadDialogOpen", {
         value: true,
         sub: "test",
-        referenceId: "ggy5io6wgwm9"
+        referenceId: "ggy5io6wgwm9",
       });
-    }
-  }
+    },
+  },
 };
 </script>

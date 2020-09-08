@@ -250,19 +250,26 @@ export class Post {
         let doc = await this.getContentDocument();
 
         function linkEquals(l1, l2) {
-            try { l1 = decodeURI(l1); } 
+            try { l1 = decodeURI(l1); }
             catch (ex1) {
                 // ...
             }
-            try { l2 = decodeURI(l2); } 
+            try { l2 = decodeURI(l2); }
             catch (ex2) {
                 // ...
             }
 
+            const l1q = l1.indexOf('?');
+            if (l1q > -1) {
+                l1 = l1.substring(0, l1q);
+            }
+
             if (l1.lastIndexOf('/') != l1.length - 1)
                 l1 += '/';
+
             if (l2.lastIndexOf('/') != l2.length - 1)
                 l2 += '/';
+                
             return (l1 == l2);
         }
 
