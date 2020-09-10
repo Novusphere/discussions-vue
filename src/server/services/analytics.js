@@ -97,6 +97,7 @@ class analytics {
             tlc: {},
             tips: {},
             swap: {},
+            swapPairs: {},
             volume: {}
         }
 
@@ -117,6 +118,13 @@ class analytics {
             else if (trx.data.memo.indexOf('Token swap') > -1) {
                 summary.swap[feeSymbol] = (summary.swap[feeSymbol] || 0) + volume;
                 summary.count.swap += 1;
+
+                // keep track of the swap pairs
+                const swapSymbols = trx.data.memo.match(/[A-Z]{2,}/g);
+                if (swapSymbols && swapSymbols.length == 2) {
+                    const pair = `${swapSymbols[0]}-${swapSymbols[1]}`;
+                    summary.swapPairs[pair] = (summary.swapPairs[pair] || 0) + 1;
+                }
             }
         }
 

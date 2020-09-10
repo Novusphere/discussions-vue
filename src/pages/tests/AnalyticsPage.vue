@@ -5,6 +5,7 @@
         <v-tab>Main</v-tab>
         <v-tab>Posts</v-tab>
         <v-tab>Volume</v-tab>
+        <v-tab>Swaps</v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="tab">
@@ -133,6 +134,18 @@
             </v-card-text>
           </v-card>
         </v-tab-item>
+        <v-tab-item>
+          <v-row>
+            <v-col cols="12">
+              <p class="text-center text-h5 font-weight-bold">Swaps (W)</p>
+              <line-chart
+                v-if="swapsChartData"
+                :chart-data="swapsChartData"
+                :options="lineChartOptions"
+              ></line-chart>
+            </v-col>
+          </v-row>
+        </v-tab-item>
       </v-tabs-items>
     </v-card-text>
   </v-card>
@@ -206,6 +219,7 @@ export default requireLoggedIn({
     eosAccountChartData: null,
     tlcChartData: null,
     transferChartData: null,
+    swapsChartData: null,
     stakingChartData: null,
     ytd: null,
     lineChartOptions: {
@@ -237,8 +251,8 @@ export default requireLoggedIn({
   },
   methods: {
     async setTransferAnalysis() {
-      const TIP_GENSIS = new Date("7/20/2020").getTime();
-      const weekly = this._weekly.filter((a) => a.time > TIP_GENSIS);
+      const TIP_GENESIS = new Date("7/20/2020").getTime();
+      const weekly = this._weekly.filter((a) => a.time > TIP_GENESIS);
 
       const transferChartData = {
         labels: weekly.map((a) => new Date(a.time).toLocaleDateString()),
@@ -279,8 +293,22 @@ export default requireLoggedIn({
         ],
       };
 
+      const SWAP_GENESIS = new Date("8/18/2020").getTime();
+      const swapsData = this._weekly.filter((a) => a.time > SWAP_GENESIS);
+      const swapsChartData = {
+        labels: swapsData.map((a) => new Date(a.time).toLocaleDateString()),
+        datasets: [
+          ...Object.keys(this.ytd.trxs.swapPairs).map((sp) => ({
+            ...color(sp),
+            label: sp,
+            data: swapsData.map((a) => a.trxs.swapPairs[sp] || 0),
+          })),
+        ],
+      };
+
       this.transferChartData = transferChartData;
       this.stakingChartData = stakingChartData;
+      this.swapsChartData = swapsChartData;
     },
     async setTLCAnalysis() {
       const TLC_GENESIS = new Date("8/18/2020").getTime();
@@ -457,6 +485,7 @@ export default requireLoggedIn({
           tips: { ...a.trxs.tips },
           tlc: { ...a.trxs.tlc },
           swap: { ...a.trxs.swap },
+          swapPairs: { ...a.trxs.swapPairs },
           volume: { ...a.trxs.volume },
         },
         content: {
@@ -478,8 +507,8 @@ export default requireLoggedIn({
       mergeTrx("tlc");
       mergeTrx("tips");
       mergeTrx("swap");
+      mergeTrx("swapPairs");
       mergeTrx("volume");
-      mergeTrx("swap");
 
       return merged;
     },
