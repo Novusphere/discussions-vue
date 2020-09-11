@@ -111,7 +111,7 @@ class analytics {
                 summary.tips[feeSymbol] = (summary.tips[feeSymbol] || 0) + volume;
                 summary.count.tips += 1;
             }
-            if (trx.data.memo.indexOf('pay for content') > -1) {
+            else if (trx.data.memo.indexOf('pay for content') > -1) {
                 summary.tlc[feeSymbol] = (summary.tlc[feeSymbol] || 0) + volume;
                 summary.count.tlc += 1;
             }

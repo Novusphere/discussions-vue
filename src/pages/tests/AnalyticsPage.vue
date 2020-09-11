@@ -1,6 +1,8 @@
 <template>
   <v-card>
     <v-card-text v-if="ytd">
+      <v-select v-model="timePeriod" :items="['Daily', 'Weekly', 'Monthly']" label="Time Period"></v-select>
+
       <v-tabs v-model="tab">
         <v-tab>Main</v-tab>
         <v-tab>Posts</v-tab>
@@ -41,7 +43,7 @@
               </v-row>
               <v-row>
                 <v-col cols="4">
-                  <p class="text-center text-h5 font-weight-bold">Activity (W)</p>
+                  <p class="text-center text-h5 font-weight-bold">Activity</p>
                   <line-chart
                     v-if="activityChartData"
                     :chart-data="activityChartData"
@@ -49,7 +51,7 @@
                   ></line-chart>
                 </v-col>
                 <v-col cols="4">
-                  <p class="text-center text-h5 font-weight-bold">EOS Accounts (W)</p>
+                  <p class="text-center text-h5 font-weight-bold">EOS Accounts</p>
                   <line-chart
                     v-if="eosAccountChartData"
                     :chart-data="eosAccountChartData"
@@ -57,7 +59,7 @@
                   ></line-chart>
                 </v-col>
                 <v-col cols="4">
-                  <p class="text-center text-h5 font-weight-bold">Staking Activity (W)</p>
+                  <p class="text-center text-h5 font-weight-bold">Staking Activity</p>
                   <line-chart
                     v-if="stakingChartData"
                     :chart-data="stakingChartData"
@@ -67,15 +69,7 @@
               </v-row>
               <v-row>
                 <v-col cols="4">
-                  <p class="text-center text-h5 font-weight-bold">TLC Volume (W)</p>
-                  <line-chart
-                    v-if="tlcChartData"
-                    :chart-data="tlcChartData"
-                    :options="lineChartOptions"
-                  ></line-chart>
-                </v-col>
-                <v-col cols="4">
-                  <p class="text-center text-h5 font-weight-bold">Token Transfers (W)</p>
+                  <p class="text-center text-h5 font-weight-bold">Token Transfers</p>
                   <line-chart
                     v-if="transferChartData"
                     :chart-data="transferChartData"
@@ -137,7 +131,7 @@
         <v-tab-item>
           <v-row>
             <v-col cols="12">
-              <p class="text-center text-h5 font-weight-bold">Swaps (W)</p>
+              <p class="text-center text-h5 font-weight-bold">Swaps</p>
               <line-chart
                 v-if="swapsChartData"
                 :chart-data="swapsChartData"
@@ -159,8 +153,8 @@ import { requireLoggedIn } from "@/utility";
 import { apiRequest, getCommunities } from "@/novusphere-js/discussions/api";
 
 import LineChart from "@/components/LineChart";
-
-const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+const ONE_WEEK = 7 * 24 * ONE_HOUR;
 
 function randomColor(name) {
   const hash = ecc.sha256(name);
@@ -193,12 +187,6 @@ function color(name) {
   };
 }
 
-function $d(a, b = 0) {
-  return a || b;
-}
-
-$d;
-
 export default requireLoggedIn({
   name: "AnalyticsPage",
   components: {
@@ -212,6 +200,7 @@ export default requireLoggedIn({
   },
   data: () => ({
     tab: 0,
+    timePeriod: "Weekly",
     volumeSymbol: "ATMOS",
     volumeData: null,
     activityChartData: null,
@@ -239,49 +228,52 @@ export default requireLoggedIn({
     async volumeSymbol() {
       await this.setVolumeChart();
     },
+    async timePeriod() {
+      await this.init();
+    },
   },
   async created() {
-    await this.setBaseAnalytics();
-    await this.setBaseYearToDate();
-    await this.setVolumeChart();
-    await this.setActivityAnalysis();
-    await this.setPostAnalysis();
-    await this.setTLCAnalysis();
-    await this.setTransferAnalysis();
+    await this.init();
   },
   methods: {
+    async init() {
+      await this.setBaseAnalytics();
+      await this.setBaseYearToDate();
+      await this.setVolumeChart();
+      await this.setActivityAnalysis();
+      await this.setPostAnalysis();
+      await this.setTLCAnalysis();
+      await this.setTransferAnalysis();
+    },
     async setTransferAnalysis() {
       const TIP_GENESIS = new Date("7/20/2020").getTime();
-      const weekly = this._weekly.filter((a) => a.time > TIP_GENESIS);
+      const periods = this._periodsData.filter((a) => a.time > TIP_GENESIS);
 
       const transferChartData = {
-        labels: weekly.map((a) => new Date(a.time).toLocaleDateString()),
+        labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
-          /*{
-            ...color("Transfers"),
-            label: "Transfers",
-            data: weekly.map((a) => a.trxs.count.trxs),
-          },*/
           {
             ...color("Tips"),
             label: "Tips",
-            data: weekly.map((a) => a.trxs.count.tips),
+            data: periods.map((a) => a.trxs.count.tips),
           },
           {
             ...color("TLC"),
             label: "TLC",
-            data: weekly.map((a) => a.trxs.count.tlc),
+            data: periods.map((a) => a.trxs.count.tlc),
           },
           {
             ...color("Swaps"),
             label: "Swaps",
-            data: weekly.map((a) => a.trxs.count.swap),
+            data: periods.map((a) => a.trxs.count.swap),
           },
         ],
       };
 
       const STAKE_P_GENESIS = new Date("7/27/2020").getTime();
-      const stakingData = this._weekly.filter((a) => a.time > STAKE_P_GENESIS);
+      const stakingData = this._periodsData.filter(
+        (a) => a.time > STAKE_P_GENESIS
+      );
       const stakingChartData = {
         labels: stakingData.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
@@ -294,7 +286,7 @@ export default requireLoggedIn({
       };
 
       const SWAP_GENESIS = new Date("8/18/2020").getTime();
-      const swapsData = this._weekly.filter((a) => a.time > SWAP_GENESIS);
+      const swapsData = this._periodsData.filter((a) => a.time > SWAP_GENESIS);
       const swapsChartData = {
         labels: swapsData.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
@@ -312,14 +304,14 @@ export default requireLoggedIn({
     },
     async setTLCAnalysis() {
       const TLC_GENESIS = new Date("8/18/2020").getTime();
-      const weekly = this._weekly.filter((a) => a.time > TLC_GENESIS);
+      const periods = this._periodsData.filter((a) => a.time > TLC_GENESIS);
       const tlcChartData = {
-        labels: weekly.map((a) => new Date(a.time).toLocaleDateString()),
+        labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
           {
             ...color("ATMOS"),
             label: "ATMOS",
-            data: weekly.map((a) => a.trxs.tlc.ATMOS),
+            data: periods.map((a) => a.trxs.tlc.ATMOS),
           },
         ],
       };
@@ -327,33 +319,33 @@ export default requireLoggedIn({
       this.tlcChartData = tlcChartData;
     },
     async setActivityAnalysis() {
-      const weekly = this._weekly;
+      const periods = this._periodsData;
       const activityChartData = {
-        labels: weekly.map((a) => new Date(a.time).toLocaleDateString()),
+        labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
           {
             ...color("Threads"),
             label: "Threads",
-            data: weekly.map((a) => a.threads),
+            data: periods.map((a) => a.threads),
           },
           {
             ...color("Posts"),
             label: "Posts",
-            data: weekly.map((a) => a.posts),
+            data: periods.map((a) => a.posts),
           },
         ],
       };
 
       const eosAccountChartData = {
-        labels: weekly.map((a) => new Date(a.time).toLocaleDateString()),
+        labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
           {
             ...color("eos"),
             label: "EOS Accounts",
-            data: weekly.map(
+            data: periods.map(
               (a) =>
                 a.eosAccounts +
-                weekly
+                periods
                   .filter((b) => b.time < a.time)
                   .reduce((pv, cv) => pv + cv.eosAccounts, 0)
             ),
@@ -365,17 +357,17 @@ export default requireLoggedIn({
       this.eosAccountChartData = eosAccountChartData;
     },
     async setPostAnalysis() {
-      const weekly = this._weekly;
+      const periods = this._periodsData;
       const tags = this.tags;
       //const tags = ["atmos", "eos", "boid", "puml", "lbry"];
 
       const postChartData = {
-        labels: weekly.map((a) => new Date(a.time).toLocaleDateString()),
+        labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
           ...tags.map((tag) => ({
             ...color(tag),
             label: `#${tag}`,
-            data: weekly.map((a) => a.content[tag] || 0),
+            data: periods.map((a) => a.content[tag] || 0),
           })),
         ],
       };
@@ -399,30 +391,32 @@ export default requireLoggedIn({
       getCommunities;
     },
     async setBaseAnalytics() {
-      const analytics = await this.getAnalytics();
+      const analytics = this._analytics || (await this.getAnalytics());
 
-      const weeks = _.groupBy(
+      let TIME_FRAME = 24 * ONE_HOUR;
+      if (this.timePeriod == "Weekly") TIME_FRAME = ONE_WEEK;
+      else if (this.timePeriod == "Monthly") TIME_FRAME = 30 * 24 * ONE_HOUR;
+
+      const periods = _.groupBy(
         analytics.map((a) => ({
           ...a,
-          w: Math.floor(a.time / ONE_WEEK),
+          w: Math.floor(a.time / TIME_FRAME),
         })),
         ({ w }) => w
       );
 
-      const weekly = [];
-      for (const week of Object.values(weeks)) {
-        const weeklyAnalytics = week.reduce(
+      const periodsData = [];
+      for (const p of Object.values(periods)) {
+        const periodAnalytics = p.reduce(
           (pv, cv) => this.mergeStrategy(pv, cv),
           undefined
         );
 
-        weekly.push(weeklyAnalytics);
+        periodsData.push(periodAnalytics);
       }
 
       this._analytics = analytics;
-      this._weekly = weekly;
-
-      return { analytics, weekly };
+      this._periodsData = periodsData;
     },
     async getAnalytics() {
       return await apiRequest(
@@ -433,34 +427,34 @@ export default requireLoggedIn({
     },
     async setVolumeChart() {
       const TIP_GENSIS = new Date("7/20/2020").getTime();
-      const weekly = this._weekly.filter((a) => a.time > TIP_GENSIS);
+      const periods = this._periodsData.filter((a) => a.time > TIP_GENSIS);
 
       function progressive(a, ts, name) {
         return (
           (a.trxs[name][ts] || 0) +
-          weekly
+          periods
             .filter((b) => b.time < a.time)
             .reduce((pv, cv) => pv + (cv.trxs[name][ts] || 0), 0)
         );
       }
 
       const volumeData = {
-        labels: weekly.map((a) => new Date(a.time).toLocaleDateString()),
+        labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
           {
             ...color("tips"),
             label: "Tips",
-            data: weekly.map((a) => progressive(a, this.volumeSymbol, "tips")),
+            data: periods.map((a) => progressive(a, this.volumeSymbol, "tips")),
           },
           {
             ...color("swaps"),
             label: "Swaps",
-            data: weekly.map((a) => progressive(a, this.volumeSymbol, "swap")),
+            data: periods.map((a) => progressive(a, this.volumeSymbol, "swap")),
           },
           {
             ...color("tlc"),
             label: "TLC",
-            data: weekly.map((a) => progressive(a, this.volumeSymbol, "tlc")),
+            data: periods.map((a) => progressive(a, this.volumeSymbol, "tlc")),
           },
         ],
       };

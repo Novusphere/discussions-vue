@@ -264,6 +264,11 @@ export class Post {
                 l1 = l1.substring(0, l1q);
             }
 
+            const l2q = l2.indexOf('?');
+            if (l2q > -1) {
+                l2 = l2.substring(0, l2q);
+            }
+
             if (l1.lastIndexOf('/') != l1.length - 1)
                 l1 += '/';
 
