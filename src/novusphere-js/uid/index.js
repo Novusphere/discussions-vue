@@ -410,12 +410,13 @@ async function newdexSwap(withdrawAction, expect, createAccount) {
 //
 //  Transfers a Unified ID asset
 //
-async function transfer(actions, notify, progressCallback) {
+async function transfer(actions, notify, progressCallback, forward) {
 
     const transfers = await createTransferActions(actions, progressCallback);
     const trx = await apiRequest(`/v1/api/blockchain/transfer`, {
         transfers,
-        notify
+        notify,
+        forward
     });
 
     return trx;

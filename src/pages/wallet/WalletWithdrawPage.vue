@@ -44,7 +44,7 @@
 <script>
 import { passwordTesterRules } from "@/utility";
 import { mapState, mapGetters } from "vuex";
-import { sleep } from "@/novusphere-js/utility";
+
 import {
   getToken,
   getTransactionLink,
@@ -138,20 +138,31 @@ export default {
       try {
         this.disableSubmit = true;
 
+        let forward = undefined;
+
+        // this account(s) need a top level transfer action... sigh
+        if (this.account == "probitwallet") {
+          forward = this.account;
+        }
+
         const token = await getToken(this.symbol);
         const request = withdrawAction({
           chain: token.p2k.chain,
           senderPrivateKey: walletPrivateKey,
-          account: this.account,
+          account: forward ? `eosforumanon` : this.account,
           amount: await createAsset(this.amount, token.symbol),
           fee: await createAsset(this.fee, token.symbol),
           nonce: Date.now(),
           memo: this.memo,
         });
 
-        await sleep(200);
+        const receipt = await transfer(
+          [request],
+          undefined,
+          undefined,
+          forward
+        );
 
-        const receipt = await transfer([request]);
         if (receipt.transaction_id) {
           this.transactionLink = await getTransactionLink(
             token.symbol,

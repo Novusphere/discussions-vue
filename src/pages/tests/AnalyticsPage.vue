@@ -156,6 +156,11 @@ import LineChart from "@/components/LineChart";
 const ONE_HOUR = 60 * 60 * 1000;
 const ONE_WEEK = 7 * 24 * ONE_HOUR;
 
+const TIP_GENESIS = new Date("7/20/2020").getTime();
+const TLC_GENESIS = new Date("8/22/2020").getTime();
+const SWAP_GENESIS = new Date("8/26/2020").getTime();
+const STAKE_P_GENESIS = new Date("7/27/2020").getTime();
+
 function randomColor(name) {
   const hash = ecc.sha256(name);
   const r = parseInt(hash.substring(0, 2), 16);
@@ -246,7 +251,6 @@ export default requireLoggedIn({
       await this.setTransferAnalysis();
     },
     async setTransferAnalysis() {
-      const TIP_GENESIS = new Date("7/20/2020").getTime();
       const periods = this._periodsData.filter((a) => a.time > TIP_GENESIS);
 
       const transferChartData = {
@@ -270,7 +274,6 @@ export default requireLoggedIn({
         ],
       };
 
-      const STAKE_P_GENESIS = new Date("7/27/2020").getTime();
       const stakingData = this._periodsData.filter(
         (a) => a.time > STAKE_P_GENESIS
       );
@@ -285,7 +288,6 @@ export default requireLoggedIn({
         ],
       };
 
-      const SWAP_GENESIS = new Date("8/18/2020").getTime();
       const swapsData = this._periodsData.filter((a) => a.time > SWAP_GENESIS);
       const swapsChartData = {
         labels: swapsData.map((a) => new Date(a.time).toLocaleDateString()),
@@ -303,7 +305,6 @@ export default requireLoggedIn({
       this.swapsChartData = swapsChartData;
     },
     async setTLCAnalysis() {
-      const TLC_GENESIS = new Date("8/18/2020").getTime();
       const periods = this._periodsData.filter((a) => a.time > TLC_GENESIS);
       const tlcChartData = {
         labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
@@ -426,8 +427,7 @@ export default requireLoggedIn({
       );
     },
     async setVolumeChart() {
-      const TIP_GENSIS = new Date("7/20/2020").getTime();
-      const periods = this._periodsData.filter((a) => a.time > TIP_GENSIS);
+      const periods = this._periodsData.filter((a) => a.time > TIP_GENESIS);
 
       function progressive(a, ts, name) {
         return (

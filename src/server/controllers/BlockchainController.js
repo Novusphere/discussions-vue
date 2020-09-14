@@ -409,17 +409,46 @@ export default @Controller('/blockchain') class BlockchainController {
     @Post('/transfer')
     async transfer(req, res) {
 
-        let { transfers, notify } = req.unpack();
+        let { transfers, notify, forward } = req.unpack();
         if (!transfers || !Array.isArray(transfers)) throw new Error(`Expected actions to be of type Array`);
 
         let actions = await this.makeTransferActions(transfers);
+
+        if (forward && transfers.length == 1 && transfers[0].to == 'EOS1111111111111111111111111111111114T1Anm') {
+
+            let memo = transfers[0].memo;            
+            let colon = memo.indexOf(':');
+
+            if (!memo.startsWith(siteConfig.relay.account)) throw new Error(`Forward action expects withdrawal to relayer account`);
+            if (colon == -1) throw new Error(`No forward memo was specified`);
+
+            memo = memo.substring(colon + 1);
+
+            const p2k = await this.getP2K();
+            const p2kInfo = p2k.find(t => t.p2k.chain == actions[0].data.chain_id);
+
+            actions.push({
+                account: p2kInfo.contract,
+                name: `transfer`,
+                data: {
+                    from: siteConfig.relay.account, // from the relay account
+                    to: forward, // forward as top level action
+                    quantity: actions[0].data.amount, // same quantity
+                    memo: memo
+                }
+            });
+        }
+
         if (notify) {
             if (Array.isArray(notify))
                 actions.push(...notify.map(n => this.makeNotifiyAction(n)));
             else
                 actions.push(this.makeNotifiyAction(notify));
         }
+
         actions = this.addAuthorizationToActions(actions);
+
+        console.log(actions);
 
         //const trx = { transaction_id: "5f2f829d6a35279ed7cf373f8ee3667bbc86cec39375a4b3b5cc86b1a9c233b7" }; 
         const trx = await this.transact(actions);
