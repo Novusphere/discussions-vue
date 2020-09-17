@@ -778,6 +778,7 @@ async function searchPostsByModerated(key, mods, tag, tags, thread) {
     mods = moderators(key, mods);
 
     const $match = {
+        "modPolicy.mod": { $in: mods },
         "modPolicy.tags": tag,
     }
 
