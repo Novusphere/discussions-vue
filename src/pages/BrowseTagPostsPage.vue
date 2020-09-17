@@ -21,7 +21,7 @@ import AssetCard from "@/components/AssetCard";
 import RecentPostsCard from "@/components/RecentPostsCard";
 import PostBrowser from "@/components/PostBrowser";
 import {
-  getPinnedPosts,
+  searchPostsByPinned,
   searchPostsByTags,
   getCommunityByTag,
 } from "@/novusphere-js/discussions/api";
@@ -52,7 +52,7 @@ export default {
   },
   data: () => ({
     tags: [],
-    pinned: [],
+    pinned: null,
     cursor: null,
     community: null,
   }),
@@ -62,17 +62,17 @@ export default {
   methods: {
     async load() {
       this.cursor = null;
-      this.pinned = [];
+      this.pinned = null;
 
       const tags = this.$route.params.tags.toLowerCase().split(",");
       const mods = this.getModeratorKeys(tags);
       const cursor = searchPostsByTags(tags);
       cursor.moderatorKeys = mods;
 
-      let pinned = [];
+      let pinned = null;
 
       if (mods.length > 0) {
-        pinned = await getPinnedPosts(
+        pinned = await searchPostsByPinned(
           this.isLoggedIn ? this.keys.arbitrary.pub : undefined,
           mods,
           tags

@@ -758,7 +758,7 @@ async function saveUserAccountObject(identityKey, accountObject, domain) {
     return await apiRequest(`/v1/api/account/save`, accountObject, { key: identityKey, domain });
 }
 
-async function restorePartialPosts(key, mods, thread, partialPosts) {
+/*async function restorePartialPosts(key, mods, thread, partialPosts) {
     const posts = [];
     if (partialPosts && partialPosts.length > 0) {
         const trxids = partialPosts.map(p => p.transaction);
@@ -772,35 +772,61 @@ async function restorePartialPosts(key, mods, thread, partialPosts) {
         while (cursor.hasMore());
     }
     return posts;
-}
+}*/
 
-async function getModeratedPosts(key, mods, tag, tags, domain, thread) {
+async function searchPostsByModerated(key, mods, tag, tags, thread) {
     mods = moderators(key, mods);
-    domain = domain || windowHost();
 
-    const partialPosts = await apiRequest(`/v1/api/moderation/posts/${tag}`, { mods, tags, domain, thread });
-    return await restorePartialPosts(key, mods, thread, partialPosts);
+    const $match = {
+        "modPolicy.tags": tag,
+    }
+
+    if (thread) {
+        $match["$expr"] = { $eq: ["$post.uuid", "$post.threadUuid"] };
+    }
+
+    if (tags && tags.length > 0) {
+        $match["tags"] = { $in: tags };
+    }
+
+    return searchPosts({
+        key,
+        sort: 'modpol',
+        moderatorKeys: mods,
+        pipeline: [
+            {
+                $match
+            }
+        ]
+    });
+
+    //const ahh = await sp.next();
+    //console.log(sp);
+    //return ahh;
+
+    //const partialPosts = await apiRequest(`/v1/api/moderation/posts/${tag}`, { mods, tags, domain, thread });
+    //return await restorePartialPosts(key, mods, thread, partialPosts);
 }
 
 //
 // Get pinned moderated posts
 //
-async function getPinnedPosts(key, mods, tags, domain, thread = true) {
-    return await getModeratedPosts(key, mods, 'pinned', tags, domain, thread);
+async function searchPostsByPinned(key, mods, tags, thread = true) {
+    return await searchPostsByModerated(key, mods, 'pinned', tags, thread);
 }
 
 //
 // Get spam moderated posts
 //
-async function getSpamPosts(key, mods, tags, domain) {
-    return await getModeratedPosts(key, mods, 'spam', tags, domain);
+async function searchPostsBySpam(key, mods, tags) {
+    return await searchPostsByModerated(key, mods, 'spam', tags);
 }
 
 //
 // Get nsfw moderated posts
 //
-async function getNsfwPosts(key, mods, tags, domain) {
-    return await getModeratedPosts(key, mods, 'nsfw', tags, domain);
+async function searchPostsByNsfw(key, mods, tags) {
+    return await searchPostsByModerated(key, mods, 'nsfw', tags);
 }
 
 //
@@ -844,9 +870,9 @@ export {
     getCommunityByTag,
     getTokens,
     modPolicySetTags,
-    getPinnedPosts,
-    getSpamPosts,
-    getNsfwPosts,
+    searchPostsByPinned,
+    searchPostsBySpam,
+    searchPostsByNsfw,
     getUserAccountObject,
     saveUserAccountObject,
     getUserDrafts,

@@ -8,8 +8,9 @@
         <v-list-item-subtitle>{{ quantity }}</v-list-item-subtitle>
         <v-list-item-subtitle v-if="price" style="font-size: 10px;">{{ price }}/{{ symbol }}</v-list-item-subtitle>
       </v-list-item-content>
-
-      <TokenIcon :size="80" :symbol="symbol" />
+      <div>
+        <TokenIcon :size="80" :symbol="symbol" />
+      </div>
     </v-list-item>
   </v-card>
 </template>

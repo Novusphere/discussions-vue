@@ -95,7 +95,14 @@ export default @Controller('/search') class SearchController {
         }
 
         if (moderatorKeys && moderatorKeys.length) {
-            this.addModeratorPolicyToPipeline(moderatorKeys, pipeline);
+            if (sort == 'modpol') {
+                let pipeline2 = [];
+                this.addModeratorPolicyToPipeline(moderatorKeys, pipeline2);
+                pipeline = [...pipeline2, ...pipeline];
+            }
+            else {
+                this.addModeratorPolicyToPipeline(moderatorKeys, pipeline);
+            }
         }
 
         if (includeOpeningPost) {

@@ -72,7 +72,8 @@ let config = {
         },
         "moderation": {
             "pub": 1,
-            "uuid": 1
+            "uuid": 1,
+            "tags": 1,
         }
     }
 }

@@ -10,7 +10,6 @@
       <PostScroller
         ref="scroller"
         :show-reply="showReply"
-        :pinned="pinned"
         :posts="posts"
         :display="display"
         :infinite="infinite"
@@ -36,7 +35,7 @@ export default {
     noSort: Boolean,
     noCursor: Boolean,
     cursor: Object,
-    pinned: Array,
+    pinned: Object, // cursor
     showReply: Boolean,
   },
   data: () => ({
@@ -85,10 +84,13 @@ export default {
           this.delegatedMods.length > 0
             ? this.delegatedMods.map((dm) => dm.pub)
             : undefined;
+
         cursor.votePublicKey = this.isLoggedIn
           ? this.keys.arbitrary.pub
           : undefined;
-        cursor.sort = this.sort;
+
+        if (!this.noSort) cursor.sort = this.sort;
+
         cursor.reset();
       }
 
@@ -106,6 +108,13 @@ export default {
         $state.complete();
       }
 
+      if (this.posts.length == 0) {
+        if (this.pinned) {
+          const pinned = await this.pinned.next();
+          this.posts.push(...pinned);
+        }
+      }
+
       let posts = undefined;
       try {
         posts = await this.cursor.next();
@@ -117,12 +126,11 @@ export default {
       }
 
       if (posts.length > 0) {
-        if (this.pinned) {
-          // prevent duplicates
-          posts = posts.filter(
-            (p) => !this.pinned.some((p2) => p.transaction == p2.transaction)
-          );
-        }
+        // prevent potential duplicates
+        posts = posts.filter(
+          (p) => !this.posts.some((p2) => p.transaction == p2.transaction)
+        );
+
         this.posts.push(...posts);
 
         this.$store.commit(

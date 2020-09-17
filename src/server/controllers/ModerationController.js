@@ -1,4 +1,4 @@
-import { Controller, Post } from '@decorators/express';
+import { Controller, Post, Get } from '@decorators/express';
 import { Api } from "../helpers";
 import { config, getDatabase } from "../mongo";
 
@@ -7,6 +7,12 @@ export default @Controller('/moderation') class ModerationController {
     }
 
     @Api()
+    @Get('/test')
+    async test(req, res) {
+        return res.success([]);
+    }
+
+    /*@Api()
     @Post('/posts/:tag')
     async posts(req, res) {
         const { domain, mods, tag, tags, thread } = req.unpack();
@@ -75,7 +81,7 @@ export default @Controller('/moderation') class ModerationController {
             .toArray();
 
         return res.success(result);
-    }
+    }*/
 
     @Api()
     @Post('/settags')
