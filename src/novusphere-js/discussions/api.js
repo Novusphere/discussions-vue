@@ -774,12 +774,14 @@ async function saveUserAccountObject(identityKey, accountObject, domain) {
     return posts;
 }*/
 
-async function searchPostsByModerated(key, mods, tag, tags, thread) {
+async function searchPostsByModerated(key, mods, tag, tags, thread, domain) {
     mods = moderators(key, mods);
+    domain = domain || windowHost();
 
     const $match = {
         "modPolicy.mod": { $in: mods },
         "modPolicy.tags": tag,
+        "modPolicy.domain": domain,
     }
 
     if (thread) {
@@ -812,22 +814,22 @@ async function searchPostsByModerated(key, mods, tag, tags, thread) {
 //
 // Get pinned moderated posts
 //
-async function searchPostsByPinned(key, mods, tags, thread = true) {
-    return await searchPostsByModerated(key, mods, 'pinned', tags, thread);
+async function searchPostsByPinned(key, mods, tags, thread = true, domain) {
+    return await searchPostsByModerated(key, mods, 'pinned', tags, thread, domain);
 }
 
 //
 // Get spam moderated posts
 //
-async function searchPostsBySpam(key, mods, tags) {
-    return await searchPostsByModerated(key, mods, 'spam', tags);
+async function searchPostsBySpam(key, mods, tags, domain) {
+    return await searchPostsByModerated(key, mods, 'spam', tags, true, domain);
 }
 
 //
 // Get nsfw moderated posts
 //
-async function searchPostsByNsfw(key, mods, tags) {
-    return await searchPostsByModerated(key, mods, 'nsfw', tags);
+async function searchPostsByNsfw(key, mods, tags, domain) {
+    return await searchPostsByModerated(key, mods, 'nsfw', tags, domain, true, domain);
 }
 
 //

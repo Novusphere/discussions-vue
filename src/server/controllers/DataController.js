@@ -42,8 +42,7 @@ export default @Controller('/data') class DataController {
         return res.success(analytics);
     }
 
-    // TO-DO: deprecate and remove
-    @Api()
+    /*@Api()
     @Get("/stats")
     async stats(req, res) {
         const { domain } = req.unpack();
@@ -93,7 +92,7 @@ export default @Controller('/data') class DataController {
         }
 
         return res.success(result);
-    }
+    }*/
 
     @Api()
     @Get("/popularusers")
