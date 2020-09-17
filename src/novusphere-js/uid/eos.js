@@ -68,6 +68,17 @@ async function getAPI(rpcEndpoint, keys = [], rpcConfig = {}) {
     return api;
 }
 
+async function getAccount(name, { rpcEndpoint, rpcConfig } = {}) {
+    const api = await getAPI(rpcEndpoint, undefined, rpcConfig);
+    try { 
+        const account = await api.rpc.get_account(name);
+        return account;
+    }
+    catch (ex) {
+        return undefined;
+    }
+}
+
 export default {
     DEFAULT_EOS_RPC,
     GREYMASS_EOS_RPC,
@@ -75,5 +86,6 @@ export default {
     EOSCAFE_EOS_RPC,
     getWalletNames,
     getAPI,
-    connectWallet
+    connectWallet,
+    getAccount
 }

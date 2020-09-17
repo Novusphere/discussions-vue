@@ -65,6 +65,7 @@ import { passwordTesterRules } from "@/utility";
 import { mapState, mapGetters } from "vuex";
 import { sleep } from "@/novusphere-js/utility";
 import {
+  eos,
   sumAsset,
   getToken,
   getTransactionLink,
@@ -103,6 +104,11 @@ export default {
           );
         }
       }
+
+      if (this.accountNameExists) {
+        rules.push(`The account name "${this.account}" is already taken`);
+      }
+
       return rules;
     },
     ...mapGetters(["isLoggedIn"]),
@@ -113,6 +119,7 @@ export default {
     }),
   },
   data: () => ({
+    accountNameExists: false,
     disableSubmit: false,
     password: "",
     valid: false,
@@ -128,6 +135,13 @@ export default {
   watch: {
     async symbol() {
       await this.refreshQuote();
+    },
+    async account() {
+      if (this.accountNameExists || this.accountNameRules.length == 0) {
+        this.accountNameExists = (await eos.getAccount(this.account))
+          ? true
+          : false;
+      }
     },
   },
   async created() {
