@@ -41,7 +41,7 @@
         </div>
       </editor-menu-bar>
 
-      <editor-content class="editor-content" :editor="editor" />
+      <editor-content ref="editorContent" class="editor-content" :editor="editor" />
     </div>
 
     <v-menu
@@ -53,21 +53,19 @@
       :position-x="popoverX"
       :position-y="popoverY"
     >
-      <div ref="suggestions">
-        <v-card>
-          <v-card-text>
-            <template v-if="hasResults">
-              <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
-                <PublicKeyIcon class="mr-2" :publicKey="user.pub" />
-                {{ user.displayName[0] }}
-              </v-list-item>
-            </template>
-            <div v-else>
-              <v-card-text>No users found</v-card-text>
-            </div>
-          </v-card-text>
-        </v-card>
-      </div>
+      <v-card>
+        <v-card-text>
+          <template v-if="hasResults">
+            <v-list-item v-for="(user, i) in filteredUsers" :key="i" @click="selectUser(user)">
+              <PublicKeyIcon class="mr-2" :publicKey="user.pub" />
+              {{ user.displayName[0] }}
+            </v-list-item>
+          </template>
+          <div v-else>
+            <v-card-text>No users found</v-card-text>
+          </div>
+        </v-card-text>
+      </v-card>
     </v-menu>
   </div>
 </template>
@@ -288,7 +286,7 @@ export default {
       darkMode: (state) => state.darkMode,
     }),
   },
-  mounted() {
+  async mounted() {
     this.hasMounted = true;
   },
   methods: {
@@ -446,6 +444,8 @@ export default {
     },
     // renders a popup with suggestions
     renderPopup(node) {
+      if (!node) return;
+      
       let rect = node.getBoundingClientRect();
       this.popoverX = rect.x + rect.width + 10;
       this.popoverY = rect.y;

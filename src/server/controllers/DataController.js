@@ -269,11 +269,12 @@ export default @Controller('/data') class DataController {
         const mcaps = {};
 
         for (let i = 1; i < feed.length; i++) {
-            const { tokenName, tokenContract, tokenPriceInUSD } = feed[i];
+            const { tokenName, tokenContract, tokenPriceInUSD, percentChange24h } = feed[i];
             mcaps[tokenName] = {
                 symbol: tokenName,
                 contract: tokenContract,
-                price: parseFloat(tokenPriceInUSD)
+                price: parseFloat(tokenPriceInUSD),
+                percentChange24h
             }
         }
 

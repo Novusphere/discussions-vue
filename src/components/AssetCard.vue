@@ -41,6 +41,7 @@ export default {
     quantity: "",
     zero: true,
     price: "",
+    change24: "",
   }),
   watch: {
     async symbol() {
@@ -67,6 +68,7 @@ export default {
           if (eosCap && thisCap) {
             if (this.symbol != "EOS") {
               this.price = `${(thisCap.price / eosCap.price).toFixed(6)} EOS`;
+              this.change24 = thisCap.percentChange24h;
             }
           }
         }

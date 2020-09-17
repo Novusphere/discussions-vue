@@ -8,6 +8,8 @@
       <v-card v-else>
         <v-card-text>
           <PostSubmitter
+            sub-select
+            @sub-change="(sub) => tag = sub"
             show-paywall
             :draft="'thread'"
             :sub="tag"
@@ -52,6 +54,12 @@ export default {
     },
     isLoggedIn() {
       if (!this.isLoggedIn) this.$router.push(`/`);
+    },
+    async tag() {
+      if (!this.tag) return;
+      
+      const community = await getCommunityByTag(this.tag);
+      this.community = community ? community : null;
     },
   },
   computed: {
@@ -159,10 +167,7 @@ export default {
         tag = this.editorTags[0]; // maybe use the most frequently used tag instead?
       }
 
-      const community = await getCommunityByTag(tag);
-
       this.tag = tag;
-      this.community = community ? community : null;
     },
   },
 };

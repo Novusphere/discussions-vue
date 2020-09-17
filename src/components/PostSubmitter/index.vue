@@ -1,6 +1,8 @@
 <template>
   <div>
     <div v-if="isLoggedIn">
+      <TagIcon v-if="false" />
+
       <v-text-field
         v-if="titleField"
         v-model="title"
@@ -8,6 +10,25 @@
         hint="Enter your post title (optional)"
         required
       ></v-text-field>
+
+      <v-select
+        v-if="subSelect"
+        :value="sub"
+        :items="communityTags"
+        @input="(s) => $emit('sub-change', s)"
+      >
+        <template v-slot:selection="{ item }">
+          <span>#{{ item }}</span>
+        </template>
+        <template v-slot:prepend>
+          <TagIcon :tag="sub" />
+        </template>
+        <template v-slot:item="{ item }">
+          <TagIcon :tag="item" />
+          <span class="ml-2">#{{ item }}</span>
+        </template>
+      </v-select>
+
       <v-tabs center-active show-arrows v-model="tab">
         <v-tab>Editor</v-tab>
         <v-tab>Preview</v-tab>
@@ -85,6 +106,7 @@
 import { mapState, mapGetters } from "vuex";
 import PayWall from "./PayWall";
 import MarkdownEditor from "@/components/MarkdownEditor";
+import TagIcon from "@/components/TagIcon";
 import PostCard from "@/components/PostCard";
 import { waitFor, generateUuid } from "@/novusphere-js/utility";
 import {
@@ -93,6 +115,7 @@ import {
   getUserProfile,
   getUserDrafts,
   saveUserDrafts,
+  getCommunities,
 } from "@/novusphere-js/discussions/api";
 import {
   createAsset,
@@ -109,9 +132,11 @@ export default {
     MarkdownEditor,
     PostCard,
     PayWall,
+    TagIcon,
   },
   props: {
     showPaywall: Boolean,
+    subSelect: Boolean,
     draft: String,
     sub: String,
     parentPost: Object,
@@ -133,7 +158,8 @@ export default {
     }),
   },
   data: () => ({
-    saveDraftInterval: null,
+    communityTags: [],
+    workerInterval: null,
     currentDraftIndex: -1,
     savingDrafts: false,
     drafts: null,
@@ -155,7 +181,9 @@ export default {
     },
   },
   async created() {},
-  mounted() {
+  async mounted() {
+    this.communityTags = ["all", ...(await getCommunities()).map((c) => c.tag)];
+
     if (this.draft) {
       const html = this.localDrafts[this.draft];
       if (html) {
@@ -163,10 +191,15 @@ export default {
         const editor = this.getEditor();
         editor.setFromHtml(html);
       }
-      this.saveDraftInterval = setInterval(() => this.saveLocalDraft(), 1000);
     }
+
+    this.workerInterval = setInterval(() => {
+      if (this.draft) this.saveLocalDraft();
+    }, 1000);
   },
-  beforeDestroy() {},
+  beforeDestroy() {
+    clearInterval(this.workerInterval);
+  },
   methods: {
     saveLocalDraft() {
       const editor = this.getEditor();
