@@ -111,7 +111,7 @@ function findInvalidBrainKeyWord(brainKey) {
             return word;
         }
     }
-    
+
     return undefined;
 }
 
@@ -509,6 +509,15 @@ async function connectWallet(name) {
     throw new Error(`Unable to connect to unknown wallet ${name}`);
 }
 
+async function getMarketCaps() {
+    const FIVE_MINUTES = 5 * 60 * 1000;
+
+    return getFromCache(cache, 'getMarketCaps', async () => {
+        return await apiRequest(`/v1/api/data/marketcaps`);
+    },
+    FIVE_MINUTES);
+}
+
 export {
     eos,
     eth,
@@ -543,6 +552,7 @@ export {
     createTransferActions,
     signText,
     signHash,
-    connectWallet
+    connectWallet,
+    getMarketCaps
 }
 

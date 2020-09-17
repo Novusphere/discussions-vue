@@ -263,6 +263,24 @@ export default @Controller('/data') class DataController {
     }
 
     @Api()
+    @Get("/marketcaps")
+    async marketcaps(req, res) {
+        const { data: feed } = await axios.get('https://monitor-api.eosx.io/marketcap');
+        const mcaps = {};
+
+        for (let i = 1; i < feed.length; i++) {
+            const { tokenName, tokenContract, tokenPriceInUSD } = feed[i];
+            mcaps[tokenName] = {
+                symbol: tokenName,
+                contract: tokenContract,
+                price: parseFloat(tokenPriceInUSD)
+            }
+        }
+
+        return res.success(mcaps);
+    }
+
+    @Api()
     @Get("/active48h")
     async active48h(req, res) {
         const ago48h = Date.now() - (2 * 24 * 60 * 60 * 1000);

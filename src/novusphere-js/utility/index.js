@@ -107,22 +107,36 @@ function sleep(time) {
     });
 }
 
-async function getFromCache(cache, name, createAsync) {
-    if (cache[name] == true) {
-        await waitFor(async () => cache[name] != true);
+async function getFromCache(cache, name, createAsync, expire) {
+
+    let cacheObject = cache[name];
+    const now = Date.now();
+
+    if (cacheObject && cacheObject.wait) {
+        await waitFor(async () => cacheObject.wait != true);
     }
 
-    if (!cache[name]) {
-        cache[name] = true;
+    if (!cacheObject || (cacheObject.expire && now >= cacheObject.expire)) {
+
+        // create a wait handle
+        cache[name] = cacheObject = {
+            wait: true,
+            value: undefined,
+            expire: expire ? now + expire : undefined
+        };
+
         try {
-            cache[name] = await createAsync();
+            cacheObject.value = await createAsync();
         }
         catch (ex) {
             console.log(ex);
             cache[name] = undefined;
         }
+
+        cacheObject.wait = false;
     }
-    return cache[name];
+
+    return cacheObject.value;
 }
 
 function createDOMParser() {
