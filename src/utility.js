@@ -1,6 +1,6 @@
 import { mapGetters, mapState } from "vuex";
 import { waitFor } from "@/novusphere-js/utility";
-import { encrypt, decrypt, brainKeyToKeys, isValidBrainKey } from "@/novusphere-js/uid";
+import { encrypt, decrypt, brainKeyToKeys, isValidBrainKey, findInvalidBrainKeyWord } from "@/novusphere-js/uid";
 
 //
 // Wrap a Vue component export to watch for isLoggedIn and require it, otherwise redirect
@@ -89,9 +89,16 @@ function brainKeyRules(brainKey) {
     return {
         brainKeyRules() {
             const rules = [];
-            if (!isValidBrainKey(this[brainKey])) {
-                rules.push(`Invalid brain key mnemonic`);
+            const bkValue = this[brainKey];
+
+            if (!isValidBrainKey(bkValue)) {
+                const invalidWord = findInvalidBrainKeyWord(bkValue);
+                if (invalidWord)
+                    rules.push(`Invalid brain key mnemonic - "${invalidWord}" may be invalid or spelled incorrectly`);
+                else
+                    rules.push(`Invalid brain key mnemonic`);
             }
+
             return rules;
         }
     }

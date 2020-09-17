@@ -102,6 +102,19 @@ function isValidBrainKey(brainKey) {
     return bip39.validateMnemonic(brainKey.trim());
 }
 
+function findInvalidBrainKeyWord(brainKey) {
+    const words = brainKey.trim().split(' ');
+    const wordlist = bip39.wordlists.english;
+
+    for (const word of words) {
+        if (!wordlist.some(w => word == w)) {
+            return word;
+        }
+    }
+    
+    return undefined;
+}
+
 async function brainKeyFromHash(hash256) {
     const mnemonic = bip39.entropyToMnemonic(hash256);
     return mnemonic;
@@ -506,6 +519,7 @@ export {
     getActiveWallets,
     generateBrainKey,
     isValidBrainKey,
+    findInvalidBrainKeyWord,
     brainKeyToKeys,
     brainKeyFromHash,
     getTokenAddress,
