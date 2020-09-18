@@ -182,7 +182,7 @@ export default {
   },
   async created() {},
   async mounted() {
-    this.communityTags = ["all", ...(await getCommunities()).map((c) => c.tag)];
+    this.communityTags = ["all", "blog", ...(await getCommunities()).map((c) => c.tag)];
 
     if (this.draft) {
       const html = this.localDrafts[this.draft];

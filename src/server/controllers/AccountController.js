@@ -143,6 +143,35 @@ export default @Controller('/account') class AccountController {
         return res.success();
     }
 
+
+    @Api()
+    @Post('/orienttag')
+    async orientTag(req, res) {
+        const { pub, time, domain, data: { tag, up } } = req.unpackAuthenticated();
+        const db = await getDatabase();
+
+        const state = await db.collection(config.table.accounts)
+            .findOne({ pub: pub, domain: domain });
+
+        if (!state) throw new Error(`Account not found`);
+
+        // verbatim from vuex.js::orientTag
+
+        let i = state.subscribedTags.indexOf(tag);
+        if (i == -1) return;
+        if (i == 0 && up) return;
+        if (i == (state.subscribedTags.length - 1) && !up) return;
+
+        state.subscribedTags.splice(i, 1); // remove it
+        state.subscribedTags.splice(up ? i - 1 : i + 1, 0, tag);
+
+        await db.collection(config.table.accounts)
+            .updateOne({ pub: pub, domain: domain },
+                { $set: { subscribedTags: state.subscribedTags } });
+
+        return res.success();
+    }
+
     @Api()
     @Post('/subscribe')
     async subscribeTag(req, res) {

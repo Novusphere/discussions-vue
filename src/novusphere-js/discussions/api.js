@@ -738,6 +738,10 @@ async function unsubscribeTag(identityKey, tag, domain) {
     return await apiRequest(`/v1/api/account/subscribe`, { value: false, tag }, { key: identityKey, domain });
 }
 
+async function orientTag(identityKey, tag, up, domain) {
+    return await apiRequest(`/v1/api/account/orienttag`, { tag, up }, { key: identityKey, domain });
+}
+
 
 //
 // Get user account object
@@ -882,6 +886,7 @@ export {
     saveUserDrafts,
     followUser,
     unfollowUser,
+    orientTag,
     subscribeTag,
     unsubscribeTag,
     connectOAuth,

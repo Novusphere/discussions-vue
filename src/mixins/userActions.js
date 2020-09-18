@@ -1,5 +1,5 @@
 import { mapState, mapGetters } from "vuex";
-import { followUser, unfollowUser, subscribeTag, unsubscribeTag } from "@/novusphere-js/discussions/api";
+import { followUser, unfollowUser, subscribeTag, unsubscribeTag, orientTag } from "@/novusphere-js/discussions/api";
 
 export const userActionsMixin = {
     computed: {
@@ -49,6 +49,16 @@ export const userActionsMixin = {
             this.$store.commit("unsubscribeTag", {
                 tag,
                 beforeSaveCallback: async () => await unsubscribeTag(this.keys.identity.key, tag)
+            });
+        },
+        async orientTag(tag, up) {
+            if (!this.isLoggedIn) return;
+
+            tag = tag.toLowerCase();
+            this.$store.commit("orientTag", {
+                tag,
+                up,
+                beforeSaveCallback: async () => await orientTag(this.keys.identity.key, tag, up)
             });
         }
     }

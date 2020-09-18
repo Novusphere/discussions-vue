@@ -115,47 +115,45 @@
       <v-btn block color="primary" @click="createPost()">New Post</v-btn>
     </v-list-item>
     <v-divider />
-    <v-subheader>My Communities</v-subheader>
-    <v-list-item v-show="false">
-      <v-text-field
-        append-icon="add"
-        class="mt-3"
-        v-model="subscribeTag"
-        label="Subscribe"
-        persistent-hint
-        hint="Subscribe to new a new tag"
-        rounded
-        outlined
-        @keydown.enter="subscribe()"
-        @click:append="subscribe()"
-      ></v-text-field>
-    </v-list-item>
+    <v-subheader>
+      My Communities
+      <v-btn icon @click="editCommunities = !editCommunities">
+        <v-icon>edit</v-icon>
+      </v-btn>
+    </v-subheader>
     <v-list-item v-for="(tag) in subscribedTags" :key="tag">
       <span class="text-decoration-ellipsis">
         <TagLink :tag="tag" />
       </span>
-      <v-btn absolute right icon color="error" @click="removeTag(tag)" v-show="false">
-        <v-icon>clear</v-icon>
-      </v-btn>
+      <div style="position: absolute; right: 0px;">
+        <v-btn icon color="primary" @click="orientTag(tag, true)" v-if="editCommunities">
+          <v-icon>arrow_upward</v-icon>
+        </v-btn>
+        <v-btn icon color="primary" @click="orientTag(tag, false)" v-if="editCommunities">
+          <v-icon>arrow_downward</v-icon>
+        </v-btn>
+      </div>
     </v-list-item>
   </v-list>
 </template>
 
 <script>
 import { mapState, mapGetters } from "vuex";
+import { userActionsMixin } from "@/mixins/userActions";
 import TagLink from "@/components/TagLink";
 import UserProfileLink from "@/components/UserProfileLink";
 
 export default {
   name: "AppNav",
+  mixins: [userActionsMixin],
   components: {
     TagLink,
     UserProfileLink,
   },
   data() {
     return {
+      editCommunities: false,
       search: this.$route.query.q || "",
-      subscribeTag: "",
       searchReadonly: true,
       walletMore: false,
     };
@@ -209,14 +207,6 @@ export default {
     },
     async goSearch() {
       this.$router.push(`/search?q=${this.search}`);
-    },
-    async removeTag(tag) {
-      this.$store.commit("unsubscribeTag", tag);
-    },
-    async subscribe() {
-      if (this.subscribeTag.length < 3) return;
-      this.$store.commit("subscribeTag", this.subscribeTag);
-      this.subscribeTag = "";
     },
   },
 };

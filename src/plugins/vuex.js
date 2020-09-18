@@ -324,13 +324,25 @@ export default new Vuex.Store({
             state.followingUsers = state.followingUsers.filter(u => u.pub != pub);
             saveAccount(state, true, undefined, beforeSaveCallback);
         },
-        subscribeTag(state, { tag, beforeSaveCallback}) {
+        subscribeTag(state, { tag, beforeSaveCallback }) {
             if (state.subscribedTags.find(t => t == tag)) return;
             state.subscribedTags.push(tag);
             saveAccount(state, true, undefined, beforeSaveCallback);
         },
-        unsubscribeTag(state, { tag, beforeSaveCallback}) {
+        unsubscribeTag(state, { tag, beforeSaveCallback }) {
             state.subscribedTags = state.subscribedTags.filter(t => t != tag);
+            saveAccount(state, true, undefined, beforeSaveCallback);
+        },
+        orientTag(state, { tag, up, beforeSaveCallback }) {
+
+            let i = state.subscribedTags.indexOf(tag);
+            if (i == -1) return;
+            if (i == 0 && up) return;
+            if (i == (state.subscribedTags.length - 1) && !up) return;
+
+            state.subscribedTags.splice(i, 1); // remove it
+            state.subscribedTags.splice(up ? i - 1 : i + 1, 0, tag);
+
             saveAccount(state, true, undefined, beforeSaveCallback);
         },
         setPopoverOpen(state, { value, type, rect, ...rest }) {
