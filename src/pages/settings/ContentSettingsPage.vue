@@ -18,6 +18,9 @@
               <v-col cols="12">
                 <v-switch v-model="alwaysUseThreadDialogProxy" :label="`Always thread dialog`"></v-switch>
               </v-col>
+              <v-col cols="12">
+                <v-switch v-model="limitMentionsProxy" :label="`Everyone can @tag me`"></v-switch>
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -26,7 +29,7 @@
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                  <PostSortSelect no-query v-model="postSortProxy" />
+                <PostSortSelect no-query v-model="postSortProxy" />
               </v-col>
             </v-row>
           </v-card-text>
@@ -138,6 +141,15 @@ export default {
         this.$store.commit("setDarkMode", value);
       },
     },
+    // the verbal description of this in the UI is inverted, so we "!" input/output
+    limitMentionsProxy: {
+      get() {
+        return !this.limitMentions;
+      },
+      set(value) {
+        this.$store.commit("set", ["limitMentions", !value, true]);
+      },
+    },
     hideSpamProxy: {
       get() {
         return this.hideSpam;
@@ -156,6 +168,7 @@ export default {
     },
     ...mapState({
       alwaysUseThreadDialog: (state) => state.alwaysUseThreadDialog,
+      limitMentions: (state) => state.limitMentions,
       postSort: (state) => state.postSort,
       followingUsers: (state) => state.followingUsers,
       delegatedMods: (state) => state.delegatedMods,

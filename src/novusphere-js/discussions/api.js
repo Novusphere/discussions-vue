@@ -585,7 +585,9 @@ function searchPostsByTextSearch(text) {
 //
 // Search posts by notifications
 //
-function searchPostsByNotifications(key, lastSeenTime, watchedThreads) {
+function searchPostsByNotifications(key, lastSeenTime, watchedThreads, keyFilter) {
+    const pub = keyFilter ? { $in: keyFilter } : { $ne: key };
+
     return searchPosts({
         key,
         includeOpeningPost: true,
@@ -595,7 +597,7 @@ function searchPostsByNotifications(key, lastSeenTime, watchedThreads) {
                 $match: {
                     $or: [
                         {
-                            pub: { $ne: key }, // ignore self posts
+                            pub: pub,
                             mentions: { $in: [key] },
                             createdAt: { $gt: lastSeenTime },
                             /*$or: [

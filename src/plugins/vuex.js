@@ -55,6 +55,7 @@ const getDefaultState = () => ({
     needSyncAccount: false,
     notificationCount: 0,
     // --- saved ---
+    limitMentions: false, // if enabled, only people you're following can @ you, and mods
     postSort: 'popular', // any valid sort option
     postViewType: "",
     localDrafts: {
@@ -114,7 +115,8 @@ async function saveAccount(state, external = true, callback = undefined, beforeS
                 delegatedMods: state.delegatedMods,
                 hideSpam: state.hideSpam,
                 blurNSFW: state.blurNSFW,
-                darkMode: state.darkMode
+                darkMode: state.darkMode,
+                limitMentions: state.limitMentions
             };
 
             if (account && saveUserAccountObject) {
@@ -203,9 +205,12 @@ export default new Vuex.Store({
         }
     },
     mutations: {
-        set(state, [name, value]) {
+        set(state, [name, value, save]) {
             // performs a very basic mutation, should not be abused!!
             state[name] = value;
+            if (save) {
+                saveAccount(state, true);
+            }
         },
         init(state) {
             let local = window.localStorage[LOCAL_STORAGE_KEY];
@@ -480,6 +485,7 @@ export default new Vuex.Store({
 
             state.syncTime = account.data.syncTime || 0;
             state.lastSeenNotificationsTime = account.data.lastSeenNotificationsTime;
+            state.limitMentions = account.data.limitMentions;
 
             state.subscribedTags = [...(account.subscribedTags || [])];
             state.followingUsers = [...(account.followingUsers || [])];

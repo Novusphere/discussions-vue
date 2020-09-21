@@ -3,12 +3,12 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
 import PostBrowser from "@/components/PostBrowser";
-import { searchPostsByNotifications } from "@/novusphere-js/discussions/api";
+import { userActionsMixin } from "@/mixins/userActions";
 
 export default {
   name: "BrowsePostNotificationsPage",
+  mixins: [userActionsMixin],
   components: {
     PostBrowser,
   },
@@ -16,12 +16,7 @@ export default {
   data: () => ({
     cursor: null,
   }),
-  computed: {
-    ...mapState({
-      keys: (state) => state.keys,
-      watchedThreads: (state) => state.watchedThreads,
-    }),
-  },
+  computed: {},
   watch: {
     "$route.query.t": async function () {
       await this.load();
@@ -33,12 +28,7 @@ export default {
   methods: {
     async load() {
       if (this.$refs.browser) this.$refs.browser.reset();
-
-      this.cursor = searchPostsByNotifications(
-        this.keys.arbitrary.pub,
-        0,
-        this.watchedThreads
-      );
+      this.cursor = this.searchPostsByNotifications(0);
     },
   },
 };

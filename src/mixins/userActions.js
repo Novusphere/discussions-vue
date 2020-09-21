@@ -1,15 +1,36 @@
 import { mapState, mapGetters } from "vuex";
-import { followUser, unfollowUser, subscribeTag, unsubscribeTag, orientTag } from "@/novusphere-js/discussions/api";
+import { followUser, unfollowUser, subscribeTag, unsubscribeTag, orientTag, searchPostsByNotifications } from "@/novusphere-js/discussions/api";
 
 export const userActionsMixin = {
     computed: {
         ...mapGetters(["isLoggedIn"]),
         ...mapState({
             keys: (state) => state.keys,
-            followingUsers: (state) => state.followingUsers
+            delegatedMods: (state) => state.delegatedMods,
+            followingUsers: (state) => state.followingUsers,
+            notificationCount: (state) => state.notificationCount,
+            lastSeenNotificationsTime: (state) => state.lastSeenNotificationsTime,
+            watchedThreads: (state) => state.watchedThreads,
+            limitMentions: (state) => state.limitMentions
         })
     },
     methods: {
+        searchPostsByNotifications(time) {
+            let keyFilter = undefined;
+
+            if (this.limitMentions) {
+                keyFilter = [...this.followingUsers.map(u => u.pub), ...this.delegatedMods.map(u => u.pub)];
+            }
+
+            const cursor = searchPostsByNotifications(
+                this.keys.arbitrary.pub,
+                (time == undefined) ? this.lastSeenNotificationsTime : time,
+                this.watchedThreads,
+                keyFilter
+            );
+
+            return cursor;
+        },
         openLoginDialog() {
             this.$store.commit('setLoginDialogOpen', true);
         },

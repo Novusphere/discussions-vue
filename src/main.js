@@ -15,6 +15,12 @@ Vue.use(VueClipboard);
 import InfiniteLoading from 'vue-infinite-loading';
 Vue.use(InfiniteLoading, { /* options */ });
 
+import VueGtag from "vue-gtag";
+Vue.use(VueGtag, {
+  config: { id: "UA-178655433-1" },
+  enabled: (window.localStorage["analytics"] != "disabled")
+}, router);
+
 Vue.config.productionTip = false;
 
 window.$vue = new Vue({

@@ -1,5 +1,8 @@
 <template>
   <v-row>
+    <v-col :cols="12">
+      <span class="text-overline">Price feed provided by <a href="https://eosgo.io">EOSGO</a></span>
+    </v-col>
     <v-col
       v-for="(s, i) in symbols"
       :key="i"

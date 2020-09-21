@@ -23,12 +23,12 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
-import { searchPostsByNotifications } from "@/novusphere-js/discussions/api";
+import { userActionsMixin } from "@/mixins/userActions";
 import { searchTransactions } from "@/novusphere-js/uid";
 
 export default {
   name: "NotificationsButton",
+  mixins: [userActionsMixin],
   components: {},
   props: {
     chip: Boolean,
@@ -36,13 +36,6 @@ export default {
     dense: Boolean
   },
   computed: {
-    ...mapGetters(["isLoggedIn"]),
-    ...mapState({
-      notificationCount: (state) => state.notificationCount,
-      lastSeenNotificationsTime: (state) => state.lastSeenNotificationsTime,
-      keys: (state) => state.keys,
-      watchedThreads: (state) => state.watchedThreads,
-    }),
   },
   data: () => ({
     stopChecking: false,
@@ -61,11 +54,8 @@ export default {
           await Notification.requestPermission();
         }
 
-        const cursor = searchPostsByNotifications(
-          this.keys.arbitrary.pub,
-          this.lastSeenNotificationsTime,
-          this.watchedThreads
-        );
+        const cursor = this.searchPostsByNotifications();
+
         cursor.includeOpeningPost = false; // dont need this
         cursor.pipeline.push({ $count: "n" });
 
