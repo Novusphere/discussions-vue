@@ -12,12 +12,17 @@
             class="d-inline-block pr-3"
             v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)"
           >
-            <TagLink inline popover :tag="post.sub" />
+            <TagLink
+              :class="{'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
+              inline
+              popover
+              :tag="post.sub"
+            />
           </div>
           <div class="d-inline-block pr-3">
             <UserProfileLink
               popover
-              :class="{'moderator': isModerator(post.sub, post.pub)}"
+              :class="{'moderator': isModerator(post.sub, post.pub), 'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
               :displayName="post.displayName"
               :publicKey="post.pub"
             />
@@ -55,7 +60,10 @@
         <v-row class="headline" v-if="isThread && post.title">
           <v-col cols="12">
             <div class="pl-3 pr-3">
-              <PostThreadLink :post="post">{{ post.title }}</PostThreadLink>
+              <PostThreadLink
+                :class="{'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
+                :post="post"
+              >{{ post.title }}</PostThreadLink>
             </div>
           </v-col>
         </v-row>
@@ -358,8 +366,8 @@ export default {
       const expire = paywall.expire.getTime();
       const now = Date.now();
 
-      if (expire != 0 && (expire - now) <= 0) return false;
-      if (!isValidAsset(paywall.asset)) return false; 
+      if (expire != 0 && expire - now <= 0) return false;
+      if (!isValidAsset(paywall.asset)) return false;
 
       let [amount, symbol] = paywall.asset.split(" ");
       amount = parseFloat(amount);
