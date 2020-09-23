@@ -69,7 +69,9 @@ const getDefaultState = () => ({
     delegatedMods: [ // { displayName, pub, tag, uidw?, nameTime }
         // hard coded list of preset moderators
         { displayName: 'xia256', pub: 'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', tag: 'all' },
-        { displayName: 'JacquesWhales', pub: 'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', tag: 'all' }
+        { displayName: 'JacquesWhales', pub: 'EOS5epmzy9PGex6uS6r6UzcsyxYhsciwjMdrx1qbtF51hXhRjnYYH', tag: 'all' },
+        { displayName: 'Novusphere_Paul', pub: 'EOS7RWM4YvxcUEhZfHozf8XVajgvfh8wvohoJS9vx8Hg1K12PDx5o', tag: 'all' },
+        { displayName: 'Brian_Novusphere', pub: 'EOS6sYMyMHzHhGtfwjCcZkRaw3YK5ws8xoD6ke2DNUmnHT3j1cpjV', tag: 'all' }
     ]
 });
 

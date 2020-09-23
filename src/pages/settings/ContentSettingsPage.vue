@@ -21,6 +21,9 @@
               <v-col cols="12">
                 <v-switch v-model="limitMentionsProxy" :label="`Everyone can @tag me`"></v-switch>
               </v-col>
+              <v-col cols="12">
+                <v-switch v-model="analyticsProxy" :label="`Allow Analytics`"></v-switch>
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -116,6 +119,20 @@ export default {
   },
   props: {},
   computed: {
+    analyticsProxy: {
+      get() {
+        return window.localStorage["analytics"] != "disabled";
+      },
+      set(value) {
+        if (value) {
+          window.localStorage["analytics"] = "enabled";
+        } else {
+          window.localStorage["analytics"] = "disabled";
+        }
+
+        window.location.reload();
+      },
+    },
     alwaysUseThreadDialogProxy: {
       get() {
         return this.alwaysUseThreadDialog;
