@@ -18,6 +18,7 @@ import {
   mergeThreadToTree,
   getThread,
   getSinglePost,
+  apiRequest,
 } from "@/novusphere-js/discussions/api";
 //import { waitFor } from "@/novusphere-js/utility";
 
@@ -37,12 +38,13 @@ export default {
     opening: null,
     tree: null,
     checkForPosts: true,
+    viewed: false,
   }),
   computed: {
     ...mapGetters(["getModeratorKeys", "isLoggedIn"]),
     ...mapState({
       keys: (state) => state.keys,
-      isThreadDialogOpen: (state) => state.isThreadDialogOpen
+      isThreadDialogOpen: (state) => state.isThreadDialogOpen,
     }),
   },
   watch: {
@@ -111,11 +113,18 @@ export default {
       this.opening = tree[thread.opening.uuid];
       this.tree = tree;
 
+      if (!this.viewed) {
+        apiRequest(`/v1/api/data/analytics/viewpost`, {
+          uuid: thread.opening.uuid,
+        });
+        this.viewed = true;
+      }
+
       this.$emit("loaded", { opening: this.opening, tree: this.tree });
     },
     async scrollToPost() {
       if (this.isThreadDialogOpen) return;
-      
+
       const subPostId = this.referenceId2;
       if (subPostId) {
         const subPost = await getSinglePost(subPostId);

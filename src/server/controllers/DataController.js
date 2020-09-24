@@ -24,6 +24,21 @@ export default @Controller('/data') class DataController {
     }
 
     @Api()
+    @Post("/analytics/viewpost")
+    async analyticsViewPost(req, res) {
+        const { uuid } = req.unpack();
+
+        const db = await getDatabase();
+        const analytics = await db.collection(config.table.posts)
+            .updateOne({ uuid: uuid },
+                {
+                    $inc: { views: 1 }
+                });
+
+        return res.success();
+    }
+
+    @Api()
     @Post("/analytics")
     async analytics(req, res) {
         const { pub } = req.unpackAuthenticated();

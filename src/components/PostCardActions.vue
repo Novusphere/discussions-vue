@@ -13,8 +13,10 @@
     </v-btn>
 
     <PostThreadLink btn :post="post" v-if="!isCommentDisplay">
-      <v-icon>comment</v-icon>
-      <span>{{ post.totalReplies + ((!$vuetify.breakpoint.mobile) ? ' Comments' : '')}}</span>
+      <span>
+        <v-icon>comment</v-icon>
+        {{ post.totalReplies + ((!$vuetify.breakpoint.mobile) ? ' Comments' : '')}}
+      </span>
     </PostThreadLink>
 
     <v-btn text v-else @click="$emit('reply')">
@@ -24,6 +26,11 @@
 
     <v-btn text @click="mediaViewer()" v-show="false">
       <v-icon>photo_album</v-icon>
+    </v-btn>
+
+    <v-btn text v-if="!$vuetify.breakpoint.mobile && post.uuid == post.threadUuid">        
+      <v-icon>mdi-eye</v-icon>
+      <span>{{ post.views }}</span>
     </v-btn>
 
     <v-spacer></v-spacer>

@@ -642,6 +642,11 @@ async function submitVote(signKey, { uuid, value, uidw }) {
     };
 
     const { transaction_id } = await apiRequest(`/v1/api/blockchain/vote`, { vote });
+
+    if (transaction_id) {
+        apiRequest(`/v1/api/data/analytics/viewpost`, { uuid: uuid });
+    }
+
     return transaction_id;
 }
 
@@ -704,6 +709,11 @@ async function submitPost(signKey, post, transferActions) {
     }
 
     const { transaction_id } = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers, notify });
+
+    if (transaction_id) {
+        apiRequest(`/v1/api/data/analytics/viewpost`, { uuid: post.uuid });
+    }
+
     return transaction_id;
 }
 

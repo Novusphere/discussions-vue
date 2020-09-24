@@ -49,6 +49,7 @@ export class Post {
         this.tips = [];
         this.modPolicy = []; // [{mod, tags}]
         this.paywall = undefined;
+        this.views = 0;
 
         // if api specified [includeOpeningPost] this field will be populated with another Post object
         this.op = undefined;
@@ -113,6 +114,8 @@ export class Post {
                 expire: new Date(o.paywall.expire)
             }
         }
+
+        p.views = o.views || 1;
 
         return p;
     }
