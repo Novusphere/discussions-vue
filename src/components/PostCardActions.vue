@@ -114,6 +114,7 @@ import {
   submitVote,
   modPolicySetTags,
   getUserAuth,
+  addViewToPost
 } from "@/novusphere-js/discussions/api";
 import { sleep } from "@/novusphere-js/utility";
 import config from "@/server/site";
@@ -331,6 +332,10 @@ export default {
         uuid: this.post.uuid,
         uidw: this.keys.wallet.pub,
       });
+
+      if (trxid && this.post.uuid == this.post.threadUuid) {
+        addViewToPost(this.post.uuid);
+      }
 
       console.log(`vote trxid: ${trxid}`);
     },

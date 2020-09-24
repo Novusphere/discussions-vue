@@ -8,6 +8,7 @@
         <v-tab>Posts</v-tab>
         <v-tab>Volume</v-tab>
         <v-tab>Swaps</v-tab>
+        <v-tab>Communities</v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="tab">
@@ -140,6 +141,18 @@
             </v-col>
           </v-row>
         </v-tab-item>
+        <v-tab-item>
+          <v-row>
+            <v-col cols="12">
+              <p class="text-center text-h5 font-weight-bold">Communities</p>
+              <line-chart
+                v-if="communitiesChartData"
+                :chart-data="communitiesChartData"
+                :options="lineChartOptions"
+              ></line-chart>
+            </v-col>
+          </v-row>
+        </v-tab-item>
       </v-tabs-items>
     </v-card-text>
   </v-card>
@@ -215,6 +228,7 @@ export default requireLoggedIn({
     transferChartData: null,
     swapsChartData: null,
     stakingChartData: null,
+    communitiesChartData: null,
     ytd: null,
     lineChartOptions: {
       responsive: true,
@@ -249,6 +263,27 @@ export default requireLoggedIn({
       await this.setPostAnalysis();
       await this.setTLCAnalysis();
       await this.setTransferAnalysis();
+      await this.setSnapshotAnalytics();
+    },
+    async setSnapshotAnalytics() {
+      const analytics = await this.getAnalytics("snapshot");
+      const periods = this.toPeriodsData(analytics);
+      const communities = (await getCommunities()).filter(
+        (comm) => comm.members >= 5
+      ); // communities we care about
+
+      const communitiesChartData = {
+        labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
+        datasets: communities.map(({ tag }) => ({
+          ...color(tag),
+          label: tag,
+          data: periods.map((a) =>
+            this.progressive(a, periods, (b) => b.communities[tag] || 0)
+          ),
+        })),
+      };
+
+      this.communitiesChartData = communitiesChartData;
     },
     async setTransferAnalysis() {
       const periods = this._periodsData.filter((a) => a.time > TIP_GENESIS);
@@ -391,9 +426,7 @@ export default requireLoggedIn({
 
       getCommunities;
     },
-    async setBaseAnalytics() {
-      const analytics = this._analytics || (await this.getAnalytics());
-
+    toPeriodsData(analytics) {
       let TIME_FRAME = 24 * ONE_HOUR;
       if (this.timePeriod == "Weekly") TIME_FRAME = ONE_WEEK;
       else if (this.timePeriod == "Monthly") TIME_FRAME = 30 * 24 * ONE_HOUR;
@@ -416,45 +449,66 @@ export default requireLoggedIn({
         periodsData.push(periodAnalytics);
       }
 
-      this._analytics = analytics;
-      this._periodsData = periodsData;
+      return periodsData;
     },
-    async getAnalytics() {
+    async setBaseAnalytics() {
+      const analytics =
+        this._analytics || (await this.getAnalytics("analysis"));
+      this._analytics = analytics;
+      this._periodsData = this.toPeriodsData(analytics);
+    },
+    async getAnalytics(type) {
       return await apiRequest(
         "/v1/api/data/analytics",
-        {},
+        { type },
         { key: this.keys.arbitrary.key }
+      );
+    },
+    progressive(a, periods, fieldFn) {
+      return (
+        (fieldFn(a) || 0) +
+        periods
+          .filter((b) => b.time < a.time)
+          .reduce((pv, cv) => pv + (fieldFn(cv) || 0), 0)
       );
     },
     async setVolumeChart() {
       const periods = this._periodsData.filter((a) => a.time > TIP_GENESIS);
-
-      function progressive(a, ts, name) {
-        return (
-          (a.trxs[name][ts] || 0) +
-          periods
-            .filter((b) => b.time < a.time)
-            .reduce((pv, cv) => pv + (cv.trxs[name][ts] || 0), 0)
-        );
-      }
-
       const volumeData = {
         labels: periods.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
           {
             ...color("tips"),
             label: "Tips",
-            data: periods.map((a) => progressive(a, this.volumeSymbol, "tips")),
+            data: periods.map((a) =>
+              this.progressive(
+                a,
+                periods,
+                (b) => b.trxs["tips"][this.volumeSymbol]
+              )
+            ),
           },
           {
             ...color("swaps"),
             label: "Swaps",
-            data: periods.map((a) => progressive(a, this.volumeSymbol, "swap")),
+            data: periods.map((a) =>
+              this.progressive(
+                a,
+                periods,
+                (b) => b.trxs["swap"][this.volumeSymbol]
+              )
+            ),
           },
           {
             ...color("tlc"),
             label: "TLC",
-            data: periods.map((a) => progressive(a, this.volumeSymbol, "tlc")),
+            data: periods.map((a) =>
+              this.progressive(
+                a,
+                periods,
+                (b) => b.trxs["tlc"][this.volumeSymbol]
+              )
+            ),
           },
         ],
       };
@@ -463,33 +517,8 @@ export default requireLoggedIn({
     mergeStrategy(a, b) {
       if (!a) return b;
       if (!b) return a;
-      const merged = {
-        stakeRewarded: a.stakeRewarded + b.stakeRewarded,
-        eosAccounts: a.eosAccounts + b.eosAccounts,
-        posts: a.posts + b.posts,
-        threads: a.threads + b.threads,
-        time: Math.min(a.time, b.time),
-        trxs: {
-          count: {
-            trxs: a.trxs.count.trxs + b.trxs.count.trxs,
-            tlc: a.trxs.count.tlc + b.trxs.count.tlc,
-            tips: a.trxs.count.tips + b.trxs.count.tips,
-            swap: a.trxs.count.swap + b.trxs.count.swap,
-          },
-          tips: { ...a.trxs.tips },
-          tlc: { ...a.trxs.tlc },
-          swap: { ...a.trxs.swap },
-          swapPairs: { ...a.trxs.swapPairs },
-          volume: { ...a.trxs.volume },
-        },
-        content: {
-          ...a.content,
-        },
-      };
 
-      for (const tag in b.content) {
-        merged.content[tag] = (merged.content[tag] || 0) + b.content[tag];
-      }
+      let merged = undefined;
 
       function mergeTrx(name) {
         for (const symbol in b.trxs[name]) {
@@ -498,11 +527,55 @@ export default requireLoggedIn({
         }
       }
 
-      mergeTrx("tlc");
-      mergeTrx("tips");
-      mergeTrx("swap");
-      mergeTrx("swapPairs");
-      mergeTrx("volume");
+      if (a.type == "snapshot") {
+        merged = {
+          type: a.type,
+          communities: {
+            ...a.communities,
+          },
+          time: Math.min(a.time, b.time),
+        };
+
+        for (const tag in b.communities) {
+          merged.communities[tag] =
+            (merged.communities[tag] || 0) + b.communities[tag];
+        }
+      } else if (a.type == "analysis") {
+        merged = {
+          type: a.type,
+          stakeRewarded: a.stakeRewarded + b.stakeRewarded,
+          eosAccounts: a.eosAccounts + b.eosAccounts,
+          posts: a.posts + b.posts,
+          threads: a.threads + b.threads,
+          time: Math.min(a.time, b.time),
+          trxs: {
+            count: {
+              trxs: a.trxs.count.trxs + b.trxs.count.trxs,
+              tlc: a.trxs.count.tlc + b.trxs.count.tlc,
+              tips: a.trxs.count.tips + b.trxs.count.tips,
+              swap: a.trxs.count.swap + b.trxs.count.swap,
+            },
+            tips: { ...a.trxs.tips },
+            tlc: { ...a.trxs.tlc },
+            swap: { ...a.trxs.swap },
+            swapPairs: { ...a.trxs.swapPairs },
+            volume: { ...a.trxs.volume },
+          },
+          content: {
+            ...a.content,
+          },
+        };
+
+        for (const tag in b.content) {
+          merged.content[tag] = (merged.content[tag] || 0) + b.content[tag];
+        }
+
+        mergeTrx("tlc");
+        mergeTrx("tips");
+        mergeTrx("swap");
+        mergeTrx("swapPairs");
+        mergeTrx("volume");
+      }
 
       return merged;
     },

@@ -18,7 +18,7 @@ import {
   mergeThreadToTree,
   getThread,
   getSinglePost,
-  apiRequest,
+  addViewToPost,
 } from "@/novusphere-js/discussions/api";
 //import { waitFor } from "@/novusphere-js/utility";
 
@@ -114,9 +114,7 @@ export default {
       this.tree = tree;
 
       if (!this.viewed) {
-        apiRequest(`/v1/api/data/analytics/viewpost`, {
-          uuid: thread.opening.uuid,
-        });
+        addViewToPost(thread.opening.uuid);
         this.viewed = true;
       }
 

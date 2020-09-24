@@ -5,6 +5,7 @@ export default {
     "description": "An open forum for discussions built on blockchain. Supporting and nurturing token communities of all kind",
     "image": "/static/banner.png",
     "url": "https://discussions.app",
+    "domain": "discussions.app", // this is a context field for many of the database contexts
     "testerPublicKeys": [
         'EOS5FcwE6haZZNNTR6zA3QcyAwJwJhk53s7UjZDch1c7QgydBWFSe', // xia256
         'EOS66mZsNtdEVeFfxrxkZ9sZ5snwTPYmtRnEtHWhpyFovfnvDnCM5', // xia512

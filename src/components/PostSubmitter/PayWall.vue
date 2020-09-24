@@ -8,7 +8,6 @@
           <v-row>
             <v-col :cols="6">
               <v-text-field
-                prepend-icon="attach_money"
                 label="Quantity"
                 v-model="paywallAssetAmount"
               ></v-text-field>

@@ -41,7 +41,7 @@ export default @Controller('/data') class DataController {
     @Api()
     @Post("/analytics")
     async analytics(req, res) {
-        const { pub } = req.unpackAuthenticated();
+        const { pub, data: { type } } = req.unpackAuthenticated();
 
         if (!siteConfig.testerPublicKeys.some(pk => pub == pk)) {
             throw new Error(`Unauthorized tester public key`);
@@ -51,7 +51,7 @@ export default @Controller('/data') class DataController {
 
         const db = await getDatabase();
         const analytics = await db.collection(config.table.analytics)
-            .find({ time: { $gte: LAST_YEAR } })
+            .find({ type: type, time: { $gte: LAST_YEAR } })
             .toArray();
 
         return res.success(analytics);

@@ -1,7 +1,5 @@
 import { config, getDatabase } from "../mongo";
-import { getCommunities } from "@/novusphere-js/discussions/api";
 import { sleep } from "@/novusphere-js/utility";
-import { getTokensInfo, getAsset } from "@/novusphere-js/uid";
 import siteConfig from "../site";
 
 
@@ -132,15 +130,36 @@ class analytics {
     }
 
 
-    async getSnapshotStats() {
-        const communities = {};
-        for (const community of await getCommunities()) {
-            communities[community.tag] = community.members || 0;
-        }
+    async getSnapshotStats(snapshotTime, now) {
+        const pipeline = [
+            { $match: { domain: siteConfig.domain } },
+            { $unwind: "$subscribedTags" },
+            { $group: { _id: "$subscribedTags", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            {
+                $project:
+                {
+                    _id: false,
+                    tag: "$_id",
+                    count: "$count"
+                }
+            },
+        ];
+
+        const db = await getDatabase();
+        let members = (await db
+            .collection(config.table.accounts)
+            .aggregate(pipeline)
+            .toArray())
+            .reduce((obj, { tag, count }) => {
+                obj[tag] = count || 0;
+                return obj;
+            }, {});
 
         return {
             type: 'snapshot',
-            communities
+            communities: members,
+            time: now
         }
     }
 
@@ -218,10 +237,10 @@ class analytics {
                 state.dayTime += ONE_DAY;
             }
 
-            //if (now - state.snapshotTime > ONE_DAY) {
-            //    updates.push(this.makeUpdateObject(await this.getSnapshotStats(state.dayTime)));
-            //    state.snapshotTime += ONE_DAY;
-            //}
+            if (now - state.snapshotTime > ONE_DAY) {
+                updates.push(this.makeUpdateObject(await this.getSnapshotStats(state.snapshotTime, now)));
+                state.snapshotTime = now;
+            }
 
             if (updates.length > 0) {
 
@@ -235,11 +254,16 @@ class analytics {
                 this.updateState(state);
             }
 
-            await sleep(1000);
 
-            // rest 30 min
-            //for (let i = 0; i < 30; i++)
-            //    await sleep(60 * 1000);
+            // if we're not caught up, only sleep 1s, otherwise sleep 30min
+            if (now - state.dayTime > ONE_DAY) {
+                await sleep(1000);
+            }
+            else {
+                // rest 30 min
+                for (let i = 0; i < 30; i++)
+                    await sleep(60 * 1000);
+            }
         }
     }
 }

@@ -116,6 +116,7 @@ import {
   getUserDrafts,
   saveUserDrafts,
   getCommunities,
+  addViewToPost
 } from "@/novusphere-js/discussions/api";
 import {
   createAsset,
@@ -622,6 +623,11 @@ export default {
           post,
           transferActions
         );
+
+        if (trxid && post.uuid == post.threadUuid) {
+          addViewToPost(post.uuid); // don't need to await
+        }
+
       } catch (ex) {
         this.disablePost = false;
         this.submitError = ex.toString();
