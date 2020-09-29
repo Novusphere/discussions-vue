@@ -6,7 +6,7 @@
           <TagLink use-slot :tag="symbol">{{ symbol }}</TagLink>
         </v-list-item-title>
         <v-list-item-subtitle>{{ quantity }}</v-list-item-subtitle>
-        <v-list-item-subtitle v-if="price" style="font-size: 10px;">{{ price }}/{{ symbol }}</v-list-item-subtitle>
+        <v-list-item-subtitle v-if="price" style="font-size: 10px;">{{ price }} {{ symbol }}/USD</v-list-item-subtitle>
       </v-list-item-content>
       <div>
         <TokenIcon :size="80" :symbol="symbol" />
@@ -64,13 +64,10 @@ export default {
         if (!this.zero) {
           const mcaps = await getMarketCaps();
 
-          const eosCap = mcaps["EOS"];
           const thisCap = mcaps[this.symbol];
-          if (eosCap && thisCap) {
-            if (this.symbol != "EOS") {
-              this.price = `${(thisCap.price / eosCap.price).toFixed(6)} EOS`;
-              this.change24 = thisCap.percentChange24h;
-            }
+          if (thisCap) {
+            this.price = `${thisCap.price.toFixed(6)}`;
+            this.change24 = thisCap.percentChange24h;
           }
         }
 
