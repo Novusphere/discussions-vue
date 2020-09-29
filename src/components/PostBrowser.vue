@@ -101,11 +101,12 @@ export default {
       }
     },
     async infinite($state) {
-      console.proxyLog(`PostBrowser infinite scroller called`);
+      console.log(`PostBrowser infinite scroller called`);
 
       if (this.noCursor) {
         $state.loaded();
         $state.complete();
+        console.log(`Infinite Scroll no cursor`);
       }
 
       if (this.posts.length == 0) {
@@ -120,7 +121,7 @@ export default {
         posts = await this.cursor.next();
       } catch (ex) {
         // error stop loading...
-        console.proxyLog(ex);
+        console.log(ex);
         $state.complete();
         return;
       }
@@ -144,8 +145,10 @@ export default {
         );
 
         $state.loaded();
+        console.log(`Infinite Scroll loaded`);
 
         if (!this.cursor.hasMore()) {
+          console.log(`Infinite Scroll does not have any more content`);
           $state.complete();
         }
       } else {

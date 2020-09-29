@@ -130,10 +130,6 @@ export default {
       editor: new Editor({
         onUpdate: () => this.$emit("change"),
         extensions: [
-          new HashtagPaste(),
-          new MentionPaste({
-            onFilter: (_, query) => this.getMentionSuggestions(query),
-          }),
           new Hashtag({
             // is called when a suggestion starts
             onEnter: ({ query, range, command }) => {
@@ -268,6 +264,10 @@ export default {
           new Bold(),
           new Image(),
           new Link2(),
+          new HashtagPaste(),
+          new MentionPaste({
+            onFilter: (_, query) => this.getMentionSuggestions(query),
+          }),
           new Italic(),
           new History(),
         ],
@@ -445,7 +445,7 @@ export default {
     // renders a popup with suggestions
     renderPopup(node) {
       if (!node) return;
-      
+
       let rect = node.getBoundingClientRect();
       this.popoverX = rect.x + rect.width + 10;
       this.popoverY = rect.y;

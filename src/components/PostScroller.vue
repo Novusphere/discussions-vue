@@ -1,20 +1,16 @@
 <template>
   <div>
-    <v-row no-gutters>
-      <div v-if="pinned">
+    <v-row>
+      <template v-if="pinned">
         <v-col cols="12" v-for="(p, i) in pinned" :key="i">
           <PostScrollCard :show-reply="showReply" :display="display" :post="p" />
         </v-col>
-      </div>
-      <div>
-        <v-col cols="12" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
-          <PostScrollCard :show-reply="showReply" :display="display" :post="p" />
-        </v-col>
-      </div>
-    </v-row>
-    <v-row>
+      </template>
+      <v-col cols="12" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
+        <PostScrollCard :show-reply="showReply" :display="display" :post="p" />
+      </v-col>
       <v-col cols="12">
-        <infinite-loading ref="infiniteLoading" @infinite="infinite">
+        <infinite-loading :distance="300" ref="infiniteLoading" @infinite="infinite">
           <div slot="spinner">
             <v-progress-linear class="mt-4" indeterminate></v-progress-linear>
           </div>
@@ -34,6 +30,7 @@ export default {
   name: "PostScroller",
   components: {
     PostScrollCard,
+    //InfiniteLoading,
   },
   props: {
     pinned: Array,
@@ -55,8 +52,18 @@ export default {
   },
   data: () => ({
     //show: []
+    islInterval: null,
   }),
-  created() {},
+  created() {
+    // idk why but for some reason this isn't being triggered by their internal system, but by calling it ourselves the bug ius resolved...
+    this.islInterval = setInterval(() => {
+      if (!this.$refs.infiniteLoading) return;
+      this.$refs.infiniteLoading.attemptLoad(false);
+    }, 1000);
+  },
+  beforeDestroy() {
+    if (this.islInterval) clearInterval(this.islInterval);
+  },
   methods: {
     reset() {
       this.$refs.infiniteLoading.stateChanger.reset();

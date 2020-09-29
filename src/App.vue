@@ -3,7 +3,6 @@
     <AppBar />
     <v-main :style="{background: $vuetify.theme.themes[theme].background}">
       <AppAlertBar />
-
       <v-menu
         z-index="9999"
         v-if="popover.profile.open"
@@ -181,6 +180,9 @@ import CommunityCard from "@/components/CommunityCard";
 import FullScreenDialog from "@/components/FullScreenDialog";
 import ImageViewer from "@/components/ImageViewer";
 
+//import TrendingCard from "@/components/TrendingCard";
+//import AboutUsCard from "@/components/AboutUsCard";
+
 export default {
   name: "App",
   components: {
@@ -198,6 +200,9 @@ export default {
     CommunityCard,
     FullScreenDialog,
     ImageViewer,
+
+    //TrendingCard,
+    //AboutUsCard,
   },
   watch: {
     imgViewerSrcs() {
