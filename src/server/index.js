@@ -23,21 +23,7 @@ import ModerationController from "./controllers/ModerationController";
 import SearchController from "./controllers/SearchController";
 import UploadController from "./controllers/UploadController";
 
-
-(async function () {
-    setAPIHost(`http://localhost:${siteConfig.port}`);
-
-    if (!await connectDatabase()) return;
-
-    // update our config
-    if (argv.config) {
-        console.log(`Updating site settings from config: ${argv.config}`);
-        Object.assign(siteConfig, getConfig(argv.config));
-    }
-
-    const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
-    const BUILD_TIME = Date.now();
-
+function createApp() {
     const app = express();
 
     app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,6 +33,20 @@ import UploadController from "./controllers/UploadController";
         resave: false,
         saveUninitialized: true,
     }));
+
+    return app;
+}
+
+
+async function serverMode0() {
+    setAPIHost(`http://localhost:${siteConfig.port}`);
+
+    if (!await connectDatabase()) return;
+
+    const INDEX_FILE = fs.readFileSync(`./dist/index.html`, `utf8`);
+    const BUILD_TIME = Date.now();
+
+    const app = createApp();
 
     async function serve(req, res) {
         const botRegex = new RegExp(siteConfig.botUserAgents.join('|'), 'i');
@@ -77,7 +77,7 @@ import UploadController from "./controllers/UploadController";
                 serve(req, res, next);
             });
         }
-        
+
         if (route.children) {
             for (const child of route.children) {
                 let fullPath = path + route.path;
@@ -99,8 +99,7 @@ import UploadController from "./controllers/UploadController";
         BlockchainController,
         DataController,
         ModerationController,
-        SearchController,
-        UploadController]);
+        SearchController]);
 
     app.use('/v1/api', cors(), apiRouter);
 
@@ -114,4 +113,36 @@ import UploadController from "./controllers/UploadController";
     //app.listen(siteConfig.port, () => console.log(`Server is listening at port ${siteConfig.port}`));
     gateways.start(app, siteConfig.port, () => console.log(`Gateway is listening at port ${siteConfig.port}`));
     services.start();
+}
+
+async function serverMode1() {
+    const app = createApp();
+
+    const apiRouter = express.Router();
+    attachControllers(apiRouter, [
+        UploadController]);
+
+    app.use('/v1/api', cors(), apiRouter);
+    app.use(express.static(`./dist/`));
+
+    app.listen(siteConfig.port, () => console.log(`Server mode 1 is listening at port ${siteConfig.port}`));
+}
+
+(async function () {
+    // update our config
+    if (argv.config) {
+        console.log(`Updating site settings from config: ${argv.config}`);
+        Object.assign(siteConfig, getConfig(argv.config));
+    }
+
+    if (!siteConfig.mode) {
+        await serverMode0();
+    }
+    else if (siteConfig.mode == 1) {
+        await serverMode1();
+    }
+    else {
+        console.error(`Unknown server mode ${siteConfig.mode}`);
+    }
+
 })();

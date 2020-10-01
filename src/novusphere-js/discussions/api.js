@@ -146,11 +146,17 @@ async function oembed(url) {
 //
 async function uploadImage(file) {
 
+    //const HOST = `https://atmosdb.novusphere.io/discussions/upload`;
+    //const FILE = (name) => `https://atmosdb.novusphere.io/discussions/upload/image/${name}`;
+
+    const HOST = `http://localhost:8010/v1/api/upload`;
+    const FILE = (name) => `http://localhost:8010/v1/api/upload/file/${name}`;
+
     const formData = new FormData();
     formData.append("image", file);
 
     const { data } = await axios.post(
-        `https://atmosdb.novusphere.io/discussions/upload`,
+        HOST,
         formData,
         {
             headers: {
@@ -160,11 +166,10 @@ async function uploadImage(file) {
     );
 
     if (data.error) {
-        //.console.log(data.message);
         throw new Error(data.message);
     }
 
-    return `https://atmosdb.novusphere.io/discussions/upload/image/${data.filename}`;
+    return FILE(data.payload.filename);
 }
 
 //
