@@ -177,7 +177,15 @@ export class Post {
     }
 
     async getContentDocument() {
-        const md = this.content.replace(/[\ufffc-\uffff]/g, "");
+        let md = this.content;
+        md = md.replace(/[\ufffc-\uffff]/g, "");
+
+        // image server migration 10/3/2020
+        md = md.replace(/https:\/\/atmosdb.novusphere.io\/discussions\/upload\/image\/[a-z0-9]+.(jpeg|jpg|png|gif)/, function (ss) {
+            const parts = ss.split('/');
+            return `https://s2.discussions.app/v1/api/upload/file/${parts[parts.length - 1]}`;
+        });
+
         //console.log(md);
 
         const html = markdownToHTML(md);
@@ -277,7 +285,7 @@ export class Post {
 
             if (l2.lastIndexOf('/') != l2.length - 1)
                 l2 += '/';
-                
+
             return (l1 == l2);
         }
 

@@ -42,7 +42,8 @@ export default class DfuseWatcher {
 
                 this._client = createDfuseClient({
                     apiKey: this._apiKey,
-                    network: "mainnet.eos.dfuse.io",
+                    network: "eos.dfuse.eosnation.io",
+                    //network: "mainnet.eos.dfuse.io",
                 });
 
                 const stream = await this._client.graphql(operation, message => {

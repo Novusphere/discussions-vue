@@ -149,8 +149,8 @@ async function uploadImage(file) {
     //const HOST = `https://atmosdb.novusphere.io/discussions/upload`;
     //const FILE = (name) => `https://atmosdb.novusphere.io/discussions/upload/image/${name}`;
 
-    const HOST = `http://localhost:8010/v1/api/upload`;
-    const FILE = (name) => `http://localhost:8010/v1/api/upload/file/${name}`;
+    const HOST = `https://s2.discussions.app/v1/api/upload`;
+    const FILE = (name) => `https://s2.discussions.app/v1/api/upload/file/${name}`;
 
     const formData = new FormData();
     formData.append("image", file);
