@@ -1,5 +1,6 @@
 <template>
   <v-card-actions :class="{ 'text-small': $vuetify.breakpoint.mobile  }">
+
     <v-btn :color="(post.myVote > 0) ? 'success' : ''" small icon @click="vote(1)">
       <v-icon>thumb_up</v-icon>
     </v-btn>
@@ -9,19 +10,18 @@
     </v-btn>
 
     <v-btn v-if="!isLoggedIn || (myPublicKey != post.pub)" text @click="sendTip()">
-      <v-icon>attach_money</v-icon>Tip
+      <v-icon>attach_money</v-icon>
     </v-btn>
 
     <PostThreadLink btn :post="post" v-if="!isCommentDisplay">
       <span>
         <v-icon>comment</v-icon>
-        {{ post.totalReplies + ((!$vuetify.breakpoint.mobile) ? ' Comments' : '')}}
+        {{ post.totalReplies }}
       </span>
     </PostThreadLink>
 
     <v-btn text v-else @click="$emit('reply')">
       <v-icon>comment</v-icon>
-      <span>Reply</span>
     </v-btn>
 
     <v-btn text @click="mediaViewer()" v-show="false">

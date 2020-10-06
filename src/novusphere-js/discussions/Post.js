@@ -1,5 +1,5 @@
 import bigInt from 'big-integer';
-import { markdownToHTML, getOEmbedHtml, getOEmbedMeta, IMAGE_REGEX, LINK_REGEX, TIME_ENCODE_GENESIS } from "@/novusphere-js/utility";
+import { markdownToHTML, sanitize, getOEmbedHtml, getOEmbedMeta, IMAGE_REGEX, LINK_REGEX, TIME_ENCODE_GENESIS } from "@/novusphere-js/utility";
 import { oembed } from "@/novusphere-js/discussions/api";
 import { isValidAsset } from "@/novusphere-js/uid";
 import { createDOMParser } from "@/novusphere-js/utility";
@@ -181,14 +181,16 @@ export class Post {
         md = md.replace(/[\ufffc-\uffff]/g, "");
 
         // image server migration 10/3/2020
-        md = md.replace(/https:\/\/atmosdb.novusphere.io\/discussions\/upload\/image\/[a-z0-9]+.(jpeg|jpg|png|gif)/, function (ss) {
+        md = md.replace(/https:\/\/atmosdb.novusphere.io\/discussions\/upload\/image\/[a-z0-9]+.(jpeg|jpg|png|gif)/gi, function (ss) {
             const parts = ss.split('/');
             return `https://s2.discussions.app/v1/api/upload/file/${parts[parts.length - 1]}`;
         });
 
         //console.log(md);
 
-        const html = markdownToHTML(md);
+        let html = markdownToHTML(md);
+        html = sanitize(html);
+
         let domParser = createDOMParser();
         let doc = domParser.parseFromString(html, 'text/html');
         return doc;

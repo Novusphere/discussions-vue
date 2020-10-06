@@ -45,6 +45,7 @@ function sanitize(html) {
             "em",
             "strike",
             "code",
+            "center",
             // 'hr',
             "br",
             // 'div',
