@@ -20,7 +20,7 @@
     "@decorators/di": "^1.0.2",
     "@decorators/express": "^2.4.0",
     "@decorators/socket": "^3.2.0",
-    "@dfuse/client": "^0.3.14",
+    "@dfuse/client": "^0.3.15",
     "@hapi/joi": "^17.1.1",
     "aes-js": "^3.1.2",
     "axios": "^0.19.2",

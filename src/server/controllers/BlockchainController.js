@@ -44,8 +44,9 @@ export default @Controller('/blockchain') class BlockchainController {
             if (!dfuseClient) {
 
                 dfuseClient = createDfuseClient({
-                    apiKey: siteConfig.relay.dfuse,
-                    network: "mainnet.eos.dfuse.io",
+                    //apiKey: siteConfig.relay.dfuse,
+                    authentication: false,
+                    network: "eos.dfuse.eosnation.io",
                 });
             }
             api = await eos.getAPI(dfuseClient.endpoints.restUrl, [siteConfig.relay.key], { fetch: dfuseFetch });
@@ -448,7 +449,7 @@ export default @Controller('/blockchain') class BlockchainController {
 
         actions = this.addAuthorizationToActions(actions);
 
-        console.log(actions);
+        //console.log(actions);
 
         //const trx = { transaction_id: "5f2f829d6a35279ed7cf373f8ee3667bbc86cec39375a4b3b5cc86b1a9c233b7" }; 
         const trx = await this.transact(actions);

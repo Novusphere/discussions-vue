@@ -41,7 +41,8 @@ export default class DfuseWatcher {
                 }`;
 
                 this._client = createDfuseClient({
-                    apiKey: this._apiKey,
+                    //apiKey: this._apiKey,
+                    authentication: false,
                     network: "eos.dfuse.eosnation.io",
                     //network: "mainnet.eos.dfuse.io",
                 });
