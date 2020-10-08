@@ -6,7 +6,17 @@ global.WebSocket = require('ws');
 
 export default class DfuseWatcher {
     constructor(apiKey) {
+        this.name = 'dfuse';
         this._apiKey = apiKey;
+    }
+
+    async getPreviousAction(collection) {
+        return await collection
+            .find()
+            .sort({ block: -1 })
+            .limit(1)
+            .next()
+            || { block: 0 };
     }
 
     async startWatch(account, previousAction, onAction) {
