@@ -44,7 +44,7 @@ async function startActionWriter(contract, table, watcher) {
                 console.log(`Consumed ${consumedActions.length} actions for ${contract}@${watcher.name} at ${new Date(previousAction.time).toLocaleString()}`);
             }
             else {
-                console.log(`Idle for ${contract}@${watcher.name} at ${new Date(previousAction.time).toLocaleString()}, now ${new Date().toLocaleString()}`);
+                console.log(`Idle for ${contract}@${watcher.name} at ${new Date(previousAction.time).toLocaleString()}, p=${previousAction.position}, id=${previousAction.transaction}`);
             }
 
             await sleep(1000);
