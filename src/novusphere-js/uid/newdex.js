@@ -10,8 +10,8 @@ class NewDexAPI {
     async request(endpoint, params = {}) {
         const url = `https://api.newdex.io${endpoint}`;
 
-        params[`api_key`] = this.key;
-        params[`timestamp`] = Math.floor(Date.now() / 1000);
+        //params[`api_key`] = this.key;
+        //params[`timestamp`] = Math.floor(Date.now() / 1000);
 
         let queryString = Object
             .keys(params)
