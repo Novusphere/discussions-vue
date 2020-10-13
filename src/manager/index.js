@@ -18,17 +18,28 @@ import { sleep } from "@/novusphere-js/utility";
         }
 
         const { name, cmd } = queue.pop();
-        const p = spawn(cmd, { shell: true });
+        const p = spawn(cmd, { shell: true, detached: true });
+        
         p.on('exit', function (code, signal) {
             console.log(`[${name}] process exited with code ${code} and signal ${signal}`);
             queue.push({ name, cmd });
         });
+
         p.stdout.on('data', (data) => {
+
+            if (data.indexOf('Terminate batch job') > -1) {
+                console.log(new Date());
+                p.kill();
+            }
+
             console.log(`[${name}] ${data}`);
         });
+
         p.stderr.on('data', (data) => {
             console.error(`[${name}] ${data}`);
         });
+
+        await sleep(1000);
     }
 
 
