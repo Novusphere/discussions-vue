@@ -23,10 +23,10 @@ async function dfuseFetch(input, init) {
     }
 
     // This is highly optimized and cached, so while the token is fresh, this is very fast
-    const apiTokenInfo = await dfuseClient.getTokenInfo()
+    //const apiTokenInfo = await dfuseClient.getTokenInfo()
 
     const headers = init.headers;
-    headers["Authorization"] = `Bearer ${apiTokenInfo.token}`;
+    //headers["Authorization"] = `Bearer ${apiTokenInfo.token}`;
     headers["X-Eos-Push-Guarantee"] = 'in-block';
 
     return global.fetch(input, init);

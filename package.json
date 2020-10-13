@@ -6,6 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "manager-alpha": "babel-node --max-old-space-size=4096 --config-file ./src/server/babel.config.json ./src/manager/ --server=server-alpha",
+    "manager-beta": "babel-node --max-old-space-size=4096 --config-file ./src/server/babel.config.json ./src/manager/ --server=server-beta",
     "server-beta": "babel-node --max-old-space-size=4096 --config-file ./src/server/babel.config.json ./src/server/ --config=server-beta",
     "server-alpha": "babel-node --max-old-space-size=4096 --config-file ./src/server/babel.config.json ./src/server/ --config=server-alpha",
     "server-mode1": "babel-node --max-old-space-size=4096 --config-file ./src/server/babel.config.json ./src/server/ --config=server-mode1",

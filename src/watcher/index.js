@@ -57,7 +57,7 @@ async function startActionWriter(contract, table, watcher) {
 
 (async function () {
     if (!await connectDatabase()) return;
-
+    
     Object.assign(siteConfig, getConfig(`watcher`));
 
     const dfuse = new DfuseWatcher(siteConfig.dfuse);
