@@ -3,7 +3,7 @@
     <v-card-text>
       <v-form ref="form" v-model="valid" @submit.prevent>
         <UserAssetSelect
-          :exclude="['EOSDT', 'PUML']"
+          :exclude="['EOSDT']"
           :label="'Pay with Asset'"
           :item-text="`symbol`"
           v-model="symbol"

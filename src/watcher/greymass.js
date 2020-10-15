@@ -2,8 +2,8 @@ import { sleep } from "@/novusphere-js/utility";
 import axios from 'axios';
 
 export default class GreymassWatcher {
-    constructor(endpoint) {
-        this.name = 'greymass';
+    constructor(endpoint, name) {
+        this.name = name || 'greymass';
         this._endpoint = endpoint || `https://eos.greymass.com`;
     }
 

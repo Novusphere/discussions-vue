@@ -94,7 +94,7 @@ import {
 } from "tiptap-extensions";
 
 import Link2 from "./nodes/Link2";
-import { Mention, MentionPaste } from "./nodes/Mention";
+import { Mention/*, MentionPaste*/ } from "./nodes/Mention";
 import { Hashtag, HashtagPaste } from "./nodes/Hashtag";
 
 import { htmlToMarkdown, markdownToHTML } from "@/novusphere-js/utility";
@@ -265,9 +265,9 @@ export default {
           new Image(),
           new Link2(),
           new HashtagPaste(),
-          new MentionPaste({
-            onFilter: (_, query) => this.getMentionSuggestions(query),
-          }),
+          //new MentionPaste({
+          //  onFilter: (_, query) => this.getMentionSuggestions(query),
+          //}),
           new Italic(),
           new History(),
         ],
