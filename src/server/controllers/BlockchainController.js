@@ -118,7 +118,8 @@ export default @Controller('/blockchain') class BlockchainController {
                     fee: data.fee, // asset fee
                     nonce: data.nonce, // uint64_t nonce
                     memo: data.memo, // string memo
-                    sig: data.sig // signature sig
+                    sig: data.sig, // signature sig
+                    metadata: data.metadata || "" // string metadata
                 }
             });
         }
@@ -417,7 +418,7 @@ export default @Controller('/blockchain') class BlockchainController {
 
         if (forward && transfers.length == 1 && transfers[0].to == 'EOS1111111111111111111111111111111114T1Anm') {
 
-            let memo = transfers[0].memo;            
+            let memo = transfers[0].memo;
             let colon = memo.indexOf(':');
 
             if (!memo.startsWith(siteConfig.relay.account)) throw new Error(`Forward action expects withdrawal to relayer account`);
