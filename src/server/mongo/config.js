@@ -14,7 +14,7 @@ let config = {
     },
     "table": {
         "discussions": "discussionsx",
-        "uid": "nsuidcntract",
+        "uid": "discussionsx", // -- make the same table as discussions contract 10/21/2020
         "analytics": "analytics",
         "state": "state",
         "posts": "posts",
@@ -28,10 +28,6 @@ let config = {
             "time": 1
         },
         "discussionsx": {
-            "transaction": 1,
-            "name": 1,
-        },
-        "nsuidcntract": {
             "transaction": 1,
             "name": 1,
             "time": 1,

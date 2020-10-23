@@ -218,14 +218,16 @@ async function getTokensInfo() {
         return apiRequest(`/v1/api/blockchain/p2k`);
     });
 
-    return eosTokensInfo;
+    //console.log(eosTokensInfo);
+
+    return [...eosTokensInfo];
 }
 //
 // Get all symbols supported by Unified ID
 //
 async function getSymbols() {
     const eosTokensInfo = await getTokensInfo();
-    return eosTokensInfo.map(t => t.symbol);
+    return [...eosTokensInfo.map(t => t.symbol)];
 }
 
 function isValidAsset(asset) {
@@ -243,41 +245,12 @@ function isValidAsset(asset) {
 // Returns a string with the balance followed by the symbol
 //
 async function getAsset(symbol, address) {
-
     // 9/5/2020 -- use server side endpoint since BP endpoint is unreliable
-
     return await apiRequest('/v1/api/blockchain/getasset', {
         symbol,
         address,
         zero: await createAsset(0, symbol)
     });
-
-    /*let balance = await createAsset(0, symbol);
-    const eosTokensInfo = await getTokensInfo();
-
-    const eosToken = eosTokensInfo.find(t => t.symbol == symbol);
-    if (eosToken) {
-
-        const api = await eos.getAPI(rpc);
-        const bound = `0x${ecc.sha256(ecc.PublicKey.fromString(address).toBuffer(), 'hex')}`;
-        const balances = await api.rpc.get_table_rows({
-            json: true,
-            code: eosToken.p2k.contract,
-            scope: eosToken.p2k.chain,
-            table: 'accounts',
-            limit: 100,
-            key_type: 'i256',
-            lower_bound: bound,
-            upper_bound: bound,
-            index_position: 2,
-        });
-
-        if (balances.rows && balances.rows.length > 0) {
-            balance = balances.rows[0].balance;
-        }
-    }
-
-    return balance;*/
 }
 
 //
@@ -331,7 +304,8 @@ async function createTransferActions(actions, progressCallback) {
                 amount: Joi.string().required(),
                 fee: Joi.string().required(),
                 nonce: Joi.number().required(),
-                memo: Joi.string()
+                memo: Joi.string(),
+                metadata: Joi.string()
             }))
         });
 
@@ -349,7 +323,8 @@ async function createTransferActions(actions, progressCallback) {
         amount,
         fee,
         //nonce,
-        memo
+        memo,
+        metadata
     } of actions) {
 
         const senderPublicKey = ecc.privateToPublic(senderPrivateKey);
@@ -386,7 +361,8 @@ async function createTransferActions(actions, progressCallback) {
             to: recipientPublicKey,
             nonce: nonce + nTx,
             memo: memo,
-            sig: signature
+            sig: signature,
+            metadata: metadata
         };
 
         transfers.push(transfer);
@@ -423,13 +399,13 @@ async function newdexSwap(withdrawAction, expect, createAccount) {
 //
 //  Transfers a Unified ID asset
 //
-async function transfer(actions, notify, progressCallback, forward) {
+async function transfer(actions, progressCallback, forward, chain) {
 
     const transfers = await createTransferActions(actions, progressCallback);
     const trx = await apiRequest(`/v1/api/blockchain/transfer`, {
         transfers,
-        notify,
-        forward
+        forward,
+        chain
     });
 
     return trx;
@@ -440,7 +416,8 @@ async function transfer(actions, notify, progressCallback, forward) {
 // Gets a block explorer transaction link for a given symbol and a transaction id
 //
 async function getTransactionLink(symbol, trxid) {
-    return `https://bloks.io/transaction/${trxid}`;
+    if (symbol == 'TLOS') return `https://telos.bloks.io/transaction/${trxid}`;
+    else return `https://bloks.io/transaction/${trxid}`;
 }
 
 //
@@ -515,7 +492,7 @@ async function getMarketCaps() {
     return getFromCache(cache, 'getMarketCaps', async () => {
         return await apiRequest(`/v1/api/data/marketcaps`);
     },
-    FIVE_MINUTES);
+        FIVE_MINUTES);
 }
 
 export {

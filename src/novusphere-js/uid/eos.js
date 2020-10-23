@@ -8,6 +8,8 @@ const GREYMASS_EOS_RPC = 'https://eos.greymass.com';
 const EOSCAFE_EOS_RPC = 'https://eos.eoscafeblock.com';
 const EOSNATION_EOS_RPC = 'https://api.eosn.io';
 const DEFAULT_EOS_RPC = GREYMASS_EOS_RPC;
+const DEFAULT_TELOS_RPC = 'https://telos.greymass.com';
+
 const ACCESS_CONTEXT_OPTIONS = {
     appName: 'Discussions',
     network: {
@@ -18,23 +20,39 @@ const ACCESS_CONTEXT_OPTIONS = {
     },
     walletProviders: [
         anchor(`discussions`),
+        scatter(),
         scatter()
     ]
 }
 
 function getWalletNames() {
     // NOTE: this should match [ACCESS_CONTEXT_OPTIONS.walletProviders] indexes
-    return [`anchor`, `scatter`]
+    return [`anchor`, `scatter`, `telos`];
+}
+
+function makeNetwork(rpc) {
+    const network = {
+        ...ACCESS_CONTEXT_OPTIONS.network,
+        protocol: rpc.substring(0, rpc.indexOf(':')),
+        host: rpc.substring(rpc.indexOf(':') + 3)
+    };
+    return network;
 }
 
 async function connectWallet(name) {
+    //console.log(name);
+
+    let network = makeNetwork(DEFAULT_EOS_RPC);
+
+    if (name == 'telos') {
+        network = makeNetwork(DEFAULT_TELOS_RPC);
+        network.chainId = '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11';
+    }
+
+
     const accessContextOptions = {
         ...ACCESS_CONTEXT_OPTIONS,
-        network: {
-            ...ACCESS_CONTEXT_OPTIONS.network,
-            protocol: DEFAULT_EOS_RPC.substring(0, DEFAULT_EOS_RPC.indexOf(':')),
-            host: DEFAULT_EOS_RPC.substring(DEFAULT_EOS_RPC.indexOf(':') + 3)
-        }
+        network
     }
 
     const accessContext = initAccessContext(accessContextOptions);
@@ -57,7 +75,7 @@ async function connectWallet(name) {
 
 async function getAPI(rpcEndpoint, keys = [], rpcConfig = {}) {
     rpcEndpoint = rpcEndpoint || DEFAULT_EOS_RPC;
-    const signatureProvider = new JsSignatureProvider(keys);    
+    const signatureProvider = new JsSignatureProvider(keys);
     const jsonRpc = new JsonRpc(rpcEndpoint, rpcConfig);
     const api = new Api({
         rpc: jsonRpc,
@@ -70,7 +88,7 @@ async function getAPI(rpcEndpoint, keys = [], rpcConfig = {}) {
 
 async function getAccount(name, { rpcEndpoint, rpcConfig } = {}) {
     const api = await getAPI(rpcEndpoint, undefined, rpcConfig);
-    try { 
+    try {
         const account = await api.rpc.get_account(name);
         return account;
     }
@@ -81,6 +99,7 @@ async function getAccount(name, { rpcEndpoint, rpcConfig } = {}) {
 
 export default {
     DEFAULT_EOS_RPC,
+    DEFAULT_TELOS_RPC,
     GREYMASS_EOS_RPC,
     EOSNATION_EOS_RPC,
     EOSCAFE_EOS_RPC,

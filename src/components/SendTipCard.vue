@@ -6,20 +6,33 @@
       </v-card-title>
       <v-card-text>
         <v-form ref="form" v-model="valid" @submit.prevent>
-          <UserAssetSelect ref="assets" v-model="symbol" required></UserAssetSelect>
+          <UserAssetSelect
+            ref="assets"
+            v-model="symbol"
+            required
+          ></UserAssetSelect>
 
           <v-text-field v-model="amount" label="Amount" required></v-text-field>
         </v-form>
-        <TransactionSubmitText
-          :link="transactionLink"
-        >Your tip has been successfully submitted to the network.</TransactionSubmitText>
+        <TransactionSubmitText :link="transactionLink"
+          >Your tip has been successfully submitted to the
+          network.</TransactionSubmitText
+        >
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
 
         <v-btn color="primary" @click="close()" v-show="closable">Close</v-btn>
-        <v-btn color="primary" @click="showSummary()" :disabled="!valid || disableSubmit">
-          <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
+        <v-btn
+          color="primary"
+          @click="showSummary()"
+          :disabled="!valid || disableSubmit"
+        >
+          <v-progress-circular
+            class="mr-2"
+            indeterminate
+            v-show="disableSubmit"
+          ></v-progress-circular>
           <span>Next</span>
         </v-btn>
       </v-card-actions>
@@ -47,7 +60,7 @@
 <script>
 import { mapState } from "vuex";
 import {
-  getChainForSymbol,
+  getToken,
   createAsset,
   getAmountFeeAssetsForTotal,
   sumAsset,
@@ -94,7 +107,7 @@ export default {
     async recipient() {
       if (!this.recipient) return;
       if (this.recipient.length == 0) return;
-      
+
       const $asset = this.recipient[0].$asset;
 
       if (!$asset) return;
@@ -128,9 +141,11 @@ export default {
 
       let transferActions = [];
 
+      const symbolToken = await getToken(this.symbol);
+
       for (const recipient of this.recipient) {
         transferActions.push({
-          chain: await getChainForSymbol(this.symbol),
+          chain: symbolToken.p2k.chain,
           senderPrivateKey: "",
           recipientPublicKey: recipient.uidw,
           amount: amountAsset,
@@ -165,6 +180,7 @@ export default {
       transferActions = transferActions.map((ta) => ({
         ...ta,
         senderPrivateKey: keys.wallet.key,
+        metadata: undefined,
       }));
 
       let notify = this.recipient.map((r) => ({
@@ -172,16 +188,23 @@ export default {
         data: { parentUuid: r.uuid },
       }));
 
+      for (let i = 0; i < notify.length; i++) {
+        transferActions[i].metadata = JSON.stringify(notify[i]);
+      }
+
       try {
         this.disableSubmit = true;
         this.progress = 0;
 
+        const symbolToken = await getToken(this.symbol);
+
         const receipt = await transfer(
           transferActions,
-          notify,
           async (current, max) => {
             this.progress = (max > 0 ? current / max : 1) * 100;
-          }
+          },
+          undefined,
+          symbolToken.chain
         );
 
         this.disableSubmit = false;

@@ -4,11 +4,11 @@ import GreymassWatcher from "./greymass";
 import siteConfig from "../server/site";
 import { connectDatabase, getCollection, config } from "../server/mongo";
 
-async function startActionWriter(contract, table, watcher) {
+async function startActionWriter(chain, contract, table, watcher) {
     try {
         const collection = await getCollection(table);
 
-        let previousAction = await watcher.getPreviousAction(collection);
+        let previousAction = await watcher.getPreviousAction(chain, contract, collection);
 
         let actions = [];
         watcher.startWatch(contract, previousAction, (action) => {
@@ -33,7 +33,7 @@ async function startActionWriter(contract, table, watcher) {
                 const write = consumedActions.map(action => ({
                     updateOne: {
                         filter: { transaction: action.transaction, name: action.name, hexData: action.hexData },
-                        update: { $set: action },
+                        update: { $set: { ...action, chain } },
                         upsert: true
                     }
                 }));
@@ -60,13 +60,18 @@ async function startActionWriter(contract, table, watcher) {
 
     Object.assign(siteConfig, getConfig(`watcher`));
 
-    const dfuse = new DfuseWatcher(siteConfig.dfuse);
-    const greymass = new GreymassWatcher();
+    const eosDfuse = new DfuseWatcher(siteConfig.dfuse);
+    const eosGreymass = new GreymassWatcher();
+    const telosGreymass = new GreymassWatcher('https://telos.greymass.com', 'telos');
 
-    const watchers = [dfuse, greymass];
+    // dfuse
+    startActionWriter('eos', config.contract.discussions, config.table.discussions, eosDfuse);
+    startActionWriter('eos', config.contract.uid, config.table.uid, eosDfuse);
 
-    for (const watcher of watchers.filter(w => w)) {
-        startActionWriter(config.contract.discussions, config.table.discussions, watcher);
-        startActionWriter(config.contract.uid, config.table.uid, watcher);
-    }
+    // gm
+    startActionWriter('eos', config.contract.discussions, config.table.discussions, eosGreymass);
+    startActionWriter('eos', config.contract.uid, config.table.uid, eosGreymass);
+
+    // gm - telos
+    startActionWriter('telos', config.contract.uid, config.table.uid, telosGreymass);
 })();

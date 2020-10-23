@@ -10,6 +10,8 @@ import { sleep } from "@/novusphere-js/utility";
         { name: `s`, cmd: `npm run ${argv.server}` }
     ];
 
+    // TO-DO: automatically restart watcher every 1h and server every 24h
+
     for (; ;) {
 
         if (queue.length == 0) {

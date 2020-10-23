@@ -8,16 +8,16 @@
         <v-col :cols="2">
           <span class="d-block">{{ time.toLocaleDateString() }}</span>
           <span class="d-block">{{ time.toLocaleTimeString() }}</span>
-          <span class="d-block">{{ isReceived ? 'Receive' : 'Sent' }}</span>
+          <span class="d-block">{{ isReceived ? "Receive" : "Sent" }}</span>
         </v-col>
         <v-col :cols="7">
           <strong class="d-block">Memo</strong>
           <span class="d-block" v-html="memoHtml"></span>
         </v-col>
         <v-col>
-          <span class="d-block">{{ isReceived ? '+' : '-' }} {{ total }}</span>
+          <span class="d-block">{{ isReceived ? "+" : "-" }} {{ total }}</span>
           <div class="d-block">
-            <TransactionLink chain="eos" :transaction="trx.transaction">
+            <TransactionLink :chain="symbol" :transaction="trx.transaction">
               <v-icon>zoom_in</v-icon>On Chain
             </TransactionLink>
           </div>
@@ -28,16 +28,16 @@
           <TokenIcon v-if="token" :size="64" :symbol="token.symbol" />
           <p class="text-center">
             <span class="d-block">{{ shortTime(time) }}</span>
-            <span class="d-block">{{ isReceived ? 'Recevie' : 'Sent' }}</span>
+            <span class="d-block">{{ isReceived ? "Recevie" : "Sent" }}</span>
           </p>
         </v-col>
         <v-col :cols="4">
           <span class="d-block" v-html="memoHtml"></span>
         </v-col>
         <v-col>
-          <span class="d-block">{{ isReceived ? '+' : '-' }} {{ total }}</span>
+          <span class="d-block">{{ isReceived ? "+" : "-" }} {{ total }}</span>
           <div class="d-block">
-            <TransactionLink chain="eos" :transaction="trx.transaction">
+            <TransactionLink :chain="symbol" :transaction="trx.transaction">
               <v-icon>zoom_in</v-icon>On Chain
             </TransactionLink>
           </div>
@@ -50,7 +50,7 @@
 <script>
 import { mapState } from "vuex";
 import { sanitize } from "@/novusphere-js/utility";
-import { getToken, getTokenForChain, sumAsset } from "@/novusphere-js/uid";
+import { getToken, sumAsset } from "@/novusphere-js/uid";
 
 import { shortTimeMixin } from "@/mixins/shortTime";
 
@@ -83,6 +83,7 @@ export default {
   data: () => ({
     token: null,
     total: "",
+    symbol: "",
     memoHtml: "",
     time: new Date(0),
   }),
@@ -90,8 +91,6 @@ export default {
     this.time = new Date(this.trx.time);
 
     if (this.trx.data.quantity) {
-      const [, symbol] = this.trx.data.quantity.split(" ");
-      this.token = await getToken(symbol);
       this.total = this.trx.data.quantity;
 
       if (this.trx.data.from == "atmosstakerw") {
@@ -100,8 +99,6 @@ export default {
         this.memoHtml = `Deposit from ${this.trx.data.from}`;
       }
     } else {
-      this.token = await getTokenForChain(this.trx.data.chain_id);
-
       if (this.isReceived) this.total = this.trx.data.amount;
       else this.total = await sumAsset(this.trx.data.amount, this.trx.data.fee);
 
@@ -110,7 +107,9 @@ export default {
         let colon = to.indexOf(":");
         if (colon > -1) {
           const message = to.substring(colon + 1);
-          this.memoHtml = `Withdraw to ${to.substring(0, colon)}` + (message ? ` - ${message}` : ``);      
+          this.memoHtml =
+            `Withdraw to ${to.substring(0, colon)}` +
+            (message ? ` - ${message}` : ``);
         } else {
           this.memoHtml = `Withdraw to ${to}`;
         }
@@ -131,6 +130,12 @@ export default {
 
         this.memoHtml = memoHtml;
       }
+    }
+
+    if (this.total) {
+      const [, symbol] = this.total.split(" ");
+      this.symbol = symbol;
+      this.token = await getToken(this.symbol);
     }
   },
   methods: {},

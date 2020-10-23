@@ -4,13 +4,32 @@
       <v-form ref="form" v-model="valid" @submit.prevent>
         <UserAssetSelect v-model="symbol" required></UserAssetSelect>
 
-        <v-text-field v-model="amount" label="Amount" required @change="amountChange()"></v-text-field>
+        <v-text-field
+          v-model="amount"
+          label="Amount"
+          required
+          @change="amountChange()"
+        ></v-text-field>
 
-        <v-text-field readonly v-model="fee" label="Fee" required></v-text-field>
+        <v-text-field
+          readonly
+          v-model="fee"
+          label="Fee"
+          required
+        ></v-text-field>
 
-        <v-text-field v-model="total" label="Total" required @change="totalChange()"></v-text-field>
+        <v-text-field
+          v-model="total"
+          label="Total"
+          required
+          @change="totalChange()"
+        ></v-text-field>
 
-        <v-text-field v-model="account" label="EOS Account" required></v-text-field>
+        <v-text-field
+          v-model="account"
+          label="Account / Address"
+          required
+        ></v-text-field>
 
         <v-text-field v-model="memo" label="Memo"></v-text-field>
 
@@ -22,10 +41,10 @@
           @keydown.enter="submitWithdraw()"
         ></v-text-field>
 
-        <TransactionSubmitText
-          :link="transactionLink"
-          :error="transactionError"
-        >Your withdrawal has been successfully submitted to the network.</TransactionSubmitText>
+        <TransactionSubmitText :link="transactionLink" :error="transactionError"
+          >Your withdrawal has been successfully submitted to the
+          network.</TransactionSubmitText
+        >
 
         <v-btn
           :block="$vuetify.breakpoint.mobile"
@@ -33,7 +52,11 @@
           @click="submitWithdraw()"
           :disabled="!valid || disableSubmit"
         >
-          <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
+          <v-progress-circular
+            class="mr-2"
+            indeterminate
+            v-show="disableSubmit"
+          ></v-progress-circular>
           <span>Withdraw</span>
         </v-btn>
       </v-form>
@@ -146,6 +169,8 @@ export default {
         }
 
         const token = await getToken(this.symbol);
+        console.log(token);
+
         const request = withdrawAction({
           chain: token.p2k.chain,
           senderPrivateKey: walletPrivateKey,
@@ -159,8 +184,8 @@ export default {
         const receipt = await transfer(
           [request],
           undefined,
-          undefined,
-          forward
+          forward,
+          token.chain
         );
 
         if (receipt.transaction_id) {

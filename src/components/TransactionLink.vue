@@ -18,15 +18,24 @@ export default {
   props: {
     btn: Boolean,
     chain: String,
-    transaction: String
+    transaction: String,
   },
   computed: {},
   data: () => ({
-    link: ""
+    link: "",
   }),
-  methods: {},
+  methods: {
+    async setLink() {
+      this.link = await getTransactionLink(this.chain, this.transaction);
+    },
+  },
+  watch: {
+    async chain() {
+      this.setLink();
+    },
+  },
   async created() {
-    this.link = await getTransactionLink(this.chain, this.transaction);
-  }
+    await this.setLink();
+  },
 };
 </script>

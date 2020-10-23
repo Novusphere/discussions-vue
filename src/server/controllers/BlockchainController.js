@@ -7,7 +7,7 @@ import eos from "@/novusphere-js/uid/eos";
 import { getXNationQuote } from "@/novusphere-js/uid/xnation";
 import { NewDexAPI } from "@/novusphere-js/uid/newdex";
 import axios from 'axios';
-import discussionsx from "../services/discussionsx";
+import discussionsx from "../services/discussions";
 import { getFromCache } from '@/novusphere-js/utility';
 
 const cache = {};
@@ -36,35 +36,52 @@ export default @Controller('/blockchain') class BlockchainController {
     constructor() {
     }
 
-    async getEosAPI() {
+    async getEosAPI(chain) {
         if (!siteConfig.relay.key) throw new Error(`Relay key has not been configured`);
 
         let api = undefined;
-        if (siteConfig.relay.dfuse) {
-            if (!dfuseClient) {
+        if (!chain || chain == 'eos') {
 
-                dfuseClient = createDfuseClient({
-                    //apiKey: siteConfig.relay.dfuse,
-                    authentication: false,
-                    network: "eos.dfuse.eosnation.io",
-                });
+            if (siteConfig.relay.dfuse) {
+                if (!dfuseClient) {
+
+                    dfuseClient = createDfuseClient({
+                        //apiKey: siteConfig.relay.dfuse,
+                        authentication: false,
+                        network: "eos.dfuse.eosnation.io",
+                    });
+                }
+                api = await eos.getAPI(dfuseClient.endpoints.restUrl, [siteConfig.relay.key], { fetch: dfuseFetch });
             }
-            api = await eos.getAPI(dfuseClient.endpoints.restUrl, [siteConfig.relay.key], { fetch: dfuseFetch });
+            else {
+                api = await eos.getAPI(eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch });
+            }
         }
         else {
-            api = await eos.getAPI(eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch });
+            if (chain == 'telos') {
+                api = await eos.getAPI(eos.DEFAULT_TELOS_RPC, [siteConfig.relay.key], { fetch });
+            }
+            else {
+                throw new Error(`Unknown chain ${chain}`);
+            }
         }
+
+
         return api;
     }
 
-    async transact(actions) {
+    async transact(actions, chain) {
 
-        let api = await this.getEosAPI();
+        let api = await this.getEosAPI(chain);
+
+        if (chain == 'telos') {
+            console.log(actions);
+        }
 
         const trx = await api.transact({ actions: actions },
             {
                 blocksBehind: 3,
-                expireSeconds: 30,
+                expireSeconds: 60,
             });
 
         return trx;
@@ -89,12 +106,14 @@ export default @Controller('/blockchain') class BlockchainController {
         });
     }
 
-    async makeTransferActions(transferActions) {
+    async makeTransferActions(transferActions, chain) {
         const p2k = await this.getP2K();
         const actions = [];
         for (const data of transferActions) {
 
-            const p2kInfo = p2k.find(t => t.p2k.chain == data.chain);
+            const p2kInfo = p2k.find(t => t.p2k.chain == data.chain && t.chain == chain);
+            if (!p2kInfo) continue;
+
             const amount = parseFloat(data.amount);
             const fee = parseFloat(data.fee);
 
@@ -199,10 +218,12 @@ export default @Controller('/blockchain') class BlockchainController {
     async post(req, res) {
         let { transfers, post, vote, notify } = req.unpack();
 
-        let actions = transfers ? (await this.makeTransferActions(transfers)) : [];
+        let actions = transfers ? (await this.makeTransferActions(transfers, 'eos')) : [];
         actions.push(this.makePostAction(post));
         if (vote) actions.push(this.makeVoteAction(vote));
-        if (notify) actions.push(this.makeNotifiyAction(notify));
+
+        // --- deprecated 10/21/2020 ---
+        //if (notify) actions.push(this.makeNotifiyAction(notify));
 
         actions = this.addAuthorizationToActions(actions);
 
@@ -233,9 +254,18 @@ export default @Controller('/blockchain') class BlockchainController {
         try {
 
             const p2k = await this.getP2K();
-            const token = p2k.find(t => t.symbol == symbol);
+            let token = p2k.find(t => t.symbol == symbol);
+
+            // TEMP: 10/20/2020
+            if (symbol == 'TLOS') {
+                token = {
+                    chain: 'telos',
+                    p2k: { contract: 'nsuidcntract', chain: 0 },
+                }
+            }
+
             if (token) {
-                const api = await this.getEosAPI();
+                const api = await this.getEosAPI(token.chain);
                 const bound = `0x${ecc.sha256(ecc.PublicKey.fromString(address).toBuffer(), 'hex')}`;
                 const balances = await api.rpc.get_table_rows({
                     json: true,
@@ -321,7 +351,7 @@ export default @Controller('/blockchain') class BlockchainController {
             throw new Error(`Last hop expect was ${lastHop.expect} under the quote ${expect}, try refreshing your quote and try again`);
         }
 
-        let actions = await this.makeTransferActions(transfers);
+        let actions = await this.makeTransferActions(transfers, 'eos');
         let tokens = [{ contract: 'eosio.token', symbol: 'EOS' }];
 
         // send the hops to newdex, these are effectively FILL-OR-KILL orders
@@ -411,10 +441,13 @@ export default @Controller('/blockchain') class BlockchainController {
     @Post('/transfer')
     async transfer(req, res) {
 
-        let { transfers, notify, forward } = req.unpack();
+        let { transfers, notify, forward, chain } = req.unpack();
         if (!transfers || !Array.isArray(transfers)) throw new Error(`Expected actions to be of type Array`);
 
-        let actions = await this.makeTransferActions(transfers);
+        //console.log(chain);
+        //console.log(transfers);
+
+        let actions = await this.makeTransferActions(transfers, chain || 'eos');
 
         if (forward && transfers.length == 1 && transfers[0].to == 'EOS1111111111111111111111111111111114T1Anm') {
 
@@ -441,19 +474,18 @@ export default @Controller('/blockchain') class BlockchainController {
             });
         }
 
-        if (notify) {
-            if (Array.isArray(notify))
-                actions.push(...notify.map(n => this.makeNotifiyAction(n)));
-            else
-                actions.push(this.makeNotifiyAction(notify));
-        }
+        // --- deprecated 10/21/2020 ---
+        //if (notify) {
+        //    if (Array.isArray(notify))
+        //        actions.push(...notify.map(n => this.makeNotifiyAction(n)));
+        //    else
+        //        actions.push(this.makeNotifiyAction(notify));
+        //}
 
         actions = this.addAuthorizationToActions(actions);
 
-        //console.log(actions);
-
         //const trx = { transaction_id: "5f2f829d6a35279ed7cf373f8ee3667bbc86cec39375a4b3b5cc86b1a9c233b7" }; 
-        const trx = await this.transact(actions);
+        const trx = await this.transact(actions, chain);
 
         return res.success(trx);
     }

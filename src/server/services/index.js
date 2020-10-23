@@ -1,8 +1,9 @@
-import discussionsx from "./discussionsx";
+import discussions from "./discussions";
 import analytics from "./analytics";
+import { config } from "../mongo";
 
 function start() {
-    discussionsx.start();
+    discussions.start();
     analytics.start();
 }
 

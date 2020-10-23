@@ -702,14 +702,46 @@ async function submitPost(signKey, post, transferActions) {
     };
 
     let transfers = undefined;
-    let notify = undefined;
+    let tlosTransfers = undefined;
 
     if (transferActions && transferActions.length > 0) {
-        transfers = await createTransferActions(transferActions);
-        notify = { name: 'tip', data: { parentUuid: post.parentUuid } };
+        const metadata = JSON.stringify({ name: 'tip', data: { parentUuid: post.parentUuid } });
+        let eosTransfers = [];
+        tlosTransfers = [];
+
+        // TO-DO: this is kind of hacky, we need a more generic approach
+        for (const ta of transferActions) {
+            ta.metadata = metadata;
+            const [, symbol] = ta.amount.split(' ');
+            if (symbol == 'TLOS') {
+                tlosTransfers.push(ta);
+            }
+            else {
+                eosTransfers.push(ta);
+            }
+        }
+
+        transfers = await createTransferActions(eosTransfers);
     }
 
-    const { transaction_id } = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers, notify });
+    const { transaction_id } = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers });
+
+    if (transaction_id) {
+        if (tlosTransfers && tlosTransfers.length > 0) {
+            try {
+                const tlos = await apiRequest(`/v1/api/blockchain/transfer`, {
+                    transfers: await createTransferActions(tlosTransfers),
+                    chain: 'telos'
+                });
+
+                console.log('telos', tlos);
+            }
+            catch (ex) {
+                // if we fail, whatever it's no big deal...
+                console.log('telos', ex);
+            }
+        }
+    }
 
     return transaction_id;
 }

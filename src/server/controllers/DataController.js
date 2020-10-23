@@ -57,58 +57,6 @@ export default @Controller('/data') class DataController {
         return res.success(analytics);
     }
 
-    /*@Api()
-    @Get("/stats")
-    async stats(req, res) {
-        const { domain } = req.unpack();
-        const result = {};
-        const db = await getDatabase();
-
-        result.allEosAccounts = await db.collection(config.table.uid).countDocuments({
-            name: "transfer",
-            account: "nsuidcntract",
-            "data.to": "EOS1111111111111111111111111111111114T1Anm",
-            "data.chain_id": 1,
-            "data.memo": { $regex: "^signupeoseos" }
-        });
-
-        const ONE_HOUR = 60 * 60 * 1000;
-        const times = [
-            { s: "lastDay", n: ONE_HOUR * 24 },
-            { s: "lastThreeDays", n: ONE_HOUR * 72 },
-            { s: "lastWeek", n: ONE_HOUR * 24 * 7 },
-            { s: "lastMonth", n: ONE_HOUR * 24 * 31 }
-        ];
-
-        const now = Date.now();
-        for (const { s, n } of times) {
-            const beforeTime = now - n;
-            const posts = await db.collection(config.table.discussions).countDocuments({
-                account: "discussionsx",
-                name: "post",
-                time: { $gte: beforeTime }
-            });
-            const threads = await db.collection(config.table.discussions).countDocuments({
-                account: "discussionsx",
-                name: "post",
-                time: { $gte: beforeTime },
-                "data.parentUuid": ""
-            });
-
-            result[s] = {
-                posts,
-                threads
-            };
-        }
-
-        result.fees = {};
-        for (const token of await getTokensInfo()) {
-            result.fees[token.symbol] = await getAsset(token.symbol, siteConfig.relay.pub);
-        }
-
-        return res.success(result);
-    }*/
-
     @Api()
     @Get("/popularusers")
     async popularUsers(req, res) {
@@ -234,8 +182,6 @@ export default @Controller('/data') class DataController {
     @Api()
     @Get("/tokens")
     async tokens(req, res) {
-
-        // TO-DO: test
         const { data } = await axios.get('https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/tokens.json');
         return res.success(data);
     }

@@ -230,7 +230,7 @@ class analytics {
             const updates = [];
             const state = await this.getState();
 
-            console.log(`[analytics] last day = ${new Date(state.dayTime).toLocaleString()}, now ${new Date().toLocaleString()}`);
+            console.log(`[${new Date().toLocaleTimeString()}] [analytics] last day = ${new Date(state.dayTime).toLocaleString()}`);
 
             if (now - state.dayTime > ONE_DAY) {
                 updates.push(this.makeUpdateObject(await this.get24hAnalysisStats(state.dayTime)));

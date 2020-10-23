@@ -7,9 +7,9 @@ export default class GreymassWatcher {
         this._endpoint = endpoint || `https://eos.greymass.com`;
     }
 
-    async getPreviousAction(collection) {
+    async getPreviousAction(chain, account, collection) {
         return await collection
-            .find()
+            .find({ account, chain })
             .sort({ position: -1 })
             .limit(1)
             .next()
@@ -33,6 +33,13 @@ export default class GreymassWatcher {
 
                 const actions = data.actions.map((a, i) => {
                     const { trx_id, act } = a.action_trace;
+
+                    let block_time = a.block_time;
+                    if (typeof block_time == 'string') {
+                        if (!block_time.endsWith('Z'))
+                            block_time = `${block_time}Z`; // UTC
+                    }
+
                     return {
                         id: Number(a.global_action_seq),
                         position: a.account_action_seq,
@@ -40,7 +47,7 @@ export default class GreymassWatcher {
                         auth: act.authorization.map(auth => auth.actor),
                         transaction: trx_id,
                         block: a.block_num,
-                        time: new Date(a.block_time).getTime(),
+                        time: new Date(block_time).getTime(),
                         name: act.name,
                         hexData: act.hex_data,
                         data: act.data

@@ -1,14 +1,7 @@
-import { config, getDatabase, getCollection } from "../mongo";
-import { sleep } from "@/novusphere-js/utility";
+import { config, getDatabase } from "../mongo";
 import ecc from "eosjs-ecc";
 import site from "../site";
-
-const DEFAULT_STATE = {
-    name: "discussionsx",
-    id: 0,
-    block: 0,
-    time: 0
-};
+import EOSContractService from "./EOSContractService";
 
 function verifyPostSignature(action) {
     const { pub, sig } = action.data.metadata;
@@ -43,61 +36,17 @@ function verifyVoteSignature(action) {
 }
 
 //
-// Monitors the actions from `discussionsx` and updates state accordingly 
+// Monitors the actions from `discussionsx`, `nsuidcntract` and updates state accordingly 
 //
-class discussionsx {
-    constructor() {
-        this.updates = {};
-    }
-
-    async getState() {
-        const db = await getDatabase();
-        let state = await db.collection(config.table.state)
-            .find({ name: DEFAULT_STATE.name })
-            .limit(1)
-            .next();
-
-        if (!state) {
-            state = {};
-            Object.assign(state, DEFAULT_STATE);
-        }
-
-        return state;
-    }
-
-    async updateState({ id, block, time }) {
-        const db = await getDatabase();
-        await db.collection(config.table.state)
-            .updateOne(
-                { name: DEFAULT_STATE.name },
-                {
-                    $setOnInsert: { name: DEFAULT_STATE.name },
-                    $set: { id, block, time }
-                },
-                { upsert: true });
-    }
-
-    sanitizeAction(action) {
-        if (!action.data) action.data = {};
-        if (action.data.metadata) {
-            if (typeof (action.data.metadata) == "string") {
-                try { action.data.metadata = JSON.parse(action.data.metadata); }
-                catch (ex) { action.data.metadata = {}; }
-            }
-        }
-        else {
-            action.data.metadata = {};
-        }
-        return action;
-    }
-
-    pushUpdate(table, update) {
-        let updates = this.updates[table];
-        if (!updates) {
-            updates = [];
-            this.updates[table] = updates;
-        }
-        updates.push(update);
+class DiscussionsService extends EOSContractService {
+    constructor(contract, chain, childService) {
+        super(config.table.discussions, contract, chain, childService);
+        this.dispatch = {
+            "post": this.post,
+            "vote": this.vote,
+            "notify": this.notify,
+            "transfer": this.transfer,
+        };
     }
 
     createSearchMeta(action) {
@@ -266,6 +215,10 @@ class discussionsx {
     }
 
     async tip(action) {
+        //
+        // LEGACY
+        //
+
         let { parentUuid } = action.data.metadata.data;
         if (!parentUuid) return;// console.log(`invalid parent uuid`);
 
@@ -310,6 +263,50 @@ class discussionsx {
         }
     }
 
+    async tipNew(action) {
+        //console.log(`tipNew`, action);
+
+        let { parentUuid } = action.data.metadata.data;
+        if (!parentUuid) return;// console.log(`invalid parent uuid`);
+
+        const db = await getDatabase();
+        const parent = await db.collection(config.table.posts)
+            .find({ uuid: parentUuid })
+            .limit(1)
+            .next();
+
+        if (!parent) return;// console.log(`parent not found`);
+        if (!parent.uidw) return;// console.log(`parent has no uidw`);
+        if (parent.uidw != action.data.to) return;
+
+        let tips = [action]
+            .map(t => ({
+                transaction: t.transaction,
+                data: t.data
+            }));
+
+        if (tips.length > 0) {
+            let tipscore = tips
+                .filter(t => !site.trustedRelay || site.trustedRelay.some(tr => t.data.relayer == tr))
+                .reduce((score, t) => {
+                    let [, token] = t.data.amount.split(' ');
+                    if (token == 'ATMOS') {
+                        const total = parseFloat(t.data.amount) + parseFloat(t.data.fee);
+                        return score + Math.log2(total);
+                    }
+                    return score;
+                }, 0);
+
+            this.pushUpdate(config.table.posts, {
+                q: { transaction: parent.transaction },
+                u: {
+                    $inc: { tipscore: Math.round(tipscore + 0.5) },
+                    $push: { tips: { $each: tips } }
+                }
+            });
+        }
+    }
+
     async notify(action) {
         if (!action.data.metadata) return;
 
@@ -326,26 +323,31 @@ class discussionsx {
         }
     }
 
-    async commit() {
-        const db = await getDatabase();
-        for (const table in this.updates) {
-            const updates = this.updates[table];
-            if (updates && updates.length > 0) {
-                await db.command({
-                    update: table,
-                    updates: updates
-                });
-            }
-        }
-        this.updates = {};
-    }
+    async transfer(action) {
+        if (action.account != config.contract.uid) return;// console.log(1);
+        if (!action.data.metadata) return;// console.log(2);
 
-    async getActionCollection() {
-        const collection = await getCollection(config.table.discussions);
-        return collection;
+        let { name } = action.data.metadata;
+        if (!name) return;// console.log(3);
+
+        const dispatch = {
+            'tip': this.tipNew
+        };
+
+        const dispatcher = dispatch[name];
+        if (dispatcher) {
+            await dispatcher.apply(this, [action]);
+        }
     }
 
     async migration() {
+
+        //const collection = await getCollection(config.table.discussions);
+        //const res = await collection.updateMany({ chain: { $exists: false } }, { $set: { chain: 'eos' } });
+
+        //await (await getCollection(config.table.posts)).deleteMany({ createdAt: { $gt: 1603172986823 } });
+        //await (await getCollection(config.table.votes)).deleteMany({ createdAt: { $gt: 1603172986823 } });
+        //await (await getCollection(config.table.discussions)).deleteMany({ time: { $gt: 1603172986823 } });
 
         /*const db = await getCollection(config.table.accounts);
         const res = await db.updateMany({
@@ -356,55 +358,10 @@ class discussionsx {
                 "data.followingUsers": "followingUsers",
                 "data.subscribedTags": "subscribedTags"
             }
-        });
+        });*/
 
-        console.log(`=== migration ===`);
-        console.log(res.modifiedCount);*/
-
-    }
-
-    async start() {
-
-        await this.migration();
-
-        const dispatch = {
-            "post": this.post,
-            "vote": this.vote,
-            "notify": this.notify
-        };
-
-        for (; ;) {
-            const state = await this.getState();
-            console.log(`[discussionsx] state position = ${new Date(state.time).toLocaleString()}, now ${new Date().toLocaleString()}`);
-
-            let actionCollection = await this.getActionCollection();
-            let actions = (await actionCollection
-                .find({ id: { $gt: state.id } })
-                .sort({ id: 1 })
-                .limit(100)
-                .toArray())
-                .map(a => this.sanitizeAction(a));
-
-            for (let i = 0; i < actions.length; i++) {
-                const action = actions[i];
-                const dispatcher = dispatch[action.name];
-                if (dispatcher) {
-                    await dispatcher.apply(this, [action]);
-                }
-
-                if (i > 0 && actions[i].transaction != actions[i - 1].transaction) {
-                    await this.commit();
-                }
-            }
-
-            await this.commit();
-
-            if (actions.length > 0) {
-                await this.updateState(actions[actions.length - 1]);
-            }
-
-            await sleep(1000);
-        }
+        //console.log(`=== migration ===`);
+        //console.log(res);
     }
 }
 
@@ -412,8 +369,12 @@ export default {
     verifyPostSignature,
     verifyVoteSignature,
     start() {
-        let contract = new discussionsx();
-        contract.start();
-        return contract;
+        // create dependency hiearchy
+        // discussionsx > nsuidcntract > telos nsuidcntract
+        const nsuidcntracttelos = new DiscussionsService(config.contract.uid, 'telos');
+        const nsuidcntract = new DiscussionsService(config.contract.uid, 'eos', nsuidcntracttelos);
+        const discussionsx = new DiscussionsService(config.contract.discussions, 'eos', nsuidcntract);
+        discussionsx.start();
+        return discussionsx;
     }
 }

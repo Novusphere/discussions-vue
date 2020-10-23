@@ -10,9 +10,9 @@ export default class DfuseWatcher {
         this._apiKey = apiKey;
     }
 
-    async getPreviousAction(collection) {
+    async getPreviousAction(chain, account, collection) {
         return await collection
-            .find()
+            .find({ account, chain })
             .sort({ block: -1 })
             .limit(1)
             .next()
