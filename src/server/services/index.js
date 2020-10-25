@@ -4,7 +4,7 @@ import { config } from "../mongo";
 
 function start() {
     discussions.start();
-    analytics.start();
+    analytics.start(); 
 }
 
 export default {
