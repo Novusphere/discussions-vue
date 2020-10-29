@@ -1,7 +1,13 @@
 <template>
   <v-app>
     <AppBar />
-    <v-main :style="{background: $vuetify.theme.themes[theme].background}">
+    <v-navigation-drawer app clipped>
+      <AppNav />
+    </v-navigation-drawer>
+    <v-navigation-drawer app clipped right>
+      <AppNavRight />
+    </v-navigation-drawer>
+    <v-main :style="{ background: $vuetify.theme.themes[theme].background }">
       <AppAlertBar />
       <v-menu
         z-index="9999"
@@ -41,7 +47,13 @@
         @click:outside="$store.commit('setLoginDialogOpen', false)"
       >
         <v-card>
-          <v-tabs v-model="loginTab" background-color="primary" slider-color="accent" dark grow>
+          <v-tabs
+            v-model="loginTab"
+            background-color="primary"
+            slider-color="accent"
+            dark
+            grow
+          >
             <v-tab>Log in</v-tab>
             <v-tab>Sign up</v-tab>
           </v-tabs>
@@ -61,7 +73,9 @@
         :retain-focus="false"
         max-width="600"
         v-model="isTransferDialogOpen"
-        @click:outside="$store.commit('setTransferDialogOpen', { value: false })"
+        @click:outside="
+          $store.commit('setTransferDialogOpen', { value: false })
+        "
       >
         <ApproveTransfersCard
           closable
@@ -77,7 +91,12 @@
         v-model="isSendTipDialogOpen"
         @click:outside="$store.commit('setSendTipDialogOpen', { value: false })"
       >
-        <SendTipCard ref="sendTip" closable @close="closeTip" :recipient="sendTipRecipient" />
+        <SendTipCard
+          ref="sendTip"
+          closable
+          @close="closeTip"
+          :recipient="sendTipRecipient"
+        />
       </v-dialog>
 
       <FullScreenDialog v-model="isThreadDialogOpenProxy">
@@ -86,12 +105,17 @@
             <v-btn
               text
               class="mr-4"
-              @click="$store.commit('setThreadDialogOpen', { value: false, path: $route.path })"
+              @click="
+                $store.commit('setThreadDialogOpen', {
+                  value: false,
+                  path: $route.path,
+                })
+              "
             >
               <v-icon>close</v-icon>Close
             </v-btn>
           </v-card-title>
-          <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
+          <v-card-text :class="{ dark: darkMode, light: !darkMode }">
             <v-row>
               <v-col :cols="12">
                 <ThreadBrowser
@@ -108,7 +132,9 @@
       <v-dialog
         v-model="isImageUploadDialogOpen"
         max-width="600"
-        @click:outside="$store.commit('setImageUploadDialogOpen', { value: false })"
+        @click:outside="
+          $store.commit('setImageUploadDialogOpen', { value: false })
+        "
       >
         <ImageUploadCard />
       </v-dialog>
@@ -116,7 +142,9 @@
       <v-dialog
         v-model="isInsertLinkDialogOpen"
         max-width="600"
-        @click:outside="$store.commit('setInsertLinkDialogOpen', { value: false })"
+        @click:outside="
+          $store.commit('setInsertLinkDialogOpen', { value: false })
+        "
       >
         <InsertLinkCard />
       </v-dialog>
@@ -130,28 +158,9 @@
           </v-col>
         </v-row>
       </v-container>
-      <v-container fluid v-else-if="$vuetify.breakpoint.xl">
+      <v-container v-else>
         <v-row>
-          <v-col cols="2"></v-col>
-          <v-col cols="2">
-            <v-card>
-              <AppNav />
-            </v-card>
-          </v-col>
-          <v-col cols="6">
-            <router-view></router-view>
-          </v-col>
-          <v-col cols="2"></v-col>
-        </v-row>
-      </v-container>
-      <v-container fluid v-else>
-        <v-row>
-          <v-col cols="2">
-            <v-card>
-              <AppNav />
-            </v-card>
-          </v-col>
-          <v-col cols="10">
+          <v-col cols="12">
             <router-view></router-view>
           </v-col>
         </v-row>
@@ -168,6 +177,7 @@ import { subscribeAccount } from "@/novusphere-js/discussions/gateway";
 import AppBar from "@/components/AppBar";
 import AppAlertBar from "@/components/AppAlertBar";
 import AppNav from "@/components/AppNav";
+import AppNavRight from "@/components/AppNavRight";
 import LoginCard from "@/components/LoginCard";
 import SignupCard from "@/components/SignupCard";
 import ImageUploadCard from "@/components/MarkdownEditor/ImageUploadCard";
@@ -189,6 +199,7 @@ export default {
     AppBar,
     AppAlertBar,
     AppNav,
+    AppNavRight,
     LoginCard,
     SignupCard,
     ImageUploadCard,
@@ -394,11 +405,13 @@ export default {
 html {
   margin-right: calc(-1 * (100vw - 100%));
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 body {
   //position: relative;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 /* I LOVE IOS AND SAFARI IT'S MY FAVORITE BROWSER */

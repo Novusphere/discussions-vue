@@ -6,10 +6,6 @@
     <template v-slot:content>
       <PostBrowser :pinned="pinned" ref="browser" :cursor="cursor" />
     </template>
-    <template v-slot:right>
-      <AssetCard class="mb-2" :symbol="community.symbol" v-if="community && community.symbol" />
-      <RecentPostsCard :tags="tags" class="mb-2" />
-    </template>
   </BrowsePageLayout>
 </template>
 
@@ -17,8 +13,7 @@
 import { mapState, mapGetters } from "vuex";
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import CommunityCard from "@/components/CommunityCard";
-import AssetCard from "@/components/AssetCard";
-import RecentPostsCard from "@/components/RecentPostsCard";
+
 import PostBrowser from "@/components/PostBrowser";
 import {
   searchPostsByPinned,
@@ -32,8 +27,6 @@ export default {
     BrowsePageLayout,
     PostBrowser,
     CommunityCard,
-    AssetCard,
-    RecentPostsCard,
   },
   props: {},
   computed: {

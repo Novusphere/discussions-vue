@@ -25,9 +25,6 @@
         @loaded="loaded"
       />
     </template>
-    <template v-slot:right>
-      <AssetCard class="mb-2" v-if="symbol" :symbol="symbol" />
-    </template>
   </BrowsePageLayout>
 </template>
 
@@ -35,7 +32,7 @@
 import BrowsePageLayout from "@/components/BrowsePageLayout";
 import CommunityCard from "@/components/CommunityCard";
 import UserProfileCard from "@/components/UserProfileCard";
-import AssetCard from "@/components/AssetCard";
+
 import ThreadBrowser from "@/components/ThreadBrowser";
 import {
   getCommunityByTag,
@@ -49,7 +46,6 @@ export default {
     BrowsePageLayout,
     CommunityCard,
     UserProfileCard,
-    AssetCard,
     ThreadBrowser
   },
   props: {},

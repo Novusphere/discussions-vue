@@ -12,11 +12,12 @@
       />
     </template>
     <template v-slot:header2>
+      
       <SocialMediasCard
-        v-if="$vuetify.breakpoint.mobile"
         :isMyProfile="isMyProfile"
         :auth="auth"
         class="text-decoration-none mt-1"
+        @update="(newAuth) => auth = newAuth"
         @remove="(name) => auth = auth.filter((a) => a.name != name)"
       />
 
@@ -76,14 +77,6 @@
           <template v-slot:body></template>
         </PostBrowser>
       </div>
-    </template>
-    <template v-slot:right>
-      <SocialMediasCard
-        :isMyProfile="isMyProfile"
-        :auth="auth"
-        class="text-decoration-none mt-1"
-        @update="(newAuth) => auth = newAuth"
-      />
     </template>
   </BrowsePageLayout>
 </template>

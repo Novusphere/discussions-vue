@@ -11,21 +11,10 @@
         <slot name="header2"></slot>
       </v-col>
     </v-row>
-    <v-row v-if="$vuetify.breakpoint.mobile">
-      <v-col cols="12">
-        <slot name="content"></slot>
-      </v-col>
-    </v-row>
-    <v-row v-else>
-      <v-col :cols="noRight ? 12 : 9">
+    <v-row>
+      <v-col :cols="12">
         <v-progress-linear v-if="needSyncAccount" indeterminate></v-progress-linear>
         <slot v-else name="content"></slot>
-      </v-col>
-      <v-col :cols="3" v-if="!noRight">
-        <slot name="right"></slot>
-        
-        <TrendingCard v-if="!noTrending" />
-        <AboutUsCard class="mt-2" />
       </v-col>
     </v-row>
   </div>
@@ -35,14 +24,14 @@
 import { mapState } from "vuex";
 import site from "@/server/site";
 
-import TrendingCard from "@/components/TrendingCard";
-import AboutUsCard from "@/components/AboutUsCard";
+//import TrendingCard from "@/components/TrendingCard";
+//import AboutUsCard from "@/components/AboutUsCard";
 
 export default {
   name: "BrowsePageLayout",
   components: {
-    TrendingCard,
-    AboutUsCard
+    //TrendingCard,
+    //AboutUsCard
   },
   props: {
     noRight: Boolean,
