@@ -1,10 +1,10 @@
 <template>
   <v-app>
-    <AppBar />
-    <v-navigation-drawer app clipped>
+    <AppBar @drawer="drawer = !drawer" />
+    <v-navigation-drawer app clipped v-model="drawer">
       <AppNav />
     </v-navigation-drawer>
-    <v-navigation-drawer app clipped right>
+    <v-navigation-drawer app clipped right v-model="drawer">
       <AppNavRight />
     </v-navigation-drawer>
     <v-main :style="{ background: $vuetify.theme.themes[theme].background }">
@@ -350,6 +350,7 @@ export default {
   },
   data: () => ({
     loginTab: null,
+    drawer: true
   }),
   created() {
     window.$app = this;

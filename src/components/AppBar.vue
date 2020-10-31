@@ -1,91 +1,60 @@
 <template>
   <v-app-bar app clipped-left clipped-right color="secondary">
-    <div class="d-flex align-center">
-      <v-btn text color="primary" :to="'/'">
-        <v-img
-          alt="Logo"
-          class="shrink"
-          contain
-          src="/static/logo.svg"
-          transition="scale-transition"
-          width="40"
-        />
-        <h3 class="ml-2" v-if="!$vuetify.breakpoint.mobile">Discussions</h3>
-      </v-btn>
-    </div>
+    <v-row>
+      <v-col class="d-flex justify-start align-center">
+        <v-app-bar-nav-icon @click="$emit('drawer')"></v-app-bar-nav-icon>
+        <v-btn text color="primary" :to="'/'">
+          <v-img
+            alt="Logo"
+            class="shrink"
+            contain
+            src="/static/logo.svg"
+            transition="scale-transition"
+            width="40"
+          />
+          <h3 class="ml-2" v-if="!$vuetify.breakpoint.mobile">Discussions</h3>
+        </v-btn>
+      </v-col>
+      <v-col class="d-flex justify-end align-center">
+        <v-btn
+          v-if="!$vuetify.breakpoint.mobile"
+          text
+          @click="$store.commit('setDarkMode', !darkMode)"
+        >
+          <v-icon>brightness_4</v-icon>
+        </v-btn>
 
-    <v-spacer />
-
-    <v-btn
-      v-if="!$vuetify.breakpoint.mobile"
-      text
-      @click="$store.commit('setDarkMode', !darkMode)"
-    >
-      <v-icon>brightness_4</v-icon>
-    </v-btn>
-
-    <div v-if="!isLoggedIn">
-      <v-btn
-        text
-        color="primary"
-        @click="$store.commit('setLoginDialogOpen', true)"
-        >Log in</v-btn
-      >
-    </div>
-    <div v-else-if="isLoggedIn && !$vuetify.breakpoint.mobile">
-      <v-btn text @click="createPost()">
-        <v-icon>create</v-icon>
-      </v-btn>
-      <NotificationsButton />
-      <v-btn text>
-        <UserProfileLink
-          :displayName="displayName"
-          :publicKey="keys.arbitrary.pub"
-        />
-      </v-btn>
-      <v-btn text @click="$store.commit('logout')">
-        <v-icon>power_settings_new</v-icon>
-      </v-btn>
-    </div>
-
-    <div v-if="$vuetify.breakpoint.mobile">
-      <v-btn
-        text
-        small
-        dense
-        @click="$router.push('/tag/all')"
-        v-if="isLoggedIn && $vuetify.breakpoint.mobile"
-        color="red"
-      >
-        <v-icon>whatshot</v-icon>
-      </v-btn>
-      <v-btn small dense v-if="isLoggedIn" text @click="createPost()">
-        <v-icon>create</v-icon>
-      </v-btn>
-      <NotificationsButton small dense v-if="isLoggedIn" />
-      <v-menu
-        offset-y
-        v-model="menu"
-        :close-on-content-click="false"
-        :max-height="$vuetify.breakpoint.height * 0.9"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn small dense text v-bind="attrs" v-on="on">
-            <v-icon>more_vert</v-icon>
+        <div v-if="!isLoggedIn">
+          <v-btn
+            text
+            color="primary"
+            @click="$store.commit('setLoginDialogOpen', true)"
+            >Log in</v-btn
+          >
+        </div>
+        <div v-else-if="isLoggedIn && !$vuetify.breakpoint.mobile">
+          <v-btn text @click="createPost()">
+            <v-icon>create</v-icon>
           </v-btn>
-        </template>
-        <AppNav />
-        <AboutUsCard>
-          <v-divider />
-        </AboutUsCard>
-      </v-menu>
-    </div>
+          <NotificationsButton />
+          <v-btn text>
+            <UserProfileLink
+              :displayName="displayName"
+              :publicKey="keys.arbitrary.pub"
+            />
+          </v-btn>
+          <v-btn text @click="$store.commit('logout')">
+            <v-icon>power_settings_new</v-icon>
+          </v-btn>
+        </div>
+      </v-col>
+    </v-row>
   </v-app-bar>
 </template>
 
 <script>
-import AppNav from "@/components/AppNav";
-import AboutUsCard from "@/components/AboutUsCard";
+//import AppNav from "@/components/AppNav";
+//import AboutUsCard from "@/components/AboutUsCard";
 import UserProfileLink from "@/components/UserProfileLink";
 import NotificationsButton from "@/components/NotificationsButton";
 import { mapState, mapGetters } from "vuex";
@@ -93,8 +62,8 @@ import { mapState, mapGetters } from "vuex";
 export default {
   name: "AppBar",
   components: {
-    AppNav,
-    AboutUsCard,
+    //AppNav,
+    //AboutUsCard,
     UserProfileLink,
     NotificationsButton,
   },
