@@ -20,13 +20,13 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 export default {
   name: "PostDisplaySelect",
   components: {},
-  props: {
-  },
+  props: {},
   computed: {
+    ...mapGetters(["isLoggedIn"]),
     ...mapState({
       postViewType: (state) => state.postViewType,
     }),
@@ -42,7 +42,10 @@ export default {
   created() {
     let view = "full";
     if (typeof this.postViewType == "string") {
-      view = this.postViewType;
+      if (this.views.some((s) => s.name == this.postViewType)) {
+        view = this.postViewType;
+        //console.log(`PostDisplaySelect`, view);
+      }
     }
     this.setView(view);
   },

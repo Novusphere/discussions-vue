@@ -17,13 +17,15 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 export default {
   name: "PostSortSelect",
   components: {},
   props: {},
-  watch: {},
+  watch: {
+    ...mapGetters(["isLoggedIn"]),
+  },
   computed: {
     valueProxy: {
       get() {
