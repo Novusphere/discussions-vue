@@ -1,12 +1,5 @@
 <template>
   <v-list>
-    <v-list-item v-if="$vuetify.breakpoint.mobile && isLoggedIn">
-      <UserProfileLink
-        btn
-        :displayName="displayName"
-        :publicKey="keys.arbitrary.pub"
-      />
-    </v-list-item>
     <v-list-item>
       <PostSortSelect v-model="sort" />
       <PostDisplaySelect v-model="display" />
@@ -28,6 +21,13 @@
         :readonly="searchReadonly"
         @focus="searchFocus()"
       ></v-text-field>
+    </v-list-item>
+    <v-list-item v-if="$vuetify.breakpoint.mobile && isLoggedIn">
+      <UserProfileLink
+        btn
+        :displayName="displayName"
+        :publicKey="keys.arbitrary.pub"
+      />
     </v-list-item>
     <v-list-item>
       <v-btn
@@ -204,8 +204,8 @@ export default {
   },
   data() {
     return {
-      sort: '',
-      display: '',
+      sort: "",
+      display: "",
       editCommunities: false,
       search: this.$route.query.q || "",
       searchReadonly: true,

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-btn text v-if="btn" :to="link">
-      <PublicKeyIcon v-show="!noIcon" :publicKey="publicKey" />
+      <PublicKeyIcon :size="iconSize" v-show="!noIcon" :publicKey="publicKey" />
       <span>{{ displayName }}</span>
     </v-btn>
     <a v-else class="user-link" @click="clicked">
@@ -32,6 +32,7 @@ export default {
     //UserProfileCard
   },
   props: {
+    iconSize: Number,
     noIcon: Boolean,
     displayName: String,
     publicKey: String,

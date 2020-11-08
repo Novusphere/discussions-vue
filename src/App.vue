@@ -452,7 +452,7 @@ body {
     font-size: 1.1rem !important;
   }
   .overline {
-    font-size: 0.5rem !important;
+    font-size: 0.6rem !important;
     line-height: 0rem !important;
   }
 }
