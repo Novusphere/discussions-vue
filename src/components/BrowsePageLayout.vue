@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row>
+    <v-row v-if="!noHeader">
       <v-col cols="12">
         <v-card flat>
           <img v-if="false" class="md-banner" :src="banner" />
@@ -24,18 +24,12 @@
 import { mapState } from "vuex";
 import site from "@/server/site";
 
-//import TrendingCard from "@/components/TrendingCard";
-//import AboutUsCard from "@/components/AboutUsCard";
-
 export default {
   name: "BrowsePageLayout",
   components: {
-    //TrendingCard,
-    //AboutUsCard
   },
   props: {
-    noRight: Boolean,
-    noTrending: Boolean
+    noHeader: Boolean,
   },
   computed: {
     ...mapState({

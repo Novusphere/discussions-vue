@@ -1,17 +1,16 @@
 <template>
   <div>
-    <v-progress-linear v-if="!cursor && !noCursor" indeterminate></v-progress-linear>
+    <v-progress-linear
+      v-if="!cursor && !noCursor"
+      indeterminate
+    ></v-progress-linear>
     <div v-else>
-      <v-row align="start" justify="end">
-        <PostSortSelect v-if="!noSort" v-model="sort" />
-        <PostDisplaySelect v-model="display" />
-      </v-row>
       <slot name="body"></slot>
       <PostScroller
         ref="scroller"
         :show-reply="showReply"
         :posts="posts"
-        :display="display"
+        :display="postViewType"
         :infinite="infinite"
       />
     </div>
@@ -21,14 +20,14 @@
 <script>
 import { mapState, mapGetters } from "vuex";
 import PostScroller from "@/components/PostScroller";
-import PostSortSelect from "@/components/PostSortSelect";
-import PostDisplaySelect from "@/components/PostDisplaySelect";
+//import PostSortSelect from "@/components/PostSortSelect";
+//import PostDisplaySelect from "@/components/PostDisplaySelect";
 
 export default {
   name: "PostBrowser",
   components: {
-    PostSortSelect,
-    PostDisplaySelect,
+    //PostSortSelect,
+    //PostDisplaySelect,
     PostScroller,
   },
   props: {
@@ -40,8 +39,6 @@ export default {
   },
   data: () => ({
     posts: [],
-    display: "",
-    sort: "",
   }),
   computed: {
     ...mapGetters(["isLoggedIn"]),
@@ -49,31 +46,26 @@ export default {
       keys: (state) => state.keys,
       delegatedMods: (state) => state.delegatedMods,
       postSort: (state) => state.postSort,
+      postViewType: (state) => state.postViewType,
     }),
   },
   watch: {
     async isLoggedIn() {
       await this.reset();
     },
-    async sort() {
+    async postSort() {
       if (this.cursor) {
-        this.cursor.sort = this.sort;
+        this.cursor.sort = this.postSort;
       }
       this.reset();
     },
   },
   async created() {
-    this.sort = this.postSort || "";
-
-    if (this.noSort && this.cursor) {
-      // sort should already be set in the cursor if no-sort is being specified
-      this.sort = this.cursor.sort;
-    }
     if (this.cursor) {
       this.cursor.votePublicKey = this.isLoggedIn
         ? this.keys.arbitrary.pub
         : undefined;
-      this.cursor.sort = this.sort;
+      this.cursor.sort = this.postSort;
     }
   },
   methods: {
@@ -89,7 +81,7 @@ export default {
           ? this.keys.arbitrary.pub
           : undefined;
 
-        if (!this.noSort) cursor.sort = this.sort;
+        if (!this.noSort) cursor.sort = this.postSort;
 
         cursor.reset();
       }

@@ -27,16 +27,6 @@
             </v-row>
           </v-card-text>
         </v-card>
-        <v-card class="mb-2">
-          <v-card-title>Default Sort</v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <PostSortSelect no-query v-model="postSortProxy" />
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
       </v-col>
       <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 8">
         <v-card>
@@ -106,7 +96,6 @@
 import TagLink from "@/components/TagLink";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import UserProfileLink from "@/components/UserProfileLink";
-import PostSortSelect from "@/components/PostSortSelect";
 
 import { mapState } from "vuex";
 export default {
@@ -114,8 +103,7 @@ export default {
   components: {
     TagLink,
     PublicKeyIcon,
-    UserProfileLink,
-    PostSortSelect,
+    UserProfileLink
   },
   props: {},
   computed: {

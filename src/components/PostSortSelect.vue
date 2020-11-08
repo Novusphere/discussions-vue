@@ -1,8 +1,8 @@
 <template>
   <div class="text-center">
-    <v-menu offset-y>
+    <v-menu offset-y eager>
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text v-bind="attrs" v-on="on">
+        <v-btn text small dense v-bind="attrs" v-on="on">
           <span>{{ valueProxy }}</span>
           <v-icon>arrow_drop_down</v-icon>
         </v-btn>
@@ -22,36 +22,15 @@ import { mapState } from "vuex";
 export default {
   name: "PostSortSelect",
   components: {},
-  props: {
-    value: String,
-    noQuery: Boolean,
-  },
-  watch: {
-    "$route.query.sort": function () {
-      this.valueProxy = this.$route.query.sort || "popular";
-    },
-    async valueProxy(nv, ov) {
-      if (nv == ov) return;
-      if (!ov && nv == "popular") return;
-
-      try {
-        if (!this.noQuery) {
-          await this.$router.push({
-            query: { ...this.$route.query, sort: this.valueProxy },
-          });
-        }
-      } catch (ex) {
-        return; // Avoided redundant navigation
-      }
-    },
-  },
+  props: {},
+  watch: {},
   computed: {
     valueProxy: {
       get() {
-        return this.value;
+        return this.postSort;
       },
       set(value) {
-        this.$emit("input", value);
+        this.$store.commit("setPostSort", value);
       },
     },
     ...mapState({
@@ -64,9 +43,11 @@ export default {
     };
   },
   created() {
-    if (!this.valueProxy) {
-      this.valueProxy = this.$route.query.sort || "popular";
+    let sort = this.postSort;
+    if (!this.items.some((s) => s == sort)) {
+      sort = "popular";
     }
+    this.valueProxy = sort;
   },
   methods: {
     change(value) {

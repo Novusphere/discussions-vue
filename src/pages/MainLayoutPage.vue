@@ -1,5 +1,5 @@
 <template>
-  <BrowsePageLayout>
+  <BrowsePageLayout no-header>
     <template v-slot:content>
       <router-view></router-view>
     </template>

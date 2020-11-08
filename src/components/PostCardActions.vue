@@ -1,110 +1,146 @@
 <template>
-  <v-card-actions :class="{ 'text-small': $vuetify.breakpoint.mobile  }">
-
-    <v-btn :color="(post.myVote > 0) ? 'success' : ''" small icon @click="vote(1)">
-      <v-icon>thumb_up</v-icon>
-    </v-btn>
-    <span>{{ post.getVoteScore() }}</span>
-    <v-btn :color="(post.myVote < 0) ? 'error': ''" small icon @click="vote(-1)">
-      <v-icon>thumb_down</v-icon>
-    </v-btn>
-
-    <v-btn v-if="!isLoggedIn || (myPublicKey != post.pub)" text @click="sendTip()">
-      <v-icon>attach_money</v-icon>
-    </v-btn>
-
-    <PostThreadLink btn :post="post" v-if="!isCommentDisplay">
-      <span>
-        <v-icon>comment</v-icon>
-        {{ post.totalReplies }}
-      </span>
-    </PostThreadLink>
-
-    <v-btn text v-else @click="$emit('reply')">
-      <v-icon>comment</v-icon>
-    </v-btn>
-
-    <v-btn text @click="mediaViewer()" v-show="false">
-      <v-icon>photo_album</v-icon>
-    </v-btn>
-
-    <v-btn text v-if="!$vuetify.breakpoint.mobile && post.uuid == post.threadUuid">        
-      <v-icon>mdi-eye</v-icon>
-      <span>{{ post.views }}</span>
-    </v-btn>
-
-    <v-spacer></v-spacer>
-
-    <v-menu>
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn icon v-bind="attrs" v-on="on">
-          <v-icon>more_vert</v-icon>
-        </v-btn>
-      </template>
-      <v-list>
-        <v-list-item v-show="isLoggedIn && (myPublicKey == post.pub) && !noEdit">
-          <v-btn text @click="$emit('edit')">
-            <v-icon>edit</v-icon>
-            <span>Edit</span>
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <PostThreadLink btn copy :post="post">
-            <v-icon>link</v-icon>
-            <span>copy link</span>
-          </PostThreadLink>
-        </v-list-item>
-        <v-list-item v-show="(isLoggedIn) && (post.uuid == post.threadUuid)">
-          <v-btn text @click="watchThread()">
-            <v-icon>watch_later</v-icon>
-            <span>{{ isThreadWatched(post.uuid) ? 'unwatch' : 'watch' }}</span>
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn text @click="markAsPinned()">
-            <v-icon color="green">push_pin</v-icon>
-            <span>{{ isMyPolicy('pinned') ? 'unpin' : 'pin'}}</span>
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn text @click="markAsSpam()">
-            <v-icon color="error">error</v-icon>
-            <span>{{ isMyPolicy('spam') ? 'not spam' : 'spam' }}</span>
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn text @click="markAsNSFW()">
-            <v-chip class="mr-1" small color="orange" text-color="white">18+</v-chip>
-            <span>{{ isMyPolicy('nsfw') ? 'sfw' : 'nsfw' }}</span>
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <TransactionLink btn :chain="post.chain" :transaction="post.transaction">
-            <v-icon>zoom_in</v-icon>On Chain
-          </TransactionLink>
-        </v-list-item>
-        <v-list-item>
-          <v-btn text @click="share('twitter')">
-            <v-icon>mdi-twitter</v-icon>
-            <span>Share</span>
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn text @click="share('fb')">
-            <v-icon>mdi-facebook</v-icon>
-            <span>Share</span>
-          </v-btn>
-        </v-list-item>
-        <v-list-item
-          v-if="post.threadUuid == post.uuid && post.threadTree && !post.threadTree.artificial"
+  <v-card-actions :class="{ 'text-small': $vuetify.breakpoint.mobile }">
+    <v-row no-gutters>
+      <div :class="{ 'd-flex align-center justify-center': true, 'col': $vuetify.breakpoint.mobile, 'post-card-action--desktop': !$vuetify.breakpoint.mobile  }">
+        <v-btn
+          :color="post.myVote > 0 ? 'success' : ''"
+          small
+          dense
+          icon
+          @click="vote(1)"
         >
-          <v-btn text @click="raindrop()">
-            <v-icon>mdi-weather-pouring</v-icon>
-            <span>Raindrop</span>
-          </v-btn>
-        </v-list-item>
-      </v-list>
-    </v-menu>
+          <v-icon>thumb_up</v-icon>
+        </v-btn>
+        <span>{{ post.getVoteScore() }}</span>
+        <v-btn
+          v-if="!$vuetify.breakpoint.mobile"
+          :color="post.myVote < 0 ? 'error' : ''"
+          small
+          dense
+          icon
+          @click="vote(-1)"
+        >
+          <v-icon>thumb_down</v-icon>
+        </v-btn>
+      </div>
+      <div :class="{ 'd-flex align-center justify-center': true, 'col': $vuetify.breakpoint.mobile, 'post-card-action--desktop': !$vuetify.breakpoint.mobile  }">
+        <v-btn
+          v-if="!isLoggedIn || myPublicKey != post.pub"
+          text small dense
+          @click="sendTip()"
+        >
+          <v-icon>attach_money</v-icon>
+        </v-btn>
+      </div>
+      <div :class="{ 'd-flex align-center justify-center': true, 'col': $vuetify.breakpoint.mobile, 'post-card-action--desktop': !$vuetify.breakpoint.mobile  }">
+        <PostThreadLink
+          class="align-center justify-center"
+          btn
+          :post="post"
+          v-if="!isCommentDisplay"
+        >
+          <span>
+            <v-icon>comment</v-icon>
+            {{ post.totalReplies }}
+          </span>
+        </PostThreadLink>
+        <v-btn text v-else @click="$emit('reply')">
+          <v-icon>comment</v-icon>
+        </v-btn>
+      </div>
+      <div :class="{ 'd-flex align-center justify-center': true, 'col': $vuetify.breakpoint.mobile, 'post-card-action--desktop': !$vuetify.breakpoint.mobile  }">
+        <v-btn text small dense v-if="post.uuid == post.threadUuid">
+          <v-icon>mdi-eye</v-icon>
+          <span>{{ post.views }}</span>
+        </v-btn>
+      </div>
+      <div :class="{ 'd-flex align-center justify-end': true, 'col': true }">
+        <v-menu>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" v-on="on">
+              <v-icon>more_vert</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item
+              v-show="isLoggedIn && myPublicKey == post.pub && !noEdit"
+            >
+              <v-btn text @click="$emit('edit')">
+                <v-icon>edit</v-icon>
+                <span>Edit</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <PostThreadLink btn copy :post="post">
+                <v-icon>link</v-icon>
+                <span>copy link</span>
+              </PostThreadLink>
+            </v-list-item>
+            <v-list-item v-show="isLoggedIn && post.uuid == post.threadUuid">
+              <v-btn text @click="watchThread()">
+                <v-icon>watch_later</v-icon>
+                <span>{{
+                  isThreadWatched(post.uuid) ? "unwatch" : "watch"
+                }}</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn text @click="markAsPinned()">
+                <v-icon color="green">push_pin</v-icon>
+                <span>{{ isMyPolicy("pinned") ? "unpin" : "pin" }}</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn text @click="markAsSpam()">
+                <v-icon color="error">error</v-icon>
+                <span>{{ isMyPolicy("spam") ? "not spam" : "spam" }}</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn text @click="markAsNSFW()">
+                <v-chip class="mr-1" small color="orange" text-color="white"
+                  >18+</v-chip
+                >
+                <span>{{ isMyPolicy("nsfw") ? "sfw" : "nsfw" }}</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <TransactionLink
+                btn
+                :chain="post.chain"
+                :transaction="post.transaction"
+              >
+                <v-icon>zoom_in</v-icon>On Chain
+              </TransactionLink>
+            </v-list-item>
+            <v-list-item>
+              <v-btn text @click="share('twitter')">
+                <v-icon>mdi-twitter</v-icon>
+                <span>Share</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn text @click="share('fb')">
+                <v-icon>mdi-facebook</v-icon>
+                <span>Share</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item
+              v-if="
+                post.threadUuid == post.uuid &&
+                post.threadTree &&
+                !post.threadTree.artificial
+              "
+            >
+              <v-btn text @click="raindrop()">
+                <v-icon>mdi-weather-pouring</v-icon>
+                <span>Raindrop</span>
+              </v-btn>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </div>
+    </v-row>
   </v-card-actions>
 </template>
 
@@ -114,7 +150,7 @@ import {
   submitVote,
   modPolicySetTags,
   getUserAuth,
-  addViewToPost
+  addViewToPost,
 } from "@/novusphere-js/discussions/api";
 import { sleep } from "@/novusphere-js/utility";
 import config from "@/server/site";
@@ -344,6 +380,10 @@ export default {
 </script>
 
 <style lang="scss">
+.post-card-action--desktop {
+  min-width: 80px;
+}
+
 .text-small {
   font-size: 12px;
 

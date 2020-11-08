@@ -1,10 +1,10 @@
 <template>
   <v-app>
-    <AppBar @drawer="drawer = !drawer" />
-    <v-navigation-drawer app clipped v-model="drawer">
+    <AppBar @drawer="toggleDrawer()" />
+    <v-navigation-drawer app clipped v-model="leftDrawer">
       <AppNav />
     </v-navigation-drawer>
-    <v-navigation-drawer app clipped right v-model="drawer">
+    <v-navigation-drawer app clipped right v-model="rightDrawer">
       <AppNavRight />
     </v-navigation-drawer>
     <v-main :style="{ background: $vuetify.theme.themes[theme].background }">
@@ -350,11 +350,17 @@ export default {
   },
   data: () => ({
     loginTab: null,
-    drawer: true
+    leftDrawer: true,
+    rightDrawer: true,
   }),
   created() {
     window.$app = this;
     this.setThemeClass();
+
+    if (this.$vuetify.breakpoint.mobile) {
+      this.leftDrawer = false;
+      this.rightDrawer = false;
+    }
 
     this.$store.commit("init");
     window.addEventListener(
@@ -372,6 +378,12 @@ export default {
   },
   beforeDestroy() {},
   methods: {
+    toggleDrawer() {
+      this.leftDrawer = !this.leftDrawer;
+      if (!this.$vuetify.breakpoint.mobile) {
+        this.rightDrawer = !this.rightDrawer;
+      }
+    },
     setThemeClass() {
       const nodes = [document.body];
       for (const node of nodes) {
@@ -432,6 +444,16 @@ body {
     .dark {
       background: #000000;
     }
+  }
+}
+
+.v-application {
+  .headline {
+    font-size: 1.1rem !important;
+  }
+  .overline {
+    font-size: 0.5rem !important;
+    line-height: 0rem !important;
   }
 }
 

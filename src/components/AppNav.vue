@@ -1,7 +1,15 @@
 <template>
   <v-list>
     <v-list-item v-if="$vuetify.breakpoint.mobile && isLoggedIn">
-      <UserProfileLink btn :displayName="displayName" :publicKey="keys.arbitrary.pub" />
+      <UserProfileLink
+        btn
+        :displayName="displayName"
+        :publicKey="keys.arbitrary.pub"
+      />
+    </v-list-item>
+    <v-list-item>
+      <PostSortSelect v-model="sort" />
+      <PostDisplaySelect v-model="display" />
     </v-list-item>
     <v-list-item>
       <v-text-field
@@ -27,7 +35,11 @@
         block
         text
         left
-        @click="isLoggedIn ? $router.push(`/feed`) : $store.commit('setLoginDialogOpen', true)"
+        @click="
+          isLoggedIn
+            ? $router.push(`/feed`)
+            : $store.commit('setLoginDialogOpen', true)
+        "
       >
         <v-icon>account_circle</v-icon>
         <span>Feed</span>
@@ -45,29 +57,51 @@
         text
         style="width: 90%"
         left
-        @click="isLoggedIn ? $router.push(`/wallet`) : $store.commit('setLoginDialogOpen', true)"
+        @click="
+          isLoggedIn
+            ? $router.push(`/wallet`)
+            : $store.commit('setLoginDialogOpen', true)
+        "
       >
         <v-icon>account_balance_wallet</v-icon>
         <span>Wallet</span>
       </v-btn>
       <v-btn icon v-if="isLoggedIn" @click="walletMore = !walletMore">
-        <v-icon>{{ walletMore ? 'expand_less' : 'expand_more' }}</v-icon>
+        <v-icon>{{ walletMore ? "expand_less" : "expand_more" }}</v-icon>
       </v-btn>
     </v-list-item>
     <v-list-item v-if="walletMore">
       <v-list>
         <v-list-item>
-          <v-btn class="justify-start" text block left @click="$router.push(`/wallet/deposit`)">
+          <v-btn
+            class="justify-start"
+            text
+            block
+            left
+            @click="$router.push(`/wallet/deposit`)"
+          >
             <span>Deposit</span>
           </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn class="justify-start" text block left @click="$router.push(`/wallet/withdraw`)">
+          <v-btn
+            class="justify-start"
+            text
+            block
+            left
+            @click="$router.push(`/wallet/withdraw`)"
+          >
             <span>Withdraw</span>
           </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn class="justify-start" text block left @click="$router.push(`/wallet/swap`)">
+          <v-btn
+            class="justify-start"
+            text
+            block
+            left
+            @click="$router.push(`/wallet/swap`)"
+          >
             <span>Swap</span>
           </v-btn>
         </v-list-item>
@@ -91,7 +125,11 @@
         block
         text
         left
-        @click="isLoggedIn ? $router.push(`/settings`) : $store.commit('setLoginDialogOpen', true)"
+        @click="
+          isLoggedIn
+            ? $router.push(`/settings`)
+            : $store.commit('setLoginDialogOpen', true)
+        "
       >
         <v-icon>settings</v-icon>
         <span>Settings</span>
@@ -121,15 +159,25 @@
         <v-icon>edit</v-icon>
       </v-btn>
     </v-subheader>
-    <v-list-item v-for="(tag) in subscribedTags" :key="tag">
+    <v-list-item v-for="tag in subscribedTags" :key="tag">
       <span class="text-decoration-ellipsis">
         <TagLink :tag="tag" />
       </span>
-      <div style="position: absolute; right: 0px;">
-        <v-btn icon color="primary" @click="orientTag(tag, true)" v-if="editCommunities">
+      <div style="position: absolute; right: 0px">
+        <v-btn
+          icon
+          color="primary"
+          @click="orientTag(tag, true)"
+          v-if="editCommunities"
+        >
           <v-icon>arrow_upward</v-icon>
         </v-btn>
-        <v-btn icon color="primary" @click="orientTag(tag, false)" v-if="editCommunities">
+        <v-btn
+          icon
+          color="primary"
+          @click="orientTag(tag, false)"
+          v-if="editCommunities"
+        >
           <v-icon>arrow_downward</v-icon>
         </v-btn>
       </div>
@@ -142,6 +190,8 @@ import { mapState, mapGetters } from "vuex";
 import { userActionsMixin } from "@/mixins/userActions";
 import TagLink from "@/components/TagLink";
 import UserProfileLink from "@/components/UserProfileLink";
+import PostSortSelect from "@/components/PostSortSelect";
+import PostDisplaySelect from "@/components/PostDisplaySelect";
 
 export default {
   name: "AppNav",
@@ -149,9 +199,13 @@ export default {
   components: {
     TagLink,
     UserProfileLink,
+    PostSortSelect,
+    PostDisplaySelect,
   },
   data() {
     return {
+      sort: '',
+      display: '',
       editCommunities: false,
       search: this.$route.query.q || "",
       searchReadonly: true,

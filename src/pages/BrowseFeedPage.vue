@@ -1,5 +1,5 @@
 <template>
-  <BrowsePageLayout>
+  <BrowsePageLayout no-header>
     <template v-slot:content>
       <PostBrowser v-if="cursor" :show-reply="true" :cursor="cursor" />
       <div v-else class="text-center">

@@ -1,5 +1,5 @@
 <template>
-  <BrowsePageLayout>
+  <BrowsePageLayout no-header>
     <template v-slot:content>
       <PostBrowser :cursor="cursor" />
     </template>

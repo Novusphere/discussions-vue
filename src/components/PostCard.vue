@@ -57,7 +57,7 @@
         </v-row>
       </div>
       <div v-else>
-        <v-row class="headline" v-if="isThread && post.title">
+        <v-row no-gutters class="headline" v-if="isThread && post.title">
           <v-col cols="12">
             <div class="pl-3 pr-3">
               <PostThreadLink
@@ -68,7 +68,7 @@
           </v-col>
         </v-row>
 
-        <v-expansion-panels class="mt-2" flat tile :value="expanded">
+        <v-expansion-panels flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content>
               <v-card flat :color="contentBackgroundColor" v-if="isPaidLockContent">

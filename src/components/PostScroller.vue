@@ -1,12 +1,12 @@
 <template>
   <div>
-    <v-row>
-      <template v-if="pinned">
-        <v-col cols="12" v-for="(p, i) in pinned" :key="i">
+    <v-row no-gutters>
+      <template v-if="pinned && pinned.length > 0">
+        <v-col cols="12" style="padding-bottom: 5px;" v-for="(p, i) in pinned" :key="i">
           <PostScrollCard :show-reply="showReply" :display="display" :post="p" />
         </v-col>
       </template>
-      <v-col cols="12" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
+      <v-col cols="12" style="padding-bottom: 5px;" v-for="(p, i) in posts" :key="i" v-show="!p.isSpam || !hideSpam">
         <PostScrollCard :show-reply="showReply" :display="display" :post="p" />
       </v-col>
       <v-col cols="12">
