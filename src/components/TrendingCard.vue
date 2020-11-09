@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card flat> 
     <v-list>
       <v-list-item>
         <span class="text-h6">

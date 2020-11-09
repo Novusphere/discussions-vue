@@ -35,7 +35,7 @@ export default {
     views: [
       { name: "compact", text: "Compact", icon: "view_headline" },
       { name: "preview", text: "Preview", icon: "view_day" },
-      { name: "full", text: "Full View", icon: "view_agenda" },
+      { name: "full", text: "Full", icon: "view_agenda" },
     ],
     view: null,
   }),

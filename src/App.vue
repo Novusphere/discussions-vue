@@ -356,6 +356,7 @@ export default {
   created() {
     window.$app = this;
     this.setThemeClass();
+    setTimeout(() => this.setThemeClass(), 1000);
 
     if (this.$vuetify.breakpoint.mobile) {
       this.leftDrawer = false;
@@ -385,12 +386,18 @@ export default {
       }
     },
     setThemeClass() {
-      const nodes = [document.body];
+      const nodes = [
+        document.body,
+        ...document.querySelectorAll(".v-navigation-drawer__content"),
+      ];
+
       for (const node of nodes) {
         const classes = node.className
           .split(" ")
           .filter((cn) => cn != "dark" && cn != "light");
-        node.className = classes.join(" ") + (this.darkMode ? "dark" : "light");
+
+        classes.push(this.darkMode ? "dark" : "light");
+        node.className = classes.join(" ");
       }
     },
     async closeTip() {

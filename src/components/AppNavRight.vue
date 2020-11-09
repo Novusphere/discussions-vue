@@ -1,21 +1,21 @@
 <template>
-  <div>
-    <AssetCard
-      class="mb-2"
-      :symbol="community.symbol"
-      v-if="community && community.symbol"
-    />
+  <v-card flat style="height: 100%">
+    <v-card-text class="pa-0">
+      <AssetCard
+        class="mb-2"
+        :symbol="community.symbol"
+        v-if="community && community.symbol"
+      />
 
-    <RecentPostsCard v-if="tags.length > 0" :tags="tags" class="mb-2" />
-    <TrendingCard v-else />
-    
-    <AboutUsCard class="mt-2" />
-  </div>
+      <RecentPostsCard v-if="tags.length > 0" :tags="tags" class="mb-2" />
+      <TrendingCard v-else />
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>
 import TrendingCard from "@/components/TrendingCard";
-import AboutUsCard from "@/components/AboutUsCard";
+//import AboutUsCard from "@/components/AboutUsCard";
 
 import AssetCard from "@/components/AssetCard";
 import RecentPostsCard from "@/components/RecentPostsCard";
@@ -27,7 +27,7 @@ export default {
   mixins: [],
   components: {
     TrendingCard,
-    AboutUsCard,
+    //AboutUsCard,
     AssetCard,
     RecentPostsCard,
   },

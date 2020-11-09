@@ -1,191 +1,198 @@
 <template>
-  <v-list>
-    <v-list-item>
-      <PostSortSelect v-model="sort" />
-      <PostDisplaySelect v-model="display" />
-    </v-list-item>
-    <v-list-item>
-      <v-text-field
-        type="search"
-        autocomplete="new-password"
-        dense
-        hide-details
-        append-icon="search"
-        class="mt-3"
-        v-model="search"
-        label="Search"
-        rounded
-        outlined
-        @keydown.enter="goSearch()"
-        @click:append="goSearch()"
-        :readonly="searchReadonly"
-        @focus="searchFocus()"
-      ></v-text-field>
-    </v-list-item>
-    <v-list-item v-if="$vuetify.breakpoint.mobile && isLoggedIn">
-      <UserProfileLink
-        btn
-        :displayName="displayName"
-        :publicKey="keys.arbitrary.pub"
-      />
-    </v-list-item>
-    <v-list-item>
-      <v-btn
-        class="justify-start"
-        block
-        text
-        left
-        @click="
-          isLoggedIn
-            ? $router.push(`/feed`)
-            : $store.commit('setLoginDialogOpen', true)
-        "
-      >
-        <v-icon>account_circle</v-icon>
-        <span>Feed</span>
-      </v-btn>
-    </v-list-item>
-    <v-list-item>
-      <v-btn class="justify-start" block text left :to="'/tag/all'">
-        <v-icon>whatshot</v-icon>
-        <span>Trending</span>
-      </v-btn>
-    </v-list-item>
-    <v-list-item>
-      <v-btn
-        class="justify-start"
-        text
-        style="width: 90%"
-        left
-        @click="
-          isLoggedIn
-            ? $router.push(`/wallet`)
-            : $store.commit('setLoginDialogOpen', true)
-        "
-      >
-        <v-icon>account_balance_wallet</v-icon>
-        <span>Wallet</span>
-      </v-btn>
-      <v-btn icon v-if="isLoggedIn" @click="walletMore = !walletMore">
-        <v-icon>{{ walletMore ? "expand_less" : "expand_more" }}</v-icon>
-      </v-btn>
-    </v-list-item>
-    <v-list-item v-if="walletMore">
+  <v-card flat tile style="height: 100%">
+    <v-card-text class="pa-0">
       <v-list>
         <v-list-item>
+          <PostSortSelect v-model="sort" />
+          <PostDisplaySelect v-model="display" />
+        </v-list-item>
+        <v-list-item>
+          <v-text-field
+            type="search"
+            autocomplete="new-password"
+            dense
+            hide-details
+            append-icon="search"
+            class="mt-3"
+            v-model="search"
+            label="Search"
+            rounded
+            outlined
+            @keydown.enter="goSearch()"
+            @click:append="goSearch()"
+            :readonly="searchReadonly"
+            @focus="searchFocus()"
+          ></v-text-field>
+        </v-list-item>
+        <v-list-item v-if="$vuetify.breakpoint.mobile && isLoggedIn">
+          <UserProfileLink
+            btn
+            :displayName="displayName"
+            :publicKey="keys.arbitrary.pub"
+          />
+        </v-list-item>
+        <v-list-item>
           <v-btn
             class="justify-start"
-            text
             block
+            text
             left
-            @click="$router.push(`/wallet/deposit`)"
+            @click="
+              isLoggedIn
+                ? $router.push(`/feed`)
+                : $store.commit('setLoginDialogOpen', true)
+            "
           >
-            <span>Deposit</span>
+            <v-icon>account_circle</v-icon>
+            <span>Feed</span>
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn class="justify-start" block text left :to="'/tag/all'">
+            <v-icon>whatshot</v-icon>
+            <span>Trending</span>
           </v-btn>
         </v-list-item>
         <v-list-item>
           <v-btn
             class="justify-start"
             text
-            block
+            style="width: 90%"
             left
-            @click="$router.push(`/wallet/withdraw`)"
+            @click="
+              isLoggedIn
+                ? $router.push(`/wallet`)
+                : $store.commit('setLoginDialogOpen', true)
+            "
           >
-            <span>Withdraw</span>
+            <v-icon>account_balance_wallet</v-icon>
+            <span>Wallet</span>
+          </v-btn>
+          <v-btn icon v-if="isLoggedIn" @click="walletMore = !walletMore">
+            <v-icon>{{ walletMore ? "expand_less" : "expand_more" }}</v-icon>
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="walletMore">
+          <v-list>
+            <v-list-item>
+              <v-btn
+                class="justify-start"
+                text
+                block
+                left
+                @click="$router.push(`/wallet/deposit`)"
+              >
+                <span>Deposit</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn
+                class="justify-start"
+                text
+                block
+                left
+                @click="$router.push(`/wallet/withdraw`)"
+              >
+                <span>Withdraw</span>
+              </v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn
+                class="justify-start"
+                text
+                block
+                left
+                @click="$router.push(`/wallet/swap`)"
+              >
+                <span>Swap</span>
+              </v-btn>
+            </v-list-item>
+          </v-list>
+        </v-list-item>
+        <v-list-item>
+          <v-btn class="justify-start" block text left :to="'/discover'">
+            <v-icon>group</v-icon>
+            <span>Community</span>
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-show="isTester">
+          <v-btn class="justify-start" block text left :to="'/tests'">
+            <v-icon>assessment</v-icon>
+            <span>Testing</span>
           </v-btn>
         </v-list-item>
         <v-list-item>
           <v-btn
             class="justify-start"
-            text
             block
+            text
             left
-            @click="$router.push(`/wallet/swap`)"
+            @click="
+              isLoggedIn
+                ? $router.push(`/settings`)
+                : $store.commit('setLoginDialogOpen', true)
+            "
           >
-            <span>Swap</span>
+            <v-icon>settings</v-icon>
+            <span>Settings</span>
           </v-btn>
+        </v-list-item>
+        <div v-show="$vuetify.breakpoint.mobile">
+          <v-list-item>
+            <v-btn text @click="$store.commit('setDarkMode', !darkMode)">
+              <v-icon>brightness_high</v-icon>
+              <span>{{ darkMode ? `Light` : `Dark` }} Mode</span>
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="isLoggedIn">
+            <v-btn text @click="$router.push(`/logout`)">
+              <v-icon>power_settings_new</v-icon>
+              <span>Log out</span>
+            </v-btn>
+          </v-list-item>
+        </div>
+        <v-list-item v-if="!$vuetify.breakpoint.mobile">
+          <v-btn block color="primary" @click="createPost()">New Post</v-btn>
+        </v-list-item>
+        <v-divider />
+        <v-subheader>
+          My Communities
+          <v-btn icon @click="editCommunities = !editCommunities">
+            <v-icon>edit</v-icon>
+          </v-btn>
+        </v-subheader>
+        <v-list-item v-for="tag in subscribedTags" :key="tag">
+          <span class="text-decoration-ellipsis">
+            <TagLink btn :tag="tag">
+              <TagIcon :tag="tag" />
+              <span>{{ tag }}</span>
+            </TagLink>
+          </span>
+          <div style="position: absolute; right: 0px">
+            <v-btn
+              icon
+              color="primary"
+              @click="orientTag(tag, true)"
+              v-if="editCommunities"
+            >
+              <v-icon>arrow_upward</v-icon>
+            </v-btn>
+            <v-btn
+              icon
+              color="primary"
+              @click="orientTag(tag, false)"
+              v-if="editCommunities"
+            >
+              <v-icon>arrow_downward</v-icon>
+            </v-btn>
+          </div>
+        </v-list-item>
+        <v-list-item>
+          <AboutUsCard class="mt-3" />
         </v-list-item>
       </v-list>
-    </v-list-item>
-    <v-list-item>
-      <v-btn class="justify-start" block text left :to="'/discover'">
-        <v-icon>group</v-icon>
-        <span>Community</span>
-      </v-btn>
-    </v-list-item>
-    <v-list-item v-show="isTester">
-      <v-btn class="justify-start" block text left :to="'/tests'">
-        <v-icon>assessment</v-icon>
-        <span>Testing</span>
-      </v-btn>
-    </v-list-item>
-    <v-list-item>
-      <v-btn
-        class="justify-start"
-        block
-        text
-        left
-        @click="
-          isLoggedIn
-            ? $router.push(`/settings`)
-            : $store.commit('setLoginDialogOpen', true)
-        "
-      >
-        <v-icon>settings</v-icon>
-        <span>Settings</span>
-      </v-btn>
-    </v-list-item>
-    <div v-show="$vuetify.breakpoint.mobile">
-      <v-list-item>
-        <v-btn text @click="$store.commit('setDarkMode', !darkMode)">
-          <v-icon>brightness_high</v-icon>
-          <span>{{ darkMode ? `Light` : `Dark` }} Mode</span>
-        </v-btn>
-      </v-list-item>
-      <v-list-item v-if="isLoggedIn">
-        <v-btn text @click="$router.push(`/logout`)">
-          <v-icon>power_settings_new</v-icon>
-          <span>Log out</span>
-        </v-btn>
-      </v-list-item>
-    </div>
-    <v-list-item v-if="!$vuetify.breakpoint.mobile">
-      <v-btn block color="primary" @click="createPost()">New Post</v-btn>
-    </v-list-item>
-    <v-divider />
-    <v-subheader>
-      My Communities
-      <v-btn icon @click="editCommunities = !editCommunities">
-        <v-icon>edit</v-icon>
-      </v-btn>
-    </v-subheader>
-    <v-list-item v-for="tag in subscribedTags" :key="tag">
-      <span class="text-decoration-ellipsis">
-        <TagLink btn :tag="tag">
-          <TagIcon :tag="tag" />
-          <span>{{ tag }}</span>
-        </TagLink>
-      </span>
-      <div style="position: absolute; right: 0px">
-        <v-btn
-          icon
-          color="primary"
-          @click="orientTag(tag, true)"
-          v-if="editCommunities"
-        >
-          <v-icon>arrow_upward</v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          color="primary"
-          @click="orientTag(tag, false)"
-          v-if="editCommunities"
-        >
-          <v-icon>arrow_downward</v-icon>
-        </v-btn>
-      </div>
-    </v-list-item>
-  </v-list>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script>
@@ -196,6 +203,7 @@ import TagIcon from "@/components/TagIcon";
 import UserProfileLink from "@/components/UserProfileLink";
 import PostSortSelect from "@/components/PostSortSelect";
 import PostDisplaySelect from "@/components/PostDisplaySelect";
+import AboutUsCard from "@/components/AboutUsCard";
 
 export default {
   name: "AppNav",
@@ -206,6 +214,7 @@ export default {
     UserProfileLink,
     PostSortSelect,
     PostDisplaySelect,
+    AboutUsCard,
   },
   data() {
     return {

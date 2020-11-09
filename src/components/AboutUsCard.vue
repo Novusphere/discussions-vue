@@ -1,8 +1,8 @@
 <template>
-  <v-card>
+  <v-card flat tile>
     <slot></slot>
-    <v-card-text class="text-center">
-      <v-row>
+    <v-card-text class="text-center pa-0">
+      <v-row no-gutters>
         <v-col :cols="12">
           <v-btn icon :href="'https://github.com/Novusphere/'" target="blank">
             <v-icon>mdi-github</v-icon>
