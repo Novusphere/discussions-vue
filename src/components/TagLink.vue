@@ -1,6 +1,6 @@
 <template>
   <div class="d-inline-block">
-    <v-btn :to="link" v-if="btn">
+    <v-btn text :to="link" v-if="btn">
       <slot></slot>
     </v-btn>
     <a class="text-decoration-none" @click="clicked" v-else>

@@ -161,7 +161,10 @@
     </v-subheader>
     <v-list-item v-for="tag in subscribedTags" :key="tag">
       <span class="text-decoration-ellipsis">
-        <TagLink :tag="tag" />
+        <TagLink btn :tag="tag">
+          <TagIcon :tag="tag" />
+          <span>{{ tag }}</span>
+        </TagLink>
       </span>
       <div style="position: absolute; right: 0px">
         <v-btn
@@ -189,6 +192,7 @@
 import { mapState, mapGetters } from "vuex";
 import { userActionsMixin } from "@/mixins/userActions";
 import TagLink from "@/components/TagLink";
+import TagIcon from "@/components/TagIcon";
 import UserProfileLink from "@/components/UserProfileLink";
 import PostSortSelect from "@/components/PostSortSelect";
 import PostDisplaySelect from "@/components/PostDisplaySelect";
@@ -198,6 +202,7 @@ export default {
   mixins: [userActionsMixin],
   components: {
     TagLink,
+    TagIcon,
     UserProfileLink,
     PostSortSelect,
     PostDisplaySelect,

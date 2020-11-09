@@ -54,6 +54,8 @@ export default {
       await this.reset();
     },
     async postSort() {
+      if (this.noSort) return;
+      
       if (this.cursor) {
         this.cursor.sort = this.postSort;
       }
@@ -65,12 +67,14 @@ export default {
       this.cursor.votePublicKey = this.isLoggedIn
         ? this.keys.arbitrary.pub
         : undefined;
-      this.cursor.sort = this.postSort;
+
+      if (!this.noSort) this.cursor.sort = this.postSort;
     }
   },
   methods: {
     reset(cursor) {
       cursor = cursor || this.cursor;
+      
       if (cursor) {
         cursor.moderatorKeys =
           this.delegatedMods.length > 0

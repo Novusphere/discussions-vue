@@ -40,7 +40,7 @@ export default {
     view: null,
   }),
   created() {
-    let view = "full";
+    let view = "preview";
     if (typeof this.postViewType == "string") {
       if (this.views.some((s) => s.name == this.postViewType)) {
         view = this.postViewType;
