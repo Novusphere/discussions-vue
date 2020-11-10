@@ -36,13 +36,17 @@ export default @Controller('/blockchain') class BlockchainController {
     constructor() {
     }
 
-    async getEosAPI(chain) {
+    async getEosAPI(chain, endpoint) {
         if (!siteConfig.relay.key) throw new Error(`Relay key has not been configured`);
 
         let api = undefined;
         if (!chain || chain == 'eos') {
 
-            if (siteConfig.relay.dfuse) {
+            if (endpoint == 'dfuse') {
+
+                if (!siteConfig.relay.dfuse)
+                    throw new Error(`Dfuse is not configured`);
+
                 if (!dfuseClient) {
 
                     dfuseClient = createDfuseClient({
@@ -51,15 +55,16 @@ export default @Controller('/blockchain') class BlockchainController {
                         network: "eos.dfuse.eosnation.io",
                     });
                 }
+
                 api = await eos.getAPI(dfuseClient.endpoints.restUrl, [siteConfig.relay.key], { fetch: dfuseFetch });
             }
             else {
-                api = await eos.getAPI(eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch });
+                api = await eos.getAPI(endpoint || eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch });
             }
         }
         else {
             if (chain == 'telos') {
-                api = await eos.getAPI(eos.DEFAULT_TELOS_RPC, [siteConfig.relay.key], { fetch });
+                api = await eos.getAPI(endpoint || eos.DEFAULT_TELOS_RPC, [siteConfig.relay.key], { fetch });
             }
             else {
                 throw new Error(`Unknown chain ${chain}`);
@@ -72,19 +77,32 @@ export default @Controller('/blockchain') class BlockchainController {
 
     async transact(actions, chain) {
 
-        let api = await this.getEosAPI(chain);
-
+        let endpoints = [];
         if (chain == 'telos') {
-            console.log(actions);
+            endpoints = [eos.DEFAULT_TELOS_RPC];
+        }
+        else /*if (chain == 'eos')*/ {
+            endpoints = ['dfuse', eos.GREYMASS_EOS_RPC];
         }
 
-        const trx = await api.transact({ actions: actions },
-            {
-                blocksBehind: 3,
-                expireSeconds: 60,
-            });
+        for (let i = 0; i < endpoints.length; i++) {
+            try {
+                let api = await this.getEosAPI(chain, endpoints[i]);
 
-        return trx;
+                const trx = await api.transact({ actions: actions },
+                    {
+                        blocksBehind: 3,
+                        expireSeconds: 60,
+                    });
+
+                return trx;
+            }
+            catch (ex) {
+                // rethrow
+                console.log(`BlockchainController`, `transact()`, `failed with endpoint ${endpoints[i]}`);
+                if (i == endpoints.length - 1) throw (ex);
+            }
+        }
     }
 
     addAuthorizationToActions(actions) {

@@ -50,7 +50,7 @@
         <v-list-item>
           <v-btn class="justify-start" block text left :to="'/tag/all'">
             <v-icon>whatshot</v-icon>
-            <span>Trending</span>
+            <span>All</span>
           </v-btn>
         </v-list-item>
         <v-list-item>
