@@ -412,10 +412,6 @@ export default {
     if (this.isCompactDisplay) this.expanded = -1;
     else this.expanded = 0;
 
-    if (this.post.transaction == '073dad28a4463fbeef67e842f3965755322c335325ddb158858786b9faf1f35a') {
-      console.log(`meep`, Date.now(), this.post.createdAt.getTime(), Date.now() - this.post.createdAt.getTime());
-    }
-
     this.postHTML = await this.post.getContentHTML();
 
     refreshOEmbed();
@@ -433,7 +429,7 @@ export default {
           pub: this.post.pub,
           uidw: this.post.uidw,
           displayName: this.post.displayName,
-          memo: `pay for content ${this.post.getRelativeUrl(false)}`,
+          memo: `pay for content ${this.post.getRelativeUrl()}`,
           uuid: this.post.uuid,
           callback: ({ transaction, transferActions }) =>
             this.tip({ uuid: this.post.uuid, transaction, transferActions }),

@@ -316,7 +316,7 @@ async function createTransferActions(actions, progressCallback) {
     const nonce = Date.now();
     let nTx = 0;
 
-    for (const {
+    for (let {
         chain,
         senderPrivateKey,
         recipientPublicKey,
@@ -336,7 +336,7 @@ async function createTransferActions(actions, progressCallback) {
         body.writeAsset(amount);
         body.writeAsset(fee);
         body.writeUInt64(nonce + nTx);
-        body.writeString(memo);
+        body.writeString(''); // DEPRECATED: memo
 
         const bodyBuffer = body.toBuffer();
 
@@ -353,6 +353,19 @@ async function createTransferActions(actions, progressCallback) {
         const trxBuffer = trx.toBuffer();
         const signature = await signHash(ecc.sha256(trxBuffer, 'hex'), senderPrivateKey);
 
+        // memo is now stored in metadata to by pass ~170ch limit
+        if (memo) {
+            if (metadata) {
+                metadata = JSON.stringify({
+                    ...JSON.parse(metadata),
+                    memo: memo
+                });
+            }
+            else {
+                metadata = JSON.stringify({ memo: memo });
+            }
+        }
+
         const transfer = {
             amount: amount,
             fee: fee,
@@ -360,7 +373,7 @@ async function createTransferActions(actions, progressCallback) {
             from: senderPublicKey,
             to: recipientPublicKey,
             nonce: nonce + nTx,
-            memo: memo,
+            memo: '', // deprecated (stored in metadata)
             sig: signature,
             metadata: metadata
         };

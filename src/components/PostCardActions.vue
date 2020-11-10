@@ -208,7 +208,7 @@ export default {
           displayName: r.post.displayName,
           memo: `raindrop to ${
             r.post.displayName
-          } for ${this.post.getRelativeUrl(false)}`,
+          } for ${this.post.getRelativeUrl()}`,
           uuid: r.post.uuid,
           callback: ({ transaction, transferActions }) =>
             this.$emit("tip", {
@@ -330,7 +330,7 @@ export default {
             displayName: this.post.displayName,
             memo: `tip to ${
               this.post.displayName
-            } for ${this.post.getRelativeUrl(false)}`,
+            } for ${this.post.getRelativeUrl()}`,
             uuid: this.post.uuid,
             callback: ({ transaction, transferActions }) =>
               this.$emit("tip", {

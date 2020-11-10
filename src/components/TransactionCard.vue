@@ -114,7 +114,17 @@ export default {
           this.memoHtml = `Withdraw to ${to}`;
         }
       } else {
-        const memo = this.trx.data.memo;
+        let memo = this.trx.data.memo;
+
+        // 11/10/2020 -- memo field in data is deprecated, memo may be stored in metadata
+        if (!memo) {
+          try {
+            memo = this.trx.data.metadata.memo || "";
+          } catch (ex) {
+            // pass
+          }
+        }
+
         let memoHtml = sanitize(memo);
 
         memoHtml = memoHtml.replace(/\/tag\/[a-zA-Z0-9/_-]+/, function (url) {

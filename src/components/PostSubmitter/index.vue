@@ -545,7 +545,7 @@ export default {
 
           let memo = `tip from ${this.displayName} to ${recipientName}`;
           if (this.parentPost) {
-            memo += ` for ${this.parentPost.getRelativeUrl(false)}`;
+            memo += ` for ${this.parentPost.getRelativeUrl()}`;
           }
 
           transferActions.push({
