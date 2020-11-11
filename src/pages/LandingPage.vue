@@ -1,83 +1,22 @@
 <template>
   <div>
-    <v-row no-gutters>
+    <v-row no-gutters class="mb-2">
       <v-col :cols="6">
-        <v-carousel
-          v-model="item"
-          cycle
+        <v-card
           height="400"
-          hide-delimiter-background
-          :show-arrows="false"
-          :interval="10000"
+          color="primary"
+          flat
+          class="rounded-0 d-flex justify-center align-center"
         >
-          <v-carousel-item>
-            <v-card
-              height="400"
-              color="primary"
-              flat
-              class="rounded-0 d-flex justify-center align-center"
-            >
-              <v-card-text>
-                <div class="mt-4 mb-4 ml-4 mr-4">
-                  <h1 class="mb-4">A new world of Discussions</h1>
-                  <p>
-                    Bringing you the best from anywhere. Be a part of
-                    everywhere.
-                  </p>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-carousel-item>
-          <v-carousel-item>
-            <v-card
-              height="400"
-              color="primary"
-              flat
-              class="rounded-0 d-flex justify-center align-center"
-            >
-              <v-card-text>
-                <div class="mt-4 mb-4 ml-4 mr-4">
-                  <h1 class="mb-4">Getting Starting</h1>
-                  <p>Tips and tricks for making the most out of Discussions.</p>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-carousel-item>
-          <v-carousel-item>
-            <v-card
-              height="400"
-              color="primary"
-              flat
-              class="rounded-0 d-flex justify-center align-center"
-            >
-              <v-card-text>
-                <div class="mt-4 mb-4 ml-4 mr-4">
-                  <h1 class="mb-4">Get ATMOS</h1>
-                  <p>From centralized exchanges to instant swaps getting ATMOS is easy!</p>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-carousel-item>
-          <v-carousel-item>
-            <v-card
-              height="400"
-              color="primary"
-              flat
-              class="rounded-0 d-flex justify-center align-center"
-            >
-              <v-card-text>
-                <div class="mt-4 mb-4 ml-4 mr-4">
-                  <h1 class="mb-4">About Us</h1>
-                  <p>
-                    The Novusphere is a nimble team building open software and
-                    leveraging emerging technology to unite blockchains and put
-                    users in control of the next wave of connected applications.
-                  </p>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-carousel-item>
-        </v-carousel>
+          <v-card-text>
+            <div class="mt-4 mb-4 ml-4 mr-4">
+              <h1 class="mb-4">A new world of Discussions</h1>
+              <p>
+                Bringing you the best from anywhere. Be a part of everywhere.
+              </p>
+            </div>
+          </v-card-text>
+        </v-card>
       </v-col>
       <v-col :cols="6">
         <v-card
@@ -87,7 +26,7 @@
         >
           <v-card-text>
             <div class="mt-4 mb-4 ml-4 mr-4">
-              <div v-if="item == 0">
+              <div>
                 <p>
                   A whole new atmosphere of freedom. Free to say, to do, to
                   transact and to build together. Built with intensity, built
@@ -104,28 +43,145 @@
                   world.
                 </p>
               </div>
-              <div v-else-if="item == 1">
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row no-gutters class="mb-2">
+      <v-col :cols="6">
+        <v-card
+          height="400"
+          color="primary"
+          flat
+          class="rounded-0 d-flex justify-center align-center"
+        >
+          <v-card-text>
+            <div class="mt-4 mb-4 ml-4 mr-4">
+              <h1 class="mb-4">Getting Starting</h1>
+              <p>Tips and tricks for making the most out of Discussions.</p>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col :cols="6">
+        <v-card
+          height="400"
+          flat
+          class="rounded-0 d-flex justify-center align-center"
+        >
+          <v-card-text>
+            <div class="mt-4 mb-4 ml-4 mr-4">
+              <div>
                 <p>
                   <a href="javascript:void{0}">Register</a> and join the
                   conversation,
-                  <router-link :to="'/discover/user'">follow creators</router-link>,
-                  <router-link :to="'/tag/all'">join topics</router-link>,
-                  <router-link :to="'/tag/faq/79m7jhh11ene/creating-post/79m7jhh11ene'">create new ones</router-link>,
-                  and check out our <router-link :to="'/tag/faq/quvwb1feu9hg/faq-working-guide-to-discussions-app'">FAQ</router-link>.
+                  <router-link :to="'/discover/user'"
+                    >follow creators</router-link
+                  >, <router-link :to="'/tag/all'">join topics</router-link>,
+                  <router-link
+                    :to="'/tag/faq/79m7jhh11ene/creating-post/79m7jhh11ene'"
+                    >create new ones</router-link
+                  >, and check out our
+                  <router-link
+                    :to="'/tag/faq/quvwb1feu9hg/faq-working-guide-to-discussions-app'"
+                    >FAQ</router-link
+                  >.
                 </p>
               </div>
-              <div v-else-if="item == 2">
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row no-gutters class="mb-2">
+      <v-col :cols="6">
+        <v-card
+          height="400"
+          color="primary"
+          flat
+          class="rounded-0 d-flex justify-center align-center"
+        >
+          <v-card-text>
+            <div class="mt-4 mb-4 ml-4 mr-4">
+              <h1 class="mb-4">Get ATMOS</h1>
+              <p>
+                From centralized exchanges to instant swaps getting ATMOS is
+                easy!
+              </p>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col :cols="6">
+        <v-card
+          height="400"
+          flat
+          class="rounded-0 d-flex justify-center align-center"
+        >
+          <v-card-text>
+            <div class="mt-4 mb-4 ml-4 mr-4">
+              <div>
                 <p>
-                  ATMOS tokens are the underlying technology that power the platform and the smart-contracts. It can be utilized to pay for locked content, advertisements, fund transactions, visual and user experience enhancements.
+                  ATMOS tokens are the underlying technology that power the
+                  platform and the smart-contracts. It can be utilized to pay
+                  for locked content, advertisements, fund transactions, visual
+                  and user experience enhancements.
                 </p>
                 <p>
-                  ATMOS can be obtained via the exchanges <a href="https://www.probit.com/app/exchange/ATMOS-BTC" target="_blank">ProBit</a> or <a href="https://newdex.io/trade/novusphereio-atmos-eos" target="_blank">NewDex</a>.
+                  ATMOS can be obtained via the exchanges
+                  <a
+                    href="https://www.probit.com/app/exchange/ATMOS-BTC"
+                    target="_blank"
+                    >ProBit</a
+                  >
+                  or
+                  <a
+                    href="https://newdex.io/trade/novusphereio-atmos-eos"
+                    target="_blank"
+                    >NewDex</a
+                  >.
                 </p>
                 <p>
-                  In addition to ATMOS, Discussions has provided a way for users to obtain tokens from other communities via <router-link :to="'/wallet/swap'">instant swaps</router-link>.
+                  In addition to ATMOS, Discussions has provided a way for users
+                  to obtain tokens from other communities via
+                  <router-link :to="'/wallet/swap'">instant swaps</router-link>.
                 </p>
               </div>
-              <div v-else-if="item == 3">
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row no-gutters class="mb-2">
+      <v-col :cols="6">
+        <v-card
+          height="400"
+          color="primary"
+          flat
+          class="rounded-0 d-flex justify-center align-center"
+        >
+          <v-card-text>
+            <div class="mt-4 mb-4 ml-4 mr-4">
+              <h1 class="mb-4">About Us</h1>
+              <p>
+                The Novusphere is a nimble team building open software and
+                leveraging emerging technology to unite blockchains and put
+                users in control of the next wave of connected applications.
+              </p>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col :cols="6">
+        <v-card
+          height="400"
+          flat
+          class="rounded-0 d-flex justify-center align-center"
+        >
+          <v-card-text>
+            <div class="mt-4 mb-4 ml-4 mr-4">
+              <div>
                 <v-list>
                   <v-list-item>
                     <UserProfileLink
