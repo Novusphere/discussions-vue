@@ -1,12 +1,7 @@
 <template>
   <v-card>
     <v-list>
-      <v-list-item>
-        <span class="text-h6">
-          <v-icon>chat</v-icon>
-          <span>New</span>
-        </span>
-      </v-list-item>
+      <v-subheader><v-icon>chat</v-icon>New Replies</v-subheader>
       <v-list-item v-for="(p, i) in posts" :key="i">
         <span class="text-decoration-ellipsis">
           <PostThreadLink :post="p">
