@@ -457,7 +457,7 @@ export default @Controller('/data') class DataController {
                     let domParser = createDOMParser();
                     let document = domParser.parseFromString(oembedResult, 'text/html');
                     const ogImage = document.querySelector('meta[property="og:image"]');
-                    const embedUrl = oembedResult.match(/https:\/\/lbry.tv\/\$\/embed\/[a-zA-Z0-9_\-\/().]+/);
+                    const embedUrl = oembedResult.match(/https:\/\/lbry.tv\/\$\/embed\/[a-zA-Z0-9_\-\/().!]+/);
 
                     if (embedUrl && embedUrl.length > 0) {
                         raw = {
