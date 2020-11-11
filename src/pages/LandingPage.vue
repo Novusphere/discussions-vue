@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row no-gutters class="mb-2">
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           color="primary"
@@ -18,7 +18,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           flat
@@ -49,7 +49,7 @@
       </v-col>
     </v-row>
     <v-row no-gutters class="mb-2">
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           color="primary"
@@ -64,7 +64,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           flat
@@ -95,7 +95,7 @@
       </v-col>
     </v-row>
     <v-row no-gutters class="mb-2">
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           color="primary"
@@ -113,7 +113,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           flat
@@ -154,7 +154,7 @@
       </v-col>
     </v-row>
     <v-row no-gutters class="mb-2">
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           color="primary"
@@ -173,7 +173,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col :cols="6">
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card
           height="400"
           flat
