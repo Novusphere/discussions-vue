@@ -264,7 +264,7 @@ function withdrawAction({ chain, senderPrivateKey, account, amount, fee, nonce, 
         amount: amount,
         fee: fee,
         nonce: nonce,
-        memo: `${account}:${memo || ''}`
+        _memo: `${account}:${memo || ''}` // needs to use legacy memo field
     };
 }
 
@@ -323,6 +323,7 @@ async function createTransferActions(actions, progressCallback) {
         amount,
         fee,
         //nonce,
+        _memo, // legacy support for memo
         memo,
         metadata
     } of actions) {
@@ -336,7 +337,7 @@ async function createTransferActions(actions, progressCallback) {
         body.writeAsset(amount);
         body.writeAsset(fee);
         body.writeUInt64(nonce + nTx);
-        body.writeString(''); // DEPRECATED: memo
+        body.writeString(_memo || ''); // DEPRECATED: memo
 
         const bodyBuffer = body.toBuffer();
 
@@ -373,7 +374,7 @@ async function createTransferActions(actions, progressCallback) {
             from: senderPublicKey,
             to: recipientPublicKey,
             nonce: nonce + nTx,
-            memo: '', // deprecated (stored in metadata)
+            memo: _memo || '', // deprecated (stored in metadata)
             sig: signature,
             metadata: metadata
         };
