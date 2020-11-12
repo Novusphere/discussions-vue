@@ -151,15 +151,8 @@
 
       <ImageViewer ref="imgViewer" :images="imgViewerSrcs" />
 
-      <v-container v-if="$vuetify.breakpoint.mobile">
-        <v-row no-gutters>
-          <v-col cols="12">
-            <router-view></router-view>
-          </v-col>
-        </v-row>
-      </v-container>
-      <v-container v-else>
-        <v-row>
+      <v-container>
+        <v-row :no-gutters="$vuetify.breakpoint.mobile">
           <v-col cols="12">
             <router-view></router-view>
           </v-col>
