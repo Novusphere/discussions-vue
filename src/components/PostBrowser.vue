@@ -55,7 +55,7 @@ export default {
     },
     async postSort() {
       if (this.noSort) return;
-      
+
       if (this.cursor) {
         this.cursor.sort = this.postSort;
       }
@@ -63,33 +63,28 @@ export default {
     },
   },
   async created() {
-    if (this.cursor) {
-      this.cursor.votePublicKey = this.isLoggedIn
+    this.setUserContext(this.cursor);
+  },
+  methods: {
+    setUserContext(cursor) {
+      if (!cursor) return;
+
+      cursor.reset();
+
+      cursor.moderatorKeys =
+        this.delegatedMods.length > 0
+          ? this.delegatedMods.map((dm) => dm.pub)
+          : undefined;
+
+      cursor.votePublicKey = this.isLoggedIn
         ? this.keys.arbitrary.pub
         : undefined;
 
-      if (!this.noSort) this.cursor.sort = this.postSort;
-    }
-  },
-  methods: {
+      if (!this.noSort) cursor.sort = this.postSort;
+    },
     reset(cursor) {
       cursor = cursor || this.cursor;
-      
-      if (cursor) {
-        cursor.moderatorKeys =
-          this.delegatedMods.length > 0
-            ? this.delegatedMods.map((dm) => dm.pub)
-            : undefined;
-
-        cursor.votePublicKey = this.isLoggedIn
-          ? this.keys.arbitrary.pub
-          : undefined;
-
-        if (!this.noSort) cursor.sort = this.postSort;
-
-        cursor.reset();
-      }
-
+      this.setUserContext(cursor);
       this.posts = [];
 
       if (this.$refs.scroller) {
