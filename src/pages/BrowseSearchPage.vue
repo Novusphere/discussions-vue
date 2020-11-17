@@ -1,7 +1,7 @@
 <template>
   <BrowsePageLayout no-header>
     <template v-slot:content>
-      <PostBrowser ref="browser" :cursor="cursor" />
+      <PostBrowser ref="browser" :cursor="cursor" no-sort />
     </template>
   </BrowsePageLayout>
 </template>

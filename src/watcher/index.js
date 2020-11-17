@@ -74,4 +74,10 @@ async function startActionWriter(chain, contract, table, watcher) {
 
     // gm - telos
     startActionWriter('telos', config.contract.uid, config.table.uid, telosGreymass);
+
+    // kill process on timer expected to be restarted by manager
+    if (siteConfig.exit) {
+        setTimeout(() => process.exit(), siteConfig.exit);
+    }
+
 })();
