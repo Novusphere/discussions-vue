@@ -2,15 +2,35 @@
   <v-card>
     <v-card-text>
       <v-form ref="form" v-model="valid" @submit.prevent>
+        <v-select
+          :items="['EOS', 'Telos']"
+          label="Chain"
+          v-model="chain"
+          required
+        ></v-select>
+
         <UserAssetSelect
+          v-if="chain == 'EOS'"
           :exclude="['EOSDT', 'TLOS']"
           :label="'Pay with Asset'"
           :item-text="`symbol`"
           v-model="symbol"
           required
         ></UserAssetSelect>
+        <v-text-field
+          v-else
+          label="Pay with Asset"
+          v-model="symbol"
+          required
+          disabled
+        />
 
-        <v-text-field v-model="total" label="Amount" required disabled></v-text-field>
+        <v-text-field
+          v-model="total"
+          label="Amount"
+          required
+          disabled
+        ></v-text-field>
 
         <v-text-field
           v-model="account"
@@ -33,10 +53,10 @@
           label="Password"
         ></v-text-field>
 
-        <TransactionSubmitText
-          :link="transactionLink"
-          :error="transactionError"
-        >Your Account has been successfully created on the network.</TransactionSubmitText>
+        <TransactionSubmitText :link="transactionLink" :error="transactionError"
+          >Your Account has been successfully created on the
+          network.</TransactionSubmitText
+        >
 
         <v-btn
           :block="$vuetify.breakpoint.mobile"
@@ -44,7 +64,11 @@
           @click="submit()"
           :disabled="!valid || disableSubmit"
         >
-          <v-progress-circular class="mr-2" indeterminate v-show="disableSubmit"></v-progress-circular>
+          <v-progress-circular
+            class="mr-2"
+            indeterminate
+            v-show="disableSubmit"
+          ></v-progress-circular>
           <span>Create</span>
         </v-btn>
 
@@ -53,8 +77,12 @@
           v-show="publicKey == this.keys.wallet.pub"
           color="primary"
           :block="$vuetify.breakpoint.mobile"
-          :class="{ 'ml-2': !$vuetify.breakpoint.mobile, 'mt-2': $vuetify.breakpoint.mobile }"
-        >Show Private Key</v-btn>
+          :class="{
+            'ml-2': !$vuetify.breakpoint.mobile,
+            'mt-2': $vuetify.breakpoint.mobile,
+          }"
+          >Show Private Key</v-btn
+        >
       </v-form>
     </v-card-text>
   </v-card>
@@ -123,6 +151,7 @@ export default {
     disableSubmit: false,
     password: "",
     valid: false,
+    chain: "EOS",
     symbol: "",
     total: 0,
     amount: 0,
@@ -133,6 +162,13 @@ export default {
     transactionError: "",
   }),
   watch: {
+    chain() {
+      if (this.chain == "EOS") {
+        this.symbol = "EOS";
+      } else if (this.chain == "Telos") {
+        this.symbol = "TLOS";
+      }
+    },
     async symbol() {
       await this.refreshQuote();
     },
@@ -152,6 +188,10 @@ export default {
     async refreshQuote() {
       if (this.symbol == "EOS") {
         this.amount = "0.5000 EOS";
+        this.fee = await getFeeForAmount(this.amount);
+        this.total = await sumAsset(this.amount, this.fee);
+      } else if (this.symbol == "TLOS") {
+        this.amount = "0.5000 TLOS";
         this.fee = await getFeeForAmount(this.amount);
         this.total = await sumAsset(this.amount, this.fee);
       } else {
@@ -217,6 +257,26 @@ export default {
           await sleep(200);
 
           receipt = await transfer([request]);
+        } else if (this.symbol == "TLOS") {
+          const request = withdrawAction({
+            chain: token.p2k.chain,
+            senderPrivateKey: walletPrivateKey,
+            account: `signuptelos1`,
+            amount: await createAsset(this.amount, token.symbol),
+            fee: await createAsset(this.fee, token.symbol),
+            nonce: Date.now(),
+            memo: accountCreationMemo,
+          });
+
+          this.disableSubmit = true;
+          await sleep(200);
+
+          receipt = await transfer(
+            [request],
+            undefined,
+            undefined,
+            token.chain
+          );
         } else {
           const fromAsset = await createAsset(this.amount, token.symbol);
           const withdraw = withdrawAction({

@@ -25,7 +25,7 @@
         <v-tab :to="`/wallet/deposit`">Deposit</v-tab>
         <v-tab :to="`/wallet/withdraw`">Withdraw</v-tab>
         <v-tab :to="`/wallet/swap`">Swap</v-tab>
-        <v-tab :to="`/wallet/eos-account`">EOS Account</v-tab>
+        <v-tab :to="`/wallet/eos-account`">EOSIO Account</v-tab>
       </v-tabs>
     </template>
     <template v-slot:content>
