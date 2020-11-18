@@ -60,17 +60,13 @@ async function connectWallet(name) {
     const walletProviders = accessContext.getWalletProviders();
     const selectedProvider = walletProviders[getWalletNames().findIndex(wn => wn == name)];
 
-    //try {
     const wallet = accessContext.initWallet(selectedProvider);
     await wallet.connect();
+    if (name == 'scatter') {
+        await wallet.logout();
+    }
     await wallet.login();
     return wallet;
-    //}
-    //catch (ex) {
-    //    console.log(selectedProvider.meta.name, ex);
-    //}
-
-    //throw new Error(`Unable to connect to any EOS wallet`);
 }
 
 async function getAPI(rpcEndpoint, keys = [], rpcConfig = {}) {

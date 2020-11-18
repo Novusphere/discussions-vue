@@ -8,7 +8,7 @@
         </v-btn>
       </template>
       <v-list>
-        <v-list-item v-for="(wn, i) in walletNames" :key="i">
+        <v-list-item v-for="(wn, i) in [...walletNames, 'wombat']" :key="i">
           <v-btn text @click="connect(wn)">{{ wn }}</v-btn>
         </v-list-item>
       </v-list>
@@ -20,11 +20,11 @@
   </div>
   <div v-else>
     <p class="text-center" style="margin-bottom: 0px">OR</p>
-    <v-row no-gutters :align="'center'" :justify="'center'">
-      <v-col v-for="(wn, i) in walletNames" :key="i">
-        <v-btn :block="$vuetify.breakpoint.mobile" color="lightgray" text outlined @click="connect(wn)" :disabled="waiting">
+    <v-row :align="'center'" :justify="'center'">
+      <v-col :cols="4" v-for="(wn, i) in [...walletNames, 'wombat']" :key="i">
+        <v-btn style="min-width: 150px" :block="$vuetify.breakpoint.mobile" color="lightgray" text outlined @click="connect(wn)" :disabled="waiting">
           <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>
-          <img v-show="!waiting" class="mr-1" :src="`/static/wallet/${wn}.png`" style="width: 32px; height: 32px" />
+          <img v-show="!waiting" class="mr-1" :src="`/static/wallet/${wn}.png`" style="width: 24px; height: 24px" />
           {{ wn }}
         </v-btn>
       </v-col>
@@ -93,6 +93,12 @@ export default {
       }
     },
     async connect(wn) {
+
+      // alias
+      if (wn == 'wombat') {
+        wn = 'scatter';
+      }
+
       this.waiting = true;
       try {
         this.$emit("start-connect");
