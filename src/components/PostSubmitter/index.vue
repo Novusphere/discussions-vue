@@ -21,10 +21,12 @@
           <span>#{{ item }}</span>
         </template>
         <template v-slot:prepend>
-          <TagIcon :tag="sub" />
+          <PublicKeyIcon :publicKey="keys.arbitrary.pub" v-if="sub =='blog'" />
+          <TagIcon :tag="sub" v-else />
         </template>
         <template v-slot:item="{ item }">
-          <TagIcon :tag="item" />
+          <PublicKeyIcon :publicKey="keys.arbitrary.pub" v-if="item =='blog'" />
+          <TagIcon :tag="item" v-else />
           <span class="ml-2">#{{ item }}</span>
         </template>
       </v-select>
@@ -107,6 +109,7 @@ import { mapState, mapGetters } from "vuex";
 import PayWall from "./PayWall";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import TagIcon from "@/components/TagIcon";
+import PublicKeyIcon from "@/components/PublicKeyIcon";
 import PostCard from "@/components/PostCard";
 import { waitFor, generateUuid } from "@/novusphere-js/utility";
 import {
@@ -134,6 +137,7 @@ export default {
     PostCard,
     PayWall,
     TagIcon,
+    PublicKeyIcon
   },
   props: {
     showPaywall: Boolean,

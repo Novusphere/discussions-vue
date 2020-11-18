@@ -159,7 +159,7 @@ export default {
       setTimeout(() => this.syncEditorTags(), 1000);
     },
     async setTag() {
-      let tag = "all";
+      let tag = "blog";
 
       if (this.$route.params.tags) {
         tag = this.$route.params.tags.split(",")[0];
