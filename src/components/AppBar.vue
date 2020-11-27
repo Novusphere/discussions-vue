@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app hide-on-scroll clipped-left clipped-right color="secondary">
+  <v-app-bar dense app hide-on-scroll clipped-left clipped-right color="secondary">
     <v-row v-if="!$vuetify.breakpoint.mobile">
       <v-col class="d-flex justify-start align-center">
         <v-app-bar-nav-icon @click="$emit('drawer')"></v-app-bar-nav-icon>

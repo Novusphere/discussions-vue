@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="!post.isSpam || !hideSpam" :class="`post-card post-card-${this.post.transaction}`">
+  <v-card outlined v-if="!post.isSpam || !hideSpam" :class="`post-card post-card-${this.post.transaction}`">
     <v-row no-gutters class="overline">
       <div class="pl-3 mt-1">
         <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || post.threadTree">
@@ -59,7 +59,7 @@
       <div v-else>
         <v-row no-gutters class="headline" v-if="isThread && post.title">
           <v-col cols="12">
-            <div class="pl-3 pr-3">
+            <div class="pl-1 mt-0">
               <PostThreadLink
                 :class="{'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
                 :post="post"
@@ -70,7 +70,7 @@
 
         <v-expansion-panels flat tile :value="expanded">
           <v-expansion-panel>
-            <v-expansion-panel-content>
+            <v-expansion-panel-content class="mt-0 mb-0">
               <v-card flat :color="contentBackgroundColor" v-if="isPaidLockContent">
                 <div class="text-center">
                   <p v-if="!isPaidLockForever">
@@ -107,7 +107,7 @@
 
     <slot name="actions" :tip="tip"></slot>
 
-    <div class="post-replies ml-1">
+    <div class="post-replies ml-2 mb-n1 mt-1">
       <slot name="replies"></slot>
     </div>
   </v-card>
@@ -542,7 +542,7 @@ export default {
   }
 
   .post-replies {
-    border-left: 2px solid lightgray;
+    border-left: 3px solid lightgray;
   }
 
   .content-fade {

@@ -116,10 +116,9 @@
             </v-btn>
           </v-card-title>
           <v-card-text :class="{ dark: darkMode, light: !darkMode }">
-            <v-row>
+            <v-row no-gutters>
               <v-col :cols="12">
                 <ThreadBrowser
-                  class="mt-3"
                   :referenceId="threadDialogRef1"
                   :referenceId2="threadDialogRef2"
                 />
@@ -151,7 +150,7 @@
 
       <ImageViewer ref="imgViewer" :images="imgViewerSrcs" />
 
-      <v-container>
+      <v-container fluid>
         <v-row :no-gutters="$vuetify.breakpoint.mobile">
           <v-col cols="12">
             <router-view></router-view>
@@ -369,6 +368,7 @@ export default {
         }
       }
     );
+
   },
   beforeDestroy() {},
   methods: {
@@ -417,17 +417,17 @@ export default {
 <style lang="scss">
 html {
   margin-right: calc(-1 * (100vw - 100%));
-  overflow-x: hidden;
+  //overflow-x: hidden;
   overflow-y: scroll;
 }
 
 body {
   //position: relative;
-  overflow-x: hidden;
+  //overflow-x: hidden;
   overflow-y: scroll;
 }
 
-/* I LOVE IOS AND SAFARI IT'S MY FAVORITE BROWSER */
+/* iOS bug fixes */
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
   only screen and (-o-min-device-pixel-ratio: 3/2),
   only screen and (min--moz-device-pixel-ratio: 1.5),
@@ -435,9 +435,9 @@ body {
   html,
   body {
     background-color: #ecf0f1;
-    height: 100%;
     width: 100%;
-    overflow-x: hidden;
+    //height: 100%; -- removed as it breaks hide-on-scroll for the AppBar
+    //overflow-x: hidden;
 
     -webkit-overflow-scrolling: touch;
 

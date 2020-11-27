@@ -1,8 +1,8 @@
 <template>
   <div>
-    <v-row v-if="!noHeader">
+    <v-row no-gutters v-if="!noHeader">
       <v-col cols="12">
-        <v-card flat>
+        <v-card flat outlined>
           <img v-if="false" class="md-banner" :src="banner" />
           <v-card-text v-if="this.$slots.header">
             <slot name="header"></slot>
@@ -11,7 +11,7 @@
         <slot name="header2"></slot>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row no-gutters>
       <v-col :cols="12">
         <v-progress-linear v-if="needSyncAccount" indeterminate></v-progress-linear>
         <slot v-else name="content"></slot>
