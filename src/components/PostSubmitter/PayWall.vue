@@ -1,107 +1,134 @@
 <template>
-  <v-expansion-panels class="mt-2" flat tile :value="false">
-    <v-expansion-panel>
-      <v-expansion-panel-header style="padding-left: 0px !important">Timelock Content</v-expansion-panel-header>
-      <v-expansion-panel-content>
-        <v-switch v-model="paywallEnabled" label="Enabled"></v-switch>
-        <v-form ref="paywallForm" :disabled="!paywallEnabled">
-          <v-row>
-            <v-col :cols="6">
-              <v-text-field
-                label="Quantity"
-                v-model="paywallAssetAmount"
-              ></v-text-field>
-            </v-col>
-            <v-col :cols="6" v-if="false">
-              <UserAssetSelect
-                no-amount
-                :item-text="`symbol`"
-                allow-zero
-                v-model="paywallAssetSymbol"
-                required
-              ></UserAssetSelect>
-            </v-col>
-            <v-col :cols="6">
-              <v-text-field label="Asset" v-model="paywallAssetSymbol" readonly disabled></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col :cols="6">
-              <v-select
-                prepend-icon="timer"
-                :items="['1 hour', ...Array.from(new Array(11)).map((_, i) => `${i+2} hours`)]"
-                v-model="simpleExpiry"
-                label="Expiration"
-              ></v-select>
-            </v-col>
-          </v-row>
-          <v-row v-if="false">
-            <v-col :cols="6">
-              <v-menu
-                v-model="menu1"
-                ref="menu"
-                :close-on-content-click="false"
-                :return-value.sync="paywallExpireDate"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
+  <div>
+    <v-switch v-model="paywallEnabled" label="Timelock Content"></v-switch>
+    <v-expansion-panels flat tile v-model="panel">
+      <v-expansion-panel>
+        <v-expansion-panel-content>
+          <v-form ref="paywallForm" :disabled="!paywallEnabled">
+            <v-row>
+              <v-col :cols="6">
+                <v-text-field
+                  label="Quantity"
+                  v-model="paywallAssetAmount"
+                ></v-text-field>
+              </v-col>
+              <v-col :cols="6" v-if="false">
+                <UserAssetSelect
+                  no-amount
+                  :item-text="`symbol`"
+                  allow-zero
+                  v-model="paywallAssetSymbol"
+                  required
+                ></UserAssetSelect>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  label="Asset"
+                  v-model="paywallAssetSymbol"
+                  readonly
+                  disabled
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col :cols="6">
+                <v-select
+                  prepend-icon="timer"
+                  :items="[
+                    '1 hour',
+                    ...Array.from(new Array(23)).map(
+                      (_, i) => `${i + 2} hours`
+                    ),
+                  ]"
+                  v-model="simpleExpiry"
+                  label="Expiration"
+                ></v-select>
+              </v-col>
+            </v-row>
+            <v-row v-if="false">
+              <v-col :cols="6">
+                <v-menu
+                  v-model="menu1"
+                  ref="menu"
+                  :close-on-content-click="false"
+                  :return-value.sync="paywallExpireDate"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="paywallExpireDate"
+                      label="Expiration Date"
+                      prepend-icon="event"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
                     v-model="paywallExpireDate"
-                    label="Expiration Date"
-                    prepend-icon="event"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker v-model="paywallExpireDate" no-title scrollable>
-                  <v-spacer></v-spacer>
-                  <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
-                  <v-btn text color="primary" @click="$refs.menu.save(paywallExpireDate)">OK</v-btn>
-                </v-date-picker>
-              </v-menu>
-            </v-col>
-            <v-col :cols="6">
-              <v-menu
-                v-model="menu2"
-                ref="menu2"
-                :close-on-content-click="false"
-                :nudge-right="40"
-                :return-value.sync="paywallExpireTime"
-                transition="scale-transition"
-                offset-y
-                max-width="290px"
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
+                    no-title
+                    scrollable
+                  >
+                    <v-spacer></v-spacer>
+                    <v-btn text color="primary" @click="menu = false"
+                      >Cancel</v-btn
+                    >
+                    <v-btn
+                      text
+                      color="primary"
+                      @click="$refs.menu.save(paywallExpireDate)"
+                      >OK</v-btn
+                    >
+                  </v-date-picker>
+                </v-menu>
+              </v-col>
+              <v-col :cols="6">
+                <v-menu
+                  v-model="menu2"
+                  ref="menu2"
+                  :close-on-content-click="false"
+                  :nudge-right="40"
+                  :return-value.sync="paywallExpireTime"
+                  transition="scale-transition"
+                  offset-y
+                  max-width="290px"
+                  min-width="290px"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="paywallExpireTime"
+                      label="Expiration Time"
+                      prepend-icon="access_time"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-time-picker
                     v-model="paywallExpireTime"
-                    label="Expiration Time"
-                    prepend-icon="access_time"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-time-picker
-                  v-model="paywallExpireTime"
-                  full-width
-                  @click:minute="$refs.menu2.save(paywallExpireTime)"
-                ></v-time-picker>
-              </v-menu>
-            </v-col>
-          </v-row>
-          <v-row v-if="false">
-            <v-col :cols="12">
-              <v-btn :disabled="!paywallEnabled" color="primary" @click="clearPaywall()">Clear</v-btn>
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
-  </v-expansion-panels>
+                    full-width
+                    @click:minute="$refs.menu2.save(paywallExpireTime)"
+                  ></v-time-picker>
+                </v-menu>
+              </v-col>
+            </v-row>
+            <v-row v-if="false">
+              <v-col :cols="12">
+                <v-btn
+                  :disabled="!paywallEnabled"
+                  color="primary"
+                  @click="clearPaywall()"
+                  >Clear</v-btn
+                >
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
+  </div>
 </template>
 
 <script>
@@ -115,7 +142,11 @@ export default {
     UserAssetSelect,
   },
   props: {},
-  watch: {},
+  watch: {
+    paywallEnabled() {
+      this.panel = this.paywallEnabled ? 0 : -1;
+    },
+  },
   computed: {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
@@ -130,7 +161,9 @@ export default {
 
       if (this.paywallAssetSymbol == "ATMOS") {
         if (parseFloat(asset) < 1)
-          return { $error: `Minimum is 1.000 ${this.paywallAssetSymbol} for time lock content` };
+          return {
+            $error: `Minimum is 1.000 ${this.paywallAssetSymbol} for time lock content`,
+          };
       }
 
       if (!this.simpleExpiry)
@@ -169,6 +202,7 @@ export default {
     },
   },
   data: () => ({
+    panel: -1,
     paywallEnabled: false,
     paywallAssetAmount: null,
     paywallAssetSymbol: "ATMOS",

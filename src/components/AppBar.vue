@@ -1,5 +1,12 @@
 <template>
-  <v-app-bar dense app hide-on-scroll clipped-left clipped-right color="secondary">
+  <v-app-bar
+    dense
+    app
+    :hide-on-scroll="!isSafari"
+    clipped-left
+    clipped-right
+    color="secondary"
+  >
     <v-row v-if="!$vuetify.breakpoint.mobile">
       <v-col class="d-flex justify-start align-center">
         <v-app-bar-nav-icon @click="$emit('drawer')"></v-app-bar-nav-icon>
@@ -89,6 +96,8 @@
 </template>
 
 <script>
+import { safariMixin } from "@/mixins/safari";
+
 //import AppNav from "@/components/AppNav";
 //import AboutUsCard from "@/components/AboutUsCard";
 import UserProfileLink from "@/components/UserProfileLink";
@@ -97,6 +106,7 @@ import { mapState, mapGetters } from "vuex";
 
 export default {
   name: "AppBar",
+  mixins: [safariMixin],
   components: {
     //AppNav,
     //AboutUsCard,

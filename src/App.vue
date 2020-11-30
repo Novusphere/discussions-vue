@@ -368,7 +368,6 @@ export default {
         }
       }
     );
-
   },
   beforeDestroy() {},
   methods: {
@@ -417,33 +416,24 @@ export default {
 <style lang="scss">
 html {
   margin-right: calc(-1 * (100vw - 100%));
-  //overflow-x: hidden;
   overflow-y: scroll;
 }
 
 body {
-  //position: relative;
-  //overflow-x: hidden;
   overflow-y: scroll;
+  background-color: #ecf0f1;
+  .dark {
+    background: #000000;
+  }
 }
 
-/* iOS bug fixes */
 @media only screen and (-webkit-min-device-pixel-ratio: 1.5),
   only screen and (-o-min-device-pixel-ratio: 3/2),
   only screen and (min--moz-device-pixel-ratio: 1.5),
   only screen and (min-device-pixel-ratio: 1.5) {
   html,
   body {
-    background-color: #ecf0f1;
-    width: 100%;
-    //height: 100%; -- removed as it breaks hide-on-scroll for the AppBar
-    //overflow-x: hidden;
-
     -webkit-overflow-scrolling: touch;
-
-    .dark {
-      background: #000000;
-    }
   }
 }
 

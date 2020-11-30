@@ -91,8 +91,7 @@
           <span v-show="!savingDrafts || !$vuetify.breakpoint.mobile">Save Draft</span>
         </v-btn>
       </div>
-      <div style="height: 5px"></div>
-      <PayWall ref="paywall" v-if="showPaywall" />
+      <PayWall class="mt-1" ref="paywall" v-if="showPaywall" />
     </div>
     <div v-else>
       <v-btn
