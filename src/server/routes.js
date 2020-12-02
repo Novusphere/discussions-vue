@@ -143,7 +143,8 @@ const routes = [
                         component: `TestBrowsePostsPage`
                     }
                 ]
-            }
+            },
+            { path: 'staking', component: 'StakingPage' }
         ]
     }
 ]

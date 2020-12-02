@@ -12,22 +12,15 @@
                   v-model="paywallAssetAmount"
                 ></v-text-field>
               </v-col>
-              <v-col :cols="6" v-if="false">
+              <v-col :cols="6">
                 <UserAssetSelect
                   no-amount
+                  :include="['ATMOS', 'TLOS']"
                   :item-text="`symbol`"
                   allow-zero
                   v-model="paywallAssetSymbol"
                   required
                 ></UserAssetSelect>
-              </v-col>
-              <v-col :cols="6">
-                <v-text-field
-                  label="Asset"
-                  v-model="paywallAssetSymbol"
-                  readonly
-                  disabled
-                ></v-text-field>
               </v-col>
             </v-row>
             <v-row>
@@ -159,12 +152,12 @@ export default {
       if (!isValidAsset(asset))
         return { $error: `Invalid asset or quantity selected` };
 
-      if (this.paywallAssetSymbol == "ATMOS") {
-        if (parseFloat(asset) < 1)
-          return {
-            $error: `Minimum is 1.000 ${this.paywallAssetSymbol} for time lock content`,
-          };
-      }
+      //if (this.paywallAssetSymbol == "ATMOS") {
+      if (parseFloat(asset) < 1)
+        return {
+          $error: `Minimum is 1.000 ${this.paywallAssetSymbol} for time lock content`,
+        };
+      //}
 
       if (!this.simpleExpiry)
         return { $error: `You must select an expiration time` };

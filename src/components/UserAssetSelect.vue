@@ -14,7 +14,7 @@
     </template>
     <template v-slot:item="{ item }">
       <TokenIcon :symbol="item.symbol" />
-      {{ !noAmount ? item.asset : (item.asset.split(' ')[1]) }}
+      {{ !noAmount ? item.asset : item.asset.split(" ")[1] }}
     </template>
   </v-select>
 </template>
@@ -34,6 +34,7 @@ export default {
     label: { type: String, default: "Asset" },
     disabled: Boolean,
     exclude: Array,
+    include: Array,
     value: String,
     required: Boolean,
     allowZero: Boolean,
@@ -74,8 +75,13 @@ export default {
       if (!this.isLoggedIn) return;
 
       let symbols = await getSymbols();
+
       if (this.exclude) {
         symbols = symbols.filter((s) => !this.exclude.some((s2) => s2 == s));
+      }
+
+      if (this.include) {
+        symbols = symbols.filter((s) => this.include.some((s2) => s2 == s));
       }
 
       const assets = await Promise.all(

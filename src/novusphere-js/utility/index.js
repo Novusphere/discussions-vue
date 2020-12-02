@@ -108,6 +108,16 @@ function sleep(time) {
     });
 }
 
+async function getCacheFallback(cache, name, fnAsync) {
+    try {
+        cache[name] = await fnAsync();
+    }
+    catch (ex) {
+        console.log(ex);
+    }
+    return cache[name];
+}
+
 async function getFromCache(cache, name, createAsync, expire) {
 
     let cacheObject = cache[name];
@@ -333,6 +343,7 @@ export {
     waitFor,
     sleep,
     getFromCache,
+    getCacheFallback,
     createDOMParser,
     getOEmbedHtml,
     getOEmbedMeta,

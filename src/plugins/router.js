@@ -42,6 +42,7 @@ import TestsPage from "@/pages/tests/TestsPage";
 import TestEditorPage from '@/pages/tests/TestEditorPage';
 import AnalyticsPage from "@/pages/tests/AnalyticsPage";
 import TestBrowsePostsPage from '@/pages/tests/posts/TestBrowsePostsPage';
+import StakingPage from "@/pages/tests/StakingPage";
 
 import MissingPage from "@/pages/MissingPage";
 
@@ -79,6 +80,7 @@ let components = {
     TestEditorPage,
     AnalyticsPage,
     TestBrowsePostsPage,
+    StakingPage,
     MissingPage
 }
 

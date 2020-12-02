@@ -169,7 +169,6 @@ export default {
         }
 
         const token = await getToken(this.symbol);
-        console.log(token);
 
         const request = withdrawAction({
           chain: token.p2k.chain,

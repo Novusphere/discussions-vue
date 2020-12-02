@@ -8,7 +8,7 @@ import { getXNationQuote } from "@/novusphere-js/uid/xnation";
 import { NewDexAPI } from "@/novusphere-js/uid/newdex";
 import axios from 'axios';
 import discussionsx from "../services/discussions";
-import { getFromCache } from '@/novusphere-js/utility';
+import { getFromCache, getCacheFallback } from '@/novusphere-js/utility';
 
 const cache = {};
 
@@ -100,7 +100,10 @@ export default @Controller('/blockchain') class BlockchainController {
             catch (ex) {
                 // rethrow
                 console.log(`BlockchainController`, `transact()`, `failed with endpoint ${endpoints[i]}`);
-                if (i == endpoints.length - 1) throw (ex);
+                if (i == endpoints.length - 1) {
+                    console.log(actions);
+                    throw (ex);
+                }
             }
         }
     }
@@ -264,12 +267,99 @@ export default @Controller('/blockchain') class BlockchainController {
     }
 
     @Api()
+    @All('/claimstake')
+    async claimStake(req, res) {
+        const { symbol } = req.unpack();
+
+        const action = {
+            account: `atmosstakev2`,
+            name: `claim`,
+            data: {
+                token_symbol: symbol,
+                relay: `nsuidcntract`,
+                memo: siteConfig.relay.pub // deposit to our UID account
+            }
+        }
+
+        let actions = [action];
+        actions = this.addAuthorizationToActions(actions);
+        const trx = await this.transact(actions);
+
+        return res.success(trx);
+    }
+
+    @Api()
+    @Post('/exitstake')
+    async exitStake(req, res) {
+        const { id, symbol, to, memo, sig } = req.unpack();
+
+        const action = {
+            account: `atmosstakev2`,
+            name: `exitstake`,
+            data: {
+                key: id,
+                token_symbol: symbol,
+                to,
+                memo,
+                sig
+            }
+        }
+
+        let actions = [action];
+        actions = this.addAuthorizationToActions(actions);
+        const trx = await this.transact(actions);
+
+        return res.success(trx);
+    }
+
+    @Api()
+    @All('/getstakes')
+    async getStakes(req, res) {
+        const { symbol, publicKey } = req.unpack();
+
+        const api = await this.getEosAPI();
+
+        const table0 = await api.rpc.get_table_rows({
+            json: true,
+            code: `atmosstakev2`,
+            scope: `atmosstakev2`,
+            table: 'stats',
+            limit: 100,
+            key_type: "",
+            lower_bound: symbol,
+            upper_bound: symbol,
+            index_position: 1,
+        });
+
+        if (!table0.rows && !table0.rows.length) return res.sucess([]);
+
+
+        const bound = `0x${ecc.sha256(ecc.PublicKey.fromString(publicKey).toBuffer(), 'hex')}`;
+        const table1 = await api.rpc.get_table_rows({
+            json: true,
+            code: `atmosstakev2`,
+            scope: symbol,
+            table: 'stakes',
+            limit: 100,
+            key_type: 'i256',
+            lower_bound: bound,
+            upper_bound: bound,
+            index_position: 2,
+        });
+
+        if (!table1.rows && !table1.rows.length > 0) return res.sucess([]);
+
+        return res.success({
+            stats: table0.rows[0],
+            stakes: table1.rows
+        });
+    }
+
+    @Api()
     @Post('/getasset')
     async getAsset(req, res) {
         const { symbol, address, zero } = req.unpack();
-        let balance = undefined;
-
-        try {
+        let balance = await getCacheFallback(cache, `${address}::${symbol}`, async () => {
 
             const p2k = await this.getP2K();
             let token = p2k.find(t => t.symbol == symbol);
@@ -298,19 +388,12 @@ export default @Controller('/blockchain') class BlockchainController {
                 });
 
                 if (balances.rows && balances.rows.length > 0) {
-                    balance = balances.rows[0].balance;
-                    cache[`${address}::${symbol}`] = balance;
+                    return balances.rows[0].balance;
                 }
             }
 
-        }
-        catch (ex) {
-            console.log(ex);
-            // fall back to our cache if the BP endpoint fails...
-            balance = cache[`${address}::${symbol}`];
-        }
-
-        //console.log(symbol, address, zero, balance);
+            return undefined;
+        });
 
         return res.success(balance || zero);
     }

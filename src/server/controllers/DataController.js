@@ -457,7 +457,22 @@ export default @Controller('/data') class DataController {
                     let domParser = createDOMParser();
                     let document = domParser.parseFromString(oembedResult, 'text/html');
                     const ogImage = document.querySelector('meta[property="og:image"]');
-                    const embedUrl = oembedResult.match(/https:\/\/[a-zA-Z0-9\.]+\/\$\/embed\/[a-zA-Z0-9_\-\/().!]+/);
+                    let embedUrl = oembedResult.match(/https:\/\/[a-zA-Z0-9\.]+\/\$\/embed\/[a-zA-Z0-9_\-\/().!]+/);
+
+                    if (!embedUrl) {
+                        // try to craft the URL from other information
+                        const ogUrl = document.querySelector('meta[property="og:url"]');
+                        if (ogUrl) {
+                            const urlFragments = (ogUrl.getAttribute('content') || '').split('/');
+                            if (urlFragments.length > 0) {
+                                const [name, hash] = urlFragments[urlFragments.length - 1].split(':');
+                                const host = href.substring(0, href.indexOf('/', 8));
+                                if (name && hash && host) {
+                                    embedUrl = [`${host}/$/embed/${name}/${hash}`];
+                                }
+                            }
+                        }
+                    }
 
                     if (embedUrl && embedUrl.length > 0) {
                         raw = {

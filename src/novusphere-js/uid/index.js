@@ -509,6 +509,21 @@ async function getMarketCaps() {
         FIVE_MINUTES);
 }
 
+async function getStakes(publicKey, symbol = `3,ATMOS`) {
+    return await apiRequest(`/v1/api/blockchain/getstakes`, { symbol, publicKey });
+}
+
+async function exitStake(id, privateKey, symbol = `3,ATMOS`) {
+    const pub = ecc.privateToPublic(privateKey);
+    const msg = `atmosstakev2 unstake:${id} nsuidcntract ${pub}`;
+    const sig = await signText(msg, privateKey);
+    return await apiRequest(`/v1/api/blockchain/exitstake`, { id, symbol, to: `nsuidcntract`, memo: pub, sig });
+}
+
+async function claimStake(symbol = `3,ATMOS`) {
+    return await apiRequest(`/v1/api/blockchain/claimstake`, { symbol });
+}
+
 export {
     eos,
     eth,
@@ -544,6 +559,9 @@ export {
     signText,
     signHash,
     connectWallet,
-    getMarketCaps
+    getMarketCaps,
+    getStakes,
+    exitStake,
+    claimStake
 }
 
