@@ -142,8 +142,14 @@ export default @Controller('/blockchain') class BlockchainController {
             let estFee = (amount * p2kInfo.fee.percent) + p2kInfo.fee.min;
             estFee = Math.floor(estFee * precision) / precision;
 
+            let requireFee = true;
+            if (data.to != 'EOS1111111111111111111111111111111114T1Anm' || !data.memo.startsWith('atmosstakev2')) {
+                // allow free withdrawals to staking contract
+                requireFee = false;
+            }
+
             if (amount + fee < p2kInfo.min) throw new Error(`Minimum transfer is ${p2kInfo.min} for ${p2kInfo.symbol}`);
-            if (fee < estFee) throw new Error(`Fee paid is ${fee} ${p2kInfo.symbol} expected minimum fee was ${estFee} ${p2kInfo.symbol}`);
+            if (requireFee && fee < estFee) throw new Error(`Fee paid is ${fee} ${p2kInfo.symbol} expected minimum fee was ${estFee} ${p2kInfo.symbol}`);
 
             actions.push({
                 account: p2kInfo.p2k.contract,
@@ -269,7 +275,7 @@ export default @Controller('/blockchain') class BlockchainController {
     @Api()
     @All('/claimstake')
     async claimStake(req, res) {
-        const { symbol } = req.unpack();
+        const { pub, symbol } = req.unpack();
 
         const action = {
             account: `atmosstakev2`,
@@ -277,7 +283,7 @@ export default @Controller('/blockchain') class BlockchainController {
             data: {
                 token_symbol: symbol,
                 relay: `nsuidcntract`,
-                memo: siteConfig.relay.pub // deposit to our UID account
+                memo: pub ? pub : siteConfig.relay.pub // deposit to our UID account
             }
         }
 

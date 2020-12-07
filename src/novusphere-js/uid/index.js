@@ -520,8 +520,8 @@ async function exitStake(id, privateKey, symbol = `3,ATMOS`) {
     return await apiRequest(`/v1/api/blockchain/exitstake`, { id, symbol, to: `nsuidcntract`, memo: pub, sig });
 }
 
-async function claimStake(symbol = `3,ATMOS`) {
-    return await apiRequest(`/v1/api/blockchain/claimstake`, { symbol });
+async function claimStake(pub, symbol = `3,ATMOS`) {
+    return await apiRequest(`/v1/api/blockchain/claimstake`, { pub, symbol });
 }
 
 export {
