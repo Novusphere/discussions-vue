@@ -170,7 +170,7 @@ export default {
       { text: "1 month", value: 31 * 24 * 60 * 60 },
       { text: "3 months", value: 3 * 31 * 24 * 60 * 60 },
       { text: "6 months", value: 6 * 31 * 24 * 60 * 60 },
-      { text: "1 year", value: 12 * 31 * 24 * 60 * 60 - 10 },
+      { text: "1 year", value: 365 * 24 * 60 * 60 - 10 },
     ],
     atmos: "",
     stakeAmount: 0,
@@ -279,11 +279,11 @@ export default {
       this.stakeError = "";
 
       const walletPrivateKey = this.walletPrivateKey;
-
-      try {
         const stakeAmount = parseFloat(this.stakeAmount);
         const stakeSecs = parseFloat(this.stakeSecs);
 
+      try {
+        if (!walletPrivateKey) throw new Error(`You must first enter your password and press the unlock icon`);
         if (isNaN(stakeAmount)) throw new Error(`Invalid stake amount`);
         if (isNaN(stakeSecs)) throw new Error(`Invalid stake days`);
 
