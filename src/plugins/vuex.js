@@ -44,6 +44,8 @@ const getDefaultState = () => ({
     initialInsertedLink: '',
     onInsertLink: null,
     //
+    isConnectWalletDialogOpen: false,
+    //
     displayName: '',
     encryptedBrainKey: '',
     encryptedTest: '', // the value "test" encrypted with the same password as [encryptedBrainKey]
@@ -390,6 +392,9 @@ export default new Vuex.Store({
                 state.onInsertLink = null;
                 state.initialInsertedLink = '';
             }
+        },
+        setConnectWalletDialogOpen(state, { value } ) {
+            state.isConnectWalletDialogOpen = value;
         },
         setImageUploadDialogOpen(state, { value, onImageUpload }) {
             if (value) {

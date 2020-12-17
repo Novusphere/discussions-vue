@@ -1,5 +1,5 @@
 <template>
-  <div class="sarpanch">
+  <div>
     <span class="text-h5">{{ timeLeft }}</span>
   </div>
 </template>
@@ -66,9 +66,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped>
-.sarpanch {
-  font-family: "Sarpanch", sans-serif;
-}
-</style>

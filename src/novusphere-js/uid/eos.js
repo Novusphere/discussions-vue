@@ -27,7 +27,7 @@ const ACCESS_CONTEXT_OPTIONS = {
 
 function getWalletNames() {
     // NOTE: this should match [ACCESS_CONTEXT_OPTIONS.walletProviders] indexes
-    return [`anchor`, `scatter`, `telos`];
+    return [`anchor`, `scatter`, `wombat`];
 }
 
 function makeNetwork(rpc) {
@@ -39,12 +39,11 @@ function makeNetwork(rpc) {
     return network;
 }
 
-async function connectWallet(name) {
-    //console.log(name);
+async function connectWallet(name, chain) {
 
     let network = makeNetwork(DEFAULT_EOS_RPC);
 
-    if (name == 'telos') {
+    if (chain == 'tlos') {
         network = makeNetwork(DEFAULT_TELOS_RPC);
         network.chainId = '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11';
     }

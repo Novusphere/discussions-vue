@@ -492,11 +492,11 @@ async function signHash(hash256, key) {
 // Connect to a wallet interface
 // 
 
-async function connectWallet(name) {
+async function connectWallet(name, chain) {
     if (eos.getWalletNames().some(n => n == name))
-        return eos.connectWallet(name);
+        return eos.connectWallet(name, chain);
     else if (eth.getWalletNames().some(n => n == name))
-        return eth.connectWallet(name);
+        return eth.connectWallet(name, chain);
     throw new Error(`Unable to connect to unknown wallet ${name}`);
 }
 

@@ -4,6 +4,7 @@ import {
 } from "tiptap-extensions";
 
 function encodeURI2(str) {
+    str = decodeURI(str);
     str = encodeURI(str);
     str = str.replace(/\(/g, "%28");
     str = str.replace(/\)/g, "%29");

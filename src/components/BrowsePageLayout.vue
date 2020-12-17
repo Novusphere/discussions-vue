@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-row no-gutters v-if="!noHeader">
+    <v-row no-gutters v-if="!noHeader" class="mb-1">
       <v-col cols="12">
         <v-card flat outlined>
           <img v-if="false" class="md-banner" :src="banner" />

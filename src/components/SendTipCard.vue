@@ -13,6 +13,11 @@
           ></UserAssetSelect>
 
           <v-text-field v-model="amount" label="Amount" required></v-text-field>
+
+          <v-text-field
+            v-model="memo"
+            label="Message (optional)"
+          ></v-text-field>
         </v-form>
         <TransactionSubmitText :link="transactionLink"
           >Your tip has been successfully submitted to the
@@ -94,6 +99,7 @@ export default {
     transfers: [],
     transactionLink: "",
     transactionError: "",
+    memo: "",
   }),
   computed: {
     ...mapState({
@@ -106,7 +112,15 @@ export default {
   watch: {
     async recipient() {
       if (!this.recipient) return;
-      if (this.recipient.length == 0) return;
+
+      if (this.recipient.length == 0) {
+        this.memo = "";
+        return;
+      }
+
+      if (this.recipient.every((r) => r.memo == r.memo)) {
+        this.memo = this.recipient[0].memo;
+      }
 
       const $asset = this.recipient[0].$asset;
 
@@ -151,7 +165,7 @@ export default {
           amount: amountAsset,
           fee: feeAsset,
           nonce: Date.now(),
-          memo: recipient.memo || `tip`,
+          memo: this.memo || recipient.memo || `tip`,
           // non-standard transfer action data (used in transfer dialog)
           recipient: {
             pub: recipient.pub, // their posting (arbitrary) key
@@ -217,6 +231,7 @@ export default {
           );
           //console.log(transactionLink);
           this.transactionLink = transactionLink;
+          this.memo = "";
 
           const strippedTransferActions = transferActions.map((ta) => ({
             ...ta,

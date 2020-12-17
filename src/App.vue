@@ -333,6 +333,7 @@ export default {
       isThreadDialogOpen: (state) => state.isThreadDialogOpen,
       isImageUploadDialogOpen: (state) => state.isImageUploadDialogOpen,
       isInsertLinkDialogOpen: (state) => state.isInsertLinkDialogOpen,
+      isConnectWalletDialogOpen: (state) => state.isConnectWalletDialogOpen,
       threadDialogRef1: (state) => state.threadDialogRef1,
       threadDialogRef2: (state) => state.threadDialogRef2,
       pendingTransfers: (state) => state.pendingTransfers,

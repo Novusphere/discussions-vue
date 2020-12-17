@@ -13,23 +13,25 @@
                   hint="Enter your brain key mnemonic"
                   required
                 ></v-textarea>
+                <div>
+                  <div class="text-center mb-2">OR</div>
+                  <ConnectWalletBtn
+                    ref="connector"
+                    color="primary"
+                    outlined
+                    @start-connect="walletError = ''"
+                    @connected="walletConnected"
+                    @error="(e) => (walletError = e)"
+                  >
+                    <template v-slot:disconnect="{ logout }">
+                      <v-btn color="error" outlined block @click="logout">Disconnect Wallet</v-btn>
+                    </template>
+                  </ConnectWalletBtn>
+                </div>
 
                 <div class="text-center" v-show="walletError">
                   <span class="error--text">{{ walletError }}</span>
                 </div>
-                <ConnectWalletBtn
-                  list
-                  ref="connector"
-                  color="primary"
-                  class="mt-2"
-                  @start-connect="walletError = ''"
-                  @connected="walletConnected"
-                  @error="(e) => walletError = e"
-                >
-                  <template v-slot:disconnect="{ logout }">
-                    <v-btn class="ml-2" color="primary" @click="logout">Disconnect Wallet</v-btn>
-                  </template>
-                </ConnectWalletBtn>
               </v-col>
             </v-row>
             <v-row>
@@ -53,7 +55,11 @@
                 <PublicKeyIcon :size="80" :publicKey="oldPublicKey" />
                 <div class="d-inline-block ml-2">
                   <h1 class="d-inline">{{ oldDisplayName }}</h1>
-                  <v-btn icon class="ml-3 mb-3" @click="$store.commit('forgetLoginSession')">
+                  <v-btn
+                    icon
+                    class="ml-3 mb-3"
+                    @click="$store.commit('forgetLoginSession')"
+                  >
                     <v-icon>delete</v-icon>
                   </v-btn>
                 </div>
@@ -77,9 +83,15 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)">Close</v-btn>
+      <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)"
+        >Close</v-btn
+      >
       <v-btn :disabled="waiting || !validForm" color="primary" @click="login()">
-        <v-progress-circular class="mr-2" indeterminate v-show="waiting"></v-progress-circular>
+        <v-progress-circular
+          class="mr-2"
+          indeterminate
+          v-show="waiting"
+        ></v-progress-circular>
         <span>Log in</span>
       </v-btn>
     </v-card-actions>

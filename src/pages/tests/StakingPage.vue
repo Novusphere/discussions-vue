@@ -1,12 +1,52 @@
 <template>
   <div>
-    <v-row justify="center">
-      <v-col cols="12">
+    <v-row>
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card>
           <v-card-text>
-            <h1>Staking 2.0</h1>
+            <h1>Staking 2.0 (TEST)</h1>
             <v-row>
-              <v-col cols="4">
+              <v-col :cols="12">
+                <v-text-field
+                  label="Total Staked"
+                  v-model="totalStaked"
+                  readonly
+                >
+                  <template v-slot:append>
+                    <TokenIcon :symbol="'ATMOS'" />
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col :cols="12">
+                <v-text-field
+                  label="Total Earned"
+                  v-model="totalEarned"
+                  readonly
+                >
+                  <template v-slot:append>
+                    <TokenIcon :symbol="'ATMOS'" />
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  label="Total Stake Weight"
+                  v-model="totalStakeWeight"
+                  readonly
+                ></v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field label="APR" v-model="apr" readonly></v-text-field>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
+        <v-card>
+          <v-card-text>
+            <v-row>
+              <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
                 <UserAssetSelect
                   ref="assets"
                   disabled
@@ -15,7 +55,7 @@
                   v-model="symbol"
                 />
               </v-col>
-              <v-col cols="4">
+              <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
                 <v-form ref="form" lazy-validation @submit.prevent>
                   <v-text-field
                     type="password"
@@ -40,31 +80,35 @@
                   </v-text-field>
                 </v-form>
               </v-col>
-              <v-col cols="4"
-                ><v-btn class="mt-2" color="primary" @click="claim" primary>
-                  Claim
-                </v-btn>
-              </v-col>
             </v-row>
             <v-row>
-              <v-col cols="4">
+              <v-col :cols="6">
                 <v-text-field label="Amount" v-model="stakeAmount">
                   <template v-slot:append>
                     <TokenIcon :symbol="'ATMOS'" />
                   </template>
                 </v-text-field>
               </v-col>
-              <v-col cols="4">
+              <v-col :cols="6">
                 <v-select
-                  prepend-icon="timer"
                   :items="stakeTimeItems"
                   v-model="stakeSecs"
                   label="Time"
                 ></v-select>
               </v-col>
-              <v-col cols="4"
-                ><v-btn class="mt-2" color="primary" @click="stake" primary>
+              <v-col :cols="12">
+                <v-btn block color="primary" @click="stake" primary>
                   Stake
+                </v-btn>
+              </v-col>
+              <v-col :cols="6">
+                <v-btn block color="primary" @click="claim" primary>
+                  Try Claim
+                </v-btn>
+              </v-col>
+              <v-col :cols="6">
+                <v-btn block color="primary" @click="refresh" primary>
+                  Refresh
                 </v-btn>
               </v-col>
             </v-row>
@@ -85,6 +129,7 @@
 
     <v-card class="mt-2">
       <v-card-text>
+        <h1>Active Stakes</h1>
         <v-data-table
           hide-default-footer
           :headers="stakeTableHeaders"
@@ -92,15 +137,14 @@
         >
           <template v-slot:item="{ item }">
             <tr>
-              <td class="text-xs-center">
-                {{ ((item.weight / stats.total_weight) * 100).toFixed(4) }}%
-              </td>
               <td class="text-xs-center">{{ item.balance }}</td>
               <td class="text-xs-center">
                 {{ item.expires.toLocaleString() }}
               </td>
               <td class="text-xs-center">
-                <v-btn color="error" @click="exit(item)">Exit</v-btn>
+                <v-btn small dense color="error" @click="exit(item)"
+                  >Exit</v-btn
+                >
               </td>
             </tr>
           </template>
@@ -130,12 +174,14 @@ import {
 
 import UserAssetSelect from "@/components/UserAssetSelect";
 import TokenIcon from "@/components/TokenIcon";
+//import Countdown from "@/components/Countdown";
 
 export default {
   name: "StakingPage",
   components: {
     UserAssetSelect,
     TokenIcon,
+    //Countdown,
   },
   props: {},
   computed: {
@@ -150,10 +196,9 @@ export default {
   data: () => ({
     symbol: "ATMOS",
     stakeTableHeaders: [
-      { text: `Weight`, value: `weight` },
-      { text: `Balance`, value: `balance` },
-      { text: `Expires`, value: `expires` },
-      { text: `Actions` },
+      { text: `Balance`, value: `balance`, sortable: false },
+      { text: `Expires`, value: `expires`, sortable: false },
+      { text: `Actions`, sortable: false },
     ],
     stakeTimeItems: [
       { text: "Invalid (test)", value: 10 },
@@ -179,8 +224,13 @@ export default {
     stakeMessage: "",
     password: "",
     stats: null,
+    nextClaim: null,
     stakes: [],
     walletPrivateKey: "",
+    totalStaked: "",
+    totalEarned: "",
+    apr: "",
+    totalStakeWeight: "",
   }),
   async created() {
     await this.refresh();
@@ -207,13 +257,44 @@ export default {
     },
     async refresh() {
       this.atmos = await getAsset(this.symbol, this.keys.wallet.pub);
-      const { stats, stakes } = await getStakes(this.keys.wallet.pub);
+      let { stats, stakes } = await getStakes(this.keys.wallet.pub);
       if (stats) {
         this.stats = { ...stats, last_claim: new Date(`${stats.last_claim}Z`) };
+        this.nextClaim = new Date(
+          this.stats.last_claim.getTime() + 24 * 60 * 60 * 1000
+        );
+
+        //console.log(stakes);
+
         this.stakes = (stakes || []).map((s) => ({
           ...s,
           expires: new Date(`${s.expires}Z`),
         }));
+
+        const totalStaked = this.stakes.reduce(
+          (pv, cv) => pv + parseFloat(cv.initial_balance),
+          0
+        );
+
+        const totalEarned =
+          this.stakes.reduce((pv, cv) => pv + parseFloat(cv.balance), 0) -
+          totalStaked;
+
+        const weightFactor =
+          this.stakes.reduce((pv, cv) => pv + parseFloat(cv.weight), 0) /
+          Math.max(this.stats.total_weight, 1);
+
+        const earnInYear =
+          weightFactor *
+          parseFloat(this.stats.round_subsidy) *
+          ((365 * 24 * 60 * 60) / this.stats.min_claim_secs);
+
+        const apr = (earnInYear + totalStaked) / totalStaked;
+
+        this.totalStaked = `${totalStaked.toFixed(3)} ATMOS`;
+        this.totalEarned = `${totalEarned.toFixed(3)} ATMOS`;
+        this.apr = `${(apr * 100).toFixed(4)}%`;
+        this.totalStakeWeight = `${(weightFactor * 100).toFixed(4)}%`;
       }
 
       if (this.$refs.assets) this.$refs.assets.refresh();
@@ -227,6 +308,7 @@ export default {
         const receipt = await claimStake(this.keys.wallet.pub);
         if (receipt.transaction_id) {
           this.stakeMessage = `Success! Since you were the one who claimed it, you will also receive a bonus!`;
+          await this.refresh();
         } else {
           if (receipt.error && receipt.message) {
             this.stakeError = receipt.message;
@@ -238,7 +320,7 @@ export default {
         if (
           message.indexOf("it has not been a sufficient amount of time") > -1
         ) {
-          const when = new Date(this.stats.last_claim.getTime() + 24 * 60 * 60);
+          const when = this.nextClaim;
           this.stakeError = `The next claim period is at ${when.toLocaleString()}`;
         } else this.stakeError = message;
         console.log(ex);
@@ -279,11 +361,14 @@ export default {
       this.stakeError = "";
 
       const walletPrivateKey = this.walletPrivateKey;
-        const stakeAmount = parseFloat(this.stakeAmount);
-        const stakeSecs = parseFloat(this.stakeSecs);
+      const stakeAmount = parseFloat(this.stakeAmount);
+      const stakeSecs = parseFloat(this.stakeSecs);
 
       try {
-        if (!walletPrivateKey) throw new Error(`You must first enter your password and press the unlock icon`);
+        if (!walletPrivateKey)
+          throw new Error(
+            `You must first enter your password and press the unlock icon`
+          );
         if (isNaN(stakeAmount)) throw new Error(`Invalid stake amount`);
         if (isNaN(stakeSecs)) throw new Error(`Invalid stake days`);
 

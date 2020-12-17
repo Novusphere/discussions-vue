@@ -10,7 +10,7 @@
 
             <TransactionSubmitText :link="transactionLink" :error="transactionError">Your deposit has been successfully submitted to the network.</TransactionSubmitText>
 
-            <ConnectWalletBtn no-eth ref="connector" :block="$vuetify.breakpoint.mobile" color="primary" @error="(ex) => transactionError = ex.toString()">
+            <ConnectWalletBtn class="text-center" no-eth ref="connector" :block="$vuetify.breakpoint.mobile" color="primary" @error="(ex) => transactionError = ex.toString()">
               <template v-slot:action>
                 <v-btn
                   :block="$vuetify.breakpoint.mobile"
@@ -33,8 +33,8 @@
             </ConnectWalletBtn>
 
             <v-btn
-              :block="$vuetify.breakpoint.mobile"
-              :class="{ 'ml-2': !$vuetify.breakpoint.mobile, 'mt-2': $vuetify.breakpoint.mobile }"
+              block
+              class="mt-2"
               color="primary"
               :disabled="!valid || disableSubmit"
               @click="manualDeposit = !manualDeposit"
