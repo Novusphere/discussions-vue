@@ -6,7 +6,18 @@
           <TagLink use-slot :tag="symbol">{{ symbol }}</TagLink>
         </v-list-item-title>
         <v-list-item-subtitle>{{ quantity }}</v-list-item-subtitle>
-        <v-list-item-subtitle v-if="price" style="font-size: 10px;">{{ price }} {{ symbol }}/USD</v-list-item-subtitle>
+        <v-list-item-subtitle v-if="price" style="font-size: 10px"
+          >{{ price }} {{ symbol }}/USD</v-list-item-subtitle
+        >
+        <v-list-item-subtitle v-if="change24" style="font-size: 10px">
+          <span
+            :class="{
+              'success--text': change24 > 0,
+              'error--text': change24 < 0,
+            }"
+            >{{ change24 > 0 ? "+" : "" }}{{ change24 }}%</span
+          >
+        </v-list-item-subtitle>
       </v-list-item-content>
       <div>
         <TokenIcon :size="80" :symbol="symbol" />
@@ -61,14 +72,12 @@ export default {
         this.quantity = quantity;
         this.zero = Number(quantity) <= 0;
 
-        if (!this.zero) {
-          const mcaps = await getMarketCaps();
+        const mcaps = await getMarketCaps();
+        const thisCap = mcaps[this.symbol];
 
-          const thisCap = mcaps[this.symbol];
-          if (thisCap) {
-            this.price = `${thisCap.price.toFixed(6)}`;
-            this.change24 = thisCap.percentChange24h;
-          }
+        if (thisCap) {
+          this.price = `${thisCap.price.toFixed(6)}`;
+          this.change24 = thisCap.percentChange24h;
         }
 
         this.$emit("data", { quantity, symbol: this.symbol, zero: this.zero });
