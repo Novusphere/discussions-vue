@@ -2,11 +2,10 @@ import * as axios from 'axios';
 import ecc from 'eosjs-ecc';
 import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
-import { getFromCache } from "@/novusphere-js/utility";
+import { getFromCache, checkTransaction } from "@/novusphere-js/utility";
 import { Post } from './Post';
 import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
 //import { AccountSearchQuery } from './AccountSearchQuery';
-
 
 if (typeof window != 'undefined') {
     window.$axios = axios;
@@ -646,9 +645,10 @@ async function submitVote(signKey, { uuid, value, uidw }) {
         })
     };
 
-    const { transaction_id } = await apiRequest(`/v1/api/blockchain/vote`, { vote });
+    const trx = await apiRequest(`/v1/api/blockchain/vote`, { vote });
+    checkTransaction(trx);
 
-    return transaction_id;
+    return trx.transaction_id;
 }
 
 //
@@ -724,26 +724,25 @@ async function submitPost(signKey, post, transferActions) {
         transfers = await createTransferActions(eosTransfers);
     }
 
-    const { transaction_id } = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers });
+    const trx = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers });
+    checkTransaction(trx);
 
-    if (transaction_id) {
-        if (tlosTransfers && tlosTransfers.length > 0) {
-            try {
-                const tlos = await apiRequest(`/v1/api/blockchain/transfer`, {
-                    transfers: await createTransferActions(tlosTransfers),
-                    chain: 'telos'
-                });
+    if (tlosTransfers && tlosTransfers.length > 0) {
+        try {
+            const tlos = await apiRequest(`/v1/api/blockchain/transfer`, {
+                transfers: await createTransferActions(tlosTransfers),
+                chain: 'telos'
+            });
 
-                console.log('telos', tlos);
-            }
-            catch (ex) {
-                // if we fail, whatever it's no big deal...
-                console.log('telos', ex);
-            }
+            console.log('telos', tlos);
+        }
+        catch (ex) {
+            // if we fail, whatever it's no big deal...
+            console.log('telos', ex);
         }
     }
 
-    return transaction_id;
+    return trx.transaction_id;
 }
 
 async function addViewToPost(uuid) {

@@ -297,10 +297,23 @@ function getOEmbedHtml(href) {
     return { insertHTML, oembed };
 }
 
+function checkTransaction(trx) {
+    if (!trx) throw new Error(`An unexpected error has occured with creating the transaction.`);
+    if (trx.transaction_id) return;
+    if (trx.error) {
+        const error = trx.error;
+        if (error.details && error.details.length > 0) {
+            const details = error.details[0];
+            throw new Error(details.message);
+        }
+        throw new Error(error);
+    }
+}
+
 (function () {
 
     // hijack the log function for logging to a string variable
-    let log = console.log;
+
     console.enableProxyLog = function (value) {
         if (typeof window !== 'undefined') {
             window._consoleProxyEnabled = value;
@@ -314,10 +327,12 @@ function getOEmbedHtml(href) {
             window._consoleProxy = (window._consoleProxy || '') + [`[${new Date().toLocaleTimeString()}]`, ...args].join(' ') + '\r\n';
         }
     }
+    
+    /*let log = console.log;
     console.log = function () {
         console.proxyLog.apply(this, arguments);
         log.apply(this, arguments);
-    }
+    }*/
 
     if (typeof window !== 'undefined' && window.localStorage['proxyLog']) {
         console.enableProxyLog(true);
@@ -347,5 +362,6 @@ export {
     createDOMParser,
     getOEmbedHtml,
     getOEmbedMeta,
-    getShortPublicKey
+    getShortPublicKey,
+    checkTransaction
 }

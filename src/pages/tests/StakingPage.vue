@@ -157,7 +157,7 @@
 <script>
 import { mapGetters, mapState } from "vuex";
 import { passwordTesterRules } from "@/utility";
-import { sleep } from "@/novusphere-js/utility";
+import { sleep, checkTransaction } from "@/novusphere-js/utility";
 import {
   getToken,
   getAsset,
@@ -306,15 +306,10 @@ export default {
 
         claimStake;
         const receipt = await claimStake(this.keys.wallet.pub);
-        if (receipt.transaction_id) {
-          this.stakeMessage = `Success! Since you were the one who claimed it, you will also receive a bonus!`;
-          await this.refresh();
-        } else {
-          if (receipt.error && receipt.message) {
-            this.stakeError = receipt.message;
-          }
-          console.log(receipt);
-        }
+        checkTransaction(receipt);
+
+        this.stakeMessage = `Success! Since you were the one who claimed it, you will also receive a bonus!`;
+        await this.refresh();
       } catch (ex) {
         const message = ex.message;
         if (
@@ -338,16 +333,11 @@ export default {
         this.stakeMessage = "Trying to exit stake... please wait...";
 
         const receipt = await exitStake(stake.key, this.walletPrivateKey);
-        if (receipt.transaction_id) {
-          this.stakeMessage = `Successfully unstaked!`;
-          await sleep(2000);
-          await this.refresh();
-        } else {
-          if (receipt.error && receipt.message) {
-            this.stakeError = receipt.message;
-          }
-          console.log(receipt);
-        }
+        checkTransaction(receipt);
+
+        this.stakeMessage = `Successfully unstaked!`;
+        await sleep(2000);
+        await this.refresh();
       } catch (ex) {
         const message = ex.message;
         if (message.indexOf("stake is not yet expired") > -1)
@@ -392,16 +382,11 @@ export default {
           token.chain
         );
 
-        if (receipt.transaction_id) {
-          this.stakeMessage = `Successfully staked ${request.amount}`;
-          await sleep(2000);
-          await this.refresh();
-        } else {
-          if (receipt.error && receipt.message) {
-            this.stakeError = receipt.message;
-          }
-          console.log(receipt);
-        }
+        checkTransaction(receipt);
+
+        this.stakeMessage = `Successfully staked ${request.amount}`;
+        await sleep(2000);
+        await this.refresh();
       } catch (ex) {
         const message = ex.message;
 
