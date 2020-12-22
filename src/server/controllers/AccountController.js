@@ -116,6 +116,36 @@ export default @Controller('/account') class AccountController {
     }
 
     @Api()
+    @Post('/block')
+    async blockUser(req, res) {
+        const { pub, domain, data } = req.unpackAuthenticated();
+        const { displayName, user, nameTime, value } = data;
+
+        //console.log(displayName, user, nameTime, value);
+
+        let db = await getDatabase();
+
+        await db.collection(config.table.accounts)
+            .updateOne({ pub: pub, domain: domain },
+                {
+                    $pull: { blockedUsers: { pub: user } },
+                    //$push: { blockedUsers: { displayName, pub: user, nameTime } },
+                });
+
+        if (value) {
+            // block
+            await db.collection(config.table.accounts)
+                .updateOne({ pub: pub, domain: domain },
+                    {
+                        //$pull: { blockedUsers: { pub: user } },
+                        $push: { blockedUsers: { displayName, pub: user, nameTime } },
+                    });
+        }
+
+        return res.success();
+    }
+
+    @Api()
     @Post('/follow')
     async followUser(req, res) {
         const { pub, domain, data } = req.unpackAuthenticated();
@@ -305,7 +335,8 @@ export default @Controller('/account') class AccountController {
                         domain: domain,
                         drafts: [],
                         followingUsers: [],
-                        subscribedTags: []
+                        subscribedTags: [],
+                        blockedUsers: [],
                     },
                     $set: {
                         time: time,

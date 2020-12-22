@@ -1,5 +1,10 @@
 import { mapState, mapGetters } from "vuex";
-import { followUser, unfollowUser, subscribeTag, unsubscribeTag, orientTag, searchPostsByNotifications } from "@/novusphere-js/discussions/api";
+import { 
+    blockUser, unblockUser,
+    followUser, unfollowUser, 
+    subscribeTag, unsubscribeTag, orientTag, 
+    searchPostsByNotifications } 
+    from "@/novusphere-js/discussions/api";
 
 export const userActionsMixin = {
     computed: {
@@ -8,6 +13,7 @@ export const userActionsMixin = {
             keys: (state) => state.keys,
             delegatedMods: (state) => state.delegatedMods,
             followingUsers: (state) => state.followingUsers,
+            blockedUsers: (state) => state.blockedUsers,
             notificationCount: (state) => state.notificationCount,
             lastSeenNotificationsTime: (state) => state.lastSeenNotificationsTime,
             watchedThreads: (state) => state.watchedThreads,
@@ -33,6 +39,28 @@ export const userActionsMixin = {
         },
         openLoginDialog() {
             this.$store.commit('setLoginDialogOpen', true);
+        },
+        async blockUser({ displayName, pub }) {
+            console.log(`blockUser`);
+            if (!this.isLoggedIn) return this.openLoginDialog();
+
+            if (pub == this.keys.arbitrary.pub) return; // self block disallowed
+            if (this.blockedUsers.find(u => u.pub == pub)) return;
+
+            const nameTime = Date.now();
+            this.$store.commit('blockUser', {
+                displayName, pub, nameTime,
+                beforeSaveCallback: async () => await blockUser(this.keys.identity.key, { displayName, pub, nameTime })
+            });
+        },
+        async unblockUser(pub) {
+            console.log(`unblockUser`);
+            if (!this.isLoggedIn) return this.openLoginDialog();
+
+            this.$store.commit('unblockUser', {
+                pub,
+                beforeSaveCallback: async () => await unblockUser(this.keys.identity.key, pub)
+            });
         },
         async followUser({ displayName, pub, uidw }) {
             if (!this.isLoggedIn) return this.openLoginDialog();

@@ -67,6 +67,7 @@ const getDefaultState = () => ({
     lastSeenNotificationsTime: 0,
     subscribedTags: [],
     followingUsers: [], // { displayName, pub, uidw, nameTime }
+    blockedUsers: [], // { displayName, pub, nameTime }
     watchedThreads: [], // { uuid, transaction, watchedAt }
     delegatedMods: [ // { displayName, pub, tag, uidw?, nameTime }
         // hard coded list of preset moderators
@@ -164,6 +165,11 @@ export default new Vuex.Store({
         isFollowing: state => {
             return key => {
                 return state.followingUsers.find(u => u.pub == key);
+            }
+        },
+        isBlocked: state => {
+            return key => {
+                return state.blockedUsers.find(u => u.pub == key);
             }
         },
         isSubscribed: state => {
@@ -333,6 +339,16 @@ export default new Vuex.Store({
             state.followingUsers = state.followingUsers.filter(u => u.pub != pub);
             saveAccount(state, true, undefined, beforeSaveCallback);
         },
+        blockUser(state, { displayName, pub, nameTime, beforeSaveCallback }) {
+            if (pub == state.keys.arbitrary.pub) return; // self follow disallowed
+            if (state.blockedUsers.find(u => u.pub == pub)) return;
+            state.blockedUsers.push({ displayName, pub, nameTime });
+            saveAccount(state, true, undefined, beforeSaveCallback);
+        },
+        unblockUser(state, { pub, beforeSaveCallback }) {
+            state.blockedUsers = state.blockedUsers.filter(u => u.pub != pub);
+            saveAccount(state, true, undefined, beforeSaveCallback);
+        },
         subscribeTag(state, { tag, beforeSaveCallback }) {
             if (state.subscribedTags.find(t => t == tag)) return;
             state.subscribedTags.push(tag);
@@ -393,7 +409,7 @@ export default new Vuex.Store({
                 state.initialInsertedLink = '';
             }
         },
-        setConnectWalletDialogOpen(state, { value } ) {
+        setConnectWalletDialogOpen(state, { value }) {
             state.isConnectWalletDialogOpen = value;
         },
         setImageUploadDialogOpen(state, { value, onImageUpload }) {
@@ -460,22 +476,19 @@ export default new Vuex.Store({
                 if (!eu.uidw && uidw) {
                     eu.uidw = uidw;
                     save = true;
-
-                    //console.log(name + ` ` + JSON.stringify(eu));
                 }
 
                 if ((!eu.nameTime || nameTime > eu.nameTime) && eu.displayName != displayName) {
                     eu.displayName = displayName;
                     eu.nameTime = nameTime;
                     save = true;
-
-                    //console.log(name + ` ` + JSON.stringify(eu));
                 }
             }
 
             for (const u of users) {
                 update(u, state.followingUsers, `following`);
                 update(u, state.delegatedMods, `delegated`);
+                update(u, state.blockedUsers, `blocked`);
             }
 
             if (save) {
@@ -496,6 +509,7 @@ export default new Vuex.Store({
 
             state.subscribedTags = [...(account.subscribedTags || [])];
             state.followingUsers = [...(account.followingUsers || [])];
+            state.blockedUsers = [...(account.blockedUsers || [])];
 
             const fixedMods = getDefaultState().delegatedMods;
             state.delegatedMods = [...account.data.delegatedMods, ...fixedMods.filter(dm => !account.data.delegatedMods.some(dm2 => dm.pub == dm2.pub && dm.tag == dm2.tag))];

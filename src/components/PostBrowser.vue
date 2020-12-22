@@ -47,6 +47,7 @@ export default {
       delegatedMods: (state) => state.delegatedMods,
       postSort: (state) => state.postSort,
       postViewType: (state) => state.postViewType,
+      blockedUsers: (state) => state.blockedUsers,
     }),
   },
   watch: {
@@ -118,10 +119,18 @@ export default {
       }
 
       if (posts.length > 0) {
-        // prevent potential duplicates
-        posts = posts.filter(
-          (p) => !this.posts.some((p2) => p.transaction == p2.transaction)
-        );
+        
+        // prevent potential duplicates and apply blocked users filter
+        posts = posts
+          .filter(
+            (p) => !this.posts.some((p2) => p.transaction == p2.transaction)
+          );
+
+        // apply blocked settings
+        for (const p of posts) {
+          p;
+          p.blockedUsers = this.blockedUsers;
+        }
 
         this.posts.push(...posts);
 

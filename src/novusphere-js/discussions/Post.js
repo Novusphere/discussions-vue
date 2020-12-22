@@ -48,6 +48,7 @@ export class Post {
         this.myVote = 0; // not voted (neutral)
         this.tips = [];
         this.modPolicy = []; // [{mod, tags}]
+        this.blockedUsers  = []; // [{pub}]
         this.paywall = undefined;
         this.views = 0;
 
@@ -122,7 +123,9 @@ export class Post {
 
     get isSpam() {
         // a post is only spam if it's been marked as spam via mod pol
-        return this.modPolicy.some(mp => mp.tags.some(t => t == 'spam'));
+        if (this.blockedUsers.find(bu => bu.pub == this.pub)) return true;
+        if (this.modPolicy.some(mp => mp.tags.some(t => t == 'spam'))) return true;
+        return false;
     }
 
     get isPinned() {

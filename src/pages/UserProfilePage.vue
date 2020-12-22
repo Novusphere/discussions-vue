@@ -12,30 +12,40 @@
       />
     </template>
     <template v-slot:header2>
-      
       <SocialMediasCard
         :isMyProfile="isMyProfile"
         :auth="auth"
         class="text-decoration-none mt-1"
-        @update="(newAuth) => auth = newAuth"
-        @remove="(name) => auth = auth.filter((a) => a.name != name)"
+        @update="(newAuth) => (auth = newAuth)"
+        @remove="(name) => (auth = auth.filter((a) => a.name != name))"
       />
 
-      <v-tabs center-active show-arrows v-model="tab" class="text-decoration-none mt-1">
+      <v-tabs
+        center-active
+        show-arrows
+        v-model="tab"
+        class="text-decoration-none mt-1"
+      >
         <v-tab :to="`/u/${$route.params.who}/blog`">
           <span>Blog</span>
         </v-tab>
         <v-tab :to="`/u/${$route.params.who}/posts`">
-          <span>{{ $vuetify.breakpoint.mobile ? '' : posts }} Posts</span>
+          <span>{{ $vuetify.breakpoint.mobile ? "" : posts }} Posts</span>
         </v-tab>
         <v-tab :to="`/u/${$route.params.who}/threads`">
-          <span>{{ $vuetify.breakpoint.mobile ? '' : threads }} Threads</span>
+          <span>{{ $vuetify.breakpoint.mobile ? "" : threads }} Threads</span>
         </v-tab>
         <v-tab :to="`/u/${$route.params.who}/following`">
           <span>Following</span>
         </v-tab>
         <v-tab :to="`/u/${$route.params.who}/followers`">
           <span>Followers</span>
+        </v-tab>
+        <v-tab
+          v-if="isLoggedIn && publicKey == keys.arbitrary.pub"
+          :to="`/u/${$route.params.who}/blocked`"
+        >
+          <span>Blocked</span>
         </v-tab>
       </v-tabs>
     </template>
@@ -57,11 +67,17 @@
         </v-card>
       </div>
       <div v-else-if="isBlog && keys && publicKey == keys.arbitrary.pub">
-        <v-btn block color="primary" :to="`/u/${$route.params.who}/submit`">New Blog</v-btn>
+        <v-btn block color="primary" :to="`/u/${$route.params.who}/submit`"
+          >New Blog</v-btn
+        >
       </div>
       <div v-else-if="isViewFollowing">
         <div v-for="(fu, i) in followingUsers" :key="i">
-          <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
+          <UserProfileCard
+            :displayName="fu.displayName"
+            :publicKey="fu.pub"
+            :uidw="fu.uidw"
+          ></UserProfileCard>
         </div>
       </div>
       <div v-else-if="isViewFollowers">
@@ -69,7 +85,20 @@
           <v-btn color="primary" @click="followersRaindrop()">Raindrop</v-btn>
         </v-row>
         <div v-for="(fu, i) in followerUsers" :key="i">
-          <UserProfileCard :displayName="fu.displayName" :publicKey="fu.pub" :uidw="fu.uidw"></UserProfileCard>
+          <UserProfileCard
+            :displayName="fu.displayName"
+            :publicKey="fu.pub"
+            :uidw="fu.uidw"
+          ></UserProfileCard>
+        </div>
+      </div>
+      <div v-else-if="isViewBlocked">
+        <div v-for="(bu, i) in blockedUsers" :key="i">
+          <UserProfileCard
+            no-follow
+            :displayName="bu.displayName"
+            :publicKey="bu.pub"
+          ></UserProfileCard>
         </div>
       </div>
       <div v-if="cursor">
@@ -116,7 +145,7 @@ export default {
       if (this.$route.params.tab == "blog" && old == "submit") return;
       if (this.$route.params.tab == "submit" && old == "blog") return;
 
-      const tabs = ["blog", "posts", "threads", "following"];
+      const tabs = ["blog", "posts", "threads", "following", "blocked"];
       let tab = tabs.findIndex((t) => t == this.$route.params.tab);
       if (tab == -1 && this.isBlogSubmit) tab = 0;
 
@@ -152,6 +181,9 @@ export default {
     isBlogSubmit() {
       return this.$route.params.tab == "submit";
     },
+    isViewBlocked() {
+      return this.$route.params.tab == "blocked";
+    },
     isBlog() {
       return (
         !this.$route.params.tab ||
@@ -168,6 +200,7 @@ export default {
     ...mapGetters(["isLoggedIn"]),
     ...mapState({
       keys: (state) => state.keys,
+      blockedUsers: (state) => state.blockedUsers
     }),
   },
   async created() {
@@ -248,7 +281,7 @@ export default {
         window.history.replaceState({}, null, path);
       }
 
-      if (this.isViewFollowing || this.isViewFollowers) {
+      if (this.isViewFollowing || this.isViewFollowers || this.isViewBlocked) {
         this.cursor = null;
       } else {
         let cursor = undefined;

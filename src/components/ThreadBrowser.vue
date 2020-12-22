@@ -41,10 +41,11 @@ export default {
     viewed: false,
   }),
   computed: {
-    ...mapGetters(["getModeratorKeys", "isLoggedIn"]),
+    ...mapGetters(["getModeratorKeys", "isLoggedIn", "isBlocked"]),
     ...mapState({
       keys: (state) => state.keys,
       isThreadDialogOpen: (state) => state.isThreadDialogOpen,
+      blockedUsers: (state) => state.blockedUsers,
     }),
   },
   watch: {
@@ -87,6 +88,10 @@ export default {
       );
 
       mergeThreadToTree(thread, this.tree);
+      this.applyContext(
+        this.opening.post,
+        Object.values(this.tree).map((c) => c.post)
+      );
 
       this.$store.commit(
         "updateDisplayNames",
@@ -102,13 +107,29 @@ export default {
 
       setTimeout(() => this.mergeNewComments(), 3000);
     },
+    applyContext(op, posts) {
+      let blockedUsers = this.blockedUsers;
+      if (blockedUsers.find((bu) => bu.pub == op.pub)) {
+        // the opening poster is blocked, but we're viewing it, so we need to temporarily unblock this user
+        blockedUsers = blockedUsers.filter((bu) => bu.pub != op.pub);
+      }
+
+      for (const p of posts) {
+        p.blockedUsers = blockedUsers;
+      }
+    },
     async load() {
       const thread = await getThread(
         this.referenceId,
         this.isLoggedIn ? this.keys.arbitrary.pub : undefined,
         this.getModeratorKeys
       );
+
       const tree = createThreadTree(thread);
+      this.applyContext(
+        tree[thread.opening.uuid].post,
+        Object.values(tree).map((c) => c.post)
+      );
 
       this.opening = tree[thread.opening.uuid];
       this.tree = tree;

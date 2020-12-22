@@ -289,7 +289,7 @@ export default {
           parseFloat(this.stats.round_subsidy) *
           ((365 * 24 * 60 * 60) / this.stats.min_claim_secs);
 
-        const apr = (earnInYear + totalStaked) / totalStaked;
+        const apr = (earnInYear) / totalStaked;
 
         this.totalStaked = `${totalStaked.toFixed(3)} ATMOS`;
         this.totalEarned = `${totalEarned.toFixed(3)} ATMOS`;

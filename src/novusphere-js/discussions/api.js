@@ -764,6 +764,16 @@ async function saveUserDrafts(identityKey, drafts, domain) {
     return await apiRequest(`/v1/api/account/savedrafts`, { drafts }, { key: identityKey, domain });
 }
 
+async function blockUser(identityKey, { displayName, pub, nameTime }, domain) {
+    // pub is renamed to user here so it doesn't overlap with the pub field from key (signed req)
+    return await apiRequest(`/v1/api/account/block`, { value: true, displayName, user: pub, nameTime }, { key: identityKey, domain });
+}
+
+async function unblockUser(identityKey, pub, domain) {
+    // pub is renamed to user here so it doesn't overlap with the pub field from key (signed req)
+    return await apiRequest(`/v1/api/account/block`, { value: false, user: pub }, { key: identityKey, domain });
+}
+
 async function followUser(identityKey, { displayName, pub, uidw, nameTime }, domain) {
     // pub is renamed to user here so it doesn't overlap with the pub field from key (signed req)
     return await apiRequest(`/v1/api/account/follow`, { value: true, displayName, user: pub, uidw, nameTime }, { key: identityKey, domain });
@@ -931,6 +941,8 @@ export {
     saveUserDrafts,
     followUser,
     unfollowUser,
+    blockUser,
+    unblockUser,
     orientTag,
     subscribeTag,
     unsubscribeTag,

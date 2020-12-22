@@ -7,22 +7,40 @@
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                <v-switch v-model="hideSpamProxy" :label="`Hide spam content`"></v-switch>
+                <v-switch
+                  v-model="hideSpamProxy"
+                  :label="`Hide spam content`"
+                ></v-switch>
               </v-col>
               <v-col cols="12">
-                <v-switch v-model="blurNSFWProxy" :label="`Blur NSFW content`"></v-switch>
+                <v-switch
+                  v-model="blurNSFWProxy"
+                  :label="`Blur NSFW content`"
+                ></v-switch>
               </v-col>
               <v-col cols="12">
-                <v-switch v-model="darkModeProxy" :label="`Dark mode`"></v-switch>
+                <v-switch
+                  v-model="darkModeProxy"
+                  :label="`Dark mode`"
+                ></v-switch>
               </v-col>
               <v-col cols="12">
-                <v-switch v-model="alwaysUseThreadDialogProxy" :label="`Always thread dialog`"></v-switch>
+                <v-switch
+                  v-model="alwaysUseThreadDialogProxy"
+                  :label="`Always thread dialog`"
+                ></v-switch>
               </v-col>
               <v-col cols="12">
-                <v-switch v-model="limitMentionsProxy" :label="`Everyone can @tag me`"></v-switch>
+                <v-switch
+                  v-model="limitMentionsProxy"
+                  :label="`Everyone can @tag me`"
+                ></v-switch>
               </v-col>
               <v-col cols="12">
-                <v-switch v-model="analyticsProxy" :label="`Allow Analytics`"></v-switch>
+                <v-switch
+                  v-model="analyticsProxy"
+                  :label="`Allow Analytics`"
+                ></v-switch>
               </v-col>
             </v-row>
           </v-card-text>
@@ -60,7 +78,12 @@
                     @keydown.enter="addModerator()"
                   >
                     <template v-slot:append-outer>
-                      <v-btn icon color="primary" :disabled="!valid" @click="addModerator()">
+                      <v-btn
+                        icon
+                        color="primary"
+                        :disabled="!valid"
+                        @click="addModerator()"
+                      >
                         <v-icon>add</v-icon>
                       </v-btn>
                     </template>
@@ -103,7 +126,7 @@ export default {
   components: {
     TagLink,
     PublicKeyIcon,
-    UserProfileLink
+    UserProfileLink,
   },
   props: {},
   computed: {
@@ -176,6 +199,7 @@ export default {
       limitMentions: (state) => state.limitMentions,
       postSort: (state) => state.postSort,
       followingUsers: (state) => state.followingUsers,
+      blockedUsers: (state) => state.blockedUsers,
       delegatedMods: (state) => state.delegatedMods,
       hideSpam: (state) => state.hideSpam,
       blurNSFW: (state) => state.blurNSFW,

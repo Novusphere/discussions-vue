@@ -8,7 +8,9 @@
             <router-link class="text-decoration-none" :to="link">
               <h2 class="d-inline text-center">{{ displayName }}</h2>
               <div v-if="extendedInfo">
-                <span class="d-block">{{ extendedInfo.followers }} followers</span>
+                <span class="d-block"
+                  >{{ extendedInfo.followers }} followers</span
+                >
               </div>
             </router-link>
             <template v-if="showSocial && extendedInfo.auth">
@@ -19,7 +21,8 @@
                   class="text-decoration-none ml-1"
                   target="_blank"
                   v-if="twitter"
-                >@{{ twitter }}</a>
+                  >@{{ twitter }}</a
+                >
               </div>
             </template>
           </div>
@@ -28,35 +31,48 @@
         <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 3"></v-col>
         <v-col :cols="$vuetify.breakpoint.mobile || small ? 12 : 4">
           <v-btn
-            :block="$vuetify.breakpoint.mobile"
-            v-if="(publicKey != myPublicKey) && !isFollowing(publicKey)"
+            v-if="!noFollow && publicKey != myPublicKey && !isFollowing(publicKey)"
             color="primary"
             :class="{ 'mt-2': $vuetify.breakpoint.mobile }"
             outlined
+            icon
             @click="followUser({ displayName, pub: publicKey, uidw })"
           >
             <v-icon>person_add</v-icon>
-            <span>Follow</span>
           </v-btn>
           <v-btn
-            :block="$vuetify.breakpoint.mobile"
-            v-else-if="(publicKey != myPublicKey)"
+            v-else-if="!noFollow && publicKey != myPublicKey"
             color="primary"
             :class="{ 'mt-2': $vuetify.breakpoint.mobile }"
+            outlined
+            icon
             @click="unfollowUser(publicKey)"
           >
             <v-icon>person_remove</v-icon>
-            <span>Unfollow</span>
           </v-btn>
           <v-btn
-            :block="$vuetify.breakpoint.mobile"
-            v-if="uidw && (publicKey != myPublicKey)"
+            v-if="uidw && publicKey != myPublicKey"
             color="primary"
-            :class="{ 'mt-2': $vuetify.breakpoint.mobile, 'ml-2': !$vuetify.breakpoint.mobile }"
+            :class="{ 'mt-2': $vuetify.breakpoint.mobile, 'ml-2': true }"
+            outlined
+            icon
             @click="sendTip()"
           >
             <v-icon>attach_money</v-icon>
-            <span>Tip</span>
+          </v-btn>
+          <v-btn
+            v-if="publicKey != myPublicKey"
+            :color="isBlocked(publicKey) ? 'red' : ''"
+            :class="{ 'mt-2': $vuetify.breakpoint.mobile, 'ml-2': true }"
+            outlined
+            icon
+            @click="
+              isBlocked(publicKey)
+                ? unblockUser(publicKey)
+                : blockUser({ pub: publicKey, displayName })
+            "
+          >
+            <v-icon>block</v-icon>
           </v-btn>
         </v-col>
       </v-row>
@@ -83,9 +99,10 @@ export default {
     flat: Boolean,
     small: Boolean,
     showSocial: Boolean,
+    noFollow: Boolean,
   },
   computed: {
-    ...mapGetters(["isLoggedIn", "isFollowing"]),
+    ...mapGetters(["isLoggedIn", "isFollowing", "isBlocked"]),
     ...mapState({
       myPublicKey: (state) => (state.keys ? state.keys.arbitrary.pub : ""),
     }),
