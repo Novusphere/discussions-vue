@@ -1,6 +1,6 @@
 import { Controller, Post, Get, All } from '@decorators/express';
 import ecc from 'eosjs-ecc';
-import { Api } from "../helpers";
+import { Api, getEosAPI } from "../helpers";
 import { config } from "../mongo";
 import siteConfig from "../site";
 import eos from "@/novusphere-js/uid/eos";
@@ -12,67 +12,13 @@ import { getFromCache, getCacheFallback } from '@/novusphere-js/utility';
 
 const cache = {};
 
-// https://docs.dfuse.io/guides/eosio/tutorials/write-chain/
-let dfuseClient = undefined;
-global.fetch = require('node-fetch');
-global.WebSocket = require('ws');
-const { createDfuseClient } = require("@dfuse/client");
-async function dfuseFetch(input, init) {
-    if (init.headers === undefined) {
-        init.headers = {}
-    }
-
-    // This is highly optimized and cached, so while the token is fresh, this is very fast
-    //const apiTokenInfo = await dfuseClient.getTokenInfo()
-
-    const headers = init.headers;
-    //headers["Authorization"] = `Bearer ${apiTokenInfo.token}`;
-    headers["X-Eos-Push-Guarantee"] = 'in-block';
-
-    return global.fetch(input, init);
-}
 
 export default @Controller('/blockchain') class BlockchainController {
     constructor() {
     }
 
     async getEosAPI(chain, endpoint) {
-        if (!siteConfig.relay.key) throw new Error(`Relay key has not been configured`);
-
-        let api = undefined;
-        if (!chain || chain == 'eos') {
-
-            if (endpoint == 'dfuse') {
-
-                if (!siteConfig.relay.dfuse)
-                    throw new Error(`Dfuse is not configured`);
-
-                if (!dfuseClient) {
-
-                    dfuseClient = createDfuseClient({
-                        //apiKey: siteConfig.relay.dfuse,
-                        authentication: false,
-                        network: "eos.dfuse.eosnation.io",
-                    });
-                }
-
-                api = await eos.getAPI(dfuseClient.endpoints.restUrl, [siteConfig.relay.key], { fetch: dfuseFetch });
-            }
-            else {
-                api = await eos.getAPI(endpoint || eos.DEFAULT_EOS_RPC, [siteConfig.relay.key], { fetch });
-            }
-        }
-        else {
-            if (chain == 'telos') {
-                api = await eos.getAPI(endpoint || eos.DEFAULT_TELOS_RPC, [siteConfig.relay.key], { fetch });
-            }
-            else {
-                throw new Error(`Unknown chain ${chain}`);
-            }
-        }
-
-
-        return api;
+        return await getEosAPI(chain, endpoint);
     }
 
     async transact(actions, chain) {

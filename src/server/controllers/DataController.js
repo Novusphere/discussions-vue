@@ -1,8 +1,7 @@
 import * as axios from 'axios';
 import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml, LBRY_REGEX, createDOMParser } from "@/novusphere-js/utility";
-import { getTokensInfo, getAsset } from "@/novusphere-js/uid";
 import { Controller, Get, All, Post } from '@decorators/express';
-import { Api } from "../helpers";
+import { Api, getEosAPI } from "../helpers";
 import { config, getDatabase } from "../mongo";
 import siteConfig from "../site";
 import Identicon from 'identicon.js';
@@ -21,6 +20,77 @@ export default @Controller('/data') class DataController {
             ...req.unpack(),
             time: Date.now()
         })
+    }
+
+    async getAllAccounts(domain) {
+        const db = await getDatabase();
+        const cursor = await db.collection(config.table.accounts).find({
+            domain
+        });
+
+        const accounts = [];
+        while (await cursor.hasNext()) {
+            accounts.push(await cursor.next());
+        }
+        return accounts;
+    }
+    
+    @Api()
+    @Get("/analytics/csv/following")
+    async analyticsCsvFollowing(req, res) {
+        const { domain } = req.unpack();
+        const accounts = await this.getAllAccounts(domain);
+
+        let output = 'Source,Target,Type,Id,Label,timeset,Weight\r\n';
+        for (const account of accounts) {
+            const publicKey = account.data.publicKeys.arbitrary;
+            for (const fu of (account.followingUsers || [])) {
+				const account2 = accounts.find(a => a.data.publicKeys.arbitrary == fu.pub);
+				if (!account2) continue;
+				output += `${publicKey},${fu.pub},Directed,0,,,1\r\n`;
+            }
+        }
+
+        return res.success(output, { contentType: 'text/plain' });
+    }
+
+    @Api()
+    @Get("/analytics/csv/general")
+    async analyticsCsvGeneral(req, res) {
+        const { domain } = req.unpack();
+        const accounts = await this.getAllAccounts(domain);
+
+        const api = await getEosAPI(`eos`);
+        const balance_table = {};
+        let balance_table_lower = "0";
+        while (balance_table_lower) {
+            const balances = await api.rpc.get_table_rows({
+                json: true,
+                code: `nsuidcntract`,
+                scope: 0, // ATMOS
+                table: 'accounts',
+                limit: 100,
+                lower_bound: balance_table_lower,
+                index_position: 1,
+            });
+
+            balance_table_lower = balances.more ? balances.next_key : undefined;
+            for (const { publickey, balance } of balances.rows) {
+                balance_table[publickey] = balance;
+            }
+        }
+
+        let output = 'publicKey,displayName,walletPublicKey,balance,twitter\r\n';
+        for (const account of accounts) {
+            const displayName = account.data.displayName;
+            const publicKey = account.data.publicKeys.arbitrary;
+            const walletPublicKey = account.data.publicKeys.wallet;
+            const twitter = account.auth ? account.auth.twitter : undefined;
+            const balance = balance_table[walletPublicKey] || '0.000 ATMOS';
+            output += `${publicKey},${displayName},${walletPublicKey},${balance},${twitter ? `@${twitter.username}` : ''}\r\n`;
+        }
+
+        return res.success(output, { contentType: 'text/plain' });
     }
 
     @Api()
