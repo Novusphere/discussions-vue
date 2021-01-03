@@ -4,7 +4,7 @@ import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
 import { getFromCache, checkTransaction } from "@/novusphere-js/utility";
 import { Post } from './Post';
-import { createTransferActions, signText/*, signHash*/ } from "@/novusphere-js/uid";
+import { createTransferActions, signText, getToken } from "@/novusphere-js/uid";
 //import { AccountSearchQuery } from './AccountSearchQuery';
 
 if (typeof window != 'undefined') {
@@ -709,14 +709,16 @@ async function submitPost(signKey, post, transferActions) {
         let eosTransfers = [];
         tlosTransfers = [];
 
-        // TO-DO: this is kind of hacky, we need a more generic approach
         for (const ta of transferActions) {
             ta.metadata = metadata;
+
             const [, symbol] = ta.amount.split(' ');
-            if (symbol == 'TLOS') {
+            const symbolToken = await getToken(symbol);
+
+            if (symbolToken.chain == 'telos') {
                 tlosTransfers.push(ta);
             }
-            else {
+            else { // assume chain == 'eos'
                 eosTransfers.push(ta);
             }
         }
@@ -814,6 +816,10 @@ async function getUserAccountObject(identityKey, domain) {
 //
 async function saveUserAccountObject(identityKey, accountObject, domain) {
     return await apiRequest(`/v1/api/account/save`, accountObject, { key: identityKey, domain });
+}
+
+async function linkExternalToUser(identityKey, externalName, externalValue, domain) {
+    return await apiRequest(`/v1/api/account/linkexternal`, { externalName, externalValue }, { key: identityKey, domain });
 }
 
 /*async function restorePartialPosts(key, mods, thread, partialPosts) {
@@ -947,5 +953,6 @@ export {
     subscribeTag,
     unsubscribeTag,
     connectOAuth,
-    removeOAuth
+    removeOAuth,
+    linkExternalToUser
 }

@@ -110,7 +110,7 @@ import {
 } from "@/utility";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
-import { getUserProfile } from "@/novusphere-js/discussions/api";
+import { getUserProfile, linkExternalToUser } from "@/novusphere-js/discussions/api";
 import {
   decrypt,
   brainKeyFromHash,
@@ -187,6 +187,13 @@ export default {
         const hash = ecc.sha256(sig);
         this.brainKey = await brainKeyFromHash(hash);
         this.displayName = auth.accountName;
+
+        const keys = await brainKeyToKeys(this.brainKey);
+
+        if (connector.chain == 'eos' || connector.chain == 'tlos') {
+          console.log(await linkExternalToUser(keys.identity.key, connector.chain, connector.wallet.auth.accountName));
+        }
+
       } catch (ex) {
         this.walletError = ex.message;
         this.$refs.connector.logout();

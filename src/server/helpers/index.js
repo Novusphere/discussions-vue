@@ -47,6 +47,9 @@ function Api() {
 
             req.unpackAuthenticated = (defaultObject) => {
                 let { sig, data } = req.unpack();
+                //console.log(sig);
+                //console.log(data);
+
                 let { pub, time, domain, ...rest } = JSON.parse(data);
 
                 let realData = {};

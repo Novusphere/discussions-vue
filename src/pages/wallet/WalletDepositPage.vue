@@ -76,6 +76,7 @@
 <script>
 import { mapState } from "vuex";
 import { sleep } from "@/novusphere-js/utility";
+import { linkExternalToUser } from "@/novusphere-js/discussions/api";
 import { getToken, getTransactionLink, createAsset } from "@/novusphere-js/uid";
 
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
@@ -163,6 +164,9 @@ export default {
             token.symbol,
             receipt.transaction_id
           );
+
+          console.log(await linkExternalToUser(this.keys.identity.key, token.chain, wallet.auth.accountName));
+
         } else {
           // shouldn't happen, but just incase...
           console.log(receipt);

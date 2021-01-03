@@ -2,7 +2,7 @@
   <div>
     <v-row :align="'center'" :justify="'center'">
       <v-col>
-        <v-menu offset-y v-for="(wn, i) in eosWallets" :key="i">
+        <v-menu offset-y v-for="(wn) in eosWallets" :key="wn">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               class="mr-2 mb-2"
@@ -87,6 +87,7 @@ export default {
   data: () => ({
     waiting: false,
     hasWallet: false,
+    chain: '',
     eosWallets: [],
     ethWallets: [],
   }),
@@ -142,6 +143,7 @@ export default {
         if (wallet) {
           this.hasWallet = true;
           this.wallet = wallet;
+          this.chain = chain;
           this.waiting = false;
           this.$emit("connected", { connector: this, auth: this.wallet.auth });
         }

@@ -57,7 +57,7 @@ export default @Controller('/data') class DataController {
     @Api()
     @Get("/analytics/csv/general")
     async analyticsCsvGeneral(req, res) {
-        const { domain } = req.unpack();
+        const { domain, scope } = req.unpack();
         const accounts = await this.getAllAccounts(domain);
 
         const api = await getEosAPI(`eos`);
@@ -67,7 +67,7 @@ export default @Controller('/data') class DataController {
             const balances = await api.rpc.get_table_rows({
                 json: true,
                 code: `nsuidcntract`,
-                scope: 0, // ATMOS
+                scope: parseInt(scope || 0),
                 table: 'accounts',
                 limit: 100,
                 lower_bound: balance_table_lower,
@@ -86,8 +86,8 @@ export default @Controller('/data') class DataController {
             const publicKey = account.data.publicKeys.arbitrary;
             const walletPublicKey = account.data.publicKeys.wallet;
             const twitter = account.auth ? account.auth.twitter : undefined;
-            const balance = balance_table[walletPublicKey] || '0.000 ATMOS';
-            output += `${publicKey},${displayName},${walletPublicKey},${balance},${twitter ? `@${twitter.username}` : ''}\r\n`;
+            const balance = balance_table[walletPublicKey];
+            output += `${publicKey},${displayName},${walletPublicKey},${parseFloat(balance || '0')},${twitter ? `@${twitter.username}` : ''}\r\n`;
         }
 
         return res.success(output, { contentType: 'text/plain' });

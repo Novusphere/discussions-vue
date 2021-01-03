@@ -146,6 +146,31 @@ export default @Controller('/account') class AccountController {
     }
 
     @Api()
+    @Post('/linkexternal')
+    async linkExternal(req, res) {
+        const { pub, domain, data } = req.unpackAuthenticated();
+        const { externalName, externalValue } = data;
+
+        let db = await getDatabase();
+
+        if (externalName && externalValue) {
+            await db.collection(config.table.accounts)
+                .updateOne({ pub: pub, domain: domain },
+                    {
+                        $pull: { external: { name: externalName, value: externalValue } },
+                    });
+
+            await db.collection(config.table.accounts)
+                .updateOne({ pub: pub, domain: domain },
+                    {
+                        $push: { external: { name: externalName, value: externalValue } },
+                    });
+        }
+
+        return res.success({ name: externalName, value: externalValue });
+    }
+
+    @Api()
     @Post('/follow')
     async followUser(req, res) {
         const { pub, domain, data } = req.unpackAuthenticated();
