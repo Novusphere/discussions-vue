@@ -52,6 +52,16 @@
                   readonly
                 ></v-text-field>
               </v-col>
+              <v-col :cols="6">
+                <v-btn block color="primary" @click="claim" primary>
+                  Try Claim
+                </v-btn>
+              </v-col>
+              <v-col :cols="6">
+                <v-btn block color="primary" @click="refresh" primary>
+                  Refresh
+                </v-btn>
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -78,19 +88,6 @@
                     label="Password"
                     @keydown.enter="toggleLock()"
                   >
-                    <template v-slot:append-outer>
-                      <v-btn
-                        icon
-                        @click="toggleLock()"
-                        small
-                        dense
-                        color="primary"
-                      >
-                        <v-icon>{{
-                          walletPrivateKey ? "lock" : "lock_open"
-                        }}</v-icon>
-                      </v-btn>
-                    </template>
                   </v-text-field>
                 </v-form>
               </v-col>
@@ -110,19 +107,15 @@
                   label="Time"
                 ></v-select>
               </v-col>
-              <v-col :cols="12">
+              <v-col :cols="6">
+                <v-btn color="primary" @click="toggleLock()" block>
+                  <v-icon>{{ walletPrivateKey ? "lock" : "lock_open" }}</v-icon>
+                  <span>{{ walletPrivateKey ? "Lock Wallet" : "Unlock Wallet" }}</span>
+                </v-btn>
+              </v-col>
+              <v-col :cols="6">
                 <v-btn block color="primary" @click="stake" primary>
                   Stake
-                </v-btn>
-              </v-col>
-              <v-col :cols="6">
-                <v-btn block color="primary" @click="claim" primary>
-                  Try Claim
-                </v-btn>
-              </v-col>
-              <v-col :cols="6">
-                <v-btn block color="primary" @click="refresh" primary>
-                  Refresh
                 </v-btn>
               </v-col>
             </v-row>
@@ -156,9 +149,15 @@
                 {{ item.expires.toLocaleString() }}
               </td>
               <td class="text-xs-center">
-                <v-btn small dense color="error" @click="exit(item)"
-                  >Exit</v-btn
+                <v-btn
+                  small
+                  dense
+                  color="error"
+                  @click="exit(item)"
+                  :disabled="item.expires.getTime() > dateNow"
                 >
+                  Exit
+                </v-btn>
               </td>
             </tr>
           </template>
@@ -244,6 +243,7 @@ export default {
       { text: "6 months", value: 6 * 31 * 24 * 60 * 60 },
       { text: "1 year", value: 365 * 24 * 60 * 60 - 10 },
     ],
+    dateNow: 0,
     systemStaked: "",
     systemSubsidy: "",
     atmos: "",
@@ -263,7 +263,7 @@ export default {
     stakesBarChartData: null,
     barChartOptions: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
     },
   }),
   async created() {
@@ -275,10 +275,16 @@ export default {
   },
   methods: {
     async toggleLock() {
+      this.stakeError = "";
+      this.stakeMessage = "";
+
       if (this.walletPrivateKey) {
         this.walletPrivateKey = "";
       } else {
-        if (this.passwordTesterRules.length) return;
+        if (this.passwordTesterRules.length)  { 
+          this.stakeError = this.passwordTesterRules[0];
+          return;
+        }
 
         const brainKey = decrypt(this.encryptedBrainKey, this.password);
         const keys = await brainKeyToKeys(brainKey);
@@ -286,6 +292,7 @@ export default {
 
         this.walletPrivateKey = walletPrivateKey;
         this.password = "";
+        this.stakeMessage = "Wallet has been unlocked!";
         this.$refs.form.resetValidation();
       }
     },
@@ -304,6 +311,7 @@ export default {
 
         //console.log(stakes);
 
+        this.dateNow = Date.now();
         this.stakes = (stakes || []).map((s) => ({
           ...s,
           expires: new Date(`${s.expires}Z`),
@@ -458,7 +466,7 @@ export default {
       try {
         if (!walletPrivateKey)
           throw new Error(
-            `You must first enter your password and press the unlock icon`
+            `You must first enter your password and press the unlock button`
           );
         if (isNaN(stakeAmount)) throw new Error(`Invalid stake amount`);
         if (isNaN(stakeSecs)) throw new Error(`Invalid stake days`);
