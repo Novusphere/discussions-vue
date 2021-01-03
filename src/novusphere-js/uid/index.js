@@ -430,8 +430,15 @@ async function transfer(actions, progressCallback, forward, chain) {
 // Gets a block explorer transaction link for a given symbol and a transaction id
 //
 async function getTransactionLink(symbol, trxid) {
-    if (symbol == 'TLOS') return `https://telos.bloks.io/transaction/${trxid}`;
-    else return `https://bloks.io/transaction/${trxid}`;
+    const token = await getToken(symbol);
+    
+    if (token) {
+        if (token.chain == 'telos') {
+            return `https://telos.bloks.io/transaction/${trxid}`;
+        }
+    }
+
+    return `https://bloks.io/transaction/${trxid}`;
 }
 
 //
