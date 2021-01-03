@@ -107,6 +107,17 @@
                 <span>Swap</span>
               </v-btn>
             </v-list-item>
+            <v-list-item>
+              <v-btn
+                class="justify-start"
+                text
+                block
+                left
+                @click="$router.push(`/wallet/staking`)"
+              >
+                <span>Stake</span>
+              </v-btn>
+            </v-list-item>
           </v-list>
         </v-list-item>
         <v-list-item>

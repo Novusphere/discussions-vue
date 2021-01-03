@@ -111,7 +111,8 @@ const routes = [
                     { path: 'withdraw', component: `WalletWithdrawPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Withdraw` }) } },
                     { path: 'deposit', component: `WalletDepositPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Deposits` }) } },
                     { path: 'swap', component: `WalletSwapPage`, meta: { head: async () => ({ title: `Discussions - Wallet - Token Swap` }) } },
-                    { path: 'eos-account', component: `EOSAccountCreatePage`, meta: { head: async () => ({ title: `Discussions - Wallet - EOS Account Creation` }) } }
+                    { path: 'eos-account', component: `EOSAccountCreatePage`, meta: { head: async () => ({ title: `Discussions - Wallet - EOS Account Creation` }) } },
+                    { path: 'staking', component: 'StakingPage', meta: { head: async () => ({ title: `Discussions - Wallet - Staking` }) } }
                 ]
             },
             {
@@ -144,7 +145,8 @@ const routes = [
                     }
                 ]
             },
-            { path: 'staking', component: 'StakingPage' }
+            { path: 'staking', redirect: '/wallet/staking' },
+            { path: 'airdrop', component: 'AirdropPage' }
         ]
     }
 ]

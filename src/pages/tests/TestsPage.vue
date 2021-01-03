@@ -40,7 +40,7 @@
           </v-toolbar>
           <v-list>
             <v-list-item>
-              <v-btn text :to="'/tests/staking'">Staking</v-btn>
+              <v-btn text :to="'/tests/airdrop'">Airdrop</v-btn>
             </v-list-item>
             <v-list-item>
               <v-btn text :to="'/tests/analytics'">Analytics</v-btn>

@@ -37,13 +37,13 @@ import WalletWithdrawPage from "@/pages/wallet/WalletWithdrawPage";
 import WalletDepositPage from "@/pages/wallet/WalletDepositPage";
 import WalletSwapPage from "@/pages/wallet/WalletSwapPage";
 import EOSAccountCreatePage from "@/pages/wallet/EOSAccountCreatePage";
+import StakingPage from "@/pages/wallet/StakingPage";
 
 import TestsPage from "@/pages/tests/TestsPage";
 import TestEditorPage from '@/pages/tests/TestEditorPage';
 import AnalyticsPage from "@/pages/tests/AnalyticsPage";
+import AirdropPage from "@/pages/tests/AirdropPage";
 import TestBrowsePostsPage from '@/pages/tests/posts/TestBrowsePostsPage';
-import StakingPage from "@/pages/tests/StakingPage";
-
 import MissingPage from "@/pages/MissingPage";
 
 let components = {
@@ -81,7 +81,8 @@ let components = {
     AnalyticsPage,
     TestBrowsePostsPage,
     StakingPage,
-    MissingPage
+    MissingPage,
+    AirdropPage
 }
 
 import createRoutes from "@/server/routes";

@@ -4,7 +4,7 @@
       <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card>
           <v-card-text>
-            <h1>Staking 2.0 (TEST)</h1>
+            <h1>Staking</h1>
             <v-row>
               <v-col :cols="12">
                 <v-text-field
@@ -52,12 +52,7 @@
                   readonly
                 ></v-text-field>
               </v-col>
-              <v-col :cols="6">
-                <v-btn block color="primary" @click="claim" primary>
-                  Try Claim
-                </v-btn>
-              </v-col>
-              <v-col :cols="6">
+              <v-col :cols="12">
                 <v-btn block color="primary" @click="refresh" primary>
                   Refresh
                 </v-btn>
@@ -110,12 +105,19 @@
               <v-col :cols="6">
                 <v-btn color="primary" @click="toggleLock()" block>
                   <v-icon>{{ walletPrivateKey ? "lock" : "lock_open" }}</v-icon>
-                  <span>{{ walletPrivateKey ? "Lock Wallet" : "Unlock Wallet" }}</span>
+                  <span>{{
+                    walletPrivateKey ? "Wallet" : "Wallet"
+                  }}</span>
                 </v-btn>
               </v-col>
               <v-col :cols="6">
                 <v-btn block color="primary" @click="stake" primary>
                   Stake
+                </v-btn>
+              </v-col>
+              <v-col :cols="12">
+                <v-btn block color="primary" @click="claim" primary>
+                  Try Claim
                 </v-btn>
               </v-col>
             </v-row>
@@ -281,7 +283,7 @@ export default {
       if (this.walletPrivateKey) {
         this.walletPrivateKey = "";
       } else {
-        if (this.passwordTesterRules.length)  { 
+        if (this.passwordTesterRules.length) {
           this.stakeError = this.passwordTesterRules[0];
           return;
         }
