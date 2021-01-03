@@ -38,6 +38,20 @@
               <v-col :cols="6">
                 <v-text-field label="APR" v-model="apr" readonly></v-text-field>
               </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  label="System Staked"
+                  v-model="systemStaked"
+                  readonly
+                ></v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  label="System Subsidy"
+                  v-model="systemSubsidy"
+                  readonly
+                ></v-text-field>
+              </v-col>
             </v-row>
           </v-card-text>
         </v-card>
@@ -151,6 +165,17 @@
         </v-data-table>
       </v-card-text>
     </v-card>
+
+    <v-card class="mt-2" max-height="600">
+      <v-card-text>
+        <h1>All Stakes</h1>
+        <bar-chart
+          v-if="stakesBarChartData"
+          :chartData="stakesBarChartData"
+          :options="barChartOptions"
+        />
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
@@ -171,9 +196,11 @@ import {
   exitStake,
   claimStake,
 } from "@/novusphere-js/uid";
+import eos from "@/novusphere-js/uid/eos";
 
 import UserAssetSelect from "@/components/UserAssetSelect";
 import TokenIcon from "@/components/TokenIcon";
+import BarChart from "@/components/BarChart";
 //import Countdown from "@/components/Countdown";
 
 export default {
@@ -181,6 +208,7 @@ export default {
   components: {
     UserAssetSelect,
     TokenIcon,
+    BarChart,
     //Countdown,
   },
   props: {},
@@ -201,7 +229,6 @@ export default {
       { text: `Actions`, sortable: false },
     ],
     stakeTimeItems: [
-      { text: "Invalid (test)", value: 10 },
       { text: "1 minute", value: 80 },
       { text: "15 minute", value: 15 * 60 },
       { text: "30 minute", value: 30 * 60 },
@@ -217,6 +244,8 @@ export default {
       { text: "6 months", value: 6 * 31 * 24 * 60 * 60 },
       { text: "1 year", value: 365 * 24 * 60 * 60 - 10 },
     ],
+    systemStaked: "",
+    systemSubsidy: "",
     atmos: "",
     stakeAmount: 0,
     stakeSecs: 80,
@@ -231,6 +260,11 @@ export default {
     totalEarned: "",
     apr: "",
     totalStakeWeight: "",
+    stakesBarChartData: null,
+    barChartOptions: {
+      responsive: true,
+      maintainAspectRatio: false
+    },
   }),
   async created() {
     await this.refresh();
@@ -260,6 +294,10 @@ export default {
       let { stats, stakes } = await getStakes(this.keys.wallet.pub);
       if (stats) {
         this.stats = { ...stats, last_claim: new Date(`${stats.last_claim}Z`) };
+
+        this.systemStaked = this.stats.total_supply;
+        this.systemSubsidy = this.stats.subsidy_supply;
+
         this.nextClaim = new Date(
           this.stats.last_claim.getTime() + 24 * 60 * 60 * 1000
         );
@@ -289,15 +327,78 @@ export default {
           parseFloat(this.stats.round_subsidy) *
           ((365 * 24 * 60 * 60) / this.stats.min_claim_secs);
 
-        const apr = (earnInYear) / totalStaked;
+        const apr = earnInYear / totalStaked;
 
         this.totalStaked = `${totalStaked.toFixed(3)} ATMOS`;
         this.totalEarned = `${totalEarned.toFixed(3)} ATMOS`;
         this.apr = `${(apr * 100).toFixed(4)}%`;
         this.totalStakeWeight = `${(weightFactor * 100).toFixed(4)}%`;
+
+        this.refreshStakesBarChart();
       }
 
       if (this.$refs.assets) this.$refs.assets.refresh();
+    },
+    async refreshStakesBarChart() {
+      this.stakesBarChartData = null;
+
+      const api = await eos.getAPI();
+      const rows = [];
+
+      let lower_bound = "0";
+      do {
+        let table = await api.rpc.get_table_rows({
+          json: true,
+          code: `atmosstakev2`,
+          scope: `3,ATMOS`,
+          table: "stakes",
+          limit: 100,
+          key_type: "",
+          lower_bound: lower_bound,
+          index_position: 1,
+        });
+
+        lower_bound = table.more ? table.next_key : undefined;
+        rows.push(...table.rows);
+      } while (lower_bound);
+
+      const stakeAmounts = [0, 0, 0, 0, 0];
+      const si = this.stakeTimeItems.findIndex((si) => si.text == "7 days");
+      const now = Date.now();
+
+      for (let { balance, expires } of rows) {
+        expires = new Date(`${expires}Z`).getTime();
+        for (let i = si; i < this.stakeTimeItems.length; i++) {
+          if (expires <= now + this.stakeTimeItems[i].value * 1000) {
+            stakeAmounts[i - si] += parseFloat(balance);
+            break;
+          }
+        }
+      }
+
+      if (
+        Math.abs(
+          stakeAmounts.reduce((pv, cv) => pv + cv, 0) -
+            parseFloat(this.systemStaked)
+        ) > 1
+      ) {
+        console.log(`Failed sanity check for [stakeAmounts] vs [systemStaked]`);
+      }
+
+      const chartData = {
+        labels: [...this.stakeTimeItems]
+          .slice(si, this.stakeTimeItems.length)
+          .map((s) => `within ${s.text}`),
+        datasets: [
+          {
+            label: "ATMOS",
+            backgroundColor: "#079e99",
+            data: [...stakeAmounts].map((sa) => Math.floor(sa)),
+          },
+        ],
+      };
+
+      this.stakesBarChartData = chartData;
     },
     async claim() {
       try {
