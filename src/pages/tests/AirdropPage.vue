@@ -159,7 +159,7 @@ export default {
                 },
               ],
               data: {
-                from: "asphyxiating",
+                from: wallet.auth.accountName,
                 memo: memo || "",
                 quantity: asset,
                 to: account,
