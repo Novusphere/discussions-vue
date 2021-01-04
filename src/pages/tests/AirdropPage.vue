@@ -59,7 +59,6 @@
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
 import TransactionSubmitText from "@/components/TransactionSubmitText";
 import {
-  eos,
   createAsset,
   getChainForSymbol,
   getToken,
@@ -68,7 +67,6 @@ import {
 import { sleep } from "@/novusphere-js/utility";
 import ecc from "eosjs-ecc";
 
-eos;
 createAsset;
 getChainForSymbol;
 
@@ -109,6 +107,8 @@ export default {
       });
 
       try {
+        const wallet = this.$refs.connector.wallet;
+        
         for (let i = 0; i < data.length; i++) {
           this.transactionError = `Validating line ${i + 1} of ${
             data.length
@@ -133,7 +133,7 @@ export default {
               id = nsuidcntract;
             }
           } else {
-            const accData = await eos.getAccount(id);
+            const accData = await wallet.eosApi.rpc.get_account(id);
             if (!accData) {
               this.airdropDataErrors.push(
                 `Error at line ${i + 1}: account does not exist ${id}`
@@ -162,7 +162,6 @@ export default {
         }
 
         let token = undefined;
-        const wallet = this.$refs.connector.wallet;
         const actions = await Promise.all(
           lines.map(async (s) => {
             const [account, asset, memo] = s.split(",");
@@ -199,6 +198,7 @@ export default {
           }
         );
 
+        this.transactionError = "";
         this.transactionLink = await getTransactionLink(
           token.symbol,
           receipt.transaction_id
