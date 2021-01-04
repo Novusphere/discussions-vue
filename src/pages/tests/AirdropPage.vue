@@ -65,6 +65,7 @@ import {
   getToken,
   getTransactionLink,
 } from "@/novusphere-js/uid";
+import { sleep } from "@/novusphere-js/utility";
 import ecc from "eosjs-ecc";
 
 eos;
@@ -75,7 +76,7 @@ export default {
   name: "AirdropPage",
   components: {
     ConnectWalletBtn,
-    TransactionSubmitText
+    TransactionSubmitText,
   },
   props: {},
   data: () => ({
@@ -107,40 +108,59 @@ export default {
         return { id, amount, symbol, memo };
       });
 
-      for (let i = 0; i < data.length; i++) {
-        let { id, amount, symbol, memo } = data[i];
-        if (!id || !amount || !symbol) {
-          this.airdropDataErrors.push(
-            `Error at line ${i + 1}: formatting is wrong`
-          );
-          continue;
-        }
+      try {
+        for (let i = 0; i < data.length; i++) {
+          this.transactionError = `Validating line ${i + 1} of ${
+            data.length
+          }, please wait...`;
 
-        if (id.length > 12) {
-          if (!ecc.isValidPublic(id)) {
+          let { id, amount, symbol, memo } = data[i];
+          if (!id || !amount || !symbol) {
             this.airdropDataErrors.push(
-              `Error at line ${i + 1}: invalid public key ${id}`
+              `Error at line ${i + 1}: formatting is wrong`
             );
             continue;
-          } else {
-            memo = id;
-            id = nsuidcntract;
           }
-        } else if (!(await eos.getAccount(id))) {
-          this.airdropDataErrors.push(
-            `Error at line ${i + 1}: account does not exist ${id}`
-          );
-          continue;
+
+          if (id.length > 12) {
+            if (!ecc.isValidPublic(id)) {
+              this.airdropDataErrors.push(
+                `Error at line ${i + 1}: invalid public key ${id}`
+              );
+              continue;
+            } else {
+              memo = id;
+              id = nsuidcntract;
+            }
+          } else {
+            const accData = await eos.getAccount(id);
+            if (!accData) {
+              this.airdropDataErrors.push(
+                `Error at line ${i + 1}: account does not exist ${id}`
+              );
+              continue;
+            } else if (new Date(`${accData.last_code_update}Z`).getTime() > 0) {
+              this.airdropDataErrors.push(
+                `Error at line ${i + 1}: account ${id} is a contract`
+              );
+              continue;
+            }
+          }
+
+          const asset = await createAsset(amount, symbol);
+          lines[i] = `${id},${asset},${memo || ""}`;
+          await sleep(5);
         }
 
-        const asset = await createAsset(amount, symbol);
-        lines[i] = `${id},${asset},${memo || ""}`;
-      }
+        this.airdropData = lines.join("\r\n");
+        this.validating = false;
 
-      this.airdropData = lines.join("\r\n");
-      this.validating = false;
+        if (this.airdropDataErrors.length > 0) {
+          this.transactionError =
+            "Please resolve the errors before continuing.";
+          return;
+        }
 
-      try {
         let token = undefined;
         const wallet = this.$refs.connector.wallet;
         const actions = await Promise.all(
