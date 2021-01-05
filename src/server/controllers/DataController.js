@@ -32,7 +32,9 @@ export default @Controller('/data') class DataController {
         while (await cursor.hasNext()) {
             accounts.push(await cursor.next());
         }
-        return accounts;
+
+        // only modern accounts
+        return accounts.filter(a => a.data.publicKeys);
     }
 
     @Api()
@@ -43,8 +45,6 @@ export default @Controller('/data') class DataController {
 
         let output = 'Source,Target,Type,Id,Label,timeset,Weight\r\n';
         for (const account of accounts) {
-            if (!account.data.publicKeys) continue;
-            
             const publicKey = account.data.publicKeys.arbitrary;
             for (const fu of (account.followingUsers || [])) {
                 const account2 = accounts.find(a => a.data.publicKeys.arbitrary == fu.pub);
@@ -84,8 +84,6 @@ export default @Controller('/data') class DataController {
 
         let output = 'publicKey,displayName,walletPublicKey,balance,twitter\r\n';
         for (const account of accounts) {
-            if (!account.data.publicKeys) continue;
-
             const displayName = account.data.displayName;
             const publicKey = account.data.publicKeys.arbitrary;
             const walletPublicKey = account.data.publicKeys.wallet;
