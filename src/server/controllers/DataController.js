@@ -1,5 +1,5 @@
 import * as axios from 'axios';
-import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml, LBRY_REGEX, createDOMParser } from "@/novusphere-js/utility";
+import { getFromCache, markdownToHTML, htmlToText, getOEmbedHtml, LBRY_REGEX, YOUTUBE_REGEX, YOUTUBE_SHORT_REGEX, createDOMParser } from "@/novusphere-js/utility";
 import { Controller, Get, All, Post } from '@decorators/express';
 import { Api, getEosAPI } from "../helpers";
 import { config, getDatabase } from "../mongo";
@@ -34,7 +34,7 @@ export default @Controller('/data') class DataController {
         }
         return accounts;
     }
-    
+
     @Api()
     @Get("/analytics/csv/following")
     async analyticsCsvFollowing(req, res) {
@@ -45,9 +45,9 @@ export default @Controller('/data') class DataController {
         for (const account of accounts) {
             const publicKey = account.data.publicKeys.arbitrary;
             for (const fu of (account.followingUsers || [])) {
-				const account2 = accounts.find(a => a.data.publicKeys.arbitrary == fu.pub);
-				if (!account2) continue;
-				output += `${publicKey},${fu.pub},Directed,0,,,1\r\n`;
+                const account2 = accounts.find(a => a.data.publicKeys.arbitrary == fu.pub);
+                if (!account2) continue;
+                output += `${publicKey},${fu.pub},Directed,0,,,1\r\n`;
             }
         }
 
@@ -551,13 +551,21 @@ export default @Controller('/data') class DataController {
                         }
                     }
                 }
+                else if (new RegExp(YOUTUBE_REGEX).test(href) || new RegExp(YOUTUBE_SHORT_REGEX).test(href)) {
+                    raw = {
+                        ...oembedResult,
+                        html: oembedResult.html.replace(/width=\"[0-9]+\" height=\"[0-9]+\"/g, `width="560" height="315"`)
+                    };
+                    
+                    insertHTML = raw.html;
+                }
                 else if (oembedResult.html) {
                     raw = oembedResult;
-                    insertHTML = oembedResult.html;
+                    insertHTML = raw.html;
                 }
             }
             catch (ex) {
-                //console.log(ex);
+                console.log(ex);
                 // failed...
             }
         }
