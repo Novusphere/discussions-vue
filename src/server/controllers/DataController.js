@@ -43,6 +43,8 @@ export default @Controller('/data') class DataController {
 
         let output = 'Source,Target,Type,Id,Label,timeset,Weight\r\n';
         for (const account of accounts) {
+            if (!account.data.publicKeys) continue;
+            
             const publicKey = account.data.publicKeys.arbitrary;
             for (const fu of (account.followingUsers || [])) {
                 const account2 = accounts.find(a => a.data.publicKeys.arbitrary == fu.pub);
