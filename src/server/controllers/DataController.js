@@ -82,6 +82,8 @@ export default @Controller('/data') class DataController {
 
         let output = 'publicKey,displayName,walletPublicKey,balance,twitter\r\n';
         for (const account of accounts) {
+            if (!account.data.publicKeys) continue;
+
             const displayName = account.data.displayName;
             const publicKey = account.data.publicKeys.arbitrary;
             const walletPublicKey = account.data.publicKeys.wallet;
