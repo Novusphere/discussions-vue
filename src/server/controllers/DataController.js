@@ -59,10 +59,10 @@ export default @Controller('/data') class DataController {
     @Api()
     @Get("/analytics/csv/general")
     async analyticsCsvGeneral(req, res) {
-        const { domain, scope } = req.unpack();
+        const { domain, scope, chain } = req.unpack();
         const accounts = await this.getAllAccounts(domain);
 
-        const api = await getEosAPI(`eos`);
+        const api = await getEosAPI(chain || `eos`);
         const balance_table = {};
         let balance_table_lower = "0";
         while (balance_table_lower) {
@@ -82,14 +82,20 @@ export default @Controller('/data') class DataController {
             }
         }
 
-        let output = 'publicKey,displayName,walletPublicKey,balance,twitter\r\n';
+        const balanceSymbol = Object.values(balance_table)[0].split(' ')[1];
+        let output = `publicKey,displayName,walletPublicKey,${balanceSymbol},twitter,eosAccount,telosAccount\r\n`;
         for (const account of accounts) {
             const displayName = account.data.displayName;
             const publicKey = account.data.publicKeys.arbitrary;
             const walletPublicKey = account.data.publicKeys.wallet;
             const twitter = account.auth ? account.auth.twitter : undefined;
             const balance = balance_table[walletPublicKey];
-            output += `${publicKey},${displayName},${walletPublicKey},${parseFloat(balance || '0')},${twitter ? `@${twitter.username}` : ''}\r\n`;
+            const external = account.external || [];
+
+            const { value: eosAccount } = external.find(({ name }) => name == 'eos') || {};
+            const { value: telosAccount } = external.find(({ name }) => name == 'telos') || {};
+
+            output += `${publicKey},${displayName},${walletPublicKey},${parseFloat(balance || '0')},${twitter ? `@${twitter.username}` : ''},${eosAccount || ''},${telosAccount || ''}\r\n`;
         }
 
         return res.success(output, { contentType: 'text/plain' });
@@ -558,7 +564,7 @@ export default @Controller('/data') class DataController {
                         ...oembedResult,
                         html: oembedResult.html.replace(/width=\"[0-9]+\" height=\"[0-9]+\"/g, `width="560" height="315"`)
                     };
-                    
+
                     insertHTML = raw.html;
                 }
                 else if (oembedResult.html) {
