@@ -307,20 +307,34 @@ export default @Controller('/account') class AccountController {
     async getUser(req, res) {
         let { pub, domain } = req.unpackAuthenticated();
 
+        const time = Date.now();
         let db = await getDatabase();
         let document = await db.collection(config.table.accounts)
-            .find({
-                pub: pub,
-                domain: domain
-            })
-            .limit(1)
-            .next();
+            .findOneAndUpdate(
+                { pub, domain },
+                {
+                    $setOnInsert: {
+                        pub: pub,
+                        domain: domain,
+                        drafts: [],
+                        followingUsers: [],
+                        subscribedTags: [],
+                        blockedUsers: [],
+                    },
+                    $set: {
+                        lastActive: time
+                    }
+                },
+                {
+                    upsert: true,
+                    returnOriginal: false
+                });
 
-        if (!document) {
+        if (!document || !document.value) {
             throw new Error(`Account not found`);
         }
 
-        return res.success(document);
+        return res.success(document.value);
     }
 
     //
@@ -364,6 +378,7 @@ export default @Controller('/account') class AccountController {
                         blockedUsers: [],
                     },
                     $set: {
+                        lastActive: time,
                         time: time,
                         data: data,
                         ip: ip

@@ -14,7 +14,7 @@ Vue.use(Vuex);
 const getDefaultState = () => ({
     syncTime: 0,
     //
-    showWelcomeMessage: true,
+    showWelcomeMessage: 0,
     //
     imgViewerSrcs: [], // image links
     //
@@ -497,7 +497,12 @@ export default new Vuex.Store({
         },
         syncAccount(state, account) {
             state.needSyncAccount = false;
-            if (!account || !account.data) return;
+            if (!account) return; 
+            if (!account.data) {
+                saveAccount(state);
+                return;
+            }
+
             if (state.syncTime && account.data.syncTime <= state.syncTime) {
                 console.log(`state sync=${state.syncTime}, account sync=${account.syncTime}`);
             }

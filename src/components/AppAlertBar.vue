@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row
-      v-if="false && showWelcomeMessage && !isLoggedIn"
+      v-if="alert && (alert.time >= showWelcomeMessage || !isLoggedIn)"
       no-gutters
       :class="`primary darken-2`"
       justify="center"
@@ -9,7 +9,7 @@
     >
       <v-col></v-col>
       <v-col align="center">
-        <v-btn text small dense class="white--text" :to="'/landing'">Need help getting started?</v-btn>
+        <v-btn text small dense class="white--text" @click="clickAlert">{{ alert.message }}</v-btn>
       </v-col>
       <v-col align="end">
         <v-btn icon @click="dismissWelcome()" class="mr-4 white--text">
@@ -17,15 +17,11 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-row v-if="errorText" no-gutters :class="`error darken-2`">
-      <v-col :cols="12" align="center">
-        <span class="white--text">{{ errorText }}</span>
-      </v-col>
-    </v-row>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 import { mapState, mapGetters } from "vuex";
 import { apiRequest } from "@/novusphere-js/discussions/api";
 
@@ -41,12 +37,12 @@ export default {
     }),
   },
   data: () => ({
-    errorText: "",
+    alert: null,
   }),
   mounted() {
     // testing purposes
     window.enableWelcomeMessage = () => {
-      this.$store.commit("setShowWelcomeMessage", true);
+      this.$store.commit("setShowWelcomeMessage", 0);
     };
   },
   async created() {
@@ -59,12 +55,27 @@ export default {
     console.log(`Server time delta: ${delta}`);
 
     if (delta > 59000) {
-      this.errorText = `We've detected your system clock may be out of sync. Please enable auto sync for your device or certain functions on Discussions may not work as intended.`
+      this.errorText = `We've detected your system clock may be out of sync. Please enable auto sync for your device or certain functions on Discussions may not work as intended.`;
+    } else {
+      const { data: alert } = await axios.get(
+        "https://raw.githubusercontent.com/Novusphere/discussions-app-settings/master/alert.json"
+      );
+      this.alert = { ...alert };
     }
   },
   methods: {
+    clickAlert() {
+      console.log(this.alert);
+
+      if (!this.alert.link) return;
+      if (this.alert.link.startsWith("http")) {
+        window.location.href = this.alert.link;
+      } else {
+        this.$router.push(this.alert.link);
+      }
+    },
     dismissWelcome() {
-      this.$store.commit("setShowWelcomeMessage", false);
+      this.$store.commit("setShowWelcomeMessage", Date.now());
     },
   },
 };

@@ -308,7 +308,7 @@ export default @Controller('/blockchain') class BlockchainController {
     }
 
     @Api()
-    @Post('/getasset')
+    @All('/getasset')
     async getAsset(req, res) {
         const { symbol, address, zero } = req.unpack();
         let balance = await getCacheFallback(cache, `${address}::${symbol}`, async () => {

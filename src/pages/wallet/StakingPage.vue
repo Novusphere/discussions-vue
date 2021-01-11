@@ -4,7 +4,12 @@
       <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
         <v-card>
           <v-card-text>
-            <h1>Staking</h1>
+            <h1>
+              Staking
+              <v-btn icon small dense class="pb-1" @click="help"
+                ><v-icon>help</v-icon></v-btn
+              >
+            </h1>
             <v-row>
               <v-col :cols="12">
                 <v-text-field
@@ -89,7 +94,11 @@
             </v-row>
             <v-row>
               <v-col :cols="6">
-                <v-text-field label="Amount" v-model="stakeAmount">
+                <v-text-field
+                  :hint="estimateAPR"
+                  label="Amount"
+                  v-model="stakeAmount"
+                >
                   <template v-slot:append>
                     <TokenIcon :symbol="'ATMOS'" />
                   </template>
@@ -105,9 +114,7 @@
               <v-col :cols="6">
                 <v-btn color="primary" @click="toggleLock()" block>
                   <v-icon>{{ walletPrivateKey ? "lock" : "lock_open" }}</v-icon>
-                  <span>{{
-                    walletPrivateKey ? "Wallet" : "Wallet"
-                  }}</span>
+                  <span>{{ walletPrivateKey ? "Wallet" : "Wallet" }}</span>
                 </v-btn>
               </v-col>
               <v-col :cols="6">
@@ -221,6 +228,17 @@ export default {
       encryptedTest: (state) => state.encryptedTest,
       keys: (state) => state.keys,
     }),
+    estimateAPR() {
+      const stakeAmount = parseFloat(this.stakeAmount);
+      const stakeSecs = parseFloat(this.stakeSecs);
+
+      if (!this.stats || isNaN(stakeAmount) || isNaN(stakeSecs)) return "";
+
+      const stats = this.getMyStakeStats(stakeAmount, stakeSecs);
+      console.log(stats);
+
+      return `estimated APR after staking: ${(stats.apr * 100).toFixed(4)}%`;
+    },
   },
   data: () => ({
     symbol: "ATMOS",
@@ -276,6 +294,11 @@ export default {
     this.walletPrivateKey = "";
   },
   methods: {
+    help() {
+      window.open(
+        `https://discussions.app/tag/atmos/95lsknsyxf45/atmos-staking`
+      );
+    },
     async toggleLock() {
       this.stakeError = "";
       this.stakeMessage = "";
@@ -298,6 +321,32 @@ export default {
         this.$refs.form.resetValidation();
       }
     },
+    getMyStakeStats(addAmount = 0, addSecs = 0) {
+      // int64_t weight = (balance.amount / 10000) * (eosio::time_diff_secs(expires, now) / 60);
+      const addWeight = Math.floor((addAmount / 10) * (addSecs / 60));
+
+      const totalStaked = this.stakes.reduce(
+        (pv, cv) => pv + parseFloat(cv.initial_balance),
+        0
+      );
+
+      const totalEarned =
+        this.stakes.reduce((pv, cv) => pv + parseFloat(cv.balance), 0) -
+        totalStaked;
+
+      const weightFactor =
+        (addWeight + this.stakes.reduce((pv, cv) => pv + parseFloat(cv.weight), 0)) /
+        (Math.max(this.stats.total_weight, 1) + addWeight);
+
+      const earnInYear =
+        weightFactor *
+        parseFloat(this.stats.round_subsidy) *
+        ((365 * 24 * 60 * 60) / this.stats.min_claim_secs);
+
+      const apr = earnInYear / (totalStaked + addAmount || 1);
+
+      return { totalStaked, totalEarned, weightFactor, earnInYear, apr };
+    },
     async refresh() {
       this.atmos = await getAsset(this.symbol, this.keys.wallet.pub);
       let { stats, stakes } = await getStakes(this.keys.wallet.pub);
@@ -319,25 +368,12 @@ export default {
           expires: new Date(`${s.expires}Z`),
         }));
 
-        const totalStaked = this.stakes.reduce(
-          (pv, cv) => pv + parseFloat(cv.initial_balance),
-          0
-        );
-
-        const totalEarned =
-          this.stakes.reduce((pv, cv) => pv + parseFloat(cv.balance), 0) -
-          totalStaked;
-
-        const weightFactor =
-          this.stakes.reduce((pv, cv) => pv + parseFloat(cv.weight), 0) /
-          Math.max(this.stats.total_weight, 1);
-
-        const earnInYear =
-          weightFactor *
-          parseFloat(this.stats.round_subsidy) *
-          ((365 * 24 * 60 * 60) / this.stats.min_claim_secs);
-
-        const apr = earnInYear / totalStaked;
+        const {
+          totalStaked,
+          totalEarned,
+          weightFactor,
+          apr,
+        } = this.getMyStakeStats();
 
         this.totalStaked = `${totalStaked.toFixed(3)} ATMOS`;
         this.totalEarned = `${totalEarned.toFixed(3)} ATMOS`;

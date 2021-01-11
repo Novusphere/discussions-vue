@@ -8,8 +8,9 @@ import { oembed } from "../discussions/api";
 
 // Posts Ids are encoded with the first 32 bits being from the transaction id, and then following 16 bits from the time offset
 const TIME_ENCODE_GENESIS = 1483246800000 // 2017-1-1
-const IMAGE_REGEX = (/(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi);
-const LINK_REGEX = (/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=!]*)/gi);
+const IMAGE_REGEX = /(.|)http[s]?:\/\/(\w|[:/.%-])+\.(png|jpg|jpeg|gif)(\?(\w|[:/.%-])+)?(.|)/gi;
+const VIDEO_REGEX = /(.|)http[s]?:\/\/(\w|[:/.%-])+\.(mp4)(\?(\w|[:/.%-])+)?(.|)/gi;
+const LINK_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=!]*)/gi;
 
 const LBRY_REGEX = /http(s)?:\/\/(open.lbry.com|lbry.tv|odysee.com)\/(@[A-Za-z0-9_]+:[a-z0-9]+\/)?[A-Za-z0-9-_().!]+:[a-z0-9]+/gi;
 const YOUTUBE_REGEX = /https?:\/\/(www.|m.)?youtube.com\/watch/gi;
@@ -245,6 +246,13 @@ function getOEmbedHtml(href) {
         // Trading view chart image
         insertHTML = `<img src="${href}" alt="${href}" />`;
     }
+    else if (new RegExp(VIDEO_REGEX).test(href)) {
+        insertHTML = `
+        <video width="560" height="315" controls>
+            <source src="${href}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>`;
+    }
     else if (new RegExp(LBRY_REGEX).test(href)) {
         //
         // Example links:
@@ -327,7 +335,7 @@ function checkTransaction(trx) {
             window._consoleProxy = (window._consoleProxy || '') + [`[${new Date().toLocaleTimeString()}]`, ...args].join(' ') + '\r\n';
         }
     }
-    
+
     /*let log = console.log;
     console.log = function () {
         console.proxyLog.apply(this, arguments);

@@ -233,43 +233,7 @@ export default {
       if (account && account.data) {
         console.log(`Retrieved account successfully`);
       } else {
-        console.log(`Did not find account... checking for legacy account...`);
-        const oldAccount = await getUserAccountObject(
-          this.keys.identity.key,
-          `https://discussions.app`
-        );
-
-        // TO-REMOVE: migration code
-        // note: "https://" is no longer in new acccount domains
-
-        if (oldAccount) {
-          console.log(`Found old Discussions account... trying to migrate...`);
-          console.log(oldAccount);
-
-          // upgrade to new object format
-          const migrated = {
-            // NOTE: we didn't bother migrating watched posts
-            subscribedTags: oldAccount.data.tags,
-            followingUsers: oldAccount.data.following.map((fu) => ({
-              pub: fu.pub,
-              displayName: fu.name,
-            })),
-            data: {
-              lastSeenNotificationsTime:
-                oldAccount.data.lastCheckedNotifications,
-              delegatedMods: oldAccount.data.moderation.delegated.map((m) => {
-                const [displayName, pub] = m[0].split(":");
-                return { displayName, pub, tag: m[1] };
-              }),
-            },
-          };
-
-          //console.log(migrated);
-          console.log(`Migration OK`);
-          account = migrated;
-        } else {
-          console.log(`Did not find legacy account`);
-        }
+        console.log(`Error retrieving the account or no account was found...`);
       }
 
       subscribeAccount(this.keys.identity.key);

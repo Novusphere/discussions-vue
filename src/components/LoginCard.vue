@@ -24,7 +24,9 @@
                     @error="(e) => (walletError = e)"
                   >
                     <template v-slot:disconnect="{ logout }">
-                      <v-btn color="error" outlined block @click="logout">Disconnect Wallet</v-btn>
+                      <v-btn color="error" outlined block @click="logout"
+                        >Disconnect Wallet</v-btn
+                      >
                     </template>
                   </ConnectWalletBtn>
                 </div>
@@ -135,6 +137,7 @@ export default {
     password: "",
     waiting: false,
     validForm: false,
+    lastWalletData: null // { chain, address }
   }),
   computed: {
     ...brainKeyRules("brainKey"),
@@ -150,8 +153,9 @@ export default {
       }
       return rules;
     },
-    ...mapGetters(["hasLoginSession"]),
+    ...mapGetters(["hasLoginSession", "isLoggedIn"]),
     ...mapState({
+      keys: (state) => state.keys,
       oldEncryptedTest: (state) => state.encryptedTest,
       oldDisplayName: (state) => state.displayName,
       oldPublicKey: (state) => state.keys.arbitrary.pub,
@@ -160,6 +164,15 @@ export default {
     }),
   },
   watch: {
+    async isLoggedIn() {
+      if (!this.isLoggedIn || !this.keys) return;
+
+      console.log(`Logged in as ${this.keys.arbitrary.pub}`);
+      if (this.lastWalletData) {
+          console.log("Link external to user", { chain: this.lastWalletData.chain, address: this.lastWalletData.address });
+          await linkExternalToUser(this.keys.identity.key, this.lastWalletData.chain, this.lastWalletData.address);
+      }
+    },
     async brainKey() {
       if (this.brainKey && isValidBrainKey(this.brainKey)) {
         const keys = await brainKeyToKeys(this.brainKey);
@@ -191,7 +204,8 @@ export default {
         const keys = await brainKeyToKeys(this.brainKey);
 
         if (connector.chain == 'eos' || connector.chain == 'tlos') {
-          console.log(await linkExternalToUser(keys.identity.key, connector.chain, connector.wallet.auth.accountName));
+          this.lastWalletData = { chain: connector.chain, address: connector.wallet.auth.accountName };
+          await linkExternalToUser(keys.identity.key, this.lastWalletData.chain, this.lastWalletData.address);
         }
 
       } catch (ex) {
@@ -227,7 +241,7 @@ export default {
 
       this.waiting = true;
       this.$store.commit("login", login);
-      await sleep(500);
+      await sleep(150);
       await waitFor(async () => !this.needSyncAccount);
       this.$store.commit("setLoginDialogOpen", false);
       await this.reset();
