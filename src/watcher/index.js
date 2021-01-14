@@ -60,8 +60,8 @@ async function startActionWriter(chain, contract, table, watcher) {
 
     Object.assign(siteConfig, getConfig(`watcher`));
 
-    const eosDfuse = new DfuseWatcher(siteConfig.dfuse);
-    const eosGreymass = new GreymassWatcher();
+    const eosDfuse = new DfuseWatcher(); // eos nation, eos
+    const eosGreymass = new GreymassWatcher('https://eos.greymass.com', 'eos');
     const telosGreymass = new GreymassWatcher('https://telos.greymass.com', 'telos');
 
     // dfuse

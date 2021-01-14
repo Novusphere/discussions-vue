@@ -93,7 +93,7 @@ export default @Controller('/data') class DataController {
             const external = account.external || [];
 
             const { value: eosAccount } = external.find(({ name }) => name == 'eos') || {};
-            const { value: telosAccount } = external.find(({ name }) => name == 'tlos') || {};
+            const { value: telosAccount } = external.find(({ name }) => name == 'telos') || {};
 
             output += `${publicKey},${displayName},${walletPublicKey},${parseFloat(balance || '0')},${twitter ? `@${twitter.username}` : ''},${eosAccount || ''},${telosAccount || ''}\r\n`;
         }

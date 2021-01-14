@@ -31,7 +31,7 @@
         <v-btn
           color="primary"
           @click="showSummary()"
-          :disabled="!valid || disableSubmit"
+          :disabled="!valid || disableSubmit || !amount"
         >
           <v-progress-circular
             class="mr-2"
@@ -230,8 +230,10 @@ export default {
             receipt.transaction_id
           );
           //console.log(transactionLink);
+
           this.transactionLink = transactionLink;
           this.memo = "";
+          this.amount = 0;
 
           const strippedTransferActions = transferActions.map((ta) => ({
             ...ta,

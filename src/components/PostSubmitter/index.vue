@@ -11,7 +11,7 @@
         required
       ></v-text-field>
 
-      <v-select
+      <v-combobox auto-select-first
         v-if="subSelect"
         :value="sub"
         :items="communityTags"
@@ -29,7 +29,7 @@
           <TagIcon :tag="item" v-else />
           <span class="ml-2">#{{ item }}</span>
         </template>
-      </v-select>
+      </v-combobox>
 
       <v-tabs center-active show-arrows v-model="tab">
         <v-tab>Editor</v-tab>

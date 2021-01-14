@@ -31,7 +31,7 @@
           </template>
           <v-list>
             <v-list-item
-              v-for="(item, index) in ['eos', 'tlos']"
+              v-for="(item, index) in ['EOS', 'TLOS']"
               :key="index"
               @click="connect(wn, item)"
             >
@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { eos, eth, connectWallet } from "@/novusphere-js/uid";
+import { eos, eth, connectWallet, getToken } from "@/novusphere-js/uid";
 import { sleep } from "@/novusphere-js/utility";
 import TokenIcon from "@/components/TokenIcon";
 
@@ -135,15 +135,16 @@ export default {
         this.hasWallet = false;
       }
     },
-    async connect(wn, chain) {
+    async connect(wn, symbol) {
       this.waiting = true;
       try {
         this.$emit("start-connect");
-        const wallet = await connectWallet(wn, chain);
+        const token = await getToken(symbol);
+        const wallet = await connectWallet(wn, token.chain);
         if (wallet) {
           this.hasWallet = true;
           this.wallet = wallet;
-          this.chain = chain;
+          this.chain = token.chain;
           this.waiting = false;
           this.$emit("connected", { connector: this, auth: this.wallet.auth });
         }

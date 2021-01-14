@@ -26,7 +26,10 @@ export default {
   }),
   methods: {
     async setLink() {
-      this.link = await getTransactionLink(this.chain, this.transaction);
+      this.link =
+        this.chain && this.transaction
+          ? await getTransactionLink(this.chain, this.transaction)
+          : null;
     },
   },
   watch: {

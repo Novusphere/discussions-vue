@@ -115,7 +115,7 @@
               <v-icon>close</v-icon>Close
             </v-btn>
           </v-card-title>
-          <v-card-text :class="{ dark: darkMode, light: !darkMode }">
+          <v-card-text class="pa-0" :class="{ dark: darkMode, light: !darkMode }">
             <v-row no-gutters>
               <v-col :cols="12">
                 <ThreadBrowser
@@ -148,7 +148,7 @@
         <InsertLinkCard />
       </v-dialog>
 
-      <ImageViewer ref="imgViewer" :images="imgViewerSrcs" />
+      <ImageViewer ref="imgViewer" :images="imgViewerSrcs" :start-index="imgViewerIndex" />
 
       <v-container fluid>
         <v-row :no-gutters="$vuetify.breakpoint.mobile">
@@ -287,6 +287,7 @@ export default {
     ...mapGetters(["isPopoverOpen"]),
     ...mapState({
       imgViewerSrcs: (state) => state.imgViewerSrcs,
+      imgViewerIndex: (state) => state.imgViewerIndex,
       darkMode: (state) => state.darkMode,
       syncTime: (state) => state.syncTime,
       needSyncAccount: (state) => state.needSyncAccount,

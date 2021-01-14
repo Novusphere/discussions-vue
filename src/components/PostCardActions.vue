@@ -188,7 +188,7 @@ export default {
     async mediaViewer() {
       const srcs = await this.post.getAllContentImages();
       if (srcs.length > 0) {
-        this.$store.commit("setImageViewer", srcs);
+        this.$store.commit("setImageViewer", { imgs: srcs });
       }
     },
     async raindrop() {

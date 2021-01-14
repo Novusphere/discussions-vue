@@ -6,7 +6,7 @@
           <v-icon>close</v-icon>Close
         </v-btn>
       </v-card-title>
-      <v-card-text :class="{ 'dark': darkMode, 'light': !darkMode }">
+      <v-card-text class="pa-0" :class="{ dark: darkMode, light: !darkMode }">
         <v-carousel
           height="90vh"
           v-model="currentIndex"
@@ -40,6 +40,7 @@ export default {
   },
   props: {
     images: Array,
+    startIndex: Number,
   },
   data: () => ({
     currentIndex: 0,
@@ -53,6 +54,11 @@ export default {
       return `${Math.floor(window.innerHeight * 0.9)}px`;
     },
   },
+  watch: {
+    startIndex() {
+      this.currentIndex = this.startIndex;
+    },
+  },
   methods: {
     inc(n) {
       this.currentIndex = Math.min(
@@ -61,8 +67,8 @@ export default {
       );
     },
     show() {
-      this.currentIndex = 0;
       this.showing = true;
+      this.currentIndex = this.startIndex || 0;
     },
   },
 };
@@ -70,6 +76,7 @@ export default {
 
 <style scoped>
 .viewer-item {
+  max-width: 100%;
   max-height: 80vh;
 }
 </style>

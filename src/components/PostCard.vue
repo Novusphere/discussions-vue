@@ -1,19 +1,32 @@
 <template>
-  <v-card outlined v-if="!post.isSpam || !hideSpam" :class="`post-card post-card-${this.post.transaction}`">
+  <v-card
+    outlined
+    v-if="!post.isSpam || !hideSpam"
+    :class="`post-card post-card-${this.post.transaction}`"
+  >
     <v-row no-gutters class="overline">
       <div class="pl-3 mt-1">
-        <div class="d-inline-block pr-3" v-if="!$vuetify.breakpoint.mobile || post.threadTree">
+        <div
+          class="d-inline-block pr-3"
+          v-if="!$vuetify.breakpoint.mobile || post.threadTree"
+        >
           <v-btn icon @click="expanded = expanded ? 0 : -1">
-            <v-icon>{{ expanded ? 'expand_less' : 'expand_more' }}</v-icon>
+            <v-icon>{{ expanded ? "expand_less" : "expand_more" }}</v-icon>
           </v-btn>
         </div>
         <div class="d-inline">
           <div
             class="d-inline-block pr-3"
-            v-if="(!$vuetify.breakpoint.mobile && !post.threadTree) || (isCommentDisplay && isThread) || (isBrowsing && isMultiTag)"
+            v-if="
+              (!$vuetify.breakpoint.mobile && !post.threadTree) ||
+              (isCommentDisplay && isThread) ||
+              (isBrowsing && isMultiTag)
+            "
           >
             <TagLink
-              :class="{'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
+              :class="{
+                'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay,
+              }"
               inline
               popover
               :tag="post.sub"
@@ -22,7 +35,10 @@
           <div class="d-inline-block pr-3">
             <UserProfileLink
               popover
-              :class="{'moderator': isModerator(post.sub, post.pub), 'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
+              :class="{
+                moderator: isModerator(post.sub, post.pub),
+                'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay,
+              }"
               :displayName="post.displayName"
               :publicKey="post.pub"
             />
@@ -37,10 +53,15 @@
             </span>
           </PostThreadLink>
         </div>
-        <div class="d-inline-block pr-3" v-if="post.isPinned || post.isSpam || post.isNSFW">
+        <div
+          class="d-inline-block pr-3"
+          v-if="post.isPinned || post.isSpam || post.isNSFW"
+        >
           <v-icon v-if="post.isPinned" color="success">push_pin</v-icon>
           <v-icon v-if="post.isSpam" color="error">error</v-icon>
-          <v-chip v-if="post.isNSFW" small color="orange" text-color="white">18+</v-chip>
+          <v-chip v-if="post.isNSFW" small color="orange" text-color="white"
+            >18+</v-chip
+          >
         </div>
         <div class="d-inline-block pr-3">
           <PostTips class="d-inline" :post="post" />
@@ -52,7 +73,9 @@
       <div v-if="post.isSpam && !forceReveal">
         <v-row>
           <v-col :cols="12" align="center" justify="center">
-            <v-btn color="error" @click="forceReveal = true, expanded = 0">Reveal Spam?</v-btn>
+            <v-btn color="error" @click="(forceReveal = true), (expanded = 0)"
+              >Reveal Spam?</v-btn
+            >
           </v-col>
         </v-row>
       </div>
@@ -61,9 +84,12 @@
           <v-col cols="12">
             <div class="pl-1 mt-0">
               <PostThreadLink
-                :class="{'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
+                :class="{
+                  'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay,
+                }"
                 :post="post"
-              >{{ post.title }}</PostThreadLink>
+                >{{ post.title }}</PostThreadLink
+              >
             </div>
           </v-col>
         </v-row>
@@ -71,25 +97,36 @@
         <v-expansion-panels flat tile :value="expanded">
           <v-expansion-panel>
             <v-expansion-panel-content class="mt-0 mb-0">
-              <v-card flat :color="contentBackgroundColor" v-if="isPaidLockContent">
+              <v-card
+                flat
+                :color="contentBackgroundColor"
+                v-if="isPaidLockContent"
+              >
                 <div class="text-center">
                   <p v-if="!isPaidLockForever">
                     Content available for free in
-                    <Countdown :end="post.paywall.expire" @done="paywallExpire()" />
+                    <Countdown
+                      :end="post.paywall.expire"
+                      @done="paywallExpire()"
+                    />
                   </p>
-                  <v-btn
-                    color="primary"
-                    outlined
-                    @click="payForContent()"
-                  >Unlock for {{ post.paywall.asset }}</v-btn>
+                  <v-btn color="primary" outlined @click="payForContent()"
+                    >Unlock for {{ post.paywall.asset }}</v-btn
+                  >
                 </div>
               </v-card>
-              <v-card flat @click.native="cardClicked" :color="contentBackgroundColor" v-else>
+              <v-card
+                flat
+                @click.native="cardClicked"
+                :color="contentBackgroundColor"
+                v-else
+              >
                 <div
-                  :class="{ 
+                  :class="{
                     'dark-fade': $vuetify.theme.dark,
-                    'content-fade': isPreviewDisplay && !isCompactContent, 
-                    'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay }"
+                    'content-fade': isPreviewDisplay && !isCompactContent,
+                    'nsfw-blur': post.isNSFW && blurNSFW && !removeNSFWOverlay,
+                  }"
                 >
                   <div class="post-html" v-html="postHTML"></div>
                 </div>
@@ -227,14 +264,15 @@ function hookPostImages($vue, document) {
 
   const postImages = Array.from(document.querySelectorAll(".post-html img"));
 
-  for (const img of postImages) {
+  for (let i = 0; i < postImages.length; i++) {
+    const img = postImages[i];
     img.onclick = function (e) {
       const srcs = Array.from(img.closest(".post-html").querySelectorAll("img"))
         .map((img) => img.getAttribute("src"))
         .filter((s) => s);
 
       if (srcs.length > 0) {
-        $vue.$store.commit("setImageViewer", srcs);
+        $vue.$store.commit("setImageViewer", { imgs: srcs, index: i });
       }
 
       return e.stopPropagation();

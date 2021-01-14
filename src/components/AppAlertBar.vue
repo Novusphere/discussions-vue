@@ -7,14 +7,11 @@
       justify="center"
       align="center"
     >
-      <v-col></v-col>
-      <v-col align="center">
-        <v-btn text small dense class="white--text" @click="clickAlert">{{ alert.message }}</v-btn>
-      </v-col>
-      <v-col align="end">
-        <v-btn icon @click="dismissWelcome()" class="mr-4 white--text">
-          <v-icon>close</v-icon>
-        </v-btn>
+      <v-col :cols="12" align="center">
+        <div class="text-overline">
+          <a href="javascript:void(0)" class="white--text text-decoration-none" @click="clickAlert">{{ alert.message }}</a>
+          <v-btn class="mr-2 float-right" icon small dense @click="dismissWelcome"><v-icon>close</v-icon></v-btn>
+        </div>
       </v-col>
     </v-row>
   </div>
@@ -65,8 +62,6 @@ export default {
   },
   methods: {
     clickAlert() {
-      console.log(this.alert);
-
       if (!this.alert.link) return;
       if (this.alert.link.startsWith("http")) {
         window.location.href = this.alert.link;

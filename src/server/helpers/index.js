@@ -120,8 +120,8 @@ async function getEosAPI(chain, endpoint) {
 
         if (endpoint == 'dfuse') {
 
-            if (!siteConfig.relay.dfuse)
-                throw new Error(`Dfuse is not configured`);
+            //if (!siteConfig.relay.dfuse)
+            //    throw new Error(`Dfuse is not configured`);
 
             if (!dfuseClient) {
 

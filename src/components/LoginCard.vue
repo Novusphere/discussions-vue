@@ -203,7 +203,7 @@ export default {
 
         const keys = await brainKeyToKeys(this.brainKey);
 
-        if (connector.chain == 'eos' || connector.chain == 'tlos') {
+        if (connector.chain == 'eos' || connector.chain == 'telos') {
           this.lastWalletData = { chain: connector.chain, address: connector.wallet.auth.accountName };
           await linkExternalToUser(keys.identity.key, this.lastWalletData.chain, this.lastWalletData.address);
         }

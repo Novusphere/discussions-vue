@@ -17,6 +17,7 @@ const getDefaultState = () => ({
     showWelcomeMessage: 0,
     //
     imgViewerSrcs: [], // image links
+    imgViewerIndex: 0,
     //
     popover: {
         tag: { value: false },
@@ -51,7 +52,7 @@ const getDefaultState = () => ({
     encryptedTest: '', // the value "test" encrypted with the same password as [encryptedBrainKey]
     keys: null,
     //
-    darkMode: false,
+    darkMode: true,
     hideSpam: true,
     blurNSFW: true,
     needSyncAccount: false,
@@ -289,8 +290,10 @@ export default new Vuex.Store({
             state.localDrafts[draftType] = draft;
             saveAccount(state, false);
         },
-        setImageViewer(state, imgs) {
+        setImageViewer(state, { imgs, index }) {
+            //console.log(`imgv`, index);
             state.imgViewerSrcs = imgs;
+            state.imgViewerIndex = index || 0;
         },
         setPostSort(state, value) {
             state.postSort = value;
