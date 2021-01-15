@@ -1,4 +1,4 @@
-import { config, getDatabase } from "../mongo";
+import { config, getDatabase, getCollection } from "../mongo";
 import ecc from "eosjs-ecc";
 import site from "../site";
 import EOSContractService from "./EOSContractService";
@@ -341,7 +341,6 @@ class DiscussionsService extends EOSContractService {
     }
 
     async migration() {
-
         //const collection = await getCollection(config.table.discussions);
         //const res = await collection.updateMany({ chain: { $exists: false } }, { $set: { chain: 'eos' } });
 
@@ -349,19 +348,17 @@ class DiscussionsService extends EOSContractService {
         //await (await getCollection(config.table.votes)).deleteMany({ createdAt: { $gt: 1603172986823 } });
         //await (await getCollection(config.table.discussions)).deleteMany({ time: { $gt: 1603172986823 } });
 
-        /*const db = await getCollection(config.table.accounts);
+        const db = await getCollection(config.table.accounts);
         const res = await db.updateMany({
-            "data.followingUsers": { $exists: true },
-            "data.subscribedTags": { $exists: true }
+            "createdAt": { $exists: false },
         }, {
-            $rename: {
-                "data.followingUsers": "followingUsers",
-                "data.subscribedTags": "subscribedTags"
+            $set: {
+                "createdAt": Date.now()
             }
-        });*/
+        });
 
-        //console.log(`=== migration ===`);
-        //console.log(res);
+        console.log(`=== migration ===`);
+        console.log(res.result.n);
     }
 }
 

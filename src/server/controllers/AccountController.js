@@ -320,6 +320,7 @@ export default @Controller('/account') class AccountController {
                         followingUsers: [],
                         subscribedTags: [],
                         blockedUsers: [],
+                        createdAt: time
                     },
                     $set: {
                         lastActive: time
@@ -376,6 +377,7 @@ export default @Controller('/account') class AccountController {
                         followingUsers: [],
                         subscribedTags: [],
                         blockedUsers: [],
+                        createdAt: time
                     },
                     $set: {
                         lastActive: time,
