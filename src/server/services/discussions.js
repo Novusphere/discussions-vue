@@ -44,7 +44,6 @@ class DiscussionsService extends EOSContractService {
         this.dispatch = {
             "post": this.post,
             "vote": this.vote,
-            "notify": this.notify,
             "transfer": this.transfer,
         };
     }
@@ -214,55 +213,6 @@ class DiscussionsService extends EOSContractService {
         });
     }
 
-    async tip(action) {
-        //
-        // LEGACY
-        //
-
-        let { parentUuid } = action.data.metadata.data;
-        if (!parentUuid) return;// console.log(`invalid parent uuid`);
-
-        const db = await getDatabase();
-        const parent = await db.collection(config.table.posts)
-            .find({ uuid: parentUuid })
-            .limit(1)
-            .next();
-
-        if (!parent) return;// console.log(`parent not found`);
-        if (!parent.uidw) return;// console.log(`parent has no uidw`);
-
-        let actionCollection = await this.getActionCollection();
-        let tips = (await actionCollection
-            .find({ transaction: action.transaction, name: 'transfer' })
-            .toArray())
-            .filter(t => t.data.to == parent.uidw)
-            .map(t => ({
-                transaction: t.transaction,
-                data: t.data
-            }));
-
-        if (tips.length > 0) {
-            let tipscore = tips
-                .filter(t => !site.trustedRelay || site.trustedRelay.some(tr => t.data.relayer == tr))
-                .reduce((score, t) => {
-                    let [, token] = t.data.amount.split(' ');
-                    if (token == 'ATMOS') {
-                        const total = parseFloat(t.data.amount) + parseFloat(t.data.fee);
-                        return score + Math.log2(total);
-                    }
-                    return score;
-                }, 0);
-
-            this.pushUpdate(config.table.posts, {
-                q: { transaction: parent.transaction },
-                u: {
-                    $inc: { tipscore: Math.round(tipscore + 0.5) },
-                    $push: { tips: { $each: tips } }
-                }
-            });
-        }
-    }
-
     async tipNew(action) {
         //console.log(`tipNew`, action);
 
@@ -304,22 +254,6 @@ class DiscussionsService extends EOSContractService {
                     $push: { tips: { $each: tips } }
                 }
             });
-        }
-    }
-
-    async notify(action) {
-        if (!action.data.metadata) return;
-
-        let { name } = action.data.metadata;
-        if (!name) return;
-
-        const dispatch = {
-            'tip': this.tip
-        };
-
-        const dispatcher = dispatch[name];
-        if (dispatcher) {
-            await dispatcher.apply(this, [action]);
         }
     }
 

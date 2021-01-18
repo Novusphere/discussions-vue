@@ -97,7 +97,7 @@
                 :key="i"
                 :cols="$vuetify.breakpoint.mobile ? 12 : 6"
               >
-                <TagLink inline class="mr-2" :tag="dm.tag" />
+                <TagLink inline class="ml-2" :tag="dm.tag" />
                 <UserProfileLink
                   class="d-inline-block"
                   :publicKey="dm.pub"

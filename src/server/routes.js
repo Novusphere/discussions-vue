@@ -146,7 +146,8 @@ const routes = [
                 ]
             },
             { path: 'staking', redirect: '/wallet/staking' },
-            { path: 'airdrop', component: 'AirdropPage' }
+            { path: 'airdrop', component: 'AirdropPage' },
+            { path: 'messenger', component: 'MessengerPage' }
         ]
     }
 ]

@@ -1,6 +1,8 @@
 import io from 'socket.io-client';
 import { getAPIHost, createSignedBody } from './api';
 import { waitFor } from "../utility";
+import { Aes } from 'eosjs-ecc';
+import Long from 'long';
 
 let _callbacks = {};
 let _lastGatewayId = 1;
@@ -14,6 +16,17 @@ async function subscribeAccount(identityKey) {
     if (subscription) {
         $state.identityKey = identityKey;
     }
+    return subscription;
+}
+
+async function decryptDirectMessage(arbitraryKey, friendPublicKey, encryptedBuffer, nonce, checksum) {
+    return Aes.decrypt(arbitraryKey, friendPublicKey, nonce, encryptedBuffer, checksum).toString('utf8');
+}
+
+async function sendDirectMessage(arbitraryKey, friendPublicKey, textMessage) {
+    const { nonce, message, checksum } = Aes.encrypt(arbitraryKey, friendPublicKey, textMessage);
+    const dm = await gatewaySend('sendDirectMessage', { nonce: nonce.toString(), message: message.toString('hex'), checksum, friendPublicKey }, { key: arbitraryKey });
+    return dm;
 }
 
 function gatewaySend(method, body, { key, domain }) {
@@ -60,6 +73,17 @@ async function getSocket() {
 
         });
 
+        socket.on('receiveDirectMessage', (e) => {
+
+            const data = Buffer.from(e.payload.data, "hex");
+            const nonce = Long.fromString(e.payload.nonce);
+            const detail = { ...e.payload, data, nonce };
+
+            const event = new CustomEvent('receiveDirectMessage', { detail });
+            window.dispatchEvent(event);
+
+        });
+
         socket.on('connect', () => {
             if ($state.identityKey) {
                 // resubscribe
@@ -75,5 +99,7 @@ async function getSocket() {
 }
 
 export {
+    decryptDirectMessage,
+    sendDirectMessage,
     subscribeAccount
 }

@@ -44,6 +44,7 @@ import TestEditorPage from '@/pages/tests/TestEditorPage';
 import AnalyticsPage from "@/pages/tests/AnalyticsPage";
 import AirdropPage from "@/pages/tests/AirdropPage";
 import TestBrowsePostsPage from '@/pages/tests/posts/TestBrowsePostsPage';
+import MessengerPage from "@/pages/tests/MessengerPage";
 import MissingPage from "@/pages/MissingPage";
 
 let components = {
@@ -82,8 +83,9 @@ let components = {
     TestBrowsePostsPage,
     StakingPage,
     MissingPage,
-    AirdropPage
-}
+    AirdropPage,
+    MessengerPage
+};
 
 import createRoutes from "@/server/routes";
 import site from "@/server/site";

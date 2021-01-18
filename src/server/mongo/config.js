@@ -20,7 +20,8 @@ let config = {
         "posts": "posts",
         "votes": "votes",
         "accounts": "accounts",
-        "moderation": "moderation"
+        "moderation": "moderation",
+        "directmsgs": "directmsgs"
     },
     "index": {
         "analytics": {
@@ -50,6 +51,11 @@ let config = {
         "votes": {
             "pub": 1,
             "uuid": 1
+        },
+        "directmsgs": {
+            "time": 1,
+            "senderPublicKey": 1,
+            "friendPublicKey": 1,
         },
         "posts": {
             "id": -1,

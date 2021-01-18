@@ -8,6 +8,10 @@ const socketio = require('socket.io');
 let _allClients = {};
 let _lastClientId = 1;
 
+function getAllClients() {
+    return Object.values(_allClients);
+}
+
 class SocketClient {
     constructor(socket) {
         this.$socket = socket;
@@ -15,7 +19,8 @@ class SocketClient {
         this.$state = {
             account: {
                 domain: '',
-                pub: ''
+                pub: '',
+                arbitraryPub: ''
             }
         };
 
@@ -40,7 +45,7 @@ class SocketClient {
             accountEvent.off('change', onAccountChange);
 
             //console.log(`Socket ${this.id} is disconnected`);
-            _allClients[this.id];
+            delete _allClients[this.id];
         });
 
         socket.on('api', ({ id, method, data }) => {
@@ -49,9 +54,12 @@ class SocketClient {
 
             const dispatch = {
                 'ping': this.ping,
-                'subscribeAccount': this.subscribeAccount
+                'subscribeAccount': this.subscribeAccount,
+                'sendDirectMessage': this.sendDirectMessage
             };
+
             const dispatcher = dispatch[method];
+
             if (dispatcher) {
                 const $this = this;
                 const req = { body: data };
@@ -79,6 +87,11 @@ class SocketClient {
         if (this.$state.account.pub != pub) return;
         if (this.$state.account.domain != domain) return;
 
+
+        if (data.publicKeys) {
+            this.$state.account.arbitraryPub = data.publicKeys.arbitrary;
+        }
+
         this.send('accountChange', 0, {
             payload: {
                 pub,
@@ -98,6 +111,7 @@ class SocketClient {
     @Api()
     async ping(req, res) {
         const data = req.unpack();
+
         return res.success({
             pong: data
         });
@@ -107,12 +121,8 @@ class SocketClient {
     async subscribeAccount(req, res) {
         const { pub, domain } = req.unpackAuthenticated();
 
-        const subscription = this.$state.account;
-        subscription.pub = pub;
-        subscription.domain = domain;
-
-        let db = await getDatabase();
-        let document = await db.collection(config.table.accounts)
+        const db = await getDatabase();
+        const document = await db.collection(config.table.accounts)
             .find({
                 pub: pub,
                 domain: domain
@@ -120,8 +130,45 @@ class SocketClient {
             .limit(1)
             .next();
 
-        if (document)
+        const subscription = this.$state.account;
+        subscription.pub = pub;
+        subscription.domain = domain;
+
+        if (document) {
+            if (document.data && document.data.publicKeys) {
+                subscription.arbitraryPub = document.data.publicKeys.arbitrary;
+            }
             this.onAccountChange(document);
+        }
+
+        return res.success();
+    }
+
+    @Api()
+    async sendDirectMessage(req, res) {
+        const { pub, data } = req.unpackAuthenticated();
+        if (pub != this.$state.account.arbitraryPub) return; // unexpected pub
+
+        const onlineClients = getAllClients()
+            .filter(({ $state }) => $state.account.arbitraryPub == data.friendPublicKey ||
+                $state.account.arbitraryPub == pub);
+
+        const outgoing = {
+            time: Date.now(),
+            senderPublicKey: pub,
+            friendPublicKey: data.friendPublicKey,
+            nonce: data.nonce,
+            data: data.message,
+            checksum: data.checksum
+        };
+
+        //console.log(onlineClients.length, outgoing);
+
+        for (const client of onlineClients) {
+            client.send('receiveDirectMessage', 0, {
+                payload: outgoing
+            });
+        }
 
         return res.success();
     }
