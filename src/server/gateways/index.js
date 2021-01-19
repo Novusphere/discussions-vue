@@ -149,10 +149,6 @@ class SocketClient {
         const { pub, data } = req.unpackAuthenticated();
         if (pub != this.$state.account.arbitraryPub) return; // unexpected pub
 
-        const onlineClients = getAllClients()
-            .filter(({ $state }) => $state.account.arbitraryPub == data.friendPublicKey ||
-                $state.account.arbitraryPub == pub);
-
         const outgoing = {
             time: Date.now(),
             senderPublicKey: pub,
@@ -162,7 +158,14 @@ class SocketClient {
             checksum: data.checksum
         };
 
-        //console.log(onlineClients.length, outgoing);
+        const db = await getDatabase();
+        await db.collection(config.table.directmsgs)
+            .insertOne(outgoing);
+
+        const onlineClients = getAllClients()
+        .filter(({ $state }) =>
+            $state.account.arbitraryPub == data.friendPublicKey ||
+            $state.account.arbitraryPub == pub);
 
         for (const client of onlineClients) {
             client.send('receiveDirectMessage', 0, {

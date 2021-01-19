@@ -4,6 +4,10 @@ import { waitFor } from "../utility";
 import { Aes } from 'eosjs-ecc';
 import Long from 'long';
 
+window._Aes = Aes;
+window._Long = Long;
+window._Buffer = Buffer;
+
 let _callbacks = {};
 let _lastGatewayId = 1;
 let $socket = undefined; // NOTE: WARNING: HMR can cause multiple sockets
@@ -19,13 +23,18 @@ async function subscribeAccount(identityKey) {
     return subscription;
 }
 
-async function decryptDirectMessage(arbitraryKey, friendPublicKey, encryptedBuffer, nonce, checksum) {
-    return Aes.decrypt(arbitraryKey, friendPublicKey, nonce, encryptedBuffer, checksum).toString('utf8');
+async function decryptDirectMessage(arbitraryKey, friendPublicKey, message, nonce, checksum) {
+    const encryptedBuffer = Buffer.from(message, "hex");
+    //console.log('decrypt', arbitraryKey, nonce.toString(), encryptedBuffer.toString('hex'), checksum, friendPublicKey);
+    return Aes.decrypt(arbitraryKey, friendPublicKey, Long.fromString(nonce), encryptedBuffer, checksum).toString('utf8');
 }
 
 async function sendDirectMessage(arbitraryKey, friendPublicKey, textMessage) {
     const { nonce, message, checksum } = Aes.encrypt(arbitraryKey, friendPublicKey, textMessage);
-    const dm = await gatewaySend('sendDirectMessage', { nonce: nonce.toString(), message: message.toString('hex'), checksum, friendPublicKey }, { key: arbitraryKey });
+    const nonceStr = nonce.toString();
+    const messageStr =  message.toString('hex');
+    //console.log('encrypt', arbitraryKey, nonceStr, messageStr, checksum, friendPublicKey);
+    const dm = await gatewaySend('sendDirectMessage', { nonce: nonceStr, message: messageStr, checksum, friendPublicKey }, { key: arbitraryKey });
     return dm;
 }
 
@@ -75,9 +84,8 @@ async function getSocket() {
 
         socket.on('receiveDirectMessage', (e) => {
 
-            const data = Buffer.from(e.payload.data, "hex");
-            const nonce = Long.fromString(e.payload.nonce);
-            const detail = { ...e.payload, data, nonce };
+            const detail = { ...e.payload };
+            //console.log(detail);
 
             const event = new CustomEvent('receiveDirectMessage', { detail });
             window.dispatchEvent(event);

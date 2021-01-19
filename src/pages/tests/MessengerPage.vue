@@ -33,14 +33,25 @@
             </v-row>
           </v-card-text>
         </v-card>
-        <v-card class="mt-1">
+        <v-card
+          ref="messageBox"
+          class="mt-1"
+          max-height="600px"
+          style="overflow-y: auto"
+        >
           <v-card-text>
-            <v-textarea
-              :rows="20"
-              v-model="tempMessages"
-              label="Message History"
-              readonly
-            ></v-textarea>
+            <v-row>
+              <v-col :cols="12" v-for="(msg, i) in messages" :key="i">
+                <span
+                  style="display: block"
+                  v-if="i == 0 || messages[i].date != messages[i - 1].date"
+                  >[{{ messages[i].date }}]</span
+                >
+                <PublicKeyIcon :publicKey="msg.senderPublicKey" />
+                <span>{{ msg.fromDisplayName }}:</span>
+                <span class="ml-1">{{ msg.content }}</span>
+              </v-col>
+            </v-row>
           </v-card-text>
         </v-card>
       </v-col>
@@ -49,7 +60,11 @@
 </template>
 
 <script>
-import { sendDirectMessage, decryptDirectMessage } from "@/novusphere-js/discussions/gateway";
+import { searchDirectMessages } from "@/novusphere-js/discussions/api";
+import {
+  sendDirectMessage,
+  decryptDirectMessage,
+} from "@/novusphere-js/discussions/gateway";
 import { mapState } from "vuex";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 
@@ -69,8 +84,25 @@ export default {
   data: () => ({
     friendPublicKey: "",
     messageText: "",
-    tempMessages: "",
+    messages: [],
+    cursor: null,
   }),
+  watch: {
+    async friendPublicKey() {
+      this.messages = [];
+      if (!this.friendPublicKey) return;
+
+      this.cursor = await searchDirectMessages(
+        this.keys.arbitrary.key,
+        this.friendPublicKey
+      );
+
+      const messages = await this.cursor.next();
+      for (const msg of messages.reverse()) {
+        await this.receiveDirectMessage({ detail: msg });
+      }
+    },
+  },
   created() {
     this._receiveDirectMessage = (e) => this.receiveDirectMessage(e);
     window.addEventListener("receiveDirectMessage", this._receiveDirectMessage);
@@ -85,32 +117,64 @@ export default {
     async receiveDirectMessage({
       detail: { checksum, data, friendPublicKey, senderPublicKey, nonce, time },
     }) {
-
       //console.log(checksum, data, fromPublicKey, senderPublicKey, nonce, time);
-      
-      if (this.keys.arbitrary.pub != friendPublicKey && this.keys.arbitrary.pub != senderPublicKey) return console.log('Unexpected receiveDirectMessage');
+
+      if (
+        this.keys.arbitrary.pub != friendPublicKey &&
+        this.keys.arbitrary.pub != senderPublicKey
+      )
+        return console.log("Unexpected receiveDirectMessage");
 
       let fromDisplayName = this.displayName;
       let otherPublicKey = friendPublicKey; // the key that isn't ours
 
       if (senderPublicKey != this.keys.arbitrary.pub) {
-        const friend = this.followingUsers.find(fu => fu.pub == senderPublicKey);
-        if (!friend) return console.log('friendPublicKey not found in followingUsers');
+        const friend = this.followingUsers.find(
+          (fu) => fu.pub == senderPublicKey
+        );
+        if (!friend)
+          return console.log("friendPublicKey not found in followingUsers");
         fromDisplayName = friend.displayName;
         otherPublicKey = senderPublicKey;
       }
-    
-      const decryptedMessage = await decryptDirectMessage(this.keys.arbitrary.key, otherPublicKey, data, nonce, checksum);
-      this.tempMessages += `[${new Date(time).toLocaleString()}] ${fromDisplayName}: ${decryptedMessage}\r\n\r\n`;
+
+      const content = await decryptDirectMessage(
+        this.keys.arbitrary.key,
+        otherPublicKey,
+        data,
+        nonce,
+        checksum
+      );
+
+      time = new Date(time);
+
+      const msg = {
+        friendPublicKey,
+        senderPublicKey,
+        fromDisplayName,
+        content,
+        time,
+        date: time.toLocaleDateString(),
+      };
+      if (this.messages.length > 0 && time < this.messages[0].time) {
+        this.messages.unshift(msg);
+      } else {
+        this.messages.push(msg);
+        this.scrollBottomMessage();
+      }
+    },
+    scrollBottomMessage() {
+        setTimeout(() => {
+          const messageBox = this.$refs.messageBox.$el;
+          messageBox.scrollTop = messageBox.scrollHeight;
+        }, 250);
     },
     async sendMessage() {
       const textMessage = `${this.messageText}`;
-      console.log(
-        await sendDirectMessage(
-          this.keys.arbitrary.key,
-          this.friendPublicKey,
-          textMessage
-        )
+      await sendDirectMessage(
+        this.keys.arbitrary.key,
+        this.friendPublicKey,
+        textMessage
       );
     },
   },

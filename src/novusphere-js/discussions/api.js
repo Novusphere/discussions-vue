@@ -2,10 +2,11 @@ import * as axios from 'axios';
 import ecc from 'eosjs-ecc';
 import Joi from "@hapi/joi";
 import { PostSearchQuery } from "./PostSearchQuery";
+//import { AccountSearchQuery } from './AccountSearchQuery';
+import { DirectMsgSearchQuery } from "./DirectMsgSearchQuery";
 import { getFromCache, checkTransaction } from "@/novusphere-js/utility";
 import { Post } from './Post';
 import { createTransferActions, signText, getToken } from "@/novusphere-js/uid";
-//import { AccountSearchQuery } from './AccountSearchQuery';
 
 if (typeof window != 'undefined') {
     window.$axios = axios;
@@ -254,6 +255,10 @@ function searchFollowers(pub, domain) {
         }]
     });
 }*/
+
+function searchDirectMessages(key, friendPublicKey) {
+    return new DirectMsgSearchQuery(key, { friendPublicKey });
+}
 
 //
 // General Search Query
@@ -918,6 +923,7 @@ export {
     addViewToPost,
     //searchAccounts,
     //searchFollowers,
+    searchDirectMessages,
     searchPosts,
     searchPostsByAll,
     searchPostsByTags,
