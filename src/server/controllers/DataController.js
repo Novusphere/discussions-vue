@@ -47,9 +47,10 @@ export default @Controller('/data') class DataController {
         for (const account of accounts) {
             const publicKey = account.data.publicKeys.arbitrary;
             for (const fu of (account.followingUsers || [])) {
-                const account2 = accounts.find(a => a.data.publicKeys.arbitrary == fu.pub);
-                if (!account2) continue;
+                //const account2 = accounts.find(a => a.data.publicKeys.arbitrary == fu.pub);
+                //if (!account2) continue;
                 output += `${publicKey},${fu.pub},Directed,0,,,1\r\n`;
+                //console.log(publicKey, fu.pub);
             }
         }
 
@@ -83,7 +84,7 @@ export default @Controller('/data') class DataController {
         }
 
         const balanceSymbol = Object.values(balance_table)[0].split(' ')[1];
-        let output = `publicKey,displayName,walletPublicKey,${balanceSymbol},twitter,eosAccount,telosAccount\r\n`;
+        let output = `publicKey,displayName,walletPublicKey,${balanceSymbol},twitter,eosAccount,telosAccount,createdAt,lastActive\r\n`;
         for (const account of accounts) {
             const displayName = account.data.displayName;
             const publicKey = account.data.publicKeys.arbitrary;
@@ -91,11 +92,13 @@ export default @Controller('/data') class DataController {
             const twitter = account.auth ? account.auth.twitter : undefined;
             const balance = balance_table[walletPublicKey];
             const external = account.external || [];
+            const createdAt = account.createdAt;
+            const lastActive = account.lastActive;
 
             const { value: eosAccount } = external.find(({ name }) => name == 'eos') || {};
             const { value: telosAccount } = external.find(({ name }) => name == 'telos') || {};
 
-            output += `${publicKey},${displayName},${walletPublicKey},${parseFloat(balance || '0')},${twitter ? `@${twitter.username}` : ''},${eosAccount || ''},${telosAccount || ''}\r\n`;
+            output += `${publicKey},${displayName},${walletPublicKey},${parseFloat(balance || '0')},${twitter ? `@${twitter.username}` : ''},${eosAccount || ''},${telosAccount || ''},${createdAt},${lastActive}\r\n`;
         }
 
         return res.success(output, { contentType: 'text/plain' });

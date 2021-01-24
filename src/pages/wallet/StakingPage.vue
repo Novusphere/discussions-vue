@@ -11,10 +11,21 @@
               >
             </h1>
             <v-row>
-              <v-col :cols="12">
+              <v-col :cols="6">
                 <v-text-field
                   label="Total Staked"
                   v-model="totalStaked"
+                  readonly
+                >
+                  <template v-slot:append>
+                    <TokenIcon :symbol="'ATMOS'" />
+                  </template>
+                </v-text-field>
+              </v-col>
+              <v-col :cols="6">
+                <v-text-field
+                  label="Staking Rank"
+                  v-model="stakingRank"
                   readonly
                 >
                   <template v-slot:append>
@@ -276,6 +287,7 @@ export default {
     nextClaim: null,
     stakes: [],
     walletPrivateKey: "",
+    stakingRank: "",
     totalStaked: "",
     totalEarned: "",
     apr: "",
@@ -349,9 +361,10 @@ export default {
     },
     async refresh() {
       this.atmos = await getAsset(this.symbol, this.keys.wallet.pub);
-      let { stats, stakes } = await getStakes(this.keys.wallet.pub);
+      let { stats, stakes, rank } = await getStakes(this.keys.wallet.pub);
       if (stats) {
         this.stats = { ...stats, last_claim: new Date(`${stats.last_claim}Z`) };
+        this.stakingRank = `#${rank}`;
 
         this.systemStaked = this.stats.total_supply;
         this.systemSubsidy = this.stats.subsidy_supply;

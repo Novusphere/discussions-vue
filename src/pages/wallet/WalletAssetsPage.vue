@@ -7,9 +7,8 @@
       v-for="(s, i) in symbols"
       :key="i"
       :cols="$vuetify.breakpoint.mobile ? 12 : 3"
-      v-show="show[i]"
     >
-      <AssetCard ref="assets" hide-zero :symbol="s" @data="({zero}) => updateShow(i, !zero)" />
+      <AssetCard ref="assets" :symbol="s" @data="({zero}) => updateShow(i, !zero)" />
     </v-col>
     <v-col :cols="12">
       <TransactionBrowser

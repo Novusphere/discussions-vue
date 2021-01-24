@@ -299,11 +299,27 @@ export default @Controller('/blockchain') class BlockchainController {
             index_position: 2,
         });
 
-        if (!table1.rows && !table1.rows.length > 0) return res.sucess([]);
+        if (!table1.rows && !table1.rows.length > 0) return res.sucess({});
+
+        const table2 = await api.rpc.get_table_rows({
+            json: true,
+            code: `atmosstakev2`,
+            scope: `3,ATMOS`,
+            table: 'accounts',
+            limit: 100,
+            key_type: "",
+            index_position: 1,
+        });
+
+        if (!table2.rows && !table2.rows.length) return res.sucess({});
+
+        table2.rows = table2.rows.sort((a, b) => parseFloat(b.total_balance) - parseFloat(a.total_balance)); // sort desc
+        const rank = table2.rows.findIndex(tr => tr.public_key == publicKey) + 1;
 
         return res.success({
             stats: table0.rows[0],
-            stakes: table1.rows
+            stakes: table1.rows,
+            rank
         });
     }
 
