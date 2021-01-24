@@ -60,10 +60,10 @@
                   ></line-chart>
                 </v-col>
                 <v-col cols="4">
-                  <p class="text-center text-h5 font-weight-bold">Staking Activity</p>
+                  <p class="text-center text-h5 font-weight-bold">Accounts Activity</p>
                   <line-chart
-                    v-if="stakingChartData"
-                    :chart-data="stakingChartData"
+                    v-if="accountsChartData"
+                    :chart-data="accountsChartData"
                     :options="lineChartOptions"
                   ></line-chart>
                 </v-col>
@@ -172,7 +172,7 @@ const ONE_WEEK = 7 * 24 * ONE_HOUR;
 const TIP_GENESIS = new Date("7/20/2020").getTime();
 const TLC_GENESIS = new Date("8/22/2020").getTime();
 const SWAP_GENESIS = new Date("8/26/2020").getTime();
-const STAKE_P_GENESIS = new Date("7/27/2020").getTime();
+//const STAKE_P_GENESIS = new Date("7/27/2020").getTime();
 
 function randomColor(name) {
   const hash = ecc.sha256(name);
@@ -227,7 +227,7 @@ export default requireLoggedIn({
     tlcChartData: null,
     transferChartData: null,
     swapsChartData: null,
-    stakingChartData: null,
+    accountsChartData: null,
     communitiesChartData: null,
     ytd: null,
     lineChartOptions: {
@@ -309,16 +309,15 @@ export default requireLoggedIn({
         ],
       };
 
-      const stakingData = this._periodsData.filter(
-        (a) => a.time > STAKE_P_GENESIS
-      );
-      const stakingChartData = {
-        labels: stakingData.map((a) => new Date(a.time).toLocaleDateString()),
+      const _accountsG = this._periodsData.findIndex(pd => pd.activeAccounts);
+      const accountsData = this._periodsData.filter((a, i) => i >= _accountsG);
+      const accountsChartData = {
+        labels: accountsData.map((a) => new Date(a.time).toLocaleDateString()),
         datasets: [
           {
-            ...color("Stake"),
-            label: "Staking Participants",
-            data: stakingData.map((a) => a.stakeRewarded),
+            ...color("Accounts"),
+            label: "Weekly Active Accounts",
+            data: accountsData.map((a) => a.activeAccounts),
           },
         ],
       };
@@ -336,7 +335,7 @@ export default requireLoggedIn({
       };
 
       this.transferChartData = transferChartData;
-      this.stakingChartData = stakingChartData;
+      this.accountsChartData = accountsChartData;
       this.swapsChartData = swapsChartData;
     },
     async setTLCAnalysis() {

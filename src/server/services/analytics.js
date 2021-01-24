@@ -196,12 +196,18 @@ class analytics {
                 time
             });
 
+        const activeAccounts = await db.collection(config.table.accounts)
+            .countDocuments({
+                lastActive: { $gte: fromTime - (7 * 24 * 60 * 60 * 1000) }
+            });
+
         const trxs = await this.aggregateTransactions(time);
         const content = await this.aggregatePosts(time);
 
         return {
             type: 'analysis',
             eosAccounts,
+            activeAccounts,
             stakeRewarded,
             posts,
             threads,
