@@ -343,10 +343,15 @@ export default {
     },
     async socialLogin(provider) {
       window.closePageCallback = async ({ provider, id, pubs }) => {
+        //console.log(provider, id);
+        //console.log(pubs.split(","));
+
         const identities = [];
         for (const pub of pubs.split(",")) {
+          if (!pub) continue;
+
           const profile = await getUserProfile(pub);
-          console.log(profile);
+          //console.log(profile);
 
           if (!profile.encryptedBrainKey) continue;
           identities.push({

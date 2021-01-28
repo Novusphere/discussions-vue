@@ -398,6 +398,8 @@ export default @Controller('/data') class DataController {
             }));
         }
 
+        if (!pub) throw new Error(`No public key was specified`);
+
         let user = await db.collection(config.table.accounts)
             .find({
                 "data.publicKeys.arbitrary": { $regex: `${pub}$` },
