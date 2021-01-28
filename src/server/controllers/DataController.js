@@ -38,6 +38,23 @@ export default @Controller('/data') class DataController {
     }
 
     @Api()
+    @Get("/analytics/csv/tags")
+    async analyticsCsvTags(req, res) {
+        const { domain } = req.unpack();
+        const accounts = await this.getAllAccounts(domain);
+
+        let output = 'Source,Target,Type,Id,Label,timeset,Weight\r\n';
+        for (const account of accounts) {
+            const publicKey = account.data.publicKeys.arbitrary;
+            for (const tag of (account.subscribedTags || [])) {
+                output += `${publicKey},${tag},Directed,0,,,1\r\n`;
+            }
+        }
+
+        return res.success(output, { contentType: 'text/plain' });
+    }
+
+    @Api()
     @Get("/analytics/csv/following")
     async analyticsCsvFollowing(req, res) {
         const { domain } = req.unpack();
