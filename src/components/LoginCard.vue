@@ -286,6 +286,18 @@ export default {
       if (!this.isLoggedIn || !this.keys) return;
 
       console.log(`Logged in as ${this.keys.arbitrary.pub}`);
+
+      // grant this oauth future access to easy login
+      if (this.lastOAuth) {
+        const oauth = this.lastOAuth;
+        const ak = this.keys.arbitrary.key;
+        setTimeout(async () => {
+          console.log("Grant oauth");
+          await grantOAuth(ak, oauth.provider, oauth.id);
+        }, 10000);
+        this.lastOAuth = null;
+      }
+
       if (this.lastWalletData) {
         console.log("Link external to user", {
           chain: this.lastWalletData.chain,
@@ -314,14 +326,7 @@ export default {
       if (this.passwordRules.length) return;
       if (this.displayNameRules.length) return;
 
-      const oauth = this.lastOAuth;
       const brainKey = generateBrainKey();
-      const keys = await brainKeyToKeys(brainKey);
-      //console.log(keys);
-
-      // grant this oauth future access to easy login
-      await grantOAuth(keys.arbitrary.key, oauth.provider, oauth.id);
-
       this.brainKey = brainKey;
 
       await this.login();
@@ -373,7 +378,7 @@ export default {
       this.password = "";
       this.brainKey = "";
       this.waiting = false;
-      this.lastOAuth = null;
+      //this.lastOAuth = null;
       this.passwordErrors = [];
       this.selectedIdentity = 0;
       this.confirmPassword = "";

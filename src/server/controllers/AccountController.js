@@ -340,12 +340,12 @@ export default @Controller('/account') class AccountController {
     @Api()
     @Post('/grantoauth')
     async grantOAuth(req, res) {
-        let { pub, data: { provider, id } } = req.unpackAuthenticated(); 
+        let { pub, data: { provider, id } } = req.unpackAuthenticated();
 
         //console.log(provider, id, pub);
 
         const db = await getDatabase();
-        await db.collection(config.table.oauths).updateOne(
+        const { ok, value } = await db.collection(config.table.oauths).findOneAndUpdate(
             { provider: provider, id: id },
             {
                 $addToSet: {
@@ -353,6 +353,27 @@ export default @Controller('/account') class AccountController {
                 }
             },
         );
+
+        //console.log(ok, value);
+
+        if (value && value.pubs.length == 0) {
+            const user = {
+                token: value.token,
+                secret: value.tokenSecret,
+                username: value.id
+            };
+
+            console.log({ "data.publicKeys.arbitrary": pub });
+
+            const { result: updateAuth } = await db.collection(config.table.accounts).updateMany({ "data.publicKeys.arbitrary": pub },
+                {
+                    $set: {
+                        "auth.twitter": user
+                    }
+                });
+
+            console.log(updateAuth);
+        }
 
         return res.success();
     }
