@@ -228,7 +228,7 @@ export default {
 
       console.log(`Synchronizing account...`);
 
-      let account = await getUserAccountObject(this.keys.identity.key);
+      let account = await getUserAccountObject(this.keys.identity.key, this.encryptedBrainKey);
 
       if (account && account.data) {
         console.log(`Retrieved account successfully`);
@@ -286,6 +286,7 @@ export default {
     },
     ...mapGetters(["isPopoverOpen"]),
     ...mapState({
+      encryptedBrainKey: (state) => state.encryptedBrainKey,
       imgViewerSrcs: (state) => state.imgViewerSrcs,
       imgViewerIndex: (state) => state.imgViewerIndex,
       darkMode: (state) => state.darkMode,
@@ -325,6 +326,8 @@ export default {
     window.addEventListener(
       "accountChange",
       ({ detail: { payload: account } }) => {
+        if (!account.data) return;
+
         console.log(
           `Remote sync, local=${this.syncTime}, remote=${account.data.syncTime}`
         );

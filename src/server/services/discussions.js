@@ -291,7 +291,50 @@ class DiscussionsService extends EOSContractService {
             }
         });
 
+        const oauths = await getCollection(config.table.oauths)
+        const accounts = await getCollection(config.table.accounts)
+        const res2 = await accounts.find( { "auth.twitter.token": { $exists: true } } );
+        const twitters = [];
+        while (await res2.hasNext()) {
+            const account = await res2.next();
+            const { token, secret, username } = account.auth.twitter;
+
+            let existingTwitter = twitters.find(t => t.id == username);
+            if (!existingTwitter) {
+                existingTwitter = {
+                    provider: 'twitter',
+                    id: username,
+                    pubs: [],
+                    token: token,
+                    tokenSecret: secret
+                    // profile: doesn't exist
+                };
+                twitters.push(existingTwitter);
+            }
+
+            existingTwitter.pubs.push(account.data.publicKeys.arbitrary);
+        }
+
+        for (const oauth of twitters) {
+            await oauths.updateOne(
+                { provider: oauth.provider, id: oauth.id },
+                {
+                    $setOnInsert: { provider: oauth.provider, id: oauth.id },
+                    $set: {
+                        token: oauth.token,
+                        tokenSecret: oauth.tokenSecret,
+                        // profile: doesn't exist
+                    },
+                    $addToSet: {
+                        pubs: { $each: Array.from(new Set(oauth.pubs)) }
+                    }
+                },
+                { upsert: true }
+            );
+        }
+
         console.log(`=== migration ===`);
+        console.log(twitters.length);
         console.log(res.result.n);
     }
 }

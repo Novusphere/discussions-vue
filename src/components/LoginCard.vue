@@ -1,103 +1,203 @@
 <template>
-  <v-card flat tile>
-    <v-card-text>
-      <v-container>
-        <v-form ref="form" v-model="validForm" @submit.prevent="login()">
-          <div v-if="!hasLoginSession">
-            <v-row>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="brainKey"
-                  :rules="brainKeyRules"
-                  label="Brain Key Mnemonic"
-                  hint="Enter your brain key mnemonic"
-                  required
-                ></v-textarea>
-                <div>
-                  <div class="text-center mb-2">OR</div>
-                  <ConnectWalletBtn
-                    ref="connector"
-                    color="primary"
-                    outlined
-                    @start-connect="walletError = ''"
-                    @connected="walletConnected"
-                    @error="(e) => (walletError = e)"
-                  >
-                    <template v-slot:disconnect="{ logout }">
-                      <v-btn color="error" outlined block @click="logout"
-                        >Disconnect Wallet</v-btn
-                      >
-                    </template>
-                  </ConnectWalletBtn>
-                </div>
+  <div>
+    <v-card flat tile v-if="!lastOAuth">
+      <v-card-text>
+        <v-container>
+          <v-form ref="form" v-model="validForm" @submit.prevent="login()">
+            <div v-if="!hasLoginSession">
+              <v-row>
+                <v-col cols="12">
+                  <v-textarea
+                    v-model="brainKey"
+                    :rules="brainKeyRules"
+                    label="Brain Key Mnemonic"
+                    hint="Enter your brain key mnemonic"
+                    required
+                  ></v-textarea>
+                  <div>
+                    <div class="text-center mb-2">OR</div>
+                    <ConnectWalletBtn
+                      class="mb-2"
+                      ref="connector"
+                      color="primary"
+                      outlined
+                      @start-connect="walletError = ''"
+                      @connected="walletConnected"
+                      @error="(e) => (walletError = e)"
+                    >
+                      <template v-slot:disconnect="{ logout }">
+                        <v-btn color="error" outlined block @click="logout"
+                          >Disconnect Wallet</v-btn
+                        >
+                      </template>
+                    </ConnectWalletBtn>
 
-                <div class="text-center" v-show="walletError">
-                  <span class="error--text">{{ walletError }}</span>
-                </div>
-              </v-col>
-            </v-row>
+                    <v-btn block outlined @click="socialLogin('twitter')"
+                      ><v-icon class="mr-2">mdi-twitter</v-icon> Twitter</v-btn
+                    >
+                  </div>
+
+                  <div class="text-center" v-show="walletError">
+                    <span class="error--text">{{ walletError }}</span>
+                  </div>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="displayName"
+                    :rules="displayNameRules"
+                    label="Display Name"
+                    required
+                  >
+                    <template v-slot:prepend>
+                      <PublicKeyIcon v-if="publicKey" :publicKey="publicKey" />
+                    </template>
+                  </v-text-field>
+                </v-col>
+              </v-row>
+            </div>
+            <div v-else>
+              <v-row>
+                <v-col cols="12">
+                  <PublicKeyIcon :size="80" :publicKey="oldPublicKey" />
+                  <div class="d-inline-block ml-2">
+                    <h1 class="d-inline">{{ oldDisplayName }}</h1>
+                    <v-btn
+                      icon
+                      class="ml-3 mb-3"
+                      @click="$store.commit('forgetLoginSession')"
+                    >
+                      <v-icon>delete</v-icon>
+                    </v-btn>
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
             <v-row>
               <v-col cols="12">
                 <v-text-field
-                  v-model="displayName"
-                  :rules="displayNameRules"
-                  label="Display Name"
+                  v-model="password"
+                  :rules="passwordRules2"
+                  label="Password"
+                  type="password"
                   required
-                >
-                  <template v-slot:prepend>
-                    <PublicKeyIcon v-if="publicKey" :publicKey="publicKey" />
-                  </template>
-                </v-text-field>
+                  @keydown.enter="login()"
+                ></v-text-field>
               </v-col>
             </v-row>
-          </div>
-          <div v-else>
-            <v-row>
-              <v-col cols="12">
-                <PublicKeyIcon :size="80" :publicKey="oldPublicKey" />
-                <div class="d-inline-block ml-2">
-                  <h1 class="d-inline">{{ oldDisplayName }}</h1>
-                  <v-btn
-                    icon
-                    class="ml-3 mb-3"
-                    @click="$store.commit('forgetLoginSession')"
-                  >
-                    <v-icon>delete</v-icon>
-                  </v-btn>
-                </div>
-              </v-col>
-            </v-row>
-          </div>
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                v-model="password"
-                :rules="passwordRules2"
-                label="Password"
-                type="password"
-                required
-                @keydown.enter="login()"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+          </v-form>
+        </v-container>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          @click="$store.commit('setLoginDialogOpen', false)"
+          >Close</v-btn
+        >
+        <v-btn
+          :disabled="waiting || !validForm"
+          color="primary"
+          @click="login()"
+        >
+          <v-progress-circular
+            class="mr-2"
+            indeterminate
+            v-show="waiting"
+          ></v-progress-circular>
+          <span>Log in</span>
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+    <v-card flat tile v-else-if="lastOAuth.identities.length == 0">
+      <v-card-text>
+        <v-form @submit.prevent>
+          <v-text-field
+            v-model="displayName"
+            :rules="displayNameRules"
+            label="Display Name"
+            required
+          >
+          </v-text-field>
+
+          <v-text-field
+            v-model="password"
+            autocomplete="off"
+            label="Password"
+            type="password"
+            :rules="passwordRules"
+          />
+          <v-text-field
+            v-model="confirmPassword"
+            autocomplete="off"
+            label="Confirm Password"
+            type="password"
+            :rules="confirmPasswordRules"
+          />
+
+          <v-btn
+            :disabled="waiting"
+            rounded
+            block
+            color="primary"
+            @click="finishOAuthSignup"
+          >
+            <v-progress-circular v-if="waiting" class="mr-2" indeterminate />
+            <span>Finish</span>
+          </v-btn>
         </v-form>
-      </v-container>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="primary" @click="$store.commit('setLoginDialogOpen', false)"
-        >Close</v-btn
-      >
-      <v-btn :disabled="waiting || !validForm" color="primary" @click="login()">
-        <v-progress-circular
-          class="mr-2"
-          indeterminate
-          v-show="waiting"
-        ></v-progress-circular>
-        <span>Log in</span>
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+      </v-card-text>
+    </v-card>
+    <v-card flat tile v-else-if="lastOAuth.identities.length > 0">
+      <v-card-text>
+        <v-form @submit.prevent>
+          <v-radio-group v-model="selectedIdentity">
+            <v-radio
+              v-for="(user, i) in lastOAuth.identities"
+              :key="user.pub"
+              :label="user.displayName"
+              :value="i"
+            />
+          </v-radio-group>
+          <v-text-field
+            v-model="password"
+            autocomplete="off"
+            label="Password"
+            type="password"
+            :error-messages="passwordErrors"
+            @keydown.enter="completeOAuthLogin"
+          />
+        </v-form>
+        <v-row>
+          <v-col :cols="6">
+            <v-btn
+              class="mt-2"
+              rounded
+              color="primary"
+              block
+              @click="lastOAuth = null"
+            >
+              Back
+            </v-btn>
+          </v-col>
+          <v-col :cols="6">
+            <v-btn
+              :disabled="waiting"
+              class="mt-2"
+              rounded
+              color="primary"
+              block
+              @click="completeOAuthLogin"
+            >
+              <v-progress-circular v-if="waiting" class="mr-2" indeterminate />
+              Next
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </div>
 </template>
 
 <script>
@@ -112,12 +212,18 @@ import {
 } from "@/utility";
 import PublicKeyIcon from "@/components/PublicKeyIcon";
 import ConnectWalletBtn from "@/components/ConnectWalletBtn";
-import { getUserProfile, linkExternalToUser } from "@/novusphere-js/discussions/api";
+import {
+  getUserProfile,
+  linkExternalToUser,
+  connectOAuth,
+  grantOAuth,
+} from "@/novusphere-js/discussions/api";
 import {
   decrypt,
   brainKeyFromHash,
   isValidBrainKey,
   brainKeyToKeys,
+  generateBrainKey,
 } from "@/novusphere-js/uid";
 import { sleep, waitFor } from "@/novusphere-js/utility";
 
@@ -137,13 +243,25 @@ export default {
     password: "",
     waiting: false,
     validForm: false,
-    lastWalletData: null // { chain, address }
+    lastWalletData: null, // { chain, address }
+    // ---
+    lastOAuth: null,
+    selectedIdentity: 0,
+    passwordErrors: [],
+    confirmPassword: "",
   }),
   computed: {
     ...brainKeyRules("brainKey"),
     ...displayNameRules("displayName"),
     ...passwordRules("password"),
     ...passwordTesterRules("password", "oldEncryptedTest"),
+    confirmPasswordRules() {
+      const rules = [];
+      if (this.password != this.confirmPassword) {
+        rules.push(`Passwords do not match`);
+      }
+      return rules;
+    },
     passwordRules2() {
       const rules = [];
       if (this.hasLoginSession) {
@@ -169,8 +287,15 @@ export default {
 
       console.log(`Logged in as ${this.keys.arbitrary.pub}`);
       if (this.lastWalletData) {
-          console.log("Link external to user", { chain: this.lastWalletData.chain, address: this.lastWalletData.address });
-          await linkExternalToUser(this.keys.identity.key, this.lastWalletData.chain, this.lastWalletData.address);
+        console.log("Link external to user", {
+          chain: this.lastWalletData.chain,
+          address: this.lastWalletData.address,
+        });
+        await linkExternalToUser(
+          this.keys.identity.key,
+          this.lastWalletData.chain,
+          this.lastWalletData.address
+        );
       }
     },
     async brainKey() {
@@ -185,13 +310,69 @@ export default {
     },
   },
   methods: {
+    async finishOAuthSignup() {
+      if (this.passwordRules.length) return;
+      if (this.displayNameRules.length) return;
+
+      const oauth = this.lastOAuth;
+      const brainKey = generateBrainKey();
+      const keys = await brainKeyToKeys(brainKey);
+      //console.log(keys);
+
+      // grant this oauth future access to easy login
+      await grantOAuth(keys.arbitrary.key, oauth.provider, oauth.id);
+
+      this.brainKey = brainKey;
+
+      await this.login();
+    },
+    async completeOAuthLogin() {
+      try {
+        const { displayName, encryptedBrainKey } = this.lastOAuth.identities[
+          this.selectedIdentity
+        ];
+        const brainKey = decrypt(encryptedBrainKey, this.password);
+        if (!isValidBrainKey(brainKey)) throw new Error();
+        this.brainKey = brainKey;
+        this.displayName = displayName;
+      } catch (ex) {
+        this.passwordErrors = ["Invalid password!"];
+        return;
+      }
+      await this.login();
+    },
+    async socialLogin(provider) {
+      window.closePageCallback = async ({ provider, id, pubs }) => {
+        const identities = [];
+        for (const pub of pubs.split(",")) {
+          const profile = await getUserProfile(pub);
+          console.log(profile);
+
+          if (!profile.encryptedBrainKey) continue;
+          identities.push({
+            pub,
+            displayName: profile.displayName,
+            encryptedBrainKey: profile.encryptedBrainKey,
+          });
+        }
+        this.passwordErrors = [];
+        this.lastOAuth = { provider, id, identities };
+      };
+
+      const callback = `${window.location.protocol}//${window.location.host}/close`;
+      await connectOAuth("", provider, callback);
+    },
     async reset() {
       this.publicKey = "";
       this.displayName = "";
       this.password = "";
       this.brainKey = "";
       this.waiting = false;
-      this.$refs.form.resetValidation();
+      this.lastOAuth = null;
+      this.passwordErrors = [];
+      this.selectedIdentity = 0;
+      this.confirmPassword = "";
+      if (this.$refs.form) this.$refs.form.resetValidation();
     },
     async walletConnected({ connector, auth }) {
       this.walletError = "";
@@ -203,18 +384,24 @@ export default {
 
         const keys = await brainKeyToKeys(this.brainKey);
 
-        if (connector.chain == 'eos' || connector.chain == 'telos') {
-          this.lastWalletData = { chain: connector.chain, address: connector.wallet.auth.accountName };
-          await linkExternalToUser(keys.identity.key, this.lastWalletData.chain, this.lastWalletData.address);
+        if (connector.chain == "eos" || connector.chain == "telos") {
+          this.lastWalletData = {
+            chain: connector.chain,
+            address: connector.wallet.auth.accountName,
+          };
+          await linkExternalToUser(
+            keys.identity.key,
+            this.lastWalletData.chain,
+            this.lastWalletData.address
+          );
         }
-
       } catch (ex) {
         this.walletError = ex.message;
         this.$refs.connector.logout();
       }
     },
     async login() {
-      this.$refs.form.validate();
+      if (this.$refs.form) this.$refs.form.validate();
 
       if (this.passwordRules.length) return;
 

@@ -371,6 +371,7 @@ export default @Controller('/data') class DataController {
         let lastPost = null;
         let threads = 0;
         let posts = 0;
+        let encryptedBrainKey = null;
 
         function stripAuth(auth) {
             if (!auth) return undefined;
@@ -396,6 +397,7 @@ export default @Controller('/data') class DataController {
                 pub = user.data.publicKeys.arbitrary;
             }
             auth = stripAuth(user.auth);
+            encryptedBrainKey = user.encryptedBrainKey;
         }
 
         if (pub && pub.length >= 50) {
@@ -444,11 +446,12 @@ export default @Controller('/data') class DataController {
             posts,
             threads,
             uidw: lastPost ? lastPost.uidw : undefined,
-            displayName: lastPost ? lastPost.displayName : undefined,
+            displayName: lastPost ? lastPost.displayName : (user && user.data) ? user.data.displayName : undefined,
             followers,
             followerUsers,
             followingUsers: (user ? user.followingUsers : undefined) || [],
-            auth: auth
+            auth: auth,
+            encryptedBrainKey
         });
     }
 

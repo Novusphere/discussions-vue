@@ -39,6 +39,7 @@ export default @Controller('/account') class AccountController {
 
     async twitter(req, token, tokenSecret, profile, done) {
         const { pub, domain } = JSON.parse(req.session.state);
+        let identityPub = null;
 
         const user = {
             token: token,
@@ -46,29 +47,59 @@ export default @Controller('/account') class AccountController {
             username: profile.username
         };
 
-        console.log({ pub, domain });
-        console.log(user);
+        //console.log({ pub, domain });
+        //console.log(user);
 
+        if (pub) {
+            const { value: account } = await db.collection(config.table.accounts).findOneAndUpdate(
+                {
+                    pub: pub,
+                    domain: domain
+                },
+                {
+                    $set: {
+                        "auth.twitter": user
+                    }
+                });
+
+            if (account) {
+                identityPub = account.data.publicKeys.arbitrary;
+            }
+        }
+
+        // maybe use id over username? ...but doing this for backwards compatability for now...
         const db = await getDatabase();
-        await db.collection(config.table.accounts).updateOne(
+        const { value: oauth } = await db.collection(config.table.oauths).findOneAndUpdate(
+            { provider: 'twitter', id: String(profile.username) },
             {
-                pub: pub,
-                domain: domain
-            },
-            {
+                $setOnInsert: { provider: 'twitter', id: String(profile.username) },
                 $set: {
-                    "auth.twitter": user
+                    token,
+                    tokenSecret,
+                    profile
+                },
+                $addToSet: {
+                    pubs: { $each: (identityPub) ? [identityPub] : [] }
                 }
-            });
+            },
+            { upsert: true, returnOriginal: false }
+        );
+
+        req.session.state = JSON.stringify({
+            ...JSON.parse(req.session.state),
+            provider: 'twitter',
+            id: String(profile.username),
+            pubs: oauth.pubs.join(',')
+        });
 
         done(null, {});
     }
 
     @Get('/passport/:what/redirect')
     async redirect(req, res) {
-        const { redirect } = JSON.parse(req.session.state);
+        const { redirect, provider, id, pubs } = JSON.parse(req.session.state);
         req.logout();
-        return res.redirect(redirect);
+        return res.redirect(redirect + `?provider=${provider}&id=${id}&pubs=${pubs}`);
     }
 
     @Api()
@@ -107,9 +138,16 @@ export default @Controller('/account') class AccountController {
     @Api()
     @Get('/passport/:what')
     async passport(req, res, next) {
-        const { data: { redirect }, pub, domain } = req.unpackAuthenticated();
-        const state = { redirect, pub, domain };
-        req.session.state = JSON.stringify(state);
+        try {
+            const { data: { redirect }, pub, domain } = req.unpackAuthenticated();
+            const state = { redirect, pub, domain };
+            req.session.state = JSON.stringify(state);
+        }
+        catch (ex) { // unauthenticated
+            const { redirect, domain } = req.unpack();
+            const state = { redirect, domain };
+            req.session.state = JSON.stringify(state);
+        }
 
         const authenticate = passport.authenticate(req.params.what);
         authenticate(req, res, next);
@@ -299,13 +337,33 @@ export default @Controller('/account') class AccountController {
         return res.success();
     }
 
+    @Api()
+    @Post('/grantoauth')
+    async grantOAuth(req, res) {
+        let { pub, data: { provider, id } } = req.unpackAuthenticated(); 
+
+        //console.log(provider, id, pub);
+
+        const db = await getDatabase();
+        await db.collection(config.table.oauths).updateOne(
+            { provider: provider, id: id },
+            {
+                $addToSet: {
+                    pubs: pub
+                }
+            },
+        );
+
+        return res.success();
+    }
+
     //
     // Account retrieval
     //
     @Api()
     @Post('/get')
     async getUser(req, res) {
-        let { pub, domain } = req.unpackAuthenticated();
+        let { pub, domain, data: { encryptedBrainKey } } = req.unpackAuthenticated();
 
         const time = Date.now();
         let db = await getDatabase();
@@ -323,7 +381,8 @@ export default @Controller('/account') class AccountController {
                         createdAt: time
                     },
                     $set: {
-                        lastActive: time
+                        lastActive: time,
+                        encryptedBrainKey: encryptedBrainKey
                     }
                 },
                 {

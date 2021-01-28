@@ -21,7 +21,8 @@ let config = {
         "votes": "votes",
         "accounts": "accounts",
         "moderation": "moderation",
-        "directmsgs": "directmsgs"
+        "directmsgs": "directmsgs",
+        "oauths": "oauths"
     },
     "index": {
         "analytics": {

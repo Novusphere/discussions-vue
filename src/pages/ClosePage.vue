@@ -11,7 +11,7 @@ export default {
   data: () => ({}),
   created() {
     if (window.opener && window.opener.closePageCallback) {
-      window.opener.closePageCallback();
+      window.opener.closePageCallback(this.$route.query);
     }
     window.close();
   },

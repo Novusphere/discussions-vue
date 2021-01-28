@@ -85,7 +85,11 @@ async function apiRequest(endpoint, body = undefined, { key, domain, redirect, n
         }
 
         if (redirect || newWindow) {
-            const fullUrl = url + `?sig=${body.sig}&data=${encodeURIComponent(body.data)}`;
+            let fullUrl = url;
+            
+            if (key) fullUrl += `?sig=${body.sig}&data=${encodeURIComponent(body.data)}`;
+            else fullUrl += `?domain=${domain}&redirect=${encodeURIComponent(body.redirect)}`;
+
             if (redirect) {
                 window.location.href = fullUrl;
             }
@@ -129,6 +133,16 @@ async function connectOAuth(identityKey, name, redirect, domain) {
 async function removeOAuth(identityKey, name, domain) {
     return await apiRequest(`/v1/api/account/passport/${name}/remove`, {}, {
         key: identityKey,
+        domain
+    });
+}
+
+//
+//
+//
+async function grantOAuth(arbitraryKey, provider, id, domain) {
+    return await apiRequest(`/v1/api/account/grantoauth`, { provider, id }, {
+        key: arbitraryKey,
         domain
     });
 }
@@ -807,9 +821,9 @@ async function orientTag(identityKey, tag, up, domain) {
 //
 // Get user account object
 //
-async function getUserAccountObject(identityKey, domain) {
+async function getUserAccountObject(identityKey, encryptedBrainKey, domain) {
     try {
-        return await apiRequest(`/v1/api/account/get`, {}, { key: identityKey, domain });
+        return await apiRequest(`/v1/api/account/get`, { encryptedBrainKey }, { key: identityKey, domain });
     }
     catch (ex) { // not found
         return null;
@@ -960,5 +974,6 @@ export {
     unsubscribeTag,
     connectOAuth,
     removeOAuth,
+    grantOAuth,
     linkExternalToUser
 }

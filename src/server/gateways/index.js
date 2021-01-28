@@ -88,7 +88,7 @@ class SocketClient {
         if (this.$state.account.domain != domain) return;
 
 
-        if (data.publicKeys) {
+        if (data && data.publicKeys) {
             this.$state.account.arbitraryPub = data.publicKeys.arbitrary;
         }
 
