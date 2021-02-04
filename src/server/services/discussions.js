@@ -282,7 +282,7 @@ class DiscussionsService extends EOSContractService {
         //await (await getCollection(config.table.votes)).deleteMany({ createdAt: { $gt: 1603172986823 } });
         //await (await getCollection(config.table.discussions)).deleteMany({ time: { $gt: 1603172986823 } });
 
-        const db = await getCollection(config.table.accounts);
+        /*const db = await getCollection(config.table.accounts);
         const res = await db.updateMany({
             "createdAt": { $exists: false },
         }, {
@@ -331,11 +331,11 @@ class DiscussionsService extends EOSContractService {
                 },
                 { upsert: true }
             );
-        }
+        }*/
 
-        console.log(`=== migration ===`);
-        console.log(twitters.length);
-        console.log(res.result.n);
+        //console.log(`=== migration ===`);
+        //console.log(twitters.length);
+        //console.log(res.result.n);
     }
 }
 

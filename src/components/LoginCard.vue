@@ -35,6 +35,10 @@
                     <v-btn block outlined @click="socialLogin('twitter')"
                       ><v-icon class="mr-2">mdi-twitter</v-icon> Twitter</v-btn
                     >
+
+                    <v-btn block outlined @click="socialLogin('reddit')"
+                      ><v-icon class="mr-2">mdi-reddit</v-icon> Reddit</v-btn
+                    >
                   </div>
 
                   <div class="text-center" v-show="walletError">

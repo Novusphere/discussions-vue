@@ -1,7 +1,8 @@
 import { Controller, Post, Get } from '@decorators/express';
 import { getConfig } from "@/novusphere-js/utility";
 import passport from 'passport';
-import { Strategy } from 'passport-twitter';
+import { Strategy as TwitterStrategy } from 'passport-twitter';
+import { Strategy as RedditStrategy } from 'passport-reddit';
 import ecc from 'eosjs-ecc';
 
 import { Api } from "../helpers";
@@ -16,6 +17,20 @@ export default @Controller('/account') class AccountController {
 
     async setupPassport() {
         const twitter = await getConfig('twitter', {});
+        const reddit = await getConfig('reddit', {});
+        if (reddit.options) {
+            const { client_id, client_secret } = reddit.options;
+            const callback = `${siteConfig.url}/v1/api/account/passport/reddit/callback`;
+            const options = {
+                clientID: client_id,
+                clientSecret: client_secret,
+                callbackURL: callback,
+                passReqToCallback: true,
+                state: true
+              };
+              passport.use(new RedditStrategy(options, (...args) => this.processOAuth('reddit', ...args)));
+              console.log(`Added reddit passport ${callback}`);
+        }
         if (twitter.options) {
             const {
                 consumer_key,
@@ -31,35 +46,42 @@ export default @Controller('/account') class AccountController {
                     passReqToCallback: true,
                     state: true
                 };
-                passport.use(new Strategy(options, this.twitter));
-                console.log(`Added twitter passport  ${callback}`);
+                passport.use(new TwitterStrategy(options, (...args) => this.processOAuth('twitter', ...args)));
+                console.log(`Added twitter passport ${callback}`);
             }
         }
     }
 
-    async twitter(req, token, tokenSecret, profile, done) {
+    async processOAuth(provider, req, token, tokenSecret, profile, done) {
         const { pub, domain } = JSON.parse(req.session.state);
         let identityPub = null;
 
         const user = {
             token: token,
             secret: tokenSecret,
-            username: profile.username
+            username: ''
         };
 
-        //console.log({ pub, domain });
-        //console.log(user);
+        if (provider == 'twitter') {
+            user.username = profile.username;
+        }
+        else if (provider == 'reddit') {
+            user.username = profile.name;
+        }
+
+        const db = await getDatabase();
 
         if (pub) {
+            const $set = {};
+            $set[`auth.${provider}`] = user;
+
             const { value: account } = await db.collection(config.table.accounts).findOneAndUpdate(
                 {
                     pub: pub,
                     domain: domain
                 },
                 {
-                    $set: {
-                        "auth.twitter": user
-                    }
+                    $set: $set
                 });
 
             if (account) {
@@ -68,11 +90,10 @@ export default @Controller('/account') class AccountController {
         }
 
         // maybe use id over username? ...but doing this for backwards compatability for now...
-        const db = await getDatabase();
         const { value: oauth } = await db.collection(config.table.oauths).findOneAndUpdate(
-            { provider: 'twitter', id: String(profile.username) },
+            { provider: provider, id: String(user.username) },
             {
-                $setOnInsert: { provider: 'twitter', id: String(profile.username) },
+                $setOnInsert: { provider: provider, id: String(user.username) },
                 $set: {
                     token,
                     tokenSecret,
@@ -87,8 +108,8 @@ export default @Controller('/account') class AccountController {
 
         req.session.state = JSON.stringify({
             ...JSON.parse(req.session.state),
-            provider: 'twitter',
-            id: String(profile.username),
+            provider: provider,
+            id: String(user.username),
             pubs: oauth.pubs.join(',')
         });
 
@@ -342,8 +363,6 @@ export default @Controller('/account') class AccountController {
     async grantOAuth(req, res) {
         let { pub, data: { provider, id } } = req.unpackAuthenticated();
 
-        //console.log(provider, id, pub);
-
         const db = await getDatabase();
         const { ok, value } = await db.collection(config.table.oauths).findOneAndUpdate(
             { provider: provider, id: id },
@@ -354,8 +373,6 @@ export default @Controller('/account') class AccountController {
             },
         );
 
-        //console.log(ok, value);
-
         if (value && value.pubs.length == 0) {
             const user = {
                 token: value.token,
@@ -365,11 +382,11 @@ export default @Controller('/account') class AccountController {
 
             console.log({ "data.publicKeys.arbitrary": pub });
 
+            const $set = {};
+            $set[`auth.${provider}`] = user;
             const { result: updateAuth } = await db.collection(config.table.accounts).updateMany({ "data.publicKeys.arbitrary": pub },
                 {
-                    $set: {
-                        "auth.twitter": user
-                    }
+                    $set: $set
                 });
 
             console.log(updateAuth);

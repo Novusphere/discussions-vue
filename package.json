@@ -49,6 +49,7 @@
     "multer": "^1.4.2",
     "node-fetch": "^2.6.1",
     "passport": "^0.4.1",
+    "passport-reddit": "^0.2.4",
     "passport-twitter": "^1.0.4",
     "rendertron-middleware": "^0.1.5",
     "sanitize-html": "^1.27.5",
