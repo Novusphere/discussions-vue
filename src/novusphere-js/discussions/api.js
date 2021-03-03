@@ -86,7 +86,7 @@ async function apiRequest(endpoint, body = undefined, { key, domain, redirect, n
 
         if (redirect || newWindow) {
             let fullUrl = url;
-            
+
             if (key) fullUrl += `?sig=${body.sig}&data=${encodeURIComponent(body.data)}`;
             else fullUrl += `?domain=${domain}&redirect=${encodeURIComponent(body.redirect)}`;
 
@@ -720,8 +720,8 @@ async function submitPost(signKey, post, transferActions) {
         metadata: JSON.stringify(metadata)
     };
 
-    let transfers = undefined;
-    let tlosTransfers = undefined;
+    let transfers = [];
+    let tlosTransfers = [];
 
     if (transferActions && transferActions.length > 0) {
         const metadata = JSON.stringify({ name: 'tip', data: { parentUuid: post.parentUuid } });
@@ -743,25 +743,19 @@ async function submitPost(signKey, post, transferActions) {
         }
 
         transfers = await createTransferActions(eosTransfers);
+        tlosTransfers = await createTransferActions(tlosTransfers);
     }
 
-    const trx = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers });
+    if (transfers.length > 0) {
+        const eosTrx = await apiRequest(`/v1/api/blockchain/transfer`, {
+            transfers: transfers,
+            chain: 'eos'
+        });
+        checkTransaction(eosTrx);
+    }
+
+    const trx = await apiRequest(`/v1/api/blockchain/post`, { vote, post: request, transfers: tlosTransfers });
     checkTransaction(trx);
-
-    if (tlosTransfers && tlosTransfers.length > 0) {
-        try {
-            const tlos = await apiRequest(`/v1/api/blockchain/transfer`, {
-                transfers: await createTransferActions(tlosTransfers),
-                chain: 'telos'
-            });
-
-            console.log('telos', tlos);
-        }
-        catch (ex) {
-            // if we fail, whatever it's no big deal...
-            console.log('telos', ex);
-        }
-    }
 
     return trx.transaction_id;
 }

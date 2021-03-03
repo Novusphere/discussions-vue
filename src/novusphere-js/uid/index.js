@@ -165,6 +165,11 @@ function getTokenAddress(token, publicKey) {
 //
 async function getToken(symbol) {
     symbol = symbol.toUpperCase();
+
+    if (symbol == 'TELOS') {
+        symbol = 'TLOS';
+    }
+
     const eosTokensInfo = await getTokensInfo();
     const token = eosTokensInfo.find(t => t.symbol == symbol);
     if (!token) throw new Error(`Symbol "${symbol}" was not found in Unified ID tokens`);

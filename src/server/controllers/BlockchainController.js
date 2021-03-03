@@ -189,18 +189,15 @@ export default @Controller('/blockchain') class BlockchainController {
     @Api()
     @Post('/post')
     async post(req, res) {
-        let { transfers, post, vote, notify } = req.unpack();
+        let { transfers, post, vote } = req.unpack();
 
-        let actions = transfers ? (await this.makeTransferActions(transfers, 'eos')) : [];
+        let actions = transfers ? (await this.makeTransferActions(transfers, 'telos')) : [];
         actions.push(this.makePostAction(post));
         if (vote) actions.push(this.makeVoteAction(vote));
 
-        // --- deprecated 10/21/2020 ---
-        //if (notify) actions.push(this.makeNotifiyAction(notify));
-
         actions = this.addAuthorizationToActions(actions);
 
-        const trx = await this.transact(actions);
+        const trx = await this.transact(actions, 'telos');
 
         return res.success(trx);
     }
@@ -213,7 +210,7 @@ export default @Controller('/blockchain') class BlockchainController {
         let actions = [this.makeVoteAction(vote)];
         actions = this.addAuthorizationToActions(actions);
 
-        const trx = await this.transact(actions);
+        const trx = await this.transact(actions, 'telos');
 
         return res.success(trx);
     }

@@ -11,7 +11,7 @@
 
         <UserAssetSelect
           v-if="chain == 'EOS'"
-          :exclude="['EOSDT', 'TLOS', 'GEM', 'SQRL', 'TLOSDAC', 'EZAR']"
+          :exclude="['EOSDT', 'TLOS', 'GEM', 'SQRL', 'TLOSDAC', 'EZAR', 'DRIC']"
           :label="'Pay with Asset'"
           :item-text="`symbol`"
           v-model="symbol"

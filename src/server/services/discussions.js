@@ -61,7 +61,7 @@ class DiscussionsService extends EOSContractService {
     async edit(action) {
         this.pushUpdate(config.table.posts, {
             q: {
-                chain: 'eos',
+                chain: this.chain,
                 uuid: action.data.parentUuid,
                 poster: action.data.poster,
                 sub: action.data.tags[0],
@@ -93,7 +93,7 @@ class DiscussionsService extends EOSContractService {
         if (action.data.parentUuid) {
             this.pushUpdate(config.table.posts, {
                 q: {
-                    chain: 'eos',
+                    chain: this.chain,
                     uuid: action.data.parentUuid,
                     sub: action.data.tags[0]
                 },
@@ -105,7 +105,7 @@ class DiscussionsService extends EOSContractService {
             if (action.data.threadUuid != action.data.parentUuid) {
                 this.pushUpdate(config.table.posts, {
                     q: {
-                        chain: 'eos',
+                        chain: this.chain,
                         uuid: action.data.threadUuid,
                         sub: action.data.tags[0]
                     },
@@ -120,11 +120,11 @@ class DiscussionsService extends EOSContractService {
         this.pushUpdate(config.table.posts, {
             upsert: true,
             q: {
-                chain: 'eos',
+                chain: this.chain,
                 transaction: action.transaction
             },
             u: {
-                chain: 'eos',
+                chain: this.chain,
                 id: action.id,
                 createdAt: action.time,
                 editedAt: 0,
@@ -201,7 +201,7 @@ class DiscussionsService extends EOSContractService {
         this.pushUpdate(config.table.posts, {
             multi: false,
             q: {
-                chain: 'eos',
+                chain: this.chain,
                 uuid: action.data.uuid,
             },
             u: {
@@ -344,10 +344,12 @@ export default {
     verifyVoteSignature,
     start() {
         // create dependency hiearchy
-        // discussionsx > nsuidcntract > telos nsuidcntract
-        const nsuidcntracttelos = new DiscussionsService(config.contract.uid, 'telos');
-        const nsuidcntract = new DiscussionsService(config.contract.uid, 'eos', nsuidcntracttelos);
+        // discussionsx > nsuidcntract > telos discussionsx > telos nsuidcntract 
+        const uidcntracttelos = new DiscussionsService(config.contract.uid, 'telos');
+        const dxtelos = new DiscussionsService(config.contract.discussions, 'telos', uidcntracttelos);
+        const nsuidcntract = new DiscussionsService(config.contract.uid, 'eos', dxtelos);
         const discussionsx = new DiscussionsService(config.contract.discussions, 'eos', nsuidcntract);
+
         discussionsx.start();
         return discussionsx;
     }
