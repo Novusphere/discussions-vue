@@ -52,7 +52,7 @@
     "passport-reddit": "^0.2.4",
     "passport-twitter": "^1.0.4",
     "rendertron-middleware": "^0.1.5",
-    "sanitize-html": "^1.27.5",
+    "sanitize-html": "^2.3.2",
     "serialize-javascript": "^3.1.0",
     "showdown": "^1.9.1",
     "socket.io": "^2.3.0",
