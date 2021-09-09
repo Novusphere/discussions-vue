@@ -29,7 +29,7 @@ function setAPIHost(host) {
 
 async function getAPIHost() {
     return await getFromCache(cache, 'apiHost', async () => {
-        const attempt = ["https://discussions.app", "https://beta.discussions.app"];
+        const attempt = ["https://old.discussions.app", "https://beta.discussions.app"];
 
         if (typeof window != "undefined") {
             attempt.unshift(window.location.origin);

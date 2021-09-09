@@ -8,6 +8,7 @@ import LogOutPage from "@/pages/LogOutPage";
 import HomePage from "@/pages/HomePage";
 import LandingPage from "@/pages/LandingPage";
 import ClosePage from "@/pages/ClosePage";
+import RecoverPage from "@/pages/RecoverPage";
 
 import SubmitPostPage from "@/pages/SubmitPostPage";
 import UserProfilePage from "@/pages/UserProfilePage";
@@ -53,6 +54,7 @@ let components = {
     HomePage,
     LandingPage,
     ClosePage,
+    RecoverPage,
     SubmitPostPage,
     UserProfilePage,
     BrowseSearchPage,

@@ -6,6 +6,7 @@ const routes = [
         redirect: '/home',
         component: `BlankPage`,
         children: [
+            { path: `recover`, component: `RecoverPage` },
             { path: `close`, component: `ClosePage` },
             { path: `landing`, component: `LandingPage` },
             { path: `home`, component: `HomePage` },

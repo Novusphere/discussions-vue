@@ -88,6 +88,8 @@ export default {
       this.setUserContext(cursor);
       this.posts = [];
 
+      //console.log(cursor);
+
       if (this.$refs.scroller) {
         this.$refs.scroller.reset();
       }
